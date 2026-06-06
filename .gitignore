@@ -62,4 +62,21 @@ Thumbs.db
 
 # Project specific
 repomix-output.xml
+repomix-output.zip
 *.tar.gz
+
+# Qdrant storage
+docker-data/
+*.mmap
+
+# Temp
+temp/
+fix_adam.py
+nano Modelfile
+*.checkpoint*
+*.bak
+unsloth_compiled_cache/
+
+# Generated
+start.sh
+stop.sh
