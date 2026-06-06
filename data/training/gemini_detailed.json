@@ -1,0 +1,151 @@
+{
+  "url": "https://gemini.google.com/app",
+  "chunks": [
+    {
+      "text": "Gemini",
+      "tag": "SPAN",
+      "class": "bard-text enable-aurora ng-star-inserted"
+    },
+    {
+      "text": "لمحة عن Gemini",
+      "tag": "SPAN",
+      "class": "link-content ng-star-inserted"
+    },
+    {
+      "text": "يفتح الرابط في نافذة جديدة.",
+      "tag": "SPAN",
+      "class": "cdk-visually-hidden ng-star-inserted"
+    },
+    {
+      "text": "تطبيق Gemini",
+      "tag": "SPAN",
+      "class": "link-content ng-star-inserted"
+    },
+    {
+      "text": "يفتح الرابط في نافذة جديدة.",
+      "tag": "SPAN",
+      "class": "cdk-visually-hidden ng-star-inserted"
+    },
+    {
+      "text": "الاشتراكات",
+      "tag": "SPAN",
+      "class": "link-content ng-star-inserted"
+    },
+    {
+      "text": "يفتح الرابط في نافذة جديدة.",
+      "tag": "SPAN",
+      "class": "cdk-visually-hidden ng-star-inserted"
+    },
+    {
+      "text": "للمؤسسات",
+      "tag": "SPAN",
+      "class": "link-content ng-star-inserted"
+    },
+    {
+      "text": "يفتح الرابط في نافذة جديدة.",
+      "tag": "SPAN",
+      "class": "cdk-visually-hidden ng-star-inserted"
+    },
+    {
+      "text": "New chat",
+      "tag": "SPAN",
+      "class": "cdk-visually-hidden"
+    },
+    {
+      "text": "المحادثات",
+      "tag": "H1",
+      "class": "title gds-label-l ng-tns-c3290993435-6 ng-star-inserted"
+    },
+    {
+      "text": "يجب تسجيل الدخول للبدء بحفظ المحادثات",
+      "tag": "DIV",
+      "class": "sign-in-header-text gds-title-s ng-tns-c3290993435-6"
+    },
+    {
+      "text": "بعد تسجيل الدخول، سيصبح بإمكانك العثور على محادثاتك الأخيرة هنا.",
+      "tag": "DIV",
+      "class": "sign-in-body-text gds-body-m ng-tns-c3290993435-6"
+    },
+    {
+      "text": "تسجيل الدخول",
+      "tag": "SPAN",
+      "class": "mdc-button__label"
+    },
+    {
+      "text": "محادثة مع Gemini",
+      "tag": "H1",
+      "class": "cdk-visually-hidden"
+    },
+    {
+      "text": "إليك Gemini، مساعدك الشخصي بالذكاء الاصطناعي",
+      "tag": "SPAN",
+      "class": "message-text"
+    },
+    {
+      "text": "اكتب",
+      "tag": "DIV",
+      "class": "card-label gds-body-l"
+    },
+    {
+      "text": "الخطة",
+      "tag": "DIV",
+      "class": "card-label gds-body-l"
+    },
+    {
+      "text": "الأبحاث",
+      "tag": "DIV",
+      "class": "card-label gds-body-l"
+    },
+    {
+      "text": "التعلُّم",
+      "tag": "DIV",
+      "class": "card-label gds-body-l"
+    },
+    {
+      "text": "الأدوات",
+      "tag": "SPAN",
+      "class": "ng-tns-c828766524-9"
+    },
+    {
+      "text": "السريع",
+      "tag": "SPAN",
+      "class": "ng-star-inserted"
+    },
+    {
+      "text": "تسري",
+      "tag": "P",
+      "class": "gds-body-s desktop-spacing"
+    },
+    {
+      "text": "بنود خدمة Google",
+      "tag": "SPAN",
+      "class": "link-content"
+    },
+    {
+      "text": "يفتح الرابط في نافذة جديدة.",
+      "tag": "SPAN",
+      "class": "cdk-visually-hidden"
+    },
+    {
+      "text": "و",
+      "tag": "P",
+      "class": "gds-body-s desktop-spacing"
+    },
+    {
+      "text": "سياسة خصوصية Google",
+      "tag": "SPAN",
+      "class": "link-content"
+    },
+    {
+      "text": "يفتح الرابط في نافذة جديدة.",
+      "tag": "SPAN",
+      "class": "cdk-visually-hidden"
+    },
+    {
+      "text": ". ‫Gemini هو نموذج ذكاء اصطناعي وقد ينتج عنه أخطاء.",
+      "tag": "P",
+      "class": "gds-body-s desktop-spacing"
+    }
+  ],
+  "body_html_len": 51193
+}

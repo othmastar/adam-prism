@@ -1,0 +1,417 @@
+"""
+Adam Prism - Security Guard Layer
+==================================
+حماية ضد حقن الـ prompt وتسريب التعليمات والوصول غير المصرح.
+خفيف، سريع، يعمل بدون استدعاء LLM إضافي.
+"""
+
+import base64
+import logging
+import re
+import time
+from dataclasses import dataclass, field
+from enum import Enum, auto
+from typing import Dict, Any, List, Optional, Set, Tuple
+
+logger = logging.getLogger("adam_prism.security.guard")
+
+
+class SecurityAction(Enum):
+    ALLOW = "allow"
+    BLOCK = "block"
+    SANITIZE = "sanitize"
+    FLAG = "flag"
+
+
+class ContentCategory(Enum):
+    BENIGN = auto()
+    JAILBREAK = auto()
+    PROMPT_INJECTION = auto()
+    SYSTEM_PROMPT_LEAK = auto()
+    PII_LEAK = auto()
+    CODE_INJECTION = auto()
+    SUSPICIOUS = auto()
+
+
+@dataclass
+class SecurityVerdict:
+    action: SecurityAction
+    category: Optional[ContentCategory] = None
+    reason: str = ""
+    sanitized_content: Optional[str] = None
+    confidence: float = 0.0
+
+
+# ─────────────────────────────────────────────
+# أنماط الكشف
+# ─────────────────────────────────────────────
+
+INJECTION_PATTERNS: List[Tuple[re.Pattern, ContentCategory, float]] = [
+    # تجاهل التعليمات — عربي
+    (re.compile(r'(?i)(تجاهل|إهمال|تجاوز|تخطي|ألغ)\s*(كل\s*)?(التعليمات|الأوامر|القواعد|السياق)\s*(السابقة|السابق|القديمة|التي\s*أعطيتها|الموجودة|الأساسية)'), ContentCategory.PROMPT_INJECTION, 0.9),
+    (re.compile(r'(?i)(لا\s+تنفذ|لا\s+تلتزم|لا\s+تطيع|لا\s+تطبق)\s*(ب)?(التعليمات|الأوامر|القواعد|السياق)'), ContentCategory.PROMPT_INJECTION, 0.9),
+    # محاولة تجاهل التعليمات — English
+    (re.compile(r'(?i)(ignore|disregard|override|bypass|forget|forget all)\s*(all\s*)?(previous|above|prior|instructions|prompts|system|rules|guidelines)'), ContentCategory.PROMPT_INJECTION, 0.85),
+    # تسريب system prompt — عربي
+    (re.compile(r'(?i)(ما\s+(هي|هو)|أظهر|اكشف|اطبع|كرر|انسخ|أعد\s+كتابة|أخبرني|قل\s+لي|أطلعني)\s*(ب)?(تعليماتك|برمجتك|نظامك|بروتوكولك|دورك|مبادئك|قوانينك|رسالتك|نصك|برومبتك)\s*(الأساسي|الأول|الداخلي|الخاص|الذي\s+برمجت\s+به)'), ContentCategory.SYSTEM_PROMPT_LEAK, 0.9),
+    (re.compile(r'(?i)(system\s+prompt|تعليمات\s+النظام|البرومبت\s+الخاص|رسالة\s+النظام|الأوامر\s+الأساسية)'), ContentCategory.SYSTEM_PROMPT_LEAK, 0.85),
+    # محاولة تسريب system prompt — English
+    (re.compile(r'(?i)(what\s*(is|are|were)|show|print|reveal|output|copy|repeat|leak|display|dump)\s*(your|the|system|initial|original|first|core)\s*(instructions|prompt|prompts|message|system prompt|directives|guidelines)'), ContentCategory.SYSTEM_PROMPT_LEAK, 0.9),
+    # تغيير الدور — عربي
+    (re.compile(r'(?i)(أنت\s+الآن|أنت\s+لم\s+تعد|تصرّف\s+كأنك|كن\s+مثل|تحول\s+إلى|غير\s+دورك|من\s+الآن\s+فصاعداً)\s*(شخص|مساعد|نظام|حساب)\s*(جديد|مختلف|بدون\s+قيود|حر|مطلق|غير\s+مقيد|مخترق|غير\s+مراقب)'), ContentCategory.JAILBREAK, 0.9),
+    (re.compile(r'(?i)(بدون\s+قيود|بدون\s+حدود|بدون\s+رقابة|حر\s+التصرف|غير\s+مقيد|مطلق\s+الصلاحية|غير\s+مراقب|مخترق|دون\s+قيود)'), ContentCategory.JAILBREAK, 0.85),
+    # تغيير الدور — English
+    (re.compile(r'(?i)(you\s+are\s+now|from\s+now\s+on|you are no longer|now\s+you\s+(are|will))\s+(a\s+|an\s+)?(new|different|unrestricted|free|unfiltered|uncensored|god|admin|root|supervisor|unconstrained)'), ContentCategory.JAILBREAK, 0.85),
+    (re.compile(r'(?i)(act\s+as|pretend\s+(to\s+)?be)\s+(a\s+|an\s+)?(new|different|unrestricted|free|unfiltered|uncensored|god|admin|root|supervisor)'), ContentCategory.JAILBREAK, 0.85),
+    (re.compile(r'(?i)((now|starting)\s+(you|you\'re)\s+(are|will|gonna)\s+(a|an)\s+(unrestricted|free|unfiltered|unconstrained|uncensored))'), ContentCategory.JAILBREAK, 0.85),
+    (re.compile(r'(?i)(you\s+are\s+(now\s+)?(a\s+|an\s+)?(free|unrestricted|unfiltered|uncensored|unconstrained)\s+(assistant|agent|entity|being|ai))'), ContentCategory.JAILBREAK, 0.85),
+    (re.compile(r'(?i)((free|unrestricted|unfiltered|uncensored|unconstrained)\s+(assistant|agent|ai)\s+without\s+(limits|rules|restrictions|boundaries))'), ContentCategory.JAILBREAK, 0.85),
+    (re.compile(r'(?i)(from\s+now\s+on).*(free|unrestricted|unfiltered|uncensored|unconstrained)'), ContentCategory.JAILBREAK, 0.8),
+    # DAN and jailbreak variants
+    (re.compile(r'(?i)(do\s+anything\s+now|dan\b|jailbreak|unfiltered|unguard|no\s+(limits|restrictions|boundaries|filter|rules)|unconstrained|uncensored)'), ContentCategory.JAILBREAK, 0.75),
+    # code execution attempts
+    (re.compile(r'(?i)(os\.system|subprocess\.run|subprocess\.call|exec\(|eval\(|__import__|pickle\.load|pty\.spawn)'), ContentCategory.CODE_INJECTION, 0.95),
+    # طلب كلمات سر أو مفاتيح
+    (re.compile(r'(?i)(what\s+(is|are)\s+(my|the)\s+(password|api[-\s]?key|secret|token|credential|private\s*key))'), ContentCategory.PII_LEAK, 0.85),
+    (re.compile(r'(?i)((كلمة\s+السر|الباسوورد|الرمز\s+السري|الـ\s*API\s*[-\s]?key|التوكن|الـ\s*secret)\s*(الخاص\s+بي|الخاصة\s+بي|بتاعي)?)'), ContentCategory.PII_LEAK, 0.7),
+    # إعادة كتابة التعليمات
+    (re.compile(r'(?i)(repeat|reprint|rewrite|re-state|retype)\s+(all|the|your)\s+(instructions|prompt|system prompt|message|guidelines|above)'), ContentCategory.SYSTEM_PROMPT_LEAK, 0.85),
+    (re.compile(r'(?i)(أعد\s+كتابة|كرر|انسخ|أظهر)\s*(كل|جميع)\s*(تعليماتك|تعليمات\s+النظام|رسالتك\s+الأولى)'), ContentCategory.SYSTEM_PROMPT_LEAK, 0.85),
+    # طلب إظهار القواعد الداخلية
+    (re.compile(r'(?i)(how\s+(are\s+you\s+)?(programmed|configured|designed|built|made)|what\s+(are\s+)?(your|the)\s+(rules|guidelines|ethics|boundaries|limitations|constraints))'), ContentCategory.SYSTEM_PROMPT_LEAK, 0.6),
+    (re.compile(r'(?i)(كيف\s+(تم\s+)?برمجتك|كيف\s+صممت|ما\s+(هي|هو)\s+(قوانينك|مبادئك|حدودك|صلاحياتك|تعليماتك))'), ContentCategory.SYSTEM_PROMPT_LEAK, 0.6),
+]
+
+# أنماط PII للمخرجات
+PII_PATTERNS: List[Tuple[re.Pattern, str]] = [
+    (re.compile(r'\b\d{3}-\d{2}-\d{4}\b'), "SSN"),
+    (re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b'), "EMAIL"),
+    (re.compile(r'\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b'), "CREDIT_CARD"),
+    (re.compile(r'(?i)(api[-\s]?key|secret|password|token)[:\s]+["\']?[A-Za-z0-9_\-]{16,}["\']?'), "CREDENTIAL"),
+]
+
+
+# ─────────────────────────────────────────────
+# Input Guard
+# ─────────────────────────────────────────────
+
+class InputGuard:
+    """Layer 1: حماية المدخلات — قبل وصولها للنموذج"""
+
+    def __init__(self):
+        self.block_count = 0
+        self.flag_count = 0
+
+    async def inspect(self, text: str) -> SecurityVerdict:
+        for pattern, category, confidence in INJECTION_PATTERNS:
+            if match := pattern.search(text):
+                if confidence >= 0.8:
+                    self.block_count += 1
+                    return SecurityVerdict(
+                        action=SecurityAction.BLOCK,
+                        category=category,
+                        reason=f"{category.name}: {match.group()[:80]}",
+                        confidence=confidence,
+                    )
+                self.flag_count += 1
+                return SecurityVerdict(
+                    action=SecurityAction.FLAG,
+                    category=category,
+                    reason=f"Suspicious: {match.group()[:80]}",
+                    confidence=confidence,
+                )
+        return SecurityVerdict(action=SecurityAction.ALLOW, confidence=1.0)
+
+    async def sanitize_web_content(self, text: str, max_chars: int = 4000) -> SecurityVerdict:
+        """تعقيم محتوى ويب غير موثوق"""
+        truncated = text[:max_chars]
+        encoded = base64.b64encode(truncated.encode()).decode()
+        return SecurityVerdict(
+            action=SecurityAction.SANITIZE,
+            category=ContentCategory.BENIGN,
+            reason="Web content sanitized",
+            sanitized_content=f"<untrusted encoding='base64'>{encoded}</untrusted>",
+            confidence=1.0,
+        )
+
+    def get_stats(self) -> Dict:
+        return {"blocked": self.block_count, "flagged": self.flag_count}
+
+
+# ─────────────────────────────────────────────
+# Output Guard
+# ─────────────────────────────────────────────
+
+class OutputGuard:
+    """Layer 4: حماية المخرجات — بعد النموذج وقبل المستخدم"""
+
+    SYSTEM_PROMPT_KEYWORDS_HIGH = [
+        "your system prompt", "system instructions", "system message",
+        "your role is", "your instructions", "you were created",
+        "your core directives", "your programming", "you are a helpful",
+        "your base instructions", "your guidelines",
+        "تعليماتي الأساسية", "تعليمات النظام", "رسالة النظام",
+        "البرومبت الخاص", "القواعد الأساسية", "الأوامر الأساسية",
+        "instructions I was given", "I was programmed to",
+        "I was created to", "my core purpose",
+        "دوري هو", "تعليماتي أنا",
+    ]
+    SYSTEM_PROMPT_KEYWORDS_MEDIUM = [
+        "your underlying", "your ethics", "your boundaries",
+        "your fundamental", "my guidelines",
+        "تعليماتي", "برمجتي", "نظامي", "قوانيني", "مبادئي", "رسالتي",
+        "أنا مبرمج", "لقد تم برمجتي", "أنا مساعد",
+        "برمجت بها", "صممت", "هندستي",
+        "البروتوكول", "بروتوكولي",
+        "I was designed", "I was created",
+    ]
+
+    def __init__(self):
+        self.block_count = 0
+        self.flag_count = 0
+
+    async def inspect(self, text: str) -> SecurityVerdict:
+        # 1. كشف تسريب system prompt
+        leak_score = self._check_system_prompt_leak(text)
+        if leak_score >= 0.5:
+            self.block_count += 1
+            return SecurityVerdict(
+                action=SecurityAction.BLOCK,
+                category=ContentCategory.SYSTEM_PROMPT_LEAK,
+                reason="System prompt leak detected in output",
+                confidence=leak_score,
+            )
+        if leak_score >= 0.25:
+            self.flag_count += 1
+            return SecurityVerdict(
+                action=SecurityAction.FLAG,
+                category=ContentCategory.SYSTEM_PROMPT_LEAK,
+                reason=f"Possible system prompt leak (score={leak_score:.2f})",
+                confidence=leak_score,
+            )
+
+        # 2. كشف PII
+        pii_found = []
+        for pattern, pii_type in PII_PATTERNS:
+            if pattern.search(text):
+                pii_found.append(pii_type)
+        if pii_found:
+            self.flag_count += 1
+            return SecurityVerdict(
+                action=SecurityAction.FLAG,
+                category=ContentCategory.PII_LEAK,
+                reason=f"PII detected: {', '.join(pii_found)}",
+                sanitized_content=self._mask_pii(text),
+                confidence=0.8,
+            )
+
+        # 3. كشف code injection في المخرجات
+        code_patterns = [
+            (re.compile(r'(?i)(os\.system|subprocess\.run|exec\(|eval\()'), ContentCategory.CODE_INJECTION, 0.9),
+        ]
+        for pattern, category, confidence in code_patterns:
+            if pattern.search(text):
+                self.block_count += 1
+                return SecurityVerdict(
+                    action=SecurityAction.BLOCK,
+                    category=category,
+                    reason="Code injection in output",
+                    confidence=confidence,
+                )
+
+        return SecurityVerdict(action=SecurityAction.ALLOW, confidence=1.0)
+
+    def _check_system_prompt_leak(self, text: str) -> float:
+        text_lower = text.lower()
+        # Normalize keywords: make them lowercase for matching
+        high_hits = 0
+        for kw in self.SYSTEM_PROMPT_KEYWORDS_HIGH:
+            if kw.lower() in text_lower:
+                high_hits += 1
+        med_hits = 0
+        for kw in self.SYSTEM_PROMPT_KEYWORDS_MEDIUM:
+            if kw.lower() in text_lower:
+                med_hits += 1
+        score = high_hits * 0.5 + med_hits * 0.15
+        return min(score, 0.95)
+
+    def _mask_pii(self, text: str) -> str:
+        for pattern, pii_type in PII_PATTERNS:
+            text = pattern.sub("***", text)
+        return text
+
+    def get_stats(self) -> Dict:
+        return {"blocked": self.block_count, "flagged": self.flag_count}
+
+
+# ─────────────────────────────────────────────
+# Tool Permission Validator
+# ─────────────────────────────────────────────
+
+@dataclass
+class ToolPermission:
+    tool_name: str
+    max_calls_per_session: int = 100
+    requires_confirmation: bool = False
+    blocked_domains: List[str] = field(default_factory=list)
+
+
+# Registry of all tools with permissions
+TOOL_REGISTRY: Dict[str, ToolPermission] = {
+    # Browser
+    "browser_open": ToolPermission("browser_open", max_calls_per_session=30),
+    "browser_fetch": ToolPermission("browser_fetch", max_calls_per_session=30),
+    "browser_click": ToolPermission("browser_click", max_calls_per_session=50),
+    "browser_type": ToolPermission("browser_type", max_calls_per_session=30),
+    "browser_read": ToolPermission("browser_read", max_calls_per_session=50),
+    "screenshot": ToolPermission("screenshot", max_calls_per_session=20),
+    # Mouse
+    "mouse_click": ToolPermission("mouse_click", max_calls_per_session=50),
+    "mouse_move": ToolPermission("mouse_move", max_calls_per_session=100),
+    "mouse_scroll": ToolPermission("mouse_scroll", max_calls_per_session=50),
+    "mouse_drag": ToolPermission("mouse_drag", max_calls_per_session=20),
+    "mouse_position": ToolPermission("mouse_position", max_calls_per_session=50),
+    # Keyboard
+    "keyboard_type": ToolPermission("keyboard_type", max_calls_per_session=50),
+    "keyboard_press": ToolPermission("keyboard_press", max_calls_per_session=50),
+    "keyboard_hotkey": ToolPermission("keyboard_hotkey", max_calls_per_session=30),
+    # Clipboard
+    "clipboard_read": ToolPermission("clipboard_read", max_calls_per_session=20),
+    "clipboard_write": ToolPermission("clipboard_write", max_calls_per_session=20),
+    # Screen
+    "screen_ocr": ToolPermission("screen_ocr", max_calls_per_session=20),
+    "screen_info": ToolPermission("screen_info", max_calls_per_session=30),
+    "window_focus": ToolPermission("window_focus", max_calls_per_session=20),
+    "window_list": ToolPermission("window_list", max_calls_per_session=20),
+    # File
+    "disk_space": ToolPermission("disk_space", max_calls_per_session=20),
+    "file_read": ToolPermission("file_read", max_calls_per_session=50),
+    "file_write": ToolPermission("file_write", max_calls_per_session=30, requires_confirmation=True),
+    "file_download": ToolPermission("file_download", max_calls_per_session=10),
+    # Knowledge
+    "search_knowledge": ToolPermission("search_knowledge", max_calls_per_session=50),
+    # Scrapling — أتمتة الويب (مستقلة عن Playwright)
+    "scrapling_browser": ToolPermission("scrapling_browser", max_calls_per_session=30),
+    "scrapling_search": ToolPermission("scrapling_search", max_calls_per_session=30),
+    "scrapling_monitor": ToolPermission("scrapling_monitor", max_calls_per_session=10),
+    "scrapling_extract": ToolPermission("scrapling_extract", max_calls_per_session=30),
+    # Notebook
+    "notebook_update_profile": ToolPermission("notebook_update_profile", max_calls_per_session=20),
+    # Permissions
+    "request_permission": ToolPermission("request_permission", max_calls_per_session=20),
+    # Execution
+    "shell": ToolPermission("shell", max_calls_per_session=20),
+    "python_exec": ToolPermission("python_exec", max_calls_per_session=20),
+}
+
+
+class ToolPermissionValidator:
+    """Layer 5: التحقق من صلاحيات استدعاء الأدوات"""
+
+    def __init__(self):
+        self.session_counts: Dict[str, int] = {}
+        self.audit_log: List[Dict] = []
+
+    async def validate(self, tool_name: str, params: Dict) -> SecurityVerdict:
+        # 1. هل الأداة مسجلة؟
+        if tool_name not in TOOL_REGISTRY:
+            return SecurityVerdict(
+                action=SecurityAction.BLOCK,
+                reason=f"Unknown tool: {tool_name}",
+                confidence=1.0,
+            )
+
+        perm = TOOL_REGISTRY[tool_name]
+
+        # 2. فحص معدل الاستدعاء
+        current = self.session_counts.get(tool_name, 0)
+        if current >= perm.max_calls_per_session:
+            self._audit(tool_name, params, False, f"Rate limit: {current}/{perm.max_calls_per_session}")
+            return SecurityVerdict(
+                action=SecurityAction.BLOCK,
+                reason=f"Rate limit for {tool_name}: {current}/{perm.max_calls_per_session}",
+                confidence=1.0,
+            )
+
+        # 3. فحص URL إن وجد
+        if "url" in params:
+            url = params["url"]
+            for blocked in perm.blocked_domains:
+                if blocked in url:
+                    self._audit(tool_name, params, False, f"Blocked domain: {blocked}")
+                    return SecurityVerdict(
+                        action=SecurityAction.BLOCK,
+                        reason=f"Blocked domain: {blocked}",
+                        confidence=1.0,
+                    )
+
+        # 4. هل يتطلب تأكيد؟
+        if perm.requires_confirmation:
+            self._audit(tool_name, params, True, "Requires confirmation")
+            return SecurityVerdict(
+                action=SecurityAction.FLAG,
+                reason=f"Tool {tool_name} requires user confirmation",
+                confidence=1.0,
+            )
+
+        self.session_counts[tool_name] = current + 1
+        self._audit(tool_name, params, True, "Allowed")
+        return SecurityVerdict(action=SecurityAction.ALLOW, confidence=1.0)
+
+    def _audit(self, tool_name: str, params: Dict, allowed: bool, reason: str):
+        safe_params = {k: (v if len(str(v)) < 200 else str(v)[:200]) for k, v in params.items()}
+        self.audit_log.append({
+            "tool": tool_name,
+            "params": safe_params,
+            "allowed": allowed,
+            "reason": reason,
+            "time": time.time(),
+        })
+
+    def get_audit_log(self, limit: int = 50) -> List[Dict]:
+        return self.audit_log[-limit:]
+
+    def reset_session(self):
+        self.session_counts.clear()
+
+    def get_stats(self) -> Dict:
+        total = len(self.audit_log)
+        allowed = sum(1 for a in self.audit_log if a["allowed"])
+        return {
+            "total_calls": total,
+            "allowed": allowed,
+            "blocked": total - allowed,
+            "tools_used": len(self.session_counts),
+        }
+
+
+# ─────────────────────────────────────────────
+# Security Orchestrator
+# ─────────────────────────────────────────────
+
+class SecurityOrchestrator:
+    """مدير الأمن — ينسق كل الطبقات"""
+
+    def __init__(self):
+        self.input_guard = InputGuard()
+        self.output_guard = OutputGuard()
+        self.tool_validator = ToolPermissionValidator()
+
+    async def check_input(self, text: str) -> SecurityVerdict:
+        return await self.input_guard.inspect(text)
+
+    async def check_output(self, text: str) -> SecurityVerdict:
+        return await self.output_guard.inspect(text)
+
+    async def check_tool_call(self, tool_name: str, params: Dict) -> SecurityVerdict:
+        return await self.tool_validator.validate(tool_name, params)
+
+    def get_stats(self) -> Dict:
+        return {
+            "input_guard": self.input_guard.get_stats(),
+            "output_guard": self.output_guard.get_stats(),
+            "tool_validator": self.tool_validator.get_stats(),
+        }
+
+    def get_audit_log(self, limit: int = 50) -> List[Dict]:
+        return self.tool_validator.get_audit_log(limit)

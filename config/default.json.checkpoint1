@@ -1,0 +1,41 @@
+{
+  "ollama_base": "http://localhost:11434",
+  "model_name": "adam-prism-v13:latest",
+  "inference_mode": "lora",
+  "lora_server_url": "http://localhost:7860",
+  "context_window": 4096,
+  "token_budget": 4000,
+  "qdrant_url": "http://localhost:6333",
+  "embedding_model": "nomic-embed-text",
+  "memory": {
+    "qdrant_url": "http://localhost:6333",
+    "ollama_base": "http://localhost:11434",
+    "embedding_model": "nomic-embed-text"
+  },
+  "notebook_path": "./notebook",
+  "summary_output_dir": "./notebook/summaries",
+  "chunk_size": 3000,
+  "overlap": 200,
+  "short_term_limit": 50,
+  "telegram_bot_token": "",
+  "authorized_chat_ids": [],
+  "authorized_users": [
+    "owner"
+  ],
+  "rate_limits": {
+    "max_per_minute": 30,
+    "max_per_hour": 500
+  },
+  "api_host": "0.0.0.0",
+  "api_port": 8000,
+  "web_port": 3000,
+  "screen_width": 1920,
+  "screen_height": 1080,
+  "chromium_data_dir": "./data/chromium-profile",
+  "firefox_profile_path": "/home/othmastar/.config/mozilla/firefox/iwdl6mkc.default-release",
+  "max_conversation_history": 50,
+  "max_tool_calls": 5,
+  "tool_timeout": 30,
+  "cycle_timeout": 180,
+  "watchdog_interval": 300
+}
