@@ -1,0 +1,65 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+.venv/
+venv/
+*.so
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Node / Frontend
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+
+# Next.js standalone
+.next/standalone/
+
+# Data
+data/chromium-profile/
+data/*.db
+data/*.sqlite
+notebook/
+
+# Logs
+*.log
+api.log
+dev.log
+server.log
+
+# Training artifacts
+models/
+*.gguf
+*.safetensors
+*.bin
+checkpoints/
+
+# Config with secrets
+config/local.json
+config/production.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project specific
+repomix-output.xml
+*.tar.gz

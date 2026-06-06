@@ -1,0 +1,63 @@
+# ═══════════════════════════════════════════
+# Dockerfile - Adam Prism API
+# مبني على Python 3.12-slim
+# ═══════════════════════════════════════════
+
+FROM python:3.12-slim AS base
+
+LABEL org.opencontainers.image.title="Adam Prism API"
+LABEL org.opencontainers.image.description="التوأم الرقمي الشخصي - Backend API"
+LABEL org.opencontainers.image.version="1.0.0"
+
+# ── النظام ─────────────────────────────────
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# ── Python Dependencies ────────────────────
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir psutil
+
+# ── Playwright Chromium ────────────────────
+RUN pip install --no-cache-dir playwright && \
+    playwright install --with-deps chromium && \
+    playwright install-deps chromium
+
+# ── التطبيق ────────────────────────────────
+COPY api/ ./api/
+COPY core/ ./core/
+COPY brain/ ./brain/
+COPY memory/ ./memory/
+COPY ethics/ ./ethics/
+COPY security/ ./security/
+COPY notebook/ ./notebook/
+COPY pipeline/ ./pipeline/
+COPY eyes/ ./eyes/
+COPY tools/ ./tools/
+COPY config/ ./config/
+COPY infrastructure.py .
+COPY main.py .
+COPY run_api.py .
+
+RUN mkdir -p /app/data /app/logs /app/data/notebook/daily \
+    /app/data/notebook/connections /app/data/notebook/pending \
+    /app/data/notebook/summaries /app/data/chromium-profile
+
+# ── Health Check ────────────────────────────
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
+    CMD curl -f http://localhost:8000/ || exit 1
+
+EXPOSE 8000
+
+# ── Non-root user ──────────────────────────
+RUN addgroup --system --gid 1001 app && \
+    adduser --system --uid 1001 --ingroup app app && \
+    chown -R app:app /app
+USER app
+
+CMD ["python", "run_api.py"]
