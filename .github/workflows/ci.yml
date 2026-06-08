@@ -26,8 +26,15 @@ jobs:
       - name: Lint with ruff
         run: ruff check . --extend-ignore=E501,F401 --target-version=py312 || true
 
-      - name: Run tests
-        run: python -m pytest tests/ -v -k "not slow" --tb=short
+      - name: Run tests (save output)
+        run: python -m pytest tests/ -v -k "not slow" --tb=long -x 2>&1 | tee /tmp/test_output.txt
+      
+      - name: Upload test output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-output
+          path: /tmp/test_output.txt
 
       - name: Check package build
         run: pip install build && python -m build --sdist --wheel
