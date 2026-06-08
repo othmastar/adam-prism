@@ -15,7 +15,7 @@ from pathlib import Path
 
 
 MEMORY_DB = os.environ.get("ADAM_MEMORY_DB",
-    "/mnt/Workspace/adam_v8_output/.adam_memory/adam_memory.db")
+    os.path.join(os.getcwd(), ".adam_memory", "adam_memory.db"))
 
 
 def _ensure_db():
