@@ -36,7 +36,10 @@ jobs:
           ruff check . --extend-ignore=E501,F401 --target-version=py312 || true
 
       - name: Run fast tests
-        run: python -m pytest tests/ -v -k "not slow" --tb=long -x 2>&1
+        run: |
+          python -m pytest tests/ -k "not slow" --tb=long -x --collect-only 2>&1 | tail -20
+          echo "=== COLLECTION DONE, NOW RUNNING ==="
+          python -m pytest tests/ -k "not slow" --tb=long -x 2>&1
 
       - name: Check package build
         run: python -m build --sdist --wheel
