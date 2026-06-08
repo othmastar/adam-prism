@@ -20,17 +20,17 @@ jobs:
         run: |
           pip install --upgrade pip setuptools wheel
           pip install -r requirements.txt
-          pip install pytest pytest-asyncio httpx ruff build
+          pip install pytest pytest-asyncio httpx ruff
           pip install -e .
 
       - name: Lint with ruff
         run: ruff check . --extend-ignore=E501,F401 --target-version=py312 || true
 
       - name: Run tests
-        run: python -m pytest tests/ -v -k "not slow" --tb=short
+        run: python -m pytest tests/ -v -k "not slow" --tb=long
 
       - name: Check package build
-        run: python -m build --sdist --wheel
+        run: pip install build && python -m build --sdist --wheel
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')
