@@ -11,9 +11,9 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "آدم بريزم | Adam Prism - Personal Digital Twin AI",
-  description: "نظام التوأم الرقمي الذكي لـ Osama - مساعد شخصي متطور مدعوم بالذكاء الاصطناعي",
-  keywords: ["Adam Prism", "آدم بريزم", "Digital Twin", "AI Assistant", "Ollama"],
-  authors: [{ name: "Osama" }],
+  description: "نظام التوأم الرقمي الواعي — إطار عمل ذكاء اصطناعي مفتوح المصدر بمصري طبيعي، ذاكرة طويلة المدى، ووعي هندسي",
+  keywords: ["Adam Prism", "آدم بريزم", "Digital Twin", "Conscious AI", "Egyptian Arabic", "Ollama", "Mohamed Othman"],
+  authors: [{ name: "Mohamed Othman" }],
 };
 
 export default function RootLayout({

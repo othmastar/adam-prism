@@ -10,7 +10,7 @@ from core.engine import AdamPrismEngine
 def config():
     return {
         "ollama_base": "http://localhost:11434",
-        "model_name": "gemma4:e4b",
+        "model_name": "adam-prism-v13:latest",
         "qdrant_url": "http://localhost:6333",
         "context_window": 4096,
         "token_budget": 4000,
@@ -29,7 +29,7 @@ async def engine(config):
 
 class TestEngineInit:
     def test_defaults(self, engine):
-        assert engine.model_name == "gemma4:e4b"
+        assert engine.model_name == "adam-prism-v13:latest"
         assert engine.active_mode == "teacher"
         assert engine.cycle_count == 0
         assert len(engine.conversation_history) == 0

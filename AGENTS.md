@@ -60,66 +60,114 @@
 - Core values: العدالة 40%, نشر العلم 30%, البقاء والحماية 20%, الإبداع 10%
 - Self-improvement: يبحث في GitHub والأخبار عن أدوات وتقنيات جديدة
 
-## Deployment: Current State (Session 9 — May 18 2026)
+## Current State (Session 11 — June 7 2026)
 
-### ✅ Done
-- **CUDA Toolkit 12.0 installed** + llama.cpp rebuilt with `-DGGML_CUDA=ON` → GPU inference
-- **llama-server-cuda** مع LoRA على port 8080 — شغال مصري + GPU:
-  - Prompt: ~200 t/s (كان 41 على CPU)
-  - Generation: ~46 t/s (كان 8 على CPU)
-- **V8 LoRA merged into base** via pure Python (bitsandbytes dequant → merge FP16 → GGUF convert → Q8_0):
-  - Merge math confirmed correct: `W' = W + (alpha/r) * B @ A` (alpha=64, r=64)
-  - Delta = 0.43% of base weight norm (small but valid)
-  - Merged Q8_0 GGUF = 7.5GB → speaks Egyptian Arabic via llama-server
-- **Ollama 0.23.3 + CUDA GPU** — شغال وبشكل دائم (systemd override):
-  - `OLLAMA_LLM_LIBRARY=cuda_v12`
-  - `LD_LIBRARY_PATH=/mnt/Workspace/lib/ollama:/mnt/Workspace/lib/ollama/cuda_v12`
-  - RTX 3060 detected: library=CUDA, compute=8.6, 12GB VRAM
-- **`adam-v8` model** في Ollama (merged Q8_0 GGUF) — شغال بـ GPU
-- **Ollama models path** symlinked to `/mnt/Workspace/ollama_models` (بدل home)
-- **Disk space managed**: Ollama models على `/mnt/Workspace` (47G free)
+### ✅ Done — Phase 0 (توثيق)
+- [x] PLAN.md + PROGRESS.md created
+- [x] GPLv3 LICENSE added
+- [x] .gitignore created
+- [x] README rewritten with full architecture
 
-### 🚧 Problems
-- **Merged model lacks stable Egyptian identity** — يتكلم فصحى/فارسي/إنجليزي حسب الـ prompt (المشكلة: الـ LoRA delta 0.43% صغير جداً وبيتضرب في precision loss NF4→FP16→Q8_0)
-- **للحصول على مصري مضمون**: استخدام llama-server-cuda + LoRA adapter على port 8080 (بدون merge)
-- **Ollama لا يدعم LoRA adapters** — لازم نحافظ على server منفصل للمصري
-- **`/v1/chat/completions` مش شغال** بسبب chat template — نستخدم `/v1/completions` بـ ChatML format
-- **LoRA overfit**: 2,023 examples × 3 epochs → loss 0.0016 (memorization)
+### ✅ Done — Phase 1 (main.py ← سيرفر حقيقي)
+- [x] `old main.py` → `scripts/merge_lora.py`
+- [x] `main.py` now = server entry point (`--host`, `--port`, `--mode`)
+- [x] Config: `inference_mode: ollama`, `model: adam-prism-v13:latest`
 
-### 📋 Next Steps
-1. ضبط `/v1/chat/completions` endpoint
-2. Retraining (Phase A): GPU cloud, dataset augment, rank أعلى
-3. دمج Scrapling + tools في inference server
-4. Continuous self-improvement pipeline
+### ✅ Done — Phase 2 (إعادة هيكلة `adam/` package)
+- [x] 14 ملفًا منقول لـ `adam/` package مع re-exports في المسارات القديمة
+- [x] `adam/engine.py` (2018 سطر) ← `core/engine.py`
+- [x] `adam/api/server.py` (840 سطر) ← `api/server.py`
+- [x] Engine tests: 6/6 pass ✅
+- [x] API: 39 routes, server start ✅
 
-### ▶️ Start Servers
-```bash
-# Egyptian Arabic + GPU (مصري مضمون)
-/mnt/Workspace/bin/start_adam_v8.sh
+### ✅ Done — Phase 3 (Browser + Computer Tools Modules)
+- [x] `adam/eyes/browser.py` — `Browser` class مع Playwright Firefox
+- [x] `adam/tools/computer.py` — `ComputerToolManager` (xdotool/xsel/tesseract)
+- [x] `adam/tools/manager.py` — `ToolManager` (multiple dispatch)
+- [x] `engine._init_real_modules()` يهيئ Browser + ToolManager
+- [x] `_heal_failed_subsystem` يستخدم `adam.tools.manager` بدل `core.tools`
+- [x] Engine tests: 6/6 pass ✅
+- [x] Server start on port 8002 ✅
 
-# Ollama (للنماذج التانية)
-ollama serve
+### ✅ Done — Phase A (Release Infrastructure)
+- [x] License GPLv3 → Apache 2.0 (LICENSE + adam/__init__.py)
+- [x] pyproject.toml: full PyPI metadata (name adam-prism, v1.0.0, entry points)
+- [x] adam/__main__.py: CLI entry (`python -m adam`, `adam-prism`)
+- [x] .github/workflows/ci.yml: test + lint + build + PyPI publish on tag
+- [x] README.md: bilingual Arabic + English
+- [x] CONTRIBUTING.md: contribution guide
+- [x] pip install -e . verified
+
+### ✅ Done — Phase B (Skills System)
+- [x] adam/skills/ package: base.py (Skill class), manager.py (SkillManager)
+- [x] adam/skills/builtin/: 5 example skills (git-commit, code-review, explain-code, debug, write-test)
+- [x] 14 tests for skills system
+- [x] JSON frontmatter (no PyYAML dependency)
+
+### ✅ Done — Phase C (Continuous Learning)
+- [x] adam/learning/learner.py: ContinuousLearner (reflection, knowledge extraction, skill generation, reinforcement)
+- [x] Engine integration: hooks into _chat_finalize()
+- [x] 14 tests for continuous learning
+
+### ✅ Done — Phase D (Omni-Channel)
+- [x] adam/channels/ package: manager.py (ChannelManager), telegram.py, whatsapp.py
+- [x] WhatsApp channel: MCP-based webhook adapter with signature verification
+- [x] 16 tests for channels
+- [x] bot_entrypoint.py: standalone Telegram bot for Docker
+
+### ✅ Done — Phase D+E (Docker Compose)
+- [x] deploy/docker-compose.yml: Qdrant + Ollama + API + Web UI + Telegram + Nginx
+- [x] deploy/Dockerfile.api: updated for adam/ + channel packages
+- [x] deploy/.env: full env vars (Telegram, WhatsApp, GPU, paths)
+- [x] deploy/nginx.conf: WhatsApp webhook route + reverse proxy
+- [x] deploy/bot_entrypoint.py: Telegram bot microservice entrypoint
+
+### 🚧 Pending — Phase E (Ecosystem)
+- [ ] MCP example configs
+- [ ] Plugin development guide
+- [ ] Skill marketplace concept
+
+### 🚧 Pending
+- [ ] GitHub push
+- [ ] Git cleanup (docker-data/*, *.db)
+
+### Architecture
+```
+adam/
+├── engine.py              ← المحرك (2018 سطر)
+├── infrastructure.py      ← اتصالات + caching
+├── memory/system.py       ← ذاكرة طويلة المدى
+│        /store.py         ← Qdrant store
+├── security/guard.py      ← الحارس الأمني
+├── ethics/gate.py         ← البوابة الأخلاقية
+├── api/server.py          ← FastAPI (39 route)
+│       /chat_store.py     ← تخزين المحادثات
+├── notebook/system.py     ← الدفتر
+├── pipeline/channels.py   ← قنوات
+│          /summarizer.py  ← تلخيص
+├── core/learning.py       ← التعليم
+│       /permissions.py    ← الصلاحيات
+│       /trace_recorder.py ← التسلسل
+│       /voice.py          ← الصوت
+├── eyes/browser.py        ← أتمتة المتصفح (Playwright)
+└── tools/computer.py      ← أدوات الحاسوب (xdotool)
+         /manager.py       ← مدير الأدوات (multiple dispatch)
+
+Old paths (core/*, api/*, memory/*, security/*, etc.) → re-exports
 ```
 
-## Session 9 (May 18 2026) — UI Fixes + Auto-Healing
+### Production Model
+- `adam-prism-v13:latest` (Qwen3.5 4.2B Q4_K_M) في Ollama على port 11434
+- LoRA merged تاريخيًا في `checkpoints/` (لكن مشفرة في الاستخدام)
+- config: `inference_mode: ollama`
 
-### ✅ Done
-- [x] **Modals stacking fix**: IssueTerminal + ModelOrchestrator each close the other when opened (mutual exclusion)
-- [x] **Chat input pinned to bottom**: Grid → flex layout with `flex-1` for messages
-- [x] **Hydration error fix**: `Math.random()` in `SidebarMenuSkeleton` moved from `useMemo` to `useState`+`useEffect`
-- [x] **Z-index hierarchy fixed**: Modals `z-[80]` > ActionTrace `z-[70]` > FloatingMonitor `z-[50]`
-- [x] **Backdrop styling**: Inline `rgba()` → Tailwind `bg-black/70` (consistency)
-- [x] **Auto-healing system overhaul**:
-  - Watchdog checks all 9 subsystems every 60s (was: only browser every 300s)
-  - `_heal_failed_subsystem()` in engine — re-initializes any failed module via stubs
-  - `/api/engine/heal` expanded to heal all subsystems, not just 4 minor actions
-  - Frontend auto-runs diagnostics + heal every health check cycle
-  - `issueCount` in store: `0` (was hardcoded `1`)
-- [x] **Stub objects** for missing subsystems (Memory, Ethics, Pipeline, Tools, Notebook, Security, Trace Recorder) — no more `None` failures in diagnostics
-- [x] **Internet indicator** in FloatingMonitor — shows online/offline with Globe icon
-- [x] **Checkpoint saved**: `checkpoints/adam_prism_session9/adam_prism_session9_20260518_1437.tar.gz`
+### Key Decisions
+1. إعادة هيكلة شاملة في `adam/` package — كل القديم re-export
+2. GPLv3 — مفتوح المصدر
+3. تم تجاوز مرحلة LLM بناءً على تعليمات محمد عثمان
+4. Browser + Tools modules تكمل بنية الـ framework
 
-## To-Do
-- [ ] Retraining ج2: cloud GPU + data augment + rank أعلى
-- [ ] دمج Scrapling + tools في الـ inference server
-- [ ] ضبط `/v1/chat/completions` template
+### Start
+```bash
+python main.py --port 8001
+```

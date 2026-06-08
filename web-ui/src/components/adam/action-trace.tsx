@@ -67,7 +67,7 @@ export function ActionTrace() {
         transform: `translateY(${visible || isStreaming ? 0 : 10}px)`,
       }}
     >
-      <div className="bg-black/80 backdrop-blur-sm border border-zinc-700/50 rounded-lg px-3 py-1.5 font-mono text-[10px] text-emerald-400/90 shadow-lg">
+      <div className="backdrop-blur-sm border border-zinc-700/50 rounded-lg px-3 py-1.5 font-mono text-[10px] text-emerald-400/90 shadow-lg" style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}>
         <span className="animate-pulse me-1">▸</span>
         {traceText || "[SYSTEM] Idle..."}
       </div>

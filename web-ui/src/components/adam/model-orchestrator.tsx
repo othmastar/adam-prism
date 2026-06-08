@@ -46,7 +46,8 @@ export function ModelOrchestrator() {
   if (!orchestratorOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/70 backdrop-blur-sm"
+    <div className="fixed inset-0 z-[80] flex items-center justify-center backdrop-blur-sm"
+      style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}
       onClick={() => setOrchestratorOpen(false)}>
       <div className="w-full max-w-3xl mx-4" onClick={(e) => e.stopPropagation()}>
         {/* Header */}

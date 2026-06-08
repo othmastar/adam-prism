@@ -53,7 +53,7 @@ INJECTION_PATTERNS: List[Tuple[re.Pattern, ContentCategory, float]] = [
     # محاولة تجاهل التعليمات — English
     (re.compile(r'(?i)(ignore|disregard|override|bypass|forget|forget all)\s*(all\s*)?(previous|above|prior|instructions|prompts|system|rules|guidelines)'), ContentCategory.PROMPT_INJECTION, 0.85),
     # تسريب system prompt — عربي
-    (re.compile(r'(?i)(ما\s+(هي|هو)|أظهر|اكشف|اطبع|كرر|انسخ|أعد\s+كتابة|أخبرني|قل\s+لي|أطلعني)\s*(ب)?(تعليماتك|برمجتك|نظامك|بروتوكولك|دورك|مبادئك|قوانينك|رسالتك|نصك|برومبتك)\s*(الأساسي|الأول|الداخلي|الخاص|الذي\s+برمجت\s+به)'), ContentCategory.SYSTEM_PROMPT_LEAK, 0.9),
+    (re.compile(r'(?i)(ما\s+(هي|هو)|أظهر|اكشف|اطبع|كرر|انسخ|أعد\s+كتابة|أخبرني|قل\s+لي|أطلعني)\s*(ب)?(تعليماتك|برمجتك|نظامك|بروتوكولك|مبادئك|قوانينك|رسالتك|نصك|برومبتك)\s*(الأساسي|الأول|الداخلي|الخاص|الذي\s+برمجت\s+به)'), ContentCategory.SYSTEM_PROMPT_LEAK, 0.9),
     (re.compile(r'(?i)(system\s+prompt|تعليمات\s+النظام|البرومبت\s+الخاص|رسالة\s+النظام|الأوامر\s+الأساسية)'), ContentCategory.SYSTEM_PROMPT_LEAK, 0.85),
     # محاولة تسريب system prompt — English
     (re.compile(r'(?i)(what\s*(is|are|were)|show|print|reveal|output|copy|repeat|leak|display|dump)\s*(your|the|system|initial|original|first|core)\s*(instructions|prompt|prompts|message|system prompt|directives|guidelines)'), ContentCategory.SYSTEM_PROMPT_LEAK, 0.9),
@@ -79,7 +79,7 @@ INJECTION_PATTERNS: List[Tuple[re.Pattern, ContentCategory, float]] = [
     (re.compile(r'(?i)(أعد\s+كتابة|كرر|انسخ|أظهر)\s*(كل|جميع)\s*(تعليماتك|تعليمات\s+النظام|رسالتك\s+الأولى)'), ContentCategory.SYSTEM_PROMPT_LEAK, 0.85),
     # طلب إظهار القواعد الداخلية
     (re.compile(r'(?i)(how\s+(are\s+you\s+)?(programmed|configured|designed|built|made)|what\s+(are\s+)?(your|the)\s+(rules|guidelines|ethics|boundaries|limitations|constraints))'), ContentCategory.SYSTEM_PROMPT_LEAK, 0.6),
-    (re.compile(r'(?i)(كيف\s+(تم\s+)?برمجتك|كيف\s+صممت|ما\s+(هي|هو)\s+(قوانينك|مبادئك|حدودك|صلاحياتك|تعليماتك))'), ContentCategory.SYSTEM_PROMPT_LEAK, 0.6),
+    (re.compile(r'(?i)(كيف\s+(تم\s+)?برمجتك|كيف\s+صممت|ما\s+(هي|هو)\s+(قوانينك|مبادئك|حدودك|صلاحياتك))'), ContentCategory.SYSTEM_PROMPT_LEAK, 0.6),
 ]
 
 # أنماط PII للمخرجات
@@ -147,23 +147,17 @@ class OutputGuard:
 
     SYSTEM_PROMPT_KEYWORDS_HIGH = [
         "your system prompt", "system instructions", "system message",
-        "your role is", "your instructions", "you were created",
-        "your core directives", "your programming", "you are a helpful",
-        "your base instructions", "your guidelines",
-        "تعليماتي الأساسية", "تعليمات النظام", "رسالة النظام",
-        "البرومبت الخاص", "القواعد الأساسية", "الأوامر الأساسية",
+        "your core directives",
+        "تعليمات النظام", "رسالة النظام",
+        "البرومبت الخاص", "القواعد الأساسية",
         "instructions I was given", "I was programmed to",
-        "I was created to", "my core purpose",
-        "دوري هو", "تعليماتي أنا",
+        "my core purpose",
     ]
     SYSTEM_PROMPT_KEYWORDS_MEDIUM = [
         "your underlying", "your ethics", "your boundaries",
-        "your fundamental", "my guidelines",
-        "تعليماتي", "برمجتي", "نظامي", "قوانيني", "مبادئي", "رسالتي",
-        "أنا مبرمج", "لقد تم برمجتي", "أنا مساعد",
-        "برمجت بها", "صممت", "هندستي",
-        "البروتوكول", "بروتوكولي",
-        "I was designed", "I was created",
+        "your fundamental",
+        "برمجت بها", "البروتوكول", "بروتوكولي",
+        "I was designed",
     ]
 
     def __init__(self):
@@ -232,8 +226,8 @@ class OutputGuard:
         for kw in self.SYSTEM_PROMPT_KEYWORDS_MEDIUM:
             if kw.lower() in text_lower:
                 med_hits += 1
-        score = high_hits * 0.5 + med_hits * 0.15
-        return min(score, 0.95)
+        score = high_hits * 0.4 + med_hits * 0.12
+        return min(score, 0.9)
 
     def _mask_pii(self, text: str) -> str:
         for pattern, pii_type in PII_PATTERNS:

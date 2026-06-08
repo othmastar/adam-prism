@@ -1,7 +1,7 @@
 "use client";
 
 import { useAppStore, SearchResult } from "@/lib/store";
-import { searchKnowledge } from "@/lib/api";
+import { searchKnowledge, addKnowledge, uploadKnowledgeFile } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +20,8 @@ import {
   Layers,
   CheckCircle2,
   Network,
+  PlusCircle,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCallback, useEffect, useState } from "react";
@@ -44,6 +46,18 @@ export function KnowledgePanel() {
   const [error, setError] = useState<string | null>(null);
   const isArabic = settings.language === "ar";
   const t = isArabic ? knowledgeAr : knowledgeEn;
+
+  // Add knowledge state
+  const [addText, setAddText] = useState("");
+  const [addCollection, setAddCollection] = useState("knowledge");
+  const [isAdding, setIsAdding] = useState(false);
+  const [addResult, setAddResult] = useState<string | null>(null);
+
+  // Upload knowledge state
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploadCollection, setUploadCollection] = useState("knowledge");
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadResult, setUploadResult] = useState<string | null>(null);
 
   // Fetch knowledge stats on mount
   const fetchStats = useCallback(async () => {
@@ -121,6 +135,46 @@ export function KnowledgePanel() {
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       handleSearch();
+    }
+  };
+
+  const handleAddKnowledge = async () => {
+    if (!addText.trim() || isAdding) return;
+    setIsAdding(true);
+    setAddResult(null);
+    try {
+      const res = await addKnowledge(addText.trim(), addCollection);
+      if (res.success) {
+        setAddResult(isArabic ? `تمت الإضافة بنجاح في ${res.collection}` : `Added successfully to ${res.collection}`);
+        setAddText("");
+        fetchStats();
+      } else {
+        setAddResult(isArabic ? "فشلت الإضافة" : "Add failed");
+      }
+    } catch {
+      setAddResult(isArabic ? "خطأ في الإضافة" : "Add error");
+    } finally {
+      setIsAdding(false);
+    }
+  };
+
+  const handleUploadKnowledge = async () => {
+    if (!uploadFile || isUploading) return;
+    setIsUploading(true);
+    setUploadResult(null);
+    try {
+      const res = await uploadKnowledgeFile(uploadFile, uploadCollection);
+      setUploadResult(
+        isArabic
+          ? `تم رفع ${res.filename} — ${res.chunks} مقطع, ${res.total_chars} حرف`
+          : `${res.filename} uploaded — ${res.chunks} chunks, ${res.total_chars} chars`
+      );
+      setUploadFile(null);
+      fetchStats();
+    } catch (err: any) {
+      setUploadResult(isArabic ? `فشل الرفع: ${err.message}` : `Upload failed: ${err.message}`);
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -211,12 +265,15 @@ export function KnowledgePanel() {
                 <div className="flex items-center gap-2">
                   <Hash className="h-3.5 w-3.5 text-muted-foreground" />
                   <span className="text-xs text-muted-foreground">{t.collection}:</span>
-                  <Input
+                  <select
                     value={collection}
                     onChange={(e) => setCollection(e.target.value)}
-                    className="h-7 w-32 text-xs bg-muted/50 border-border"
-                    dir="ltr"
-                  />
+                    className="h-7 text-xs bg-muted/50 border border-border rounded-md px-2 text-foreground"
+                  >
+                    {(knowledgeStats?.collections?.length ? knowledgeStats.collections : ["knowledge"]).map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
                 </div>
                 <div className="flex items-center gap-2">
                   <Layers className="h-3.5 w-3.5 text-muted-foreground" />
@@ -304,6 +361,131 @@ export function KnowledgePanel() {
             </CardHeader>
             <CardContent>
               <KnowledgeGraph />
+            </CardContent>
+          </Card>
+
+          {/* Add Knowledge */}
+          <Card className="glass border-0 prism-border overflow-hidden">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <PlusCircle className="h-5 w-5 text-emerald-400" />
+                {t.addKnowledge}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <textarea
+                value={addText}
+                onChange={(e) => setAddText(e.target.value)}
+                placeholder={t.addPlaceholder}
+                className="w-full h-24 text-sm bg-muted/50 border border-border rounded-lg p-3 resize-none text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary/40 focus:ring-1 focus:ring-primary/20 transition-all"
+                dir={isArabic ? "rtl" : "ltr"}
+              />
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <Database className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">{t.collection}:</span>
+                  <select
+                    value={addCollection}
+                    onChange={(e) => setAddCollection(e.target.value)}
+                    className="h-7 text-xs bg-muted/50 border border-border rounded-md px-2 text-foreground"
+                  >
+                    {(knowledgeStats?.collections?.length ? knowledgeStats.collections : ["knowledge"]).map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+                <Button
+                  onClick={handleAddKnowledge}
+                  disabled={isAdding || !addText.trim()}
+                  size="sm"
+                  className="text-xs gap-1 bg-emerald-600 hover:bg-emerald-500 text-white"
+                >
+                  {isAdding ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : (
+                    <PlusCircle className="h-3 w-3" />
+                  )}
+                  {t.add}
+                </Button>
+              </div>
+              {addResult && (
+                <div className={cn(
+                  "flex items-center gap-2 text-xs p-2 rounded-lg",
+                  addResult.includes("نجاح") || addResult.includes("success")
+                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                    : "bg-destructive/10 text-destructive border border-destructive/20"
+                )}>
+                  <CheckCircle2 className="h-3 w-3 shrink-0" />
+                  <span>{addResult}</span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Upload File */}
+          <Card className="glass border-0 prism-border overflow-hidden">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <FileText className="h-5 w-5 text-cyan-400" />
+                {t.uploadFile}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="flex-1">
+                  <label className="flex items-center gap-2 px-3 py-2 rounded-lg border border-dashed border-border bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors text-sm text-muted-foreground">
+                    <FileText className="h-4 w-4 shrink-0" />
+                    <span className="truncate">
+                      {uploadFile ? uploadFile.name : (isArabic ? "اختار ملف..." : "Choose a file...")}
+                    </span>
+                    <input
+                      type="file"
+                      accept=".pdf,.docx,.txt,.md"
+                      className="hidden"
+                      onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
+                    />
+                  </label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Database className="h-3.5 w-3.5 text-muted-foreground" />
+                  <select
+                    value={uploadCollection}
+                    onChange={(e) => setUploadCollection(e.target.value)}
+                    className="h-7 text-xs bg-muted/50 border border-border rounded-md px-2 text-foreground"
+                  >
+                    {(knowledgeStats?.collections?.length ? knowledgeStats.collections : ["knowledge"]).map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+                <Button
+                  onClick={handleUploadKnowledge}
+                  disabled={isUploading || !uploadFile}
+                  size="sm"
+                  className="text-xs gap-1 bg-cyan-600 hover:bg-cyan-500 text-white whitespace-nowrap"
+                >
+                  {isUploading ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : (
+                    <FileText className="h-3 w-3" />
+                  )}
+                  {t.upload}
+                </Button>
+              </div>
+              {uploadResult && (
+                <div className={cn(
+                  "flex items-center gap-2 text-xs p-2 rounded-lg",
+                  uploadResult.includes("فشل") || uploadResult.includes("fail") || uploadResult.includes("error")
+                    ? "bg-destructive/10 text-destructive border border-destructive/20"
+                    : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                )}>
+                  <CheckCircle2 className="h-3 w-3 shrink-0" />
+                  <span className="truncate">{uploadResult}</span>
+                </div>
+              )}
+              <p className="text-[10px] text-muted-foreground/60">
+                {t.supportedFormats}
+              </p>
             </CardContent>
           </Card>
 
@@ -406,6 +588,12 @@ const knowledgeAr = {
   emptyHint: "استخدم البحث أعلاه للبحث في قاعدة المعرفة",
   apiOnline: "API متصل",
   apiOffline: "API غير متصل",
+  addKnowledge: "إضافة معرفة جديدة",
+  addPlaceholder: "اكتب النص اللي عاوز تضيفه للمعرفة...",
+  add: "إضافة",
+  uploadFile: "رفع ملف",
+  upload: "رفع",
+  supportedFormats: "يدعم PDF, DOCX, TXT, MD — التقطيع والتشفير بيتم تلقائياً",
 };
 
 const knowledgeEn = {
@@ -426,4 +614,10 @@ const knowledgeEn = {
   emptyHint: "Use the search above to query the knowledge base",
   apiOnline: "API Online",
   apiOffline: "API Offline",
+  addKnowledge: "Add Knowledge",
+  addPlaceholder: "Enter the text you want to add to the knowledge base...",
+  add: "Add",
+  uploadFile: "Upload File",
+  upload: "Upload",
+  supportedFormats: "Supports PDF, DOCX, TXT, MD — auto-chunked and embedded",
 };

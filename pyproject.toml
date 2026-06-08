@@ -1,3 +1,56 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "adam-prism"
+version = "1.0.0-beta"
+description = "Egyptian Arabic conscious AI framework — personal digital twin with ethics, memory, and tools"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+authors = [
+    {name = "Mohamed Othman", email = "othmastar@gmail.com"},
+]
+keywords = ["ai", "agent", "egyptian-arabic", "consciousness", "digital-twin", "llm", "mcp"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Natural Language :: Arabic",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+    "Topic :: Communications :: Chat",
+]
+requires-python = ">=3.12"
+dependencies = [
+    "httpx>=0.25.0",
+    "pydantic>=2.0.0",
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+    "websockets>=12.0",
+    "playwright>=1.40.0",
+    "qdrant-client>=1.7.0",
+    "beautifulsoup4>=4.12.0",
+    "lxml>=4.9.0",
+    "Pillow>=10.0.0",
+    "mcp[cli]>=1.27.0",
+    "apscheduler>=3.11.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/othmastar/adam-prism"
+Repository = "https://github.com/othmastar/adam-prism"
+Documentation = "https://github.com/othmastar/adam-prism#readme"
+
+[project.scripts]
+adam-prism = "adam.__main__:main"
+adam = "adam.__main__:main"
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
@@ -6,3 +59,6 @@ markers = [
     "slow: marks tests as slow (deselect with '-k \"not slow\"')",
     "asyncio: marks tests as async",
 ]
+
+[tool.setuptools.packages.find]
+include = ["adam*"]

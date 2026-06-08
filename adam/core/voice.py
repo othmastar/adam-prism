@@ -570,8 +570,8 @@ class VoicePipeline:
     MAX_CHUNK_DURATION = 11.0  # 11 ثانية للتقسيم (دراسة FastConformer)
     TARGET_SAMPLE_RATE = 16000
 
-    def __init__(self, temp_dir: str = "temp/audio", tts_backend: str = "lahgtna",
-                 tts_dialect: str = "eg"):
+    def __init__(self, temp_dir: str = "temp/audio", tts_backend: str = "edge_tts",
+                 tts_dialect: str = "eg", tts_voice: str = "ar-EG-ShakirNeural"):
         self.vad = SileroVAD()
         self.asr = FasterWhisperASR()
         self._tts_backend = tts_backend
@@ -579,8 +579,8 @@ class VoicePipeline:
             self.tts = LahgtnaTTS(dialect=tts_dialect)
             logger.info(f"VoicePipeline: TTS = Lahgtna (لهجة: {tts_dialect})")
         else:
-            self.tts = EdgeTTS()
-            logger.info("VoicePipeline: TTS = EdgeTTS (cloud)")
+            self.tts = EdgeTTS(voice=tts_voice)
+            logger.info(f"VoicePipeline: TTS = EdgeTTS ({tts_voice})")
 
         self._temp_dir = Path(temp_dir)
         self._temp_dir.mkdir(parents=True, exist_ok=True)

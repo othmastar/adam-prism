@@ -1,0 +1,31 @@
+# Adam Prism Inference Server — Gemma 4 12B
+FROM pytorch/pytorch:2.6.0-cuda12.4-cudnn9-devel
+
+WORKDIR /app
+
+# Install Python deps
+RUN pip install --no-cache-dir \
+    transformers>=4.49 \
+    accelerate \
+    bitsandbytes \
+    fastapi \
+    uvicorn[standard] \
+    pydantic \
+    jinja2 \
+    playwright
+
+# Install Playwright browser
+RUN playwright install firefox && playwright install-deps firefox
+
+# Copy inference server
+COPY جيما\ 4\ 12\ مليار/fastapi_server.py /app/server.py
+COPY جيما\ 4\ 12\ مليار/subagent.py /app/subagent.py
+COPY جيما\ 4\ 12\ مليار/sandbox.py /app/sandbox.py
+
+# Model volume mount point
+VOLUME /mnt/Workspace/gemma4_12b_4bit
+ENV MODEL_PATH=/mnt/Workspace/gemma4_12b_4bit
+
+EXPOSE 7861
+
+CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "7861"]

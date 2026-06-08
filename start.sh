@@ -1,105 +1,84 @@
-#!/usr/bin/env bash
+#!/bin/bash
+# آدم المنظار — تشغيل كل الخدمات
 set -e
 
-ROOT="$(cd "$(dirname "$0")" && pwd)"
+export HF_HOME="/mnt/Workspace/.huggingface"
+export PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True"
+export TOKENIZERS_PARALLELISM="false"
+export NO_HF_DOWNLOAD="1"
 
-echo "╔══════════════════════════════════════════╗"
-echo "║     ADAM PRISM — تشغيل المنظومة كاملة     ║"
-echo "╚══════════════════════════════════════════╝"
+ROOT="/mnt/Workspace/Adam_Prism_Complete_v2"
+LORA_VENV="/mnt/Workspace/جيما 4 12 مليار/.venv/bin/python3"
+LORA_PORT=8080
+API_PORT=8002
+FRONTEND_PORT=3000
 
-# ─── 0. Qdrant ───
-echo ""
-echo "[0/4] Qdrant — المتجهات على :6333"
-if docker ps --format '{{.Names}}' 2>/dev/null | grep -q ^adam-qdrant$; then
-    echo "  ✅ Qdrant شغال بالفعل"
-else
-    cd "$ROOT"
-    docker compose -f deploy/docker-compose.yml up -d qdrant 2>&1
-    echo "  ⏳ انتظار Qdrant..."
-    for i in $(seq 1 15); do
-        if curl -s -o /dev/null -w '' http://localhost:6333/ 2>/dev/null; then
-            echo "  ✅ Qdrant جاهز على :6333"
-            break
-        fi
-        if [ $i -eq 15 ]; then echo "  ⚠️ Qdrant لم يستجب — تحقق من docker logs adam-qdrant"; fi
-        sleep 1
-    done
-fi
+echo "=== آدم المنظار — Startup ==="
 
-# ─── 1. Model Server (Qwen3.5-4B + LoRA) ───
-MODEL_PID=""
-echo ""
-echo "[1/4] Model — الموديل على :7860"
-MODEL_PID=$(lsof -ti:7860 2>/dev/null)
-if [ -n "$MODEL_PID" ]; then
-    echo "  ✅ Model شغال بالفعل (PID $MODEL_PID)"
-else
-    cd /mnt/Workspace/adam_v8_output/Qwen-Adam-AR
-    PYTHONPATH="/mnt/Workspace/python-lib/site-packages:$PYTHONPATH" \
-    setsid /usr/bin/python3 scripts/flask_chat.py &>/tmp/adam_flask.log &
-    MODEL_PID=$!
-    echo "  ⏳ PID $MODEL_PID — تحميل الموديل (قد يستغرق دقيقة)..."
-    for i in $(seq 1 90); do
-        if curl -s -o /dev/null -w '' http://localhost:7860/ 2>/dev/null; then
-            echo "  ✅ Model جاهز على :7860"
-            break
-        fi
-        if [ $i -eq 90 ]; then echo "  ⚠️  Model لم يستجب — تحقق من /tmp/adam_flask.log"; fi
-        sleep 2
-    done
-fi
+# 1) LoRA Inference Server
+echo "[1/3] LoRA Server (port $LORA_PORT)..."
+setsid $LORA_VENV python "$ROOT/scripts/inference_server.py" > /tmp/lora-server.log 2>&1 &
+LORA_PID=$!
+echo "  PID: $LORA_PID"
 
-# ─── 2. API Server ───
-echo ""
-echo "[2/4] API — الخادم على :8000"
-API_PID=$(lsof -ti:8000 2>/dev/null)
-if [ -n "$API_PID" ]; then
-    echo "  ✅ API شغال بالفعل (PID $API_PID)"
-else
-    cd "$ROOT"
-    source venv/bin/activate
-    setsid python run_api.py &>/mnt/Workspace/Adam_Prism_Complete_v2/api.log &
-    API_PID=$!
-    echo "  ⏳ PID $API_PID — انتظار..."
-    for i in $(seq 1 15); do
-        if curl -s -o /dev/null -w '' http://localhost:8000/ 2>/dev/null; then
-            echo "  ✅ API جاهز على :8000"
-            break
-        fi
-        if [ $i -eq 15 ]; then echo "  ⚠️  API لم يستجب — تحقق من api.log"; fi
-        sleep 1
-    done
-fi
+# Wait for LoRA to be ready
+for i in $(seq 1 60); do
+  if curl -s --max-time 2 "http://localhost:$LORA_PORT/health" 2>/dev/null | grep -q "ok"; then
+    echo "  ✅ LoRA ready"
+    break
+  fi
+  if [ $i -eq 60 ]; then
+    echo "  ❌ LoRA failed to start"
+    tail -5 /tmp/lora-server.log
+    exit 1
+  fi
+  sleep 2
+done
 
-# ─── 3. Frontend ───
-echo ""
-echo "[3/4] UI — الواجهة على :3000"
-UI_PID=$(lsof -ti:3000 2>/dev/null)
-if [ -n "$UI_PID" ]; then
-    echo "  ✅ UI شغال بالفعل (PID $UI_PID)"
-else
-    cd "$ROOT/web-ui"
-    setsid node node_modules/next/dist/bin/next dev -p 3000 &>/mnt/Workspace/Adam_Prism_Complete_v2/frontend.log &
-    UI_PID=$!
-    echo "  ⏳ PID $UI_PID — انتظار..."
-    for i in $(seq 1 30); do
-        if curl -s -o /dev/null -w '' http://localhost:3000/ 2>/dev/null; then
-            echo "  ✅ UI جاهز على :3000"
-            break
-        fi
-        if [ $i -eq 30 ]; then echo "  ⚠️  UI لم يستجب — تحقق من frontend.log"; fi
-        sleep 1
-    done
-fi
+# 2) API Server
+echo "[2/3] API Server (port $API_PORT)..."
+setsid python3 "$ROOT/main.py" --port $API_PORT > /tmp/main-api.log 2>&1 &
+API_PID=$!
+echo "  PID: $API_PID"
+
+for i in $(seq 1 30); do
+  if curl -s --max-time 2 "http://localhost:$API_PORT/api/status" 2>/dev/null | grep -q "lora"; then
+    echo "  ✅ API ready"
+    break
+  fi
+  if [ $i -eq 30 ]; then
+    echo "  ❌ API failed to start"
+    tail -5 /tmp/main-api.log
+    exit 1
+  fi
+  sleep 1
+done
+
+# 3) Frontend
+echo "[3/3] Frontend (port $FRONTEND_PORT)..."
+cd "$ROOT/web-ui" || exit 1
+setsid npx next dev -p $FRONTEND_PORT > /tmp/frontend.log 2>&1 &
+FE_PID=$!
+echo "  PID: $FE_PID"
+
+for i in $(seq 1 20); do
+  if curl -s --max-time 2 "http://localhost:$FRONTEND_PORT" 2>/dev/null | grep -q "html"; then
+    echo "  ✅ Frontend ready"
+    break
+  fi
+  if [ $i -eq 20 ]; then
+    echo "  ❌ Frontend failed to start"
+    tail -5 /tmp/frontend.log
+    exit 1
+  fi
+  sleep 1
+done
 
 echo ""
-echo "╔══════════════════════════════════════════╗"
-echo "║  ✅  ADAM PRISM — شغال بالكامل           ║"
-echo "╠══════════════════════════════════════════╣"
-echo "║  Qdrant :6333  متجهات آدم                ║"
-echo "║  Model  :7860  Qwen3.5-4B + LoRA         ║"
-echo "║  API    :8000  Adam Prism Engine          ║"
-echo "║  UI     :3000  Next.js Frontend           ║"
-echo "╠══════════════════════════════════════════╣"
-echo "║  افتح:  http://localhost:3000             ║"
-echo "╚══════════════════════════════════════════╝"
+echo "=== All Services Running ==="
+echo "  Frontend:  http://localhost:$FRONTEND_PORT  (PID $FE_PID)"
+echo "  API:       http://localhost:$API_PORT       (PID $API_PID)"
+echo "  LoRA:      http://localhost:$LORA_PORT       (PID $LORA_PID)"
+echo ""
+echo "  Logs: /tmp/lora-server.log / /tmp/main-api.log / /tmp/frontend.log"
+echo "  Stop: kill $FE_PID $API_PID $LORA_PID"

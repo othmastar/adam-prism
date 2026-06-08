@@ -1,0 +1,42 @@
+{
+  "name": "adam-prism-desktop",
+  "version": "1.0.0",
+  "description": "Adam Prism — Desktop Chat Client",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:linux": "electron-builder --linux AppImage",
+    "build:mac": "electron-builder --mac dmg",
+    "build:win": "electron-builder --win nsis",
+    "build:all": "electron-builder --linux AppImage --mac dmg --win nsis"
+  },
+  "build": {
+    "appId": "com.adam-prism.desktop",
+    "productName": "Adam Prism",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*"
+    ],
+    "linux": {
+      "target": ["AppImage"],
+      "icon": "renderer/icon.png",
+      "category": "Utility"
+    },
+    "mac": {
+      "target": ["dmg"],
+      "icon": "renderer/icon.png"
+    },
+    "win": {
+      "target": ["nsis"],
+      "icon": "renderer/icon.png"
+    }
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0"
+  }
+}

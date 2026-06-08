@@ -31,9 +31,10 @@ export type Conversation = {
   messages: Message[];
   createdAt: number;
   updatedAt: number;
+  archived?: boolean;
 };
 
-export type ViewType = "chat" | "knowledge" | "notebook" | "tools" | "settings" | "monitor" | "pipeline";
+export type ViewType = "chat" | "knowledge" | "notebook" | "tools" | "settings" | "monitor" | "pipeline" | "scheduler" | "plugins" | "subagents" | "memory" | "skills" | "channels";
 
 export type AppSettings = {
   // Model
@@ -152,6 +153,8 @@ type AppState = {
   addConversation: (conv: Conversation) => void;
   updateConversation: (id: string, updates: Partial<Conversation>) => void;
   deleteConversation: (id: string) => void;
+  archiveConversation: (id: string) => void;
+  restoreConversation: (id: string) => void;
 
   // Chat state
   isStreaming: boolean;
@@ -178,6 +181,12 @@ type AppState = {
   setSearchResults: (results: SearchResult[]) => void;
   isSearching: boolean;
   setIsSearching: (searching: boolean) => void;
+
+  // Skills
+  skillsList: { name: string; description: string; path: string }[];
+  setSkillsList: (skills: { name: string; description: string; path: string }[]) => void;
+  skillsLoading: boolean;
+  setSkillsLoading: (loading: boolean) => void;
 
   // Notebook
   notebookStats: NotebookStats | null;
@@ -252,7 +261,7 @@ const defaultSettings: AppSettings = {
   topK: 40,
   language: "ar",
   ollamaUrl: "http://localhost:11434",
-  fastApiUrl: "http://localhost:8000",
+  fastApiUrl: "http://localhost:8002",
   qdrantUrl: "http://localhost:6333",
   qdrantApiKey: "",
   telegramBotToken: "",
@@ -323,6 +332,22 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ conversations: updated, activeConversationId: newActiveId });
     saveToLocalStorage("adam-conversations", updated);
   },
+  archiveConversation: (id) => {
+    const updated = get().conversations.map((c) =>
+      c.id === id ? { ...c, archived: true } : c
+    );
+    const newActiveId =
+      get().activeConversationId === id ? null : get().activeConversationId;
+    set({ conversations: updated, activeConversationId: newActiveId });
+    saveToLocalStorage("adam-conversations", updated);
+  },
+  restoreConversation: (id) => {
+    const updated = get().conversations.map((c) =>
+      c.id === id ? { ...c, archived: false } : c
+    );
+    set({ conversations: updated });
+    saveToLocalStorage("adam-conversations", updated);
+  },
 
   // Chat state
   isStreaming: false,
@@ -353,6 +378,12 @@ export const useAppStore = create<AppState>((set, get) => ({
   setSearchResults: (results) => set({ searchResults: results }),
   isSearching: false,
   setIsSearching: (searching) => set({ isSearching: searching }),
+
+  // Skills
+  skillsList: [] as { name: string; description: string; path: string }[],
+  setSkillsList: (skills) => set({ skillsList: skills }),
+  skillsLoading: false,
+  setSkillsLoading: (loading) => set({ skillsLoading: loading }),
 
   // Notebook
   notebookStats: null,

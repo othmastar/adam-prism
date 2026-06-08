@@ -1,7 +1,7 @@
 "use client";
 
 import { useAppStore, Message, getModeInfo, CognitiveMode, ProcessingStep } from "@/lib/store";
-import { sendChatMessage, fetchSessions, fetchSession, createSession, addMessageToSession, syncSessionMessages, deleteSessionOnServer } from "@/lib/api";
+import { sendChatMessage, fetchSessions, fetchSession, createSession, addMessageToSession, syncSessionMessages, deleteSessionOnServer, uploadFile, ChatResponse } from "@/lib/api";
 import { AdamLogo } from "./adam-logo";
 import { PermissionDialog } from "./permission-dialog";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,13 @@ import {
   Zap,
   Volume2,
   Square,
+  Trash2,
+  Paperclip,
+  X,
+  Archive,
+  Plus,
+  MessageSquare,
+  Check,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCallback, useRef, useEffect, useState } from "react";
@@ -27,7 +34,7 @@ import ReactMarkdown from "react-markdown";
 import { CapabilityBubbles } from "./capability-bubbles";
 import { ShieldPulse } from "./shield-pulse";
 import { VoiceButton } from "./voice-button";
-import { sendAudio, getFastApiUrl } from "@/lib/api";
+import { sendAudio, getFastApiUrl, useChatWebSocket } from "@/lib/api";
 
 function TypingIndicator() {
   return (
@@ -231,7 +238,7 @@ function MessageBubble({ message }: { message: Message }) {
 
         {/* Audio playback for AI messages — يظهر فقط عند hover */}
         {!isUser && message.audioUrl && (
-          <div className="px-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <div className="px-1">
             <AudioPlayButton audioUrl={message.audioUrl} />
           </div>
         )}
@@ -336,8 +343,12 @@ export function ChatInterface() {
   const {
     conversations,
     activeConversationId,
+    setActiveConversationId,
     addConversation,
     updateConversation,
+    deleteConversation,
+    archiveConversation,
+    restoreConversation,
     isStreaming,
     setIsStreaming,
     settings,
@@ -345,6 +356,7 @@ export function ChatInterface() {
     apiConnected,
     activeMode,
     setActiveMode,
+    setActiveView,
     processingSteps,
     activeCapability,
   } = useAppStore();
@@ -359,13 +371,55 @@ export function ChatInterface() {
   const userScrolledUpRef = useRef(false);
   const prevMessagesLenRef = useRef(0);
   const scrollPositionsRef = useRef<Map<string, number>>(new Map());
+  const [mounted, setMounted] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [filePreview, setFilePreview] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [showScrollDown, setShowScrollDown] = useState(false);
+  const [showConvMenu, setShowConvMenu] = useState(false);
+  const [wsConnected, setWsConnected] = useState(false);
+  const wsResponseResolveRef = useRef<((data: Record<string, unknown>) => void) | null>(null);
+
+  const ws = useChatWebSocket({
+    onMessage: (data) => {
+      wsResponseResolveRef.current?.(data);
+      wsResponseResolveRef.current = null;
+      setStreamingContent("");
+    },
+    onDisconnect: () => setWsConnected(false),
+  });
+
+  const sendViaWebSocket = useCallback(async (message: string): Promise<ChatResponse | null> => {
+    return new Promise((resolve) => {
+      if (!ws.send(message)) { resolve(null); return; }
+      wsResponseResolveRef.current = (data) => resolve(data as ChatResponse);
+      setTimeout(() => {
+        wsResponseResolveRef.current = null;
+        resolve(null);
+      }, 30000);
+    });
+  }, [ws]);
+
+  useEffect(() => {
+    if (ws.connected && !wsConnected) {
+      setWsConnected(true);
+    }
+  }, [ws.connected, wsConnected]);
+
+  useEffect(() => { setMounted(true); }, []);
 
   const activeConversation = conversations.find(
     (c) => c.id === activeConversationId
   );
   const messages = activeConversation?.messages || [];
   const isArabic = settings.language === "ar";
+
+  const handleNewChat = useCallback(() => {
+    setActiveConversationId(null);
+    setInput("");
+    setError(null);
+  }, [setActiveConversationId]);
 
   const isNearBottom = useCallback(() => {
     const el = scrollRef.current;
@@ -488,16 +542,41 @@ export function ChatInterface() {
 
   const handleSend = useCallback(async () => {
     const trimmed = input.trim();
-    if (!trimmed || isStreaming) return;
+    const pendingFile = selectedFile;
+    if ((!trimmed && !pendingFile) || isStreaming) return;
+
+    let fileUrl = "";
+    let fileName = "";
+    if (pendingFile) {
+      setIsUploading(true);
+      fileName = pendingFile.name;
+      try {
+        const result = await uploadFile(pendingFile);
+        if (result) {
+          fileUrl = result.url;
+        }
+      } catch {
+        // continue without file
+      } finally {
+        setIsUploading(false);
+      }
+      handleRemoveFile();
+    }
 
     setError(null);
     setIsStreaming(true);
     setStreamingContent("");
 
+    const messageContent = fileUrl
+      ? trimmed
+        ? `${trimmed}\n\n_(المرفق: [${fileName}](${fileUrl}))_`
+        : `_(المرفق: [${fileName}](${fileUrl}))_`
+      : trimmed;
+
     const userMessage: Message = {
       id: crypto.randomUUID(),
       role: "user",
-      content: trimmed,
+      content: messageContent,
       timestamp: Date.now(),
     };
 
@@ -530,8 +609,9 @@ export function ChatInterface() {
       abortRef.current = new AbortController();
 
       if (apiConnected) {
-        // Use FastAPI backend
-        const result = await sendChatMessage(trimmed, { history: messages.slice(-10) });
+        // Use FastAPI backend — WebSocket or REST
+        let result: ChatResponse | null = wsConnected ? await sendViaWebSocket(trimmed) : null;
+        if (!result) result = await sendChatMessage(trimmed, { history: messages.slice(-10) });
 
         // Update cognitive mode
         if (result.mode) {
@@ -669,6 +749,25 @@ export function ChatInterface() {
     messages,
   ]);
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setSelectedFile(file);
+    if (file.type.startsWith("image/")) {
+      const url = URL.createObjectURL(file);
+      setFilePreview(url);
+    } else {
+      setFilePreview(null);
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setSelectedFile(null);
+    if (filePreview) URL.revokeObjectURL(filePreview);
+    setFilePreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -756,6 +855,10 @@ export function ChatInterface() {
   const t = isArabic ? chatAr : chatEn;
   const modeInfo = getModeInfo(activeMode, isArabic ? "ar" : "en");
 
+  if (!mounted) {
+    return <div className="flex-1 flex flex-col min-h-0" />;
+  }
+
   return (
     <div className="flex-1 flex flex-col min-h-0">
       <PermissionDialog />
@@ -770,11 +873,90 @@ export function ChatInterface() {
           <Menu className="h-5 w-5" />
         </Button>
 
-        <div className="flex items-center gap-2 flex-1 min-w-0">
+        <div className="flex items-center gap-2 flex-1 min-w-0 relative" suppressHydrationWarning>
           <AdamLogo size={24} animate={false} />
-          <span className="text-sm font-medium truncate">
-            {activeConversation?.title || t.newConversation}
-          </span>
+          <div className="relative" suppressHydrationWarning>
+            <button
+              className="text-sm font-medium truncate max-w-[200px] flex items-center gap-1.5 hover:text-primary transition-colors cursor-pointer"
+              onClick={() => setShowConvMenu(!showConvMenu)}>
+              <span className="truncate">{activeConversation?.title || t.newConversation}</span>
+              <span className="text-[9px] text-muted-foreground/50 shrink-0">{showConvMenu ? "▲" : "▼"}</span>
+            </button>
+            {showConvMenu && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowConvMenu(false)} />
+                <div className="absolute top-full left-0 mt-1 w-72 max-h-80 overflow-y-auto rounded-lg border border-border shadow-2xl z-50"
+                  style={{ backgroundColor: 'hsl(var(--popover))' }}>
+                  <div className="p-1.5 space-y-0.5">
+                    <button
+                      className="w-full flex items-center gap-2 px-2.5 py-2 text-xs rounded-md hover:bg-primary/10 text-left transition-colors"
+                      onClick={() => { handleNewChat(); setShowConvMenu(false); }}>
+                      <Plus className="h-3.5 w-3.5" />
+                      {isArabic ? "محادثة جديدة" : "New Chat"}
+                    </button>
+                    <div className="h-px bg-border mx-2" />
+                    {conversations.length === 0 ? (
+                      <p className="px-2.5 py-3 text-[10px] text-muted-foreground text-center">
+                        {isArabic ? "لا توجد محادثات" : "No conversations"}
+                      </p>
+                    ) : (
+                      conversations.map((conv) => (
+                        <div key={conv.id}
+                          className={cn(
+                            "flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs cursor-pointer transition-colors",
+                            conv.archived && "opacity-50",
+                            conv.id === activeConversationId
+                              ? "bg-primary/15 text-primary"
+                              : "hover:bg-muted text-muted-foreground hover:text-foreground"
+                          )}
+                          onClick={() => {
+                            if (!conv.archived) {
+                              setActiveConversationId(conv.id);
+                              setActiveView("chat");
+                            }
+                            setShowConvMenu(false);
+                          }}>
+                          <MessageSquare className="h-3 w-3 shrink-0" />
+                          <span className="flex-1 truncate">{conv.archived ? "📦 " : ""}{conv.title}</span>
+                          <div className="flex items-center gap-0.5 shrink-0">
+                            {!conv.archived && (
+                              <button
+                                className="h-5 w-5 flex items-center justify-center rounded hover:bg-primary/10 text-muted-foreground hover:text-primary transition-all"
+                                onClick={(e) => { e.stopPropagation(); archiveConversation(conv.id); }}
+                                title={isArabic ? "أرشفة" : "Archive"}
+                              >
+                                <Archive className="h-3 w-3" />
+                              </button>
+                            )}
+                            {conv.archived && (
+                              <button
+                                className="h-5 w-5 flex items-center justify-center rounded hover:bg-emerald-500/10 text-muted-foreground hover:text-emerald-400 transition-all"
+                                onClick={(e) => { e.stopPropagation(); restoreConversation(conv.id); }}
+                                title={isArabic ? "استعادة" : "Restore"}
+                              >
+                                <RotateCcw className="h-3 w-3" />
+                              </button>
+                            )}
+                            <button
+                              className="h-5 w-5 flex items-center justify-center rounded hover:bg-destructive/20 text-muted-foreground hover:text-destructive transition-all"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                deleteConversation(conv.id);
+                                if (apiConnected) deleteSessionOnServer(conv.id).catch(() => {});
+                              }}
+                              title={isArabic ? "حذف" : "Delete"}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
@@ -905,7 +1087,41 @@ export function ChatInterface() {
           <div className="flex items-end gap-2">
             <ShieldPulse />
             <VoiceButton onAudioReady={handleAudioReady} disabled={isStreaming} />
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileSelect}
+              className="hidden"
+              accept="image/*,.pdf,.doc,.docx,.txt,.csv,.json,.py,.js,.ts,.jsx,.tsx,.html,.css"
+            />
+            <Button
+              onClick={() => fileInputRef.current?.click()}
+              variant="outline"
+              size="icon"
+              disabled={isStreaming}
+              className="h-11 w-11 rounded-xl shrink-0 text-muted-foreground hover:text-foreground"
+              title={isArabic ? "رفع ملف" : "Upload file"}
+            >
+              <Paperclip className="h-4 w-4" />
+            </Button>
             <div className="flex-1 relative">
+              {filePreview && (
+                <div className="absolute bottom-full mb-2 left-0 right-0">
+                  <div className="relative inline-block rounded-lg overflow-hidden border border-border/50 bg-card/50 backdrop-blur-sm">
+                    <img
+                      src={filePreview}
+                      alt="Preview"
+                      className="max-h-32 w-auto object-contain"
+                    />
+                    <button
+                      onClick={handleRemoveFile}
+                      className="absolute top-1 right-1 h-5 w-5 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center hover:bg-destructive/20 transition-colors"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                </div>
+              )}
               <Textarea
                 ref={textareaRef}
                 value={input}
