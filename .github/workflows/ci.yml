@@ -20,22 +20,33 @@ jobs:
         run: |
           pip install --upgrade pip setuptools wheel
           pip install -r requirements.txt
-          pip install pytest pytest-asyncio httpx ruff build
+          pip install pytest pytest-asyncio httpx ruff
           pip install -e .
 
-      - name: Show environment
-        run: |
-          which python
-          python --version
-          pip list 2>&1 | head -40
-          python -c "from adam.engine import AdamPrismEngine; print('✅ adam import OK')"
+      - name: Lint with ruff
+        run: ruff check . --extend-ignore=E501,F401 --target-version=py312 || true
 
-      - name: Run tests (file by file)
+      - name: Run tests
+        run: python -m pytest tests/ -v -k "not slow" --tb=short
+
+      - name: Check package build
+        run: pip install build && python -m build --sdist --wheel
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [test]
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build
         run: |
-          set -o pipefail
-          for f in tests/test_*.py; do
-            echo "=== Testing $f ==="
-            python -m pytest "$f" -k "not slow" -v --tb=long 2>&1 || echo "FAILED: $f"
-            echo ""
-          done
-          echo "=== ALL TESTS DONE ==="
+          pip install build
+          python -m build --sdist --wheel
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
