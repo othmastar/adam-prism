@@ -25,7 +25,7 @@ jobs:
       - name: Install dependencies
         run: |
           uv pip install --system -r requirements.txt
-          uv pip install --system pytest httpx
+          uv pip install --system pytest pytest-asyncio httpx
 
       - name: Install package
         run: pip install -e .

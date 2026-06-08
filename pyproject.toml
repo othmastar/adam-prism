@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "adam-prism"
-version = "1.0.0-beta"
+version = "1.0.0-experimental"
 description = "Egyptian Arabic conscious AI framework — personal digital twin with ethics, memory, and tools"
 readme = "README.md"
 license = {text = "Apache-2.0"}
