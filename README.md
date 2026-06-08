@@ -4,7 +4,7 @@
 
 **التوأم الرقمي الواعي — The Conscious Digital Twin**
 
-[![Adam Prism](https://img.shields.io/badge/Adam_Prism-v1.0.0--experimental-orange)](https://github.com/othmastar/adam-prism)
+[![Adam Prism](https://img.shields.io/badge/Adam_Prism-v1.0.0b1-orange)](https://github.com/othmastar/adam-prism)
 [![Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-green)](LICENSE)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue)](https://python.org)
 [![Tests](https://img.shields.io/badge/tests-251%20pass%20%7C%2025%20JS%20pass-brightgreen)](https://github.com/othmastar/adam-prism/actions/workflows/ci.yml)
