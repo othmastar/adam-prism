@@ -632,7 +632,7 @@ export function SettingsPanel() {
                   <Save className="h-5 w-5 text-white" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium prism-text">آدم بريزم v2.0</p>
+                  <p className="text-sm font-medium prism-text">آدم بريزم v1.0.0-beta</p>
                   <p className="text-[10px] text-muted-foreground">{t.aboutDesc}</p>
                 </div>
               </div>
@@ -683,7 +683,7 @@ const settingsAr = {
   tailscaleStatus: "حالة Tailscale",
   connected: "متصل",
   disconnected: "غير متصل",
-  aboutDesc: "نظام التوأم الرقمي الذكي لـ OthMastar · مدعوم بـ FastAPI + Ollama",
+  aboutDesc: "التوأم الرقمي الواعي · إطار عمل ذكاء اصطناعي مفتوح المصدر لمحمد عثمان",
 };
 
 const settingsEn = {
@@ -725,5 +725,5 @@ const settingsEn = {
   tailscaleStatus: "Tailscale Status",
   connected: "Connected",
   disconnected: "Disconnected",
-  aboutDesc: "Personal Digital Twin AI for OthMastar · Powered by FastAPI + Ollama",
+  aboutDesc: "Conscious AI Framework · Open-source personal digital twin by Mohamed Othman",
 };

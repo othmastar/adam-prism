@@ -147,17 +147,31 @@ class LiveSummarizer:
         current_chunk = ""
         
         for para in paragraphs:
+            # لو الفقرة أطول من chunk_size، قسمها على كلمات
+            if len(para) > self.chunk_size:
+                # الأول: احفظ الـ current_chunk لو فيه حاجة
+                if current_chunk.strip():
+                    chunks.append(current_chunk.strip())
+                    current_chunk = ""
+                # قسم الفقرة الطويلة
+                words = para.split()
+                temp = ""
+                for word in words:
+                    if len(temp) + len(word) + 1 > self.chunk_size and temp:
+                        chunks.append(temp.strip())
+                        temp = temp[-self.overlap:] + " " + word if len(temp) > self.overlap else word
+                    else:
+                        temp += " " + word if temp else word
+                if temp.strip():
+                    current_chunk = temp
             # لو إضافة الفقرة تتجاوز الحجم
-            if len(current_chunk) + len(para) > self.chunk_size and current_chunk:
+            elif len(current_chunk) + len(para) > self.chunk_size and current_chunk:
                 chunks.append(current_chunk.strip())
-                
-                # التداخل: آخر جزء من القطعة السابقة
                 overlap_text = current_chunk[-self.overlap:] if len(current_chunk) > self.overlap else current_chunk
                 current_chunk = overlap_text + "\n\n" + para
             else:
                 current_chunk += "\n\n" + para if current_chunk else para
         
-        # آخر قطعة
         if current_chunk.strip():
             chunks.append(current_chunk.strip())
         

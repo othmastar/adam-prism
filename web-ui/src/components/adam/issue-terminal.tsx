@@ -136,7 +136,8 @@ export function IssueTerminal() {
   const failedCount = result?.summary.failed ?? 0;
 
   return (
-    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/70 backdrop-blur-sm"
+    <div className="fixed inset-0 z-[80] flex items-center justify-center backdrop-blur-sm"
+      style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}
       onClick={() => setDiagnosticsOpen(false)}>
       <div className="w-full max-w-2xl mx-4" onClick={(e) => e.stopPropagation()}>
         {/* Terminal header */}
@@ -172,7 +173,7 @@ export function IssueTerminal() {
         </div>
 
         {/* Terminal body */}
-        <div ref={terminalRef} className="bg-black/95 border-x border-b border-zinc-700 rounded-b-xl p-4 max-h-[60vh] overflow-y-auto font-mono text-xs space-y-0.5">
+        <div ref={terminalRef} className="border-x border-b border-zinc-700 rounded-b-xl p-4 max-h-[60vh] overflow-y-auto font-mono text-xs space-y-0.5" style={{ backgroundColor: 'rgba(0,0,0,0.95)' }}>
           {logs.map((line, i) => {
             if (!line) return <div key={i} className="h-2" />;
             let color = "text-zinc-300";

@@ -232,7 +232,7 @@ export function KnowledgeGraph() {
 
       {/* Node info panel */}
       {selectedNode !== null && nodes[selectedNode] && (
-        <div className="absolute top-2 right-2 left-2 p-3 rounded-lg bg-black/80 backdrop-blur-sm border border-primary/30 animate-fade-in-up z-10">
+        <div className="absolute top-2 right-2 left-2 p-3 rounded-lg backdrop-blur-sm border border-primary/30 animate-fade-in-up z-10" style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}>
           <div className="flex items-start gap-2">
             <div className="h-6 w-6 rounded-md flex items-center justify-center shrink-0" style={{ backgroundColor: `${nodes[selectedNode].color}30` }}>
               <div className="h-2 w-2 rounded-full" style={{ backgroundColor: nodes[selectedNode].color }} />
@@ -258,7 +258,7 @@ export function KnowledgeGraph() {
       {/* Legend overlay */}
       <div className="absolute bottom-2 left-2 flex flex-wrap gap-1.5">
         {nodesData.slice(0, 5).map((n) => (
-          <div key={n.id} className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-black/30">
+          <div key={n.id} className="flex items-center gap-1 px-1.5 py-0.5 rounded" style={{ backgroundColor: 'rgba(0,0,0,0.3)' }}>
             <div className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: n.color }} />
             <span className="text-[7px] text-zinc-500">{isArabic ? n.labelAr : n.label}</span>
           </div>

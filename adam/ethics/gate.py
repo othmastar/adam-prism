@@ -36,13 +36,16 @@ class EthicsGate:
         self.model_name = config.get("model_name", "gemma3:4b")
         self._eval_cache = TTLCache(default_ttl=300.0, max_size=100)
         
-        # أوزان القوانين
+        # أوزان القوانين — تدعم override من config
         self.law_weights = {
             "fairness": 0.40,    # العدالة
             "learning": 0.30,    # التعلم
             "survival": 0.20,    # البقاء
             "creativity": 0.10   # الإبداع
         }
+        config_weights = config.get("law_weights", {})
+        if config_weights:
+            self.law_weights = config_weights
         
         # المحرمات المطلقة
         self.absolute_prohibitions = [

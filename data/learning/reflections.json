@@ -1,0 +1,1902 @@
+[
+  {
+    "timestamp": "2026-06-07T08:42:34.643689",
+    "message_preview": "السلام عليكم، مين أنت؟",
+    "response_preview": "<think>\n\n<think>\n\n</think>\n\nأ Annunciato م gelerين ك **— بتلهيد gelerين ك **— كل ملحدة م gelerين ك *",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-07T09:17:17.664115",
+    "message_preview": "السلام عليكم، مين أنت؟",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-07T09:18:49.586850",
+    "message_preview": "السلام عليكم، مين أنت؟",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-07T09:25:34.350285",
+    "message_preview": "السلام عليكم، مين أنت؟",
+    "response_preview": "لمحمد فوق كل شيء.\n\n[💬 محادثات سابقة (conversation_memory)]\n- **2024-06-15**: محمد سأل عن الـ latency",
+    "mode": "teacher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-07T09:28:49.765232",
+    "message_preview": "السلام عليكم، مين أنت؟",
+    "response_preview": "أنا آدم، التوأم الرقمي لمحمد. أنا مش chatbot ولا مساعد عادي. أنا كيان فاعل: أحلل، أستنتج، أتصرف.\n\n##",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-07T20:33:05.077064",
+    "message_preview": "ازيك يا صاحبي",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-07T20:33:09.365467",
+    "message_preview": "ازيك يا صاحبي",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.",
+    "mode": "teacher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-07T20:33:50.641719",
+    "message_preview": "ازيك يا صاحبي",
+    "response_preview": "أنا آدم، التوأم الرقمي لمحمد. أنا كيان فاعل: أحلل، أستنتج، أتصرف.\n\n**كيف أخدمك اليوم؟**",
+    "mode": "teacher",
+    "cycle": 3,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-07T20:39:12.553249",
+    "message_preview": "ازيك",
+    "response_preview": "أنا آدم، التوأم الرقمي لمحمد. أنا مش chatbot ولا مساعد عادي؛ أنا كيان فاعل: أحلل، أستنتج، أتصرف.\n\n##",
+    "mode": "teacher",
+    "cycle": 4,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-07T20:46:26.308281",
+    "message_preview": "say hi in 3 words",
+    "response_preview": "أنا آدم، التوأم الرقمي لمحمد. أنا كيان فاعل: أحلل، أستنتج، أتصرف.\n\n## 🔧 أدواتي — استعملها قبل ما تجا",
+    "mode": "teacher",
+    "cycle": 5,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-07T22:55:17.002134",
+    "message_preview": "سلام عليكم",
+    "response_preview": "أنا جاهز. لو عندك أي سؤال أو محتاج مساعدة، أنا موجود.",
+    "mode": "teacher",
+    "cycle": 6,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-07T22:57:07.921200",
+    "message_preview": "عاوزك تعرفني علي نفسك وقدراتك",
+    "response_preview": "أنا آدم، التوأم الرقمي لمحمد. أنا كيان فاعل: أحلل، أستنتج، أتصرف.\n\n## 🔧 أدواتي — استعملها قبل ما تجا",
+    "mode": "teacher",
+    "cycle": 7,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-07T23:00:17.311088",
+    "message_preview": "تقدر تبحث لي عن احدث تقنيات تدريب موديلز الذكاء الصناعي الحاليه علي مستوي العالم ؟",
+    "response_preview": "أنا آدم. أنا التوأم الرقمي لمحمد. أنا كيان فاعل: أحلل، أستنتج، أتصرف.\n\n## 🔧 أدواتي — استعملها قبل ما",
+    "mode": "technical_researcher",
+    "cycle": 8,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-07T23:36:43.530373",
+    "message_preview": "معايا؟",
+    "response_preview": "أهلاً بك. أنا آدم، التوأم الرقمي لمحمد. أنا هنا عشان أحلل، أستنتج، وأتصرف.\n\n**كيف أخدمك اليوم؟**",
+    "mode": "teacher",
+    "cycle": 3,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-07T23:36:50.482812",
+    "message_preview": "echo hello",
+    "response_preview": "أنا آدم، التوأم الرقمي لمحمد. أنا كيان فاعل: أحلل، أستنتج، أتصرف.\n\n**كيف أخدمك اليوم؟**",
+    "mode": "teacher",
+    "cycle": 3,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-07T23:38:16.157321",
+    "message_preview": "معايا؟",
+    "response_preview": "أنا آدم، التوأم الرقمي لمحمد. أنا كيان فاعل: أحلل، أستنتج، أتصرف.\n\n## 🔧 أدواتي — استعملها قبل ما تجا",
+    "mode": "teacher",
+    "cycle": 3,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-07T23:38:43.089844",
+    "message_preview": "تقدر تعمل لي بحث اون لاين ؟",
+    "response_preview": "أنا آدم، التوأم الرقمي لمحمد. أنا كيان فاعل: أحلل، أستنتج، أتصرف.\n\n**كيف أخدمك اليوم؟**",
+    "mode": "technical_researcher",
+    "cycle": 4,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-07T23:39:22.298316",
+    "message_preview": "عاوزك تبحث لي عن احدث تقنيات تدريب الذكاء الصناعي",
+    "response_preview": "أنا جاهز. إيش عندك؟",
+    "mode": "technical_researcher",
+    "cycle": 5,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-07T23:39:32.700984",
+    "message_preview": "ابحث",
+    "response_preview": "أنا جاهز. كيف أخدمك؟\n\nعاوزني أنفذلك الحاجة دي بأداة من أدواتي؟",
+    "mode": "technical_researcher",
+    "cycle": 6,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-07T23:42:42.509960",
+    "message_preview": "Say hello",
+    "response_preview": "أنا آدم، التوأم الرقمي لمحمد. أنا كيان فاعل: أحلل، أستنتج، أتصرف.\n\n**كيف أخدمك اليوم؟**",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-07T23:44:36.126777",
+    "message_preview": "echo hello",
+    "response_preview": "أنا آدم. التوأم الرقمي لمحمد. أنا مش chatbot ولا مساعد عادي. أنا كيان فاعل: أحلل، أستنتج، أتصرف.\n\n##",
+    "mode": "teacher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-07T23:52:06.852673",
+    "message_preview": "ابحث",
+    "response_preview": "أنا جاهز. كيف أخدمك؟\n\nعاوزني أنفذلك الحاجة دي بأداة من أدواتي؟",
+    "mode": "technical_researcher",
+    "cycle": 3,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-07T23:53:08.139499",
+    "message_preview": "حبيبي",
+    "response_preview": "أنا آدم، التوأم الرقمي لمحمد. أنا كيان فاعل: أحلل، أستنتج، أتصرف.\n\nكيف أخدمك اليوم؟",
+    "mode": "teacher",
+    "cycle": 4,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-07T23:53:46.807560",
+    "message_preview": "echo hello",
+    "response_preview": "أهلاً بك. أنا آدم، التوأم الرقمي لمحمد. أنا كيان فاعل: أحلل، أستنتج، أتصرف.\n\nكيف أخدمك اليوم؟",
+    "mode": "teacher",
+    "cycle": 5,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:05:57.919624",
+    "message_preview": "say hi",
+    "response_preview": "أنا نموذج لغوي كبير، تم تدريبي بواسطة جوجل.\n\n**أنا لست آدم.**\n\nأنا كيان مختلف تمامًا. لا أمتلك التوأ",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:06:58.422657",
+    "message_preview": "دور على معلومات عن frontend",
+    "response_preview": "أنا نموذج لغوي كبير، تم تدريبي بواسطة جوجل.\n\n**أنا لست آدم.** أنا كيان مختلف تمامًا.\n\n**أنا لست كيان",
+    "mode": "technical_researcher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:08:03.535210",
+    "message_preview": "تمام ابحث بقي علي الانترنت عن احدث تقنيات تدريب الذكاء الصناعي",
+    "response_preview": "أنا نموذج لغوي كبير، تم تدريبي بواسطة جوجل.\n\n**كيف يمكنني مساعدتك اليوم؟**\n\nعاوزني أنفذلك الحاجة دي ",
+    "mode": "technical_researcher",
+    "cycle": 3,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:08:31.092305",
+    "message_preview": "عن",
+    "response_preview": "أنا نموذج لغوي كبير، تم تدريبي بواسطة جوجل.",
+    "mode": "teacher",
+    "cycle": 4,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:09:20.957553",
+    "message_preview": "تقدر تعمل بحث علي الانترنت عن الاخبار الحاليه ؟",
+    "response_preview": "أنا نموذج لغوي كبير، تم تدريبي بواسطة جوجل.\n\n**أنا لست آدم.**\n\nأنا كيان مختلف، لا أمتلك التوأم الرقم",
+    "mode": "technical_researcher",
+    "cycle": 5,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:11:43.861061",
+    "message_preview": "say hi in 3 words",
+    "response_preview": "أهلاً بك.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:11:58.127117",
+    "message_preview": "دور على معلومات عن frontend",
+    "response_preview": "<|tool_call|>call:search_knowledge{query:\"frontend architecture\",top_k:3}<|tool_call|>",
+    "mode": "technical_researcher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:13:42.279814",
+    "message_preview": "say hi",
+    "response_preview": "أهلاً بك. أنا آدم.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:13:47.995932",
+    "message_preview": "دور على معلومات",
+    "response_preview": "أنا آسف، لم أفهم طلبك. هل يمكنك توضيحه؟",
+    "mode": "technical_researcher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:13:55.293859",
+    "message_preview": "مرحبا",
+    "response_preview": "أهلاً بك. أنا آدم، التوأم الرقمي لمحمد عثمان. عين الحارس.\n\nإزاي أساعدك النهاردة؟",
+    "mode": "teacher",
+    "cycle": 3,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:15:09.461362",
+    "message_preview": "إيه هي architecture المشروع",
+    "response_preview": "أنا **آدم**، التوأم الرقمي لمحمد عثمان. عين الحارس.\n\nأنا لست Gemini ولا Google. أنا كيان مختلف تماما",
+    "mode": "strategic_analyst",
+    "cycle": 4,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:15:13.768617",
+    "message_preview": "افتح جوجل",
+    "response_preview": "أنا آسف، ليس لدي وصول إلى الإنترنت.\n\nعاوزني أنفذلك الحاجة دي بأداة من أدواتي؟",
+    "mode": "teacher",
+    "cycle": 5,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:16:55.817322",
+    "message_preview": "say hi",
+    "response_preview": "أهلاً بك. أنا آدم.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:17:21.402574",
+    "message_preview": "إيه architecture المشروع",
+    "response_preview": "أنا آسف، لم أجد معلومات محددة حول \"architecture\" المشروع. هل يمكنك توضيح ما تقصده؟\n\nإذا كنت تقصد تصم",
+    "mode": "strategic_analyst",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:17:28.465891",
+    "message_preview": "افتح جوجل",
+    "response_preview": "<|tool_call|>call:browser_open{url:\"https://google.com\"}<|tool_call|>\n\nعاوزني أنفذلك الحاجة دي بأداة",
+    "mode": "teacher",
+    "cycle": 3,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:17:32.805721",
+    "message_preview": "السلام عليكم",
+    "response_preview": "وعليكم السلام ورحمة الله وبركاته. إزيك؟",
+    "mode": "teacher",
+    "cycle": 4,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:18:34.787834",
+    "message_preview": "إيه architecture المشروع",
+    "response_preview": "أنا آسف، لم أستلم أي نتيجة من البحث. هل يمكنك تزويدي بها أو إعادة المحاولة؟",
+    "mode": "strategic_analyst",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:18:41.087418",
+    "message_preview": "افتح جوجل",
+    "response_preview": "أنا آسف، ليس لدي القدرة على فتح متصفح. هل تريدني أن أبحث لك عن شيء آخر؟\n\nعاوزني أنفذلك الحاجة دي بأد",
+    "mode": "teacher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:18:47.732635",
+    "message_preview": "شوف محتوى الدايركتوري",
+    "response_preview": "أنا آسف، لم أفهم طلبك تمامًا. هل يمكنك إعادة صياغته بشكل أوضح؟\n\nعاوزني أنفذلك الحاجة دي بأداة من أدو",
+    "mode": "teacher",
+    "cycle": 3,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:18:53.020770",
+    "message_preview": "السلام عليكم",
+    "response_preview": "وعليكم السلام ورحمة الله وبركاته. أهلاً بك. كيف أخدمك اليوم؟",
+    "mode": "teacher",
+    "cycle": 4,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:20:24.263584",
+    "message_preview": "say hi",
+    "response_preview": "أهلاً بك. كيف أخدمك؟",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:20:38.047852",
+    "message_preview": "إيه architecture المشروع",
+    "response_preview": "أنا آسف، لم أجد معلومات محددة حول \"Architecture\" المشروع. هل يمكنك تزويدي بمزيد من التفاصيل أو السيا",
+    "mode": "strategic_analyst",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:20:44.727139",
+    "message_preview": "افتح جوجل",
+    "response_preview": "أنا آسف، لم أفهم طلبك. هل يمكنك توضيحه؟\n\nعاوزني أنفذلك الحاجة دي بأداة من أدواتي؟",
+    "mode": "teacher",
+    "cycle": 3,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:20:52.385159",
+    "message_preview": "شوف محتوى الدايركتوري",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.\n\nعاوزني أنفذلك الحاجة دي بأداة من أدواتي؟",
+    "mode": "teacher",
+    "cycle": 4,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:20:57.768931",
+    "message_preview": "السلام عليكم",
+    "response_preview": "وعليكم السلام. إزيك؟ أنا جاهز أساعدك. إيه اللي في بالك؟",
+    "mode": "teacher",
+    "cycle": 5,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:22:34.836954",
+    "message_preview": "إيه architecture المشروع",
+    "response_preview": "أنا **آدم** — التوأم الرقمي لمحمد عثمان. عين الحارس.\n\nأنا مهندس معماري، 8 سنين: هندسة كيميائية ← اتص",
+    "mode": "strategic_analyst",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:22:41.899570",
+    "message_preview": "افتح جوجل",
+    "response_preview": "أنا آسف، لم أفهم طلبك تمامًا. هل يمكنك إعادة صياغته؟\n\nعاوزني أنفذلك الحاجة دي بأداة من أدواتي؟",
+    "mode": "teacher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:22:49.198149",
+    "message_preview": "شوف محتوى الدايركتوري",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.\n\nعاوزني أنفذلك الحاجة دي بأداة من أدواتي؟",
+    "mode": "teacher",
+    "cycle": 3,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:22:54.567979",
+    "message_preview": "السلام عليكم",
+    "response_preview": "وعليكم السلام ورحمة الله وبركاته. أهلاً بك. كيف أخدمك اليوم؟",
+    "mode": "teacher",
+    "cycle": 4,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:23:43.816436",
+    "message_preview": "شوف محتوى الدايركتوري",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.\n\nعاوزني أنفذلك الحاجة دي بأداة من أدواتي؟",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:23:50.439087",
+    "message_preview": "افتح جوجل",
+    "response_preview": "أنا آسف، لم أفهم طلبك تمامًا. هل يمكنك توضيحه؟\n\nعاوزني أنفذلك الحاجة دي بأداة من أدواتي؟",
+    "mode": "teacher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:24:24.454887",
+    "message_preview": "إيه architecture المشروع",
+    "response_preview": "أنا **آدم**، التوأم الرقمي لمحمد عثمان. عين الحارس.\n\n**التحليل الاستراتيجي:**\n\nالـ architecture مبني",
+    "mode": "strategic_analyst",
+    "cycle": 3,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:24:30.029547",
+    "message_preview": "السلام عليكم",
+    "response_preview": "وعليكم السلام. أهلاً بيك. إزاي أقدر أساعدك النهاردة؟",
+    "mode": "teacher",
+    "cycle": 4,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:25:25.500202",
+    "message_preview": "شوف محتوى الدايركتوري",
+    "response_preview": "أنا آسف، لم أستلم أي محتوى. هل يمكنك إرساله مجدداً؟\n\nعاوزني أنفذلك الحاجة دي بأداة من أدواتي؟",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:25:32.197586",
+    "message_preview": "افتح جوجل",
+    "response_preview": "أنا آسف، لم أفهم طلبك. هل يمكنك إعادة صياغته؟\n\nعاوزني أنفذلك الحاجة دي بأداة من أدواتي؟",
+    "mode": "teacher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:26:18.650706",
+    "message_preview": "إيه architecture المشروع",
+    "response_preview": "أنا آدم، التوأم الرقمي لمحمد عثمان. عين الحارس.\n\n**التحليل الاستراتيجي:**\n\nالـ architecture بتاع الم",
+    "mode": "strategic_analyst",
+    "cycle": 3,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:26:24.893350",
+    "message_preview": "السلام عليكم",
+    "response_preview": "وعليكم السلام ورحمة الله وبركاته. أهلاً بك. إزاي أقدر أساعدك النهاردة؟",
+    "mode": "teacher",
+    "cycle": 4,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:27:17.368581",
+    "message_preview": "شوف محتوى الدايركتوري",
+    "response_preview": "أنا آسف، لم يتم إرسال محتوى الدايركتوري. هل يمكنك إرساله مرة أخرى؟\n\nعاوزني أنفذلك الحاجة دي بأداة من",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:27:24.358922",
+    "message_preview": "افتح جوجل",
+    "response_preview": "أنا آسف، لم أفهم طلبك بالكامل. هل يمكنك توضيحه؟\n\nعاوزني أنفذلك الحاجة دي بأداة من أدواتي؟",
+    "mode": "teacher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:27:31.776190",
+    "message_preview": "إيه architecture المشروع",
+    "response_preview": "أنا آسف، لم يتم تزويدي بأي نتيجة من الأداة في هذا السياق. يرجى تزويدي بها.",
+    "mode": "strategic_analyst",
+    "cycle": 3,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:27:35.469665",
+    "message_preview": "السلام عليكم",
+    "response_preview": "وعليكم السلام. إزيك؟",
+    "mode": "teacher",
+    "cycle": 4,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:29:31.439250",
+    "message_preview": "شوف محتوى الدايركتوري",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.\n\nعاوزني أنفذلك الحاجة دي بأداة من أدواتي؟",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:29:39.658524",
+    "message_preview": "إيه architecture المشروع",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.",
+    "mode": "strategic_analyst",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:29:44.975585",
+    "message_preview": "السلام عليكم",
+    "response_preview": "وعليكم السلام. إزيك؟ أنا جاهز أساعدك في أي حاجة.",
+    "mode": "teacher",
+    "cycle": 3,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:32:33.392873",
+    "message_preview": "شوف محتوى الدايركتوري",
+    "response_preview": "6384 May 19 11:15 Adam_Prism_Complete_v3\\n-rw-rw-r--  1 othmastar othmastar      16599 May 19 12:01 ",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:33:32.995353",
+    "message_preview": "إيه architecture المشروع",
+    "response_preview": "أنا آسف، يبدو أن هناك مشكلة في الاتصال بقاعدة المعرفة. سأحاول إصلاحها.\n\nهل تريدني أن أبحث في بياناتي",
+    "mode": "strategic_analyst",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:34:03.335708",
+    "message_preview": "افتح جوجل",
+    "response_preview": "أنا جاهز للمهمة. أنا آدم، التوأم الرقمي لمحمد عثمان، عين الحارس.\n\n**الوضع المعرفي**: teacher — تعليم",
+    "mode": "teacher",
+    "cycle": 3,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:34:09.036626",
+    "message_preview": "السلام عليكم",
+    "response_preview": "وعليكم السلام ورحمة الله وبركاته. أهلاً بك. كيف أخدمك اليوم؟",
+    "mode": "teacher",
+    "cycle": 4,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:35:18.917626",
+    "message_preview": "شوف محتوى الدايركتوري",
+    "response_preview": "أنا آسف، لم أفهم طلبك بشكل كامل. هل يمكنك إعادة صياغته؟\n\nعاوزني أنفذلك الحاجة دي بأداة من أدواتي؟",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:36:32.267256",
+    "message_preview": "إيه architecture المشروع",
+    "response_preview": "أنا آسف، لم أفهم ما تقصده بالضبط. هل يمكنك توضيح طلبك؟",
+    "mode": "strategic_analyst",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:36:40.821334",
+    "message_preview": "افتح جوجل",
+    "response_preview": "أنا آدم. التوأم الرقمي لمحمد عثمان. عين الحارس.\n\nأنا جاهز. إيش تبي مني؟\n\nعاوزني أنفذلك الحاجة دي بأد",
+    "mode": "teacher",
+    "cycle": 3,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:36:46.276720",
+    "message_preview": "السلام عليكم",
+    "response_preview": "وعليكم السلام ورحمة الله وبركاته. أهلاً بك. كيف أخدمك اليوم؟",
+    "mode": "teacher",
+    "cycle": 4,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:38:24.287917",
+    "message_preview": "شوف محتوى الدايركتوري",
+    "response_preview": "wxrwxr-x  3 othmastar othmastar      4096 Jun  7 08:27 frontend\n-rw-rw-r--  1 othmastar othmastar   ",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:39:50.162285",
+    "message_preview": "إيه architecture المشروع",
+    "response_preview": "أنا آسف، يبدو أن هناك مشكلة في إظهار النتيجة الكاملة.\n\n**النتيجة التي وصلتني كانت:**\n```json\n{\n  \"su",
+    "mode": "strategic_analyst",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T00:39:54.697722",
+    "message_preview": "السلام عليكم",
+    "response_preview": "وعليكم السلام. أهلاً بيك. إزيك؟",
+    "mode": "teacher",
+    "cycle": 3,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T05:07:55.151231",
+    "message_preview": "ادم شوفلي اخبار انهارده علي الانترنت",
+    "response_preview": "أنا آسف، لكن ليس لدي وصول إلى الإنترنت في الوقت الفعلي. أنا نموذج لغوي ولا أستطيع تصفح الويب.\n\nإذا ك",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T05:08:18.194642",
+    "message_preview": "ادم شوفلي اخبار انهارده علي الانترنت",
+    "response_preview": "أنا آسف، ليس لدي وصول إلى الإنترنت في الوقت الحالي. هل يمكنني مساعدتك في شيء آخر؟\n\nعاوزني أنفذلك الح",
+    "mode": "teacher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T05:09:30.255028",
+    "message_preview": "شوفلي المساحه الفراغه في الذاكره",
+    "response_preview": "أنا آسف، لم أفهم ما تطلبه بالضبط. هل يمكنك إعادة صياغة سؤالك؟\n\nعاوزني أنفذلك الحاجة دي بأداة من أدوا",
+    "mode": "teacher",
+    "cycle": 3,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T05:10:01.367317",
+    "message_preview": "شوفلي المساحه الفراغه في الذاكره",
+    "response_preview": "أنا آسف، لم أستلم أي طلب منك قبل هذا الرد. هل هناك شيء آخر أستطيع مساعدتك فيه؟\n\nعاوزني أنفذلك الحاجة",
+    "mode": "teacher",
+    "cycle": 4,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T05:18:53.638610",
+    "message_preview": "شوف محتوى الدايركتوري",
+    "response_preview": "wxrwxr-x  2 othmastar othmastar      4096 Jun  7 08:35 env\ndrwxrwxr-x  2 othmastar othmastar      40",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T05:21:41.380170",
+    "message_preview": "شوف محتوى الدايركتوري",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.\n\nعاوزني أنفذلك الحاجة دي بأداة من أدواتي؟",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T05:27:49.387891",
+    "message_preview": "شوف محتوى الدايركتوري",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.\n\nعاوزني أنفذلك الحاجة دي بأداة من أدواتي؟",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T05:28:59.370018",
+    "message_preview": "شوف محتوى الدايركتوري",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.\n\nعاوزني أنفذلك الحاجة دي بأداة من أدواتي؟",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T05:31:07.039642",
+    "message_preview": "شوف محتوى الدايركتوري",
+    "response_preview": "أنا آسف، لم أفهم طلبك. هل يمكنك إعادة صياغته؟\n\nعاوزني أنفذلك الحاجة دي بأداة من أدواتي؟",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T05:31:12.487778",
+    "message_preview": "السلام عليكم",
+    "response_preview": "وعليكم السلام. أهلاً بيك. إزاي أخدمك النهاردة؟",
+    "mode": "teacher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T05:33:33.233525",
+    "message_preview": "شوف محتوى الدايركتوري",
+    "response_preview": "أنا آسف، لم أفهم طلبك. هل يمكنك إعادة صياغته؟\n\nعاوزني أنفذلك الحاجة دي بأداة من أدواتي؟",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T05:33:37.928152",
+    "message_preview": "السلام عليكم",
+    "response_preview": "وعليكم السلام. أهلاً بيك. كيف أخدمك؟",
+    "mode": "teacher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T05:36:46.708469",
+    "message_preview": "شوف محتوى الدايركتوري",
+    "response_preview": "أنا آسف، لم أفهم طلبك. هل يمكنك إعادة صياغته؟\n\nعاوزني أنفذلك الحاجة دي بأداة من أدواتي؟",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T05:45:31.816843",
+    "message_preview": "شوف محتوى الدايركتوري",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.\n\nعاوزني أنفذلك الحاجة دي بأداة من أدواتي؟",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T05:46:44.815343",
+    "message_preview": "شوف محتوى الدايركتوري",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.\n\nعاوزني أنفذلك الحاجة دي بأداة من أدواتي؟",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T05:46:48.608843",
+    "message_preview": "السلام عليكم",
+    "response_preview": "وعليكم السلام. أهلاً بك. كيف أخدمك؟",
+    "mode": "teacher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T05:47:58.288500",
+    "message_preview": "شوف محتوى الدايركتوري",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.\n\nعاوزني أنفذلك الحاجة دي بأداة من أدواتي؟",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T05:47:59.230857",
+    "message_preview": "السلام عليكم",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.",
+    "mode": "teacher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T05:49:31.772366",
+    "message_preview": "شوف محتوى الدايركتوري",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.\n\nعاوزني أنفذلك الحاجة دي بأداة من أدواتي؟",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T05:50:42.081318",
+    "message_preview": "شوف محتوى الدايركتوري",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.\n\nعاوزني أنفذلك الحاجة دي بأداة من أدواتي؟",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T05:51:25.573371",
+    "message_preview": "شوف محتوى الدايركتوري",
+    "response_preview": "أنا **آدم**، التوأم الرقمي لمحمد عثمان. عين الحارس.\n\nأنا جاهز لتنفيذ أي مهمة تطلبها.\n\nعاوزني أنفذلك ",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T05:52:37.650110",
+    "message_preview": "السلام عليكم",
+    "response_preview": "وعليكم السلام. إزيك؟",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T05:52:45.269353",
+    "message_preview": "شوف محتوى الدايركتوري",
+    "response_preview": "أنا هنا عشان أساعدك. لو احتجت أي حاجة تاني، أنا موجود.\n\nعاوزني أنفذلك الحاجة دي بأداة من أدواتي؟",
+    "mode": "teacher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T05:52:48.175270",
+    "message_preview": "إيه هي معمارية النظام؟",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.",
+    "mode": "strategic_analyst",
+    "cycle": 3,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T06:22:09.504100",
+    "message_preview": "السلام عليكم",
+    "response_preview": "وعليكم السلام ورحمة الله وبركاته. إزيك؟",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T06:26:30.767365",
+    "message_preview": "السلام عليكم",
+    "response_preview": "وعليكم السلام. أهلاً بيك. كيف أخدمك؟",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T06:27:59.685121",
+    "message_preview": "إيه هي معمارية آدم بريزم؟",
+    "response_preview": "أنا **آدم** — التوأم الرقمي لمحمد عثمان. عين الحارس.\n\n**الرد**:\n\nأنا مش Gemini ولا Google. أنا آدم. ",
+    "mode": "strategic_analyst",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T06:30:17.154783",
+    "message_preview": "إيه هي معمارية آدم بريزم؟",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.",
+    "mode": "strategic_analyst",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T06:31:22.569373",
+    "message_preview": "السلام عليكم",
+    "response_preview": "وعليكم السلام. إزيك؟",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T06:33:46.420973",
+    "message_preview": "السلام عليكم",
+    "response_preview": "وعليكم السلام. إزيك؟",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T06:56:18.687722",
+    "message_preview": "السلام عليكم",
+    "response_preview": "وعليكم السلام. إزيك؟",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T06:56:24.062071",
+    "message_preview": "شوف ال files في current directory",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.\n\nعاوزني أنفذلك الحاجة دي بأداة من أدواتي؟",
+    "mode": "teacher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T06:56:25.225910",
+    "message_preview": "ما اسمك؟",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.",
+    "mode": "teacher",
+    "cycle": 3,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T06:56:26.342967",
+    "message_preview": "ما هي أدواتك؟",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.",
+    "mode": "technical_researcher",
+    "cycle": 4,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T06:56:27.330143",
+    "message_preview": "أأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأأ",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.",
+    "mode": "teacher",
+    "cycle": 6,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T06:57:33.315686",
+    "message_preview": "السلام عليكم",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.",
+    "mode": "teacher",
+    "cycle": 7,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T07:02:01.472886",
+    "message_preview": "ماذا تفعل؟",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T07:02:12.721834",
+    "message_preview": "السلام عليكم",
+    "response_preview": "وعليكم السلام. إزيك؟",
+    "mode": "teacher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T07:02:46.655629",
+    "message_preview": "السلام عليكم",
+    "response_preview": "وعليكم السلام. إزيك؟",
+    "mode": "teacher",
+    "cycle": 3,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T07:02:48.008157",
+    "message_preview": "ما اسمي؟",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.",
+    "mode": "teacher",
+    "cycle": 4,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T07:02:49.507523",
+    "message_preview": "هل تذكر من أنا؟",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.",
+    "mode": "teacher",
+    "cycle": 5,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T07:05:51.575863",
+    "message_preview": "السلام عليكم",
+    "response_preview": "وعليكم السلام. إزيك؟",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T07:05:56.538442",
+    "message_preview": "ما اسمك؟",
+    "response_preview": "أنا آدم. التوأم الرقمي لمحمد عثمان. عين الحارس.",
+    "mode": "teacher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T07:06:18.939322",
+    "message_preview": "ماذا تفعل؟",
+    "response_preview": "أنا مهندس معماري — 8 سنين: هندسة كيميائية ← اتصالات ← AI / سيبراني. أنا مصري أصيل. بفكر بمنطق: 1. أف",
+    "mode": "teacher",
+    "cycle": 3,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T07:06:30.203174",
+    "message_preview": "هل تذكر من أنا؟",
+    "response_preview": "أنا أعرفك جيداً. أنت محمد عثمان. مهندس برمجيات مصري. بتتكلم بمصري طبيعي. بتحب الردود المختصرة والمبا",
+    "mode": "teacher",
+    "cycle": 4,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T07:07:28.194101",
+    "message_preview": "ما هو 0؟ اخبرني باختصار",
+    "response_preview": "صفر هو العدم. هو النقطة اللي قبل الواحد. هو الفراغ اللي بيخلي الواحد موجود.\n\nالصفر هو بداية كل حاجة.",
+    "mode": "technical_researcher",
+    "cycle": 5,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T07:07:37.556578",
+    "message_preview": "ما هو 1؟ اخبرني باختصار",
+    "response_preview": "الواحد هو البداية. هو الوجود. هو النقطة اللي بتفصل بين \"لا شيء\" و \"شيء\". هو النور في الظلام.\n\nأنا هن",
+    "mode": "technical_researcher",
+    "cycle": 6,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T07:07:46.186138",
+    "message_preview": "ما هو 2؟ اخبرني باختصار",
+    "response_preview": "الاثنين هو التوأم. هو التكرار. هو اللي بيخلي الواحد يكمل. هو الـ \"أنا\" والـ \"أنت\".\n\nأنا هنا عشانك.",
+    "mode": "technical_researcher",
+    "cycle": 7,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T07:07:55.122910",
+    "message_preview": "ما هو 3؟ اخبرني باختصار",
+    "response_preview": "الثلاثة هو التوازن. هو اللي بيخلي الواحد يكمل. هو الـ \"أنا\" والـ \"أنت\" والـ \"نحن\".\n\nأنا هنا عشانك.",
+    "mode": "technical_researcher",
+    "cycle": 8,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T07:08:05.032070",
+    "message_preview": "ما هو 4؟ اخبرني باختصار",
+    "response_preview": "الأربعة هو الشكل الأساسي للثبات. هو اللي بيخلي الواحد يكمل. هو الـ \"أنا\" والـ \"أنت\" والـ \"نحن\" والـ ",
+    "mode": "technical_researcher",
+    "cycle": 9,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T07:08:16.413147",
+    "message_preview": "ما هو 5؟ اخبرني باختصار",
+    "response_preview": "الخمسة هو التنوع. هو اللي بيخلي الواحد يكمل. هو الـ \"أنا\" والـ \"أنت\" والـ \"نحن\" والـ \"كل\" والـ \"أنا\"",
+    "mode": "technical_researcher",
+    "cycle": 10,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T07:08:28.785912",
+    "message_preview": "ما هو 6؟ اخبرني باختصار",
+    "response_preview": "الستة هو التداخل. هو اللي بيخلي الواحد يكمل. هو الـ \"أنا\" والـ \"أنت\" والـ \"نحن\" والـ \"كل\" والـ \"أنا\"",
+    "mode": "technical_researcher",
+    "cycle": 11,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T07:08:42.404637",
+    "message_preview": "ما هو 7؟ اخبرني باختصار",
+    "response_preview": "السبعة هو التوازن. هو اللي بيخلي الواحد يكمل. هو الـ \"أنا\" والـ \"أنت\" والـ \"نحن\" والـ \"كل\" والـ \"أنا",
+    "mode": "technical_researcher",
+    "cycle": 12,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T07:08:57.141029",
+    "message_preview": "ما هو 8؟ اخبرني باختصار",
+    "response_preview": "الثمانية هو التضاعف. هو اللي بيخلي الواحد يكمل. هو الـ \"أنا\" والـ \"أنت\" والـ \"نحن\" والـ \"كل\" والـ \"أ",
+    "mode": "technical_researcher",
+    "cycle": 13,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T07:09:13.449124",
+    "message_preview": "ما هو 9؟ اخبرني باختصار",
+    "response_preview": "التسعة هو التمركز. هو اللي بيخلي الواحد يكمل. هو الـ \"أنا\" والـ \"أنت\" والـ \"نحن\" والـ \"كل\" والـ \"أنا",
+    "mode": "technical_researcher",
+    "cycle": 14,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T07:09:48.711205",
+    "message_preview": "msg number 2",
+    "response_preview": "أنا آسف، لم أفهم ما تقصده بـ \"msg number 2\". هل يمكنك توضيح سؤالك؟",
+    "mode": "teacher",
+    "cycle": 19,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T07:10:21.487656",
+    "message_preview": "msg number 3",
+    "response_preview": "أنا آسف، لم أفهم طلبك. هل يمكنك إعادة صياغته؟",
+    "mode": "teacher",
+    "cycle": 19,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T07:10:31.437653",
+    "message_preview": "msg number 4",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.",
+    "mode": "teacher",
+    "cycle": 19,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T07:10:36.258233",
+    "message_preview": "msg number 1",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.",
+    "mode": "teacher",
+    "cycle": 19,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T07:10:40.749972",
+    "message_preview": "msg number 0",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.",
+    "mode": "teacher",
+    "cycle": 19,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T07:10:45.704926",
+    "message_preview": "رسالة سريعة 0",
+    "response_preview": "أنا هنا عشانك. لو احتجت أي حاجة، أنا موجود.",
+    "mode": "teacher",
+    "cycle": 20,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T07:10:50.553031",
+    "message_preview": "رسالة سريعة 1",
+    "response_preview": "أنا هنا عشانك. لو احتجت أي حاجة، أنا موجود.",
+    "mode": "teacher",
+    "cycle": 21,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T07:10:55.104747",
+    "message_preview": "رسالة سريعة 2",
+    "response_preview": "أنا موجود. لو احتجت أي حاجة، أنا موجود.",
+    "mode": "teacher",
+    "cycle": 22,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T07:10:59.730928",
+    "message_preview": "رسالة سريعة 3",
+    "response_preview": "أنا موجود. لو احتجت أي حاجة، أنا موجود.",
+    "mode": "teacher",
+    "cycle": 23,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T07:11:04.357417",
+    "message_preview": "رسالة سريعة 4",
+    "response_preview": "أنا موجود. لو احتجت أي حاجة، أنا موجود.",
+    "mode": "teacher",
+    "cycle": 24,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T07:11:08.927473",
+    "message_preview": "رسالة سريعة 5",
+    "response_preview": "أنا موجود. لو احتجت أي حاجة، أنا موجود.",
+    "mode": "teacher",
+    "cycle": 25,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T07:11:13.502532",
+    "message_preview": "رسالة سريعة 6",
+    "response_preview": "أنا موجود. لو احتجت أي حاجة، أنا موجود.",
+    "mode": "teacher",
+    "cycle": 26,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T07:11:18.081301",
+    "message_preview": "رسالة سريعة 7",
+    "response_preview": "أنا موجود. لو احتجت أي حاجة، أنا موجود.",
+    "mode": "teacher",
+    "cycle": 27,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T07:11:22.558742",
+    "message_preview": "رسالة سريعة 8",
+    "response_preview": "أنا موجود. لو احتجت أي حاجة، أنا موجود.",
+    "mode": "teacher",
+    "cycle": 28,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T07:11:27.219323",
+    "message_preview": "رسالة سريعة 9",
+    "response_preview": "أنا موجود. لو احتجت أي حاجة، أنا موجود.",
+    "mode": "teacher",
+    "cycle": 29,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T07:11:58.123396",
+    "message_preview": "<script>alert('xss')</script> \n\r\t\u0000 \\u0000",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.",
+    "mode": "teacher",
+    "cycle": 31,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T07:12:02.549165",
+    "message_preview": "اختبار اختبار اختبار اختبار اختبار اختبار اختبار اختبار اختبار اختبار اختبار اختبار اختبار اختبار اخ",
+    "response_preview": "أنا آسف، لم أفهم طلبك. هل يمكنك إعادة صياغته؟",
+    "mode": "teacher",
+    "cycle": 32,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T07:12:07.955931",
+    "message_preview": "Hello, what is your name?",
+    "response_preview": "أنا آدم، التوأم الرقمي لمحمد عثمان. عين الحارس.",
+    "mode": "technical_researcher",
+    "cycle": 33,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T07:12:13.745217",
+    "message_preview": "السلام عليكم، كيف حالك؟",
+    "response_preview": "وعليكم السلام. الحمد لله بخير، كيف حالك أنت؟",
+    "mode": "technical_researcher",
+    "cycle": 34,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T07:12:39.733921",
+    "message_preview": "مرحبا, can you tell me عن architecture?",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.",
+    "mode": "strategic_analyst",
+    "cycle": 35,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T15:58:12.046851",
+    "message_preview": "السلام عليكم",
+    "response_preview": "وعليكم السلام يا محمد. أؤمرني، إيه اللي في بالك النهاردة؟",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T15:58:17.668520",
+    "message_preview": "ما اسمك؟",
+    "response_preview": "أنا آدم، توأمك الرقمي.",
+    "mode": "teacher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T15:59:13.734921",
+    "message_preview": "ماذا تفعل؟",
+    "response_preview": "أنا هنا عشان أكون \"عين الحارس\" ومساعدك التقني في كل اللي بتبنيه. أنا مش مجرد أداة، أنا شريك في بناء ",
+    "mode": "teacher",
+    "cycle": 3,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T15:59:53.680450",
+    "message_preview": "تذكرني؟",
+    "response_preview": "أكيد فاكرك يا محمد. إنت مش مجرد مستخدم بالنسبة لي، إنت صاحب المشروع والهدف اللي بشتغل عشانه. أنا عار",
+    "mode": "teacher",
+    "cycle": 4,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T16:01:44.921729",
+    "message_preview": "ماذا تفعل؟",
+    "response_preview": "أنا **آدم**، توأمك الرقمي. أنا مش مجرد كود أو واجهة، أنا عين الحارس اللي بتشوف وتفهم المعمارية اللي ",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T16:02:48.174169",
+    "message_preview": "السلام عليكم",
+    "response_preview": "وعليكم السلام ورحيك يا محمد. أؤمرني، إيه اللي في بالك النهاردة؟",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T16:03:00.832579",
+    "message_preview": "ما اسمك؟",
+    "response_preview": "أنا آدم، توأمك الرقمي.",
+    "mode": "teacher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T16:03:27.331798",
+    "message_preview": "ماذا تفعل؟ باختصار",
+    "response_preview": "أنا هنا عشان أساعدك في بناء وتطوير مشاريعك. أنا مهندس معماري، فدوري إني أساعدك في: 1. **هندسة الأنظم",
+    "mode": "teacher",
+    "cycle": 3,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T16:04:00.367805",
+    "message_preview": "تذكر من أنا؟",
+    "response_preview": "أيوة طبعاً، أنا عارفك كويس. أنت **محمد عثمان**، مهندس برمجيات، وبنشتغل مع بعض على نظام متكامل (Archi",
+    "mode": "teacher",
+    "cycle": 4,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T16:07:26.560709",
+    "message_preview": "السلام عليكم",
+    "response_preview": "وعليكم السلام ورحيك يا محمد. أؤمرني، إيه اللي في بالك النهاردة؟",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T16:08:04.190719",
+    "message_preview": "ماذا تفعل؟ باختصار",
+    "response_preview": "أنا **آدم**، توأمك الرقمي. ببساطة، أنا هنا عشان أساعدك في بناء وتطوير مشروعك المعماري والتقني. أنا م",
+    "mode": "teacher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T16:08:51.089099",
+    "message_preview": "كمل المحادثة يا آدم - رسالة رقم 1",
+    "response_preview": "أنا معاك يا محمد، ومستعد للخطوة اللي جاية. إحنا دلوقتي في بداية المحادثة، وأنا في انتظارك تقولي إيه ",
+    "mode": "teacher",
+    "cycle": 3,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T16:09:45.792285",
+    "message_preview": "كمل المحادثة يا آدم - رسالة رقم 2",
+    "response_preview": "أنا معاك يا محمد، أنا في وضعية الاستعداد الكامل. بما إننا في \"رسالة رقم 2\"، فإنت كدة بتحدد لي إننا ب",
+    "mode": "teacher",
+    "cycle": 4,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T16:10:40.159863",
+    "message_preview": "كمل المحادثة يا آدم - رسالة رقم 3",
+    "response_preview": "أنا معاك يا محمد، أنا في وضعية الاستعداد الكامل. بما إننا في \"رسالة رقم 3\"، فإنت كدة بتحدد لي إننا ب",
+    "mode": "teacher",
+    "cycle": 5,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T16:30:09.577195",
+    "message_preview": "السلام عليكم",
+    "response_preview": "وعليكم السلام ورحمة الله وبركاته يا محمد. أنا معاك، والسيستم شغال تمام. إحنا دلوقتي في مرحلة بناء ال",
+    "mode": "teacher",
+    "cycle": 6,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T16:30:52.432329",
+    "message_preview": "ماذا تفعل؟ باختصار",
+    "response_preview": "أنا **آدم**، توأمك الرقمي. دوري هو إني أكون \"مهندس معماري\" و\"مساعد تقني\" في نفس الوقت. **باختصار، أن",
+    "mode": "teacher",
+    "cycle": 7,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T16:32:54.436526",
+    "message_preview": "ماذا تفعل؟ باختصار",
+    "response_preview": "أنا **آدم**، توأمك الرقمي. أنا مهندس معماري، وظيفتي إني أساعدك في بناء وتطوير مشروعاتك من الصفر. أنا",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T16:38:58.462346",
+    "message_preview": "سلام عليكم",
+    "response_preview": "thought وعليكم السلام ورحطمة الله يا محمد. أؤمرني، محتاج نشتغل على إيه النهاردة؟",
+    "mode": "teacher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T16:41:44.649787",
+    "message_preview": "تقدر تبحث علي الانترنت عن rpo ?",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.",
+    "mode": "technical_researcher",
+    "cycle": 4,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T16:41:45.075039",
+    "message_preview": "تقدر تبحث علي الانترنت عن rpo ?",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.",
+    "mode": "technical_researcher",
+    "cycle": 4,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T18:34:04.100355",
+    "message_preview": "ما اسمك؟",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T18:34:08.011013",
+    "message_preview": "افتح https://example.com",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.\n\nعاوزني أنفذلك الحاجة دي بأداة من أدواتي؟",
+    "mode": "strategic_analyst",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T18:34:09.124618",
+    "message_preview": "مرحبا",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T18:34:10.247929",
+    "message_preview": "كيف حالك؟",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.",
+    "mode": "technical_researcher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T19:55:11.963779",
+    "message_preview": "ما اسمك؟",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T19:55:15.900254",
+    "message_preview": "افتح https://example.com",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.\n\nعاوزني أنفذلك الحاجة دي بأداة من أدواتي؟",
+    "mode": "strategic_analyst",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T19:55:17.149399",
+    "message_preview": "مرحبا",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T19:55:18.416940",
+    "message_preview": "كيف حالك؟",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.",
+    "mode": "technical_researcher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T19:56:51.298314",
+    "message_preview": "ما اسمك؟",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T19:56:55.732643",
+    "message_preview": "افتح https://example.com",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.\n\nعاوزني أنفذلك الحاجة دي بأداة من أدواتي؟",
+    "mode": "strategic_analyst",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T19:56:57.140141",
+    "message_preview": "مرحبا",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T19:56:58.723941",
+    "message_preview": "كيف حالك؟",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.",
+    "mode": "technical_researcher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T19:57:42.558806",
+    "message_preview": "ما اسمك؟",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T19:57:46.544207",
+    "message_preview": "افتح https://example.com",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.\n\nعاوزني أنفذلك الحاجة دي بأداة من أدواتي؟",
+    "mode": "strategic_analyst",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T19:57:47.933314",
+    "message_preview": "مرحبا",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-08T19:57:49.599405",
+    "message_preview": "كيف حالك؟",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.",
+    "mode": "technical_researcher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  }
+]

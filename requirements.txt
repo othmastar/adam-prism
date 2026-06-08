@@ -23,6 +23,12 @@ lxml>=4.9.0
 # أدوات النظام
 Pillow>=10.0.0
 
+# MCP - آلاف الأدوات القياسية
+mcp[cli]>=1.27.0
+
+# Scheduler - جدولة المهام
+apscheduler>=3.11.0
+
 # لو حابب تستخدم LoRA لاحقاً
 # torch>=2.1.0
 # transformers>=4.36.0

@@ -9,6 +9,7 @@ import { ChatInterface } from "@/components/adam/chat-interface";
 import { KnowledgePanel } from "@/components/adam/knowledge-panel";
 import { NotebookPanel } from "@/components/adam/notebook-panel";
 import { ToolsPanel } from "@/components/adam/tools-panel";
+import { SkillsPanel } from "@/components/adam/skills-panel";
 import { SettingsPanel } from "@/components/adam/settings-panel";
 import { PipelineMonitor } from "@/components/adam/pipeline-monitor";
 import { SystemDashboard } from "@/components/adam/system-dashboard";
@@ -17,6 +18,11 @@ import { IssueTerminal } from "@/components/adam/issue-terminal";
 import { ModelOrchestrator } from "@/components/adam/model-orchestrator";
 import { ShieldPulse } from "@/components/adam/shield-pulse";
 import { ActionTrace } from "@/components/adam/action-trace";
+import { SchedulerDashboard } from "@/components/adam/scheduler-dashboard";
+import { PluginManager } from "@/components/adam/plugin-manager";
+import { SubagentDashboard } from "@/components/adam/subagent-dashboard";
+import { MemoryPanel } from "@/components/adam/memory-panel";
+import { ChannelsPanel } from "@/components/adam/channels-panel";
 import { Activity } from "lucide-react";
 
 function AppContent() {
@@ -102,7 +108,13 @@ function AppContent() {
         {activeView === "knowledge" && <KnowledgePanel />}
         {activeView === "notebook" && <NotebookPanel />}
         {activeView === "tools" && <ToolsPanel />}
+        {activeView === "skills" && <SkillsPanel />}
         {activeView === "settings" && <SettingsPanel />}
+        {activeView === "scheduler" && <SchedulerDashboard />}
+        {activeView === "plugins" && <PluginManager />}
+        {activeView === "subagents" && <SubagentDashboard />}
+        {activeView === "channels" && <ChannelsPanel />}
+        {activeView === "memory" && <MemoryPanel />}
       </main>
     </div>
   );

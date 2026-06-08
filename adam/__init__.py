@@ -1,8 +1,12 @@
 """
-Adam Prism — التوأم الرقمي الواعي
-عين الحارس — Egyptian Arabic Conscious AI Framework
+Adam Prism — Conscious AI Framework
+التوأم الرقمي الواعي — عين الحارس
+Egyptian Arabic · Open Source · Personal Digital Twin
+
+Created by Mohamed Othman (OthMastar)
+Apache 2.0 License
 """
 
-__version__ = "2.0.0"
-__author__ = "Mohamed Osman"
-__license__ = "GPL-3.0-only"
+__version__ = "1.0.0-beta"
+__author__ = "Mohamed Othman"
+__license__ = "Apache-2.0"

@@ -1,7 +1,7 @@
 import React from "react";
 import { useAppStore, SystemHealth, ProcessingStep } from "./store";
 
-const FASTAPI_DEFAULT = "http://localhost:8000";
+const FASTAPI_DEFAULT = "http://localhost:8002";
 
 export function getFastApiUrl(): string {
   if (typeof window === "undefined") return FASTAPI_DEFAULT;
@@ -53,6 +53,12 @@ export type ChatResponse = {
   cycle: number;
   duration_ms: number;
   audio_url?: string | null;
+  permission_pending?: {
+    action: string;
+    category: string;
+    level: string;
+    reason: string;
+  } | null;
 };
 
 export async function sendChatMessage(
@@ -103,6 +109,87 @@ export async function searchKnowledge(
 
   const data = await res.json();
   return data.results || data || [];
+}
+
+// --- Ollama Models ---
+
+export async function fetchOllamaModels(): Promise<string[]> {
+  const url = getFastApiUrl();
+  const res = await fetch(`${url}/api/ollama/models`, {
+    signal: AbortSignal.timeout(10000),
+  });
+  if (!res.ok) return [];
+  const data = await res.json();
+  return data.models || [];
+}
+
+export async function selectOllamaModel(model: string): Promise<boolean> {
+  const url = getFastApiUrl();
+  const res = await fetch(`${url}/api/ollama/select`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ model }),
+  });
+  return res.ok;
+}
+
+// --- Skills ---
+
+export async function fetchSkillsList(): Promise<{ name: string; description: string; path: string }[]> {
+  const url = getFastApiUrl();
+  const res = await fetch(`${url}/api/skills/list`, {
+    signal: AbortSignal.timeout(10000),
+  });
+  if (!res.ok) return [];
+  const data = await res.json();
+  return data.skills || [];
+}
+
+export async function loadSkill(path: string): Promise<{ success: boolean; result?: string }> {
+  const url = getFastApiUrl();
+  const res = await fetch(`${url}/api/skills/load`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ path }),
+  });
+  const data = await res.json();
+  return data;
+}
+
+// --- Knowledge Add ---
+
+export async function addKnowledge(
+  text: string,
+  collection: string = "knowledge",
+  metadata?: Record<string, unknown>
+): Promise<{ success: boolean; collection: string; id?: number }> {
+  const url = getFastApiUrl();
+  const res = await fetch(`${url}/api/knowledge/add`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text, collection, metadata }),
+  });
+  const data = await res.json();
+  return data;
+}
+
+export async function uploadKnowledgeFile(
+  file: File,
+  collection: string = "knowledge"
+): Promise<{ success: boolean; filename: string; collection: string; chunks: number; total_chars: number }> {
+  const url = getFastApiUrl();
+  const form = new FormData();
+  form.append("file", file);
+  form.append("collection", collection);
+  const res = await fetch(`${url}/api/knowledge/upload`, {
+    method: "POST",
+    body: form,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "Upload failed" }));
+    throw new Error(err.detail || `HTTP ${res.status}`);
+  }
+  return res.json();
 }
 
 // --- Notebook ---
@@ -343,6 +430,38 @@ export async function syncSessionMessages(
   }
 }
 
+export async function searchChatHistory(
+  query: string,
+  limit = 20
+): Promise<{ results: Record<string, unknown>[]; count: number }> {
+  const url = getFastApiUrl();
+  const res = await fetch(`${url}/api/chat/search`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query, limit }),
+  });
+  if (!res.ok) return { results: [], count: 0 };
+  return res.json();
+}
+
+export async function uploadFile(
+  file: File
+): Promise<{ filename: string; original_name: string; url: string; content_type: string; size: number } | null> {
+  const url = getFastApiUrl();
+  const form = new FormData();
+  form.append("file", file);
+  try {
+    const res = await fetch(`${url}/api/chat/upload`, {
+      method: "POST",
+      body: form,
+    });
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
+}
+
 // --- Voice ---
 
 export type VoiceChatResponse = {
@@ -491,8 +610,15 @@ export async function fetchDiagnostics(): Promise<any> {
 }
 
 export async function triggerHeal(): Promise<any> {
-  const res = await fetch(`${getFastApiUrl()}/api/engine/heal`);
-  return res.json();
+  try {
+    const res = await fetch(`${getFastApiUrl()}/api/engine/heal`, {
+      signal: AbortSignal.timeout(10000),
+    });
+    if (res.ok) return res.json();
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 export async function respondPermission(approve: boolean, level?: string): Promise<any> {
@@ -502,6 +628,48 @@ export async function respondPermission(approve: boolean, level?: string): Promi
     body: JSON.stringify({ approve, level: level || "once" }),
   });
   return res.json();
+}
+
+// --- Channels ---
+
+export type ChannelInfo = {
+  name: string;
+  running: boolean;
+  webhook: boolean;
+  requires?: string[];
+};
+
+export async function fetchChannels(): Promise<Record<string, ChannelInfo>> {
+  const url = getFastApiUrl();
+  try {
+    const res = await fetch(`${url}/api/channels`, { signal: AbortSignal.timeout(5000) });
+    if (res.ok) {
+      const data = await res.json();
+      return data.channels || {};
+    }
+  } catch { /* ignore */ }
+  return {};
+}
+
+export async function fetchChannelStatus(name: string): Promise<ChannelInfo | null> {
+  const url = getFastApiUrl();
+  try {
+    const res = await fetch(`${url}/api/channels/${name}`, { signal: AbortSignal.timeout(5000) });
+    if (res.ok) return res.json();
+  } catch { /* ignore */ }
+  return null;
+}
+
+export async function toggleChannel(name: string, enable: boolean): Promise<boolean> {
+  const url = getFastApiUrl();
+  try {
+    const res = await fetch(`${url}/api/channels/${name}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ enabled: enable }),
+    });
+    return res.ok;
+  } catch { return false; }
 }
 
 export function useApiHealthCheck() {
@@ -545,4 +713,66 @@ export function useApiHealthCheck() {
 
     return () => clearInterval(interval);
   }, [settings.ollamaUrl, settings.fastApiUrl, setApiConnected, setOllamaConnected, setOllamaModels, setSystemHealth, setIssueCount, diagnosticsOpen]);
+}
+
+export function getWebSocketUrl(): string {
+  const httpUrl = getFastApiUrl();
+  return httpUrl.replace(/^http/, "ws") + "/ws/chat";
+}
+
+type WsCallbacks = {
+  onMessage: (data: Record<string, unknown>) => void;
+  onError?: (err: Event) => void;
+  onDisconnect?: () => void;
+};
+
+export function useChatWebSocket(callbacks: WsCallbacks) {
+  const wsRef = React.useRef<WebSocket | null>(null);
+  const reconnectTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cbRef = React.useRef(callbacks);
+  cbRef.current = callbacks;
+  const [connected, setConnected] = React.useState(false);
+
+  const connect = React.useCallback(() => {
+    if (wsRef.current?.readyState === WebSocket.OPEN) return;
+    try {
+      const ws = new WebSocket(getWebSocketUrl());
+      ws.onopen = () => setConnected(true);
+      ws.onclose = () => {
+        setConnected(false);
+        cbRef.current.onDisconnect?.();
+        reconnectTimerRef.current = setTimeout(connect, 3000);
+      };
+      ws.onerror = (e) => cbRef.current.onError?.(e);
+      ws.onmessage = (e) => {
+        try {
+          const data = JSON.parse(e.data);
+          cbRef.current.onMessage(data);
+        } catch { /* ignore invalid JSON */ }
+      };
+      wsRef.current = ws;
+    } catch { /* ignore */ }
+  }, []);
+
+  const disconnect = React.useCallback(() => {
+    if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
+    wsRef.current?.close();
+    wsRef.current = null;
+    setConnected(false);
+  }, []);
+
+  const send = React.useCallback((message: string) => {
+    if (wsRef.current?.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({ message, voice: true }));
+      return true;
+    }
+    return false;
+  }, []);
+
+  React.useEffect(() => {
+    connect();
+    return () => disconnect();
+  }, [connect, disconnect]);
+
+  return { connected, connect, disconnect, send };
 }

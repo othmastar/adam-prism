@@ -28,55 +28,38 @@ venv/
 node_modules/
 .next/
 out/
-*.tsbuildinfo
 
-# Next.js standalone
-.next/standalone/
+# Database
+*.db
 
-# Data
+# Browser profile (local Playwright data)
 data/chromium-profile/
-data/*.db
-data/*.sqlite
-notebook/
+
+# Docker
+docker-data/
 
 # Logs
 *.log
-api.log
-dev.log
-server.log
-
-# Training artifacts
-models/
-*.gguf
-*.safetensors
-*.bin
-checkpoints/
-
-# Config with secrets
-config/local.json
-config/production.json
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Project specific
-repomix-output.xml
-repomix-output.zip
+# Training data / checkpoints (large binaries)
+data/training/
+checkpoints/
 *.tar.gz
 
-# Qdrant storage
-docker-data/
-*.mmap
+# Adam memory (local)
+.adam_memory/
+models/
 
-# Temp
+# Temp files
 temp/
-fix_adam.py
-nano Modelfile
-*.checkpoint*
 *.bak
-unsloth_compiled_cache/
 
-# Generated
-start.sh
-stop.sh
+# Build artifacts
+*.tsbuildinfo
+
+# Repomix output
+repomix-output.xml
