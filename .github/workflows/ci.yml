@@ -20,23 +20,19 @@ jobs:
         run: |
           pip install --upgrade pip setuptools wheel
           pip install -r requirements.txt
-          pip install pytest pytest-asyncio httpx ruff
+          pip install pytest pytest-asyncio httpx ruff build
           pip install -e .
-
-      - name: Lint with ruff
-        run: ruff check . --extend-ignore=E501,F401 --target-version=py312 || true
 
       - name: Run tests
         run: |
           set -o pipefail
-          python -m pytest tests/ -k "not slow" --tb=long -x 2>&1 | tee /tmp/test_output.txt
+          python -m pytest tests/ -v -k "not slow" --tb=long 2>&1 | tee /tmp/test_output.txt
 
       - name: Upload test output
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-output
           path: /tmp/test_output.txt
 
-      - name: Check package build
-        run: pip install build && python -m build --sdist --wheel
+      - name: Build package
+        run: python -m build --sdist --wheel
