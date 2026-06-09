@@ -139,6 +139,40 @@ services:
     networks:
       - adam_net
 
+  # ─── 7. Prometheus ───────────────────────────────────
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: adam-prometheus
+    restart: unless-stopped
+    volumes:
+      - ./deploy/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    depends_on:
+      - api
+    networks:
+      - adam_net
+
+  # ─── 8. Grafana ─────────────────────────────────────
+  grafana:
+    image: grafana/grafana:latest
+    container_name: adam-grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_INSTALL_PLUGINS=
+    volumes:
+      - ./deploy/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./deploy/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - adam_net
+
 # ─── Volumes ────────────────────────────────────────
 volumes:
   qdrant_storage:
@@ -147,6 +181,8 @@ volumes:
   api_data:
   api_logs:
   nginx_logs:
+  prometheus_data:
+  grafana_data:
 
 # ─── Networks ───────────────────────────────────────
 networks:
