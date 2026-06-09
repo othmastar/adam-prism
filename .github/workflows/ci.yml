@@ -24,11 +24,22 @@ jobs:
           pip install -e .
 
       - name: Run tests
+        id: run_tests
         run: |
           set -o pipefail
-          python -m pytest tests/ -v -k "not slow" --tb=long 2>&1 | tee /tmp/test_output.txt
+          python -m pytest tests/ -v -k "not slow" --tb=long -x 2>&1 | tee /tmp/test_output.txt
+
+      - name: Show failures
+        if: failure()
+        run: |
+          echo "=== First 80 lines of test output ==="
+          head -80 /tmp/test_output.txt
+          echo ""
+          echo "=== Last 30 lines of test output ==="
+          tail -30 /tmp/test_output.txt
 
       - name: Upload test output
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-output
