@@ -27,7 +27,9 @@ jobs:
         run: ruff check . --extend-ignore=E501,F401 --target-version=py312 || true
 
       - name: Run tests
-        run: python -m pytest tests/ -v -k "not slow" --tb=long -x 2>&1 | tee /tmp/test_output.txt
+        run: |
+          set -o pipefail
+          python -m pytest tests/ -k "not slow" --tb=long -x 2>&1 | tee /tmp/test_output.txt
 
       - name: Upload test output
         if: always()
