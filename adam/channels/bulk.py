@@ -77,7 +77,7 @@ class DiscordChannel(BaseChannel):
             await asyncio.sleep(interval)
             try:
                 await ws.send(json.dumps({"op": 1, "d": self._seq}))
-            except:
+            except Exception:
                 break
 
     def _headers(self):
@@ -352,7 +352,7 @@ class WebSocketChannel(BaseChannel):
         for ws in list(self._clients):
             try:
                 await ws.send(text)
-            except:
+            except Exception:
                 self._clients.discard(ws)
 
     def stop(self):
