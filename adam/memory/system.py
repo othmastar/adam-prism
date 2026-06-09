@@ -147,17 +147,17 @@ class MemorySystem:
     async def search(self, query: str, collection: str = "knowledge",
                      top_k: int = 5, score_threshold: float = 0.5) -> List[Dict[str, Any]]:
         """البحث الدلالي في القاعدة المعرفية"""
-        query_embedding = await self.embed(query)
-        if not query_embedding:
-            return []
-            
         coll_name = self.collections.get(collection, collection)
-        
+
         cache_key = self.search_cache._key(query, collection, top_k, score_threshold)
         cached = self.search_cache.get(cache_key)
         if cached is not None:
             return cached
-        
+
+        query_embedding = await self.embed(query)
+        if not query_embedding:
+            return []
+
         client = await self._get_client("qdrant", self.qdrant_url, 30.0)
         try:
             response = await client.post(
