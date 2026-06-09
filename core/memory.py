@@ -1,1 +1,1 @@
-from memory.memory_system import MemorySystem
+from adam.memory.system import MemorySystem
