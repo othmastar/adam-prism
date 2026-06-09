@@ -23,14 +23,6 @@ jobs:
           pip install pytest pytest-asyncio httpx ruff build
           pip install -e .
 
-      - name: Diagnostic — check environment
-        run: |
-          which python
-          python --version
-          python -c "import site; print('site-packages:', site.getsitepackages())"
-          python -c "from adam.engine import AdamPrismEngine; print('adam import OK')" 2>&1 || echo "::error title=Import Error::Failed to import adam package"
-          python -c "import tests.conftest; print(f'ollama={tests.conftest.ollama_available} api={tests.conftest.api_available}')" 2>&1 || true
-
       - name: Run tests
         id: run_tests
         run: |
@@ -40,11 +32,11 @@ jobs:
       - name: Show failures
         if: failure()
         run: |
-          grep -n "FAILED" /tmp/test_output.txt | head -5 | while read line; do
-            echo "::error file=tests,title=FAILED::$line"
-          done
-          # Print traceback lines near the failure
-          awk '/FAILURES|Error|Traceback|assert /{print "::error file=tests,title=TRACE::" $0}' /tmp/test_output.txt | head -20
+          grep -n "FAILED\|FAILURES\|Error\|assert \|ConnectError\|TimeoutError" /tmp/test_output.txt \
+            | head -15 \
+            | while read line; do
+                echo "::error file=tests,title=FAIL::$line"
+              done
 
       - name: Upload test output
         if: always()
