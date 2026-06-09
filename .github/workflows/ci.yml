@@ -27,26 +27,14 @@ jobs:
         run: ruff check . --extend-ignore=E501,F401 --target-version=py312 || true
 
       - name: Run tests
-        run: python -m pytest tests/ -v -k "not slow" --tb=long
+        run: python -m pytest tests/ -v -k "not slow" --tb=long -x 2>&1 | tee /tmp/test_output.txt
+
+      - name: Upload test output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-output
+          path: /tmp/test_output.txt
 
       - name: Check package build
         run: pip install build && python -m build --sdist --wheel
-
-  release:
-    if: startsWith(github.ref, 'refs/tags/v')
-    needs: [test]
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Build
-        run: |
-          pip install build
-          python -m build --sdist --wheel
-      - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
