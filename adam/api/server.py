@@ -6,6 +6,7 @@ Adam Prism - API Server
 """
 
 import json
+import os
 import sqlite3
 import logging
 import asyncio
@@ -70,6 +71,27 @@ class ActionRequest(BaseModel):
 
 # متغير عام لوقت بدء التشغيل
 _start_time: Optional[datetime] = None
+
+def _qdrant_url(engine):
+    if engine and engine.config:
+        return engine.config.get("qdrant_url", "http://localhost:6333")
+    return os.environ.get("QDRANT_URL", "http://localhost:6333")
+
+def _ollama_url(engine):
+    if engine and engine.config:
+        return engine.config.get("ollama_base", "http://localhost:11434")
+    return os.environ.get("OLLAMA_URL", "http://localhost:11434")
+
+def _lora_url(engine):
+    if engine and engine.config:
+        return engine.config.get("lora_server_url", "http://localhost:8080")
+    return os.environ.get("LORA_URL", "http://localhost:8080")
+
+def _qdrant_client(engine):
+    from urllib.parse import urlparse
+    pu = urlparse(_qdrant_url(engine))
+    from qdrant_client import QdrantClient
+    return QdrantClient(host=pu.hostname or "localhost", port=pu.port or 6333)
 
 def create_app(engine=None, channel_manager=None) -> FastAPI:
     """إنشاء تطبيق FastAPI مع كل المسارات"""
@@ -336,8 +358,7 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
     async def list_collections():
         """عرض كل المجموعات في Qdrant مع عدد النقاط"""
         try:
-            from qdrant_client import QdrantClient
-            qdrant = QdrantClient(host="localhost", port=6333)
+            qdrant = _qdrant_client(engine)
             cols = qdrant.get_collections().collections
             result = []
             total = 0
@@ -363,21 +384,19 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
             body = await request.json()
             text = body.get("text", "").strip()
             collection = body.get("collection", "knowledge")
-            # جمع الأسماء المتوقعة: knowledge → adam_knowledge (لتوافق MemorySystem)
             qdrant_collection = {"knowledge": "adam_knowledge", "conversations": "adam_conversations", "patterns": "adam_patterns"}.get(collection, collection)
             metadata = body.get("metadata", {})
             if not text:
                 raise HTTPException(400, "النص مطلوب")
-            from qdrant_client import QdrantClient
             from qdrant_client.http import models
-            qdrant = QdrantClient(host="localhost", port=6333)
+            qdrant = _qdrant_client(engine)
             cols = [c.name for c in qdrant.get_collections().collections]
             if qdrant_collection not in cols:
                 qdrant.create_collection(qdrant_collection, vectors_config=models.VectorParams(size=768, distance=models.Distance.COSINE))
                 logger.info(f"✅ Created new Qdrant collection: {qdrant_collection}")
             try:
                 async with httpx.AsyncClient(timeout=30) as c:
-                    resp = await c.post("http://localhost:11434/api/embeddings", json={"model": "nomic-embed-text", "prompt": text})
+                    resp = await c.post(f"{_ollama_url(engine)}/api/embeddings", json={"model": "nomic-embed-text", "prompt": text})
                     if resp.status_code == 200:
                         vec = resp.json().get("embedding", [])
                     else:
@@ -452,16 +471,15 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
 
             # Add to Qdrant — resolve collection name for MemorySystem compatibility
             qdrant_collection = {"knowledge": "adam_knowledge", "conversations": "adam_conversations", "patterns": "adam_patterns"}.get(collection, collection)
-            from qdrant_client import QdrantClient
             from qdrant_client.http import models
-            qdrant = QdrantClient(host="localhost", port=6333)
+            qdrant = _qdrant_client(engine)
             cols = [c.name for c in qdrant.get_collections().collections]
             if qdrant_collection not in cols:
                 qdrant.create_collection(qdrant_collection, vectors_config=models.VectorParams(size=768, distance=models.Distance.COSINE))
 
             async def embed_chunk(chunk: str) -> list:
                 async with httpx.AsyncClient(timeout=30) as c:
-                    resp = await c.post("http://localhost:11434/api/embeddings", json={"model": "nomic-embed-text", "prompt": chunk})
+                    resp = await c.post(f"{_ollama_url(engine)}/api/embeddings", json={"model": "nomic-embed-text", "prompt": chunk})
                     if resp.status_code == 200:
                         return resp.json().get("embedding", [])
                     raise ValueError(f"Ollama embed returned {resp.status_code}")
@@ -503,8 +521,7 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
     async def recent_knowledge(limit: int = 10):
         """آخر الإضافات لقاعدة المعرفة عبر scroll في كل المجموعات"""
         try:
-            from qdrant_client import QdrantClient
-            qdrant = QdrantClient(host="localhost", port=6333)
+            qdrant = _qdrant_client(engine)
             recent = []
             for c in qdrant.get_collections().collections:
                 try:
@@ -531,7 +548,7 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
         try:
             summary_prompt = f"لخص النص التالي بطريقة منظمة مختصرة:\n{request.text[:4000]}"
             async with httpx.AsyncClient(timeout=120) as c:
-                resp = await c.post("http://localhost:8080/chat", json={
+                resp = await c.post(f"{_lora_url(engine)}/chat", json={
                     "messages": [{"role": "user", "content": summary_prompt}],
                     "max_tokens": 300
                 })
@@ -1262,9 +1279,7 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
     async def list_ollama_models():
         """جلب كل الموديلات المتاحة في Ollama"""
         try:
-            ollama_url = "http://localhost:11434"
-            if engine:
-                ollama_url = getattr(engine, "ollama_url", ollama_url) or ollama_url
+            ollama_url = _ollama_url(engine)
             async with httpx.AsyncClient(timeout=10) as client:
                 resp = await client.get(f"{ollama_url}/api/tags")
                 if resp.status_code != 200:

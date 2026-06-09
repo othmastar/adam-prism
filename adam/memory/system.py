@@ -54,11 +54,14 @@ class MemorySystem:
     async def _get_client(self, name: str, base_url: str, timeout: float = 30.0) -> httpx.AsyncClient:
         if self.shared_clients:
             return await self.shared_clients.get(name, base_url, timeout)
-        return httpx.AsyncClient(base_url=base_url, timeout=timeout)
+        attr = f"_pool_{name}"
+        if not hasattr(self, attr) or getattr(self, attr) is None:
+            setattr(self, attr, httpx.AsyncClient(base_url=base_url, timeout=timeout))
+        return getattr(self, attr)
 
     async def _close_client(self, client):
         if not self.shared_clients:
-            await client.aclose()
+            pass
 
     async def initialize(self):
         """تهيئة المجموعات في Qdrant"""
