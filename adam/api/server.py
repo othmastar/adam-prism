@@ -113,10 +113,11 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
             pass
     
     # CORS - السماح بالوصول من أي جهاز
+    cors_origins = os.environ.get("CORS_ORIGINS", "*")
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
-        allow_credentials=True,
+        allow_origins=cors_origins.split(",") if cors_origins != "*" else ["*"],
+        allow_credentials=cors_origins != "*",
         allow_methods=["*"],
         allow_headers=["*"],
     )
@@ -404,6 +405,12 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
         import os, tempfile, logging as log
         log = logger.getChild("upload")
 
+        # Size limit (default 50MB)
+        MAX_UPLOAD = 50 * 1024 * 1024
+        content = await file.read()
+        if len(content) > MAX_UPLOAD:
+            raise HTTPException(413, f"الملف كبير جداً ({len(content)//1024//1024}MB). الحد 50MB.")
+
         # Validate extension
         ext = os.path.splitext(file.filename or "")[1].lower()
         if ext not in (".pdf", ".docx", ".txt", ".md"):
@@ -412,7 +419,6 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
         # Save temp file
         tmp = tempfile.NamedTemporaryFile(delete=False, suffix=ext)
         try:
-            content = await file.read()
             tmp.write(content)
             tmp.close()
 
@@ -534,10 +540,6 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
                 else:
                     summary_text = ""
             return {"master_summary": summary_text.strip(), "stats": {"input_chars": len(request.text)}}
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"فشل التلخيص: {e}")
         except HTTPException:
             raise
         except Exception as e:
@@ -1401,7 +1403,11 @@ def run_server(engine=None, host: str = "0.0.0.0", port: int = 8000, channel_con
             from adam.channels.manager import ChannelManager
             channel_manager = ChannelManager(channel_config)
             import asyncio
-            asyncio.run(channel_manager.start_all(engine))
+            try:
+                loop = asyncio.get_running_loop()
+                loop.create_task(channel_manager.start_all(engine))
+            except RuntimeError:
+                asyncio.run(channel_manager.start_all(engine))
             logger.info(f"✅ Channels: {list(channel_manager.channels.keys())}")
         except Exception as e:
             logger.warning(f"⚠️ Channel init skipped: {e}")

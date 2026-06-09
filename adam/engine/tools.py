@@ -400,6 +400,7 @@ class AdamPrismEngineTools(AdamPrismEngineGenerate):
 
     async def _tool_file(self, tool_name: str, params: Dict) -> Dict:
         """أدوات الملفات — read, write, download"""
+        import httpx
         try:
             if tool_name == "file_read":
                 path = params.get("path", "")
@@ -428,15 +429,15 @@ class AdamPrismEngineTools(AdamPrismEngineGenerate):
                 return {"success": True, "path": path, "size": len(content)}
 
             elif tool_name == "file_download":
-                import httpx
                 url = params.get("url", "")
                 if not url:
                     return {"success": False, "error": "مفيش URL"}
-                r = httpx.get(url, follow_redirects=True, timeout=15)
-                r.raise_for_status()
-                dest = f"/tmp/adam_dl_{uuid.uuid4().hex[:8]}.bin"
-                with open(dest, "wb") as f:
-                    f.write(r.content)
+                async with httpx.AsyncClient(timeout=15) as hc:
+                    r = await hc.get(url, follow_redirects=True)
+                    r.raise_for_status()
+                    dest = f"/tmp/adam_dl_{uuid.uuid4().hex[:8]}.bin"
+                    with open(dest, "wb") as f:
+                        f.write(r.content)
                 return {"success": True, "path": dest, "size": len(r.content),
                         "content_type": r.headers.get("content-type", ""),
                         "preview": r.text[:200] if "text" in r.headers.get("content-type", "") else "(binary)"}
@@ -446,25 +447,31 @@ class AdamPrismEngineTools(AdamPrismEngineGenerate):
             return {"success": False, "error": str(e)}
 
     async def _tool_knowledge(self, params: Dict) -> Dict:
-        """البحث في Qdrant"""
+        """البحث في Qdrant — async"""
         query = params.get("query", "")
         top_k = params.get("top_k", 3)
         if not query:
             return {"success": False, "error": "مفيش query"}
         try:
-            from qdrant_client import QdrantClient
+            from urllib.parse import urlparse
+            from qdrant_client import AsyncQdrantClient
             import httpx
-            client = QdrantClient(host="localhost", port=6333)
+            qdrant_url = self.config.get("qdrant_url", "http://localhost:6333")
+            pu = urlparse(qdrant_url)
+            ollama_base = self.config.get("ollama_base", "http://localhost:11434")
+            client = AsyncQdrantClient(host=pu.hostname or "localhost", port=pu.port or 6333)
             collected = []
-            o_resp = httpx.post("http://localhost:11434/api/embeddings", json={
-                "model": "nomic-embed-text", "prompt": query
-            }, timeout=10)
-            o_data = o_resp.json()
+            async with httpx.AsyncClient(timeout=10) as hc:
+                o_resp = await hc.post(f"{ollama_base}/api/embeddings", json={
+                    "model": "nomic-embed-text", "prompt": query
+                })
+                o_data = o_resp.json()
             query_vec = o_data.get("embedding")
             if query_vec and len(query_vec) == 768:
-                for col in client.get_collections().collections:
+                cols = await client.get_collections()
+                for col in cols.collections:
                     try:
-                        sr = client.query_points(collection_name=col.name, query=query_vec, limit=top_k)
+                        sr = await client.query_points(collection_name=col.name, query=query_vec, limit=top_k)
                         for hit in sr.points:
                             text = (hit.payload or {}).get("text", "")
                             if text:
@@ -473,15 +480,17 @@ class AdamPrismEngineTools(AdamPrismEngineGenerate):
                         pass
             if not collected:
                 keywords = query.lower().split()
-                for col in client.get_collections().collections:
+                cols = await client.get_collections()
+                for col in cols.collections:
                     try:
-                        points = client.scroll(col.name, limit=200, with_payload=True, with_vectors=False)[0]
-                        for pt in points:
+                        points = await client.scroll(col.name, limit=200, with_payload=True, with_vectors=False)
+                        for pt in points[0]:
                             text = (pt.payload or {}).get("text", "")
                             if text and any(kw in text.lower() for kw in keywords):
                                 collected.append({"collection": col.name, "text": text, "score": 0.5})
                     except Exception:
                         pass
+            await client.close()
             collected.sort(key=lambda x: -x["score"])
             return {"success": True, "results": collected[:top_k], "count": min(len(collected), top_k)}
         except Exception as e:

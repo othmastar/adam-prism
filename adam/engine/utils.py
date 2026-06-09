@@ -115,13 +115,9 @@ class AdamPrismEngineUtils(AdamPrismEngineBase):
                 self.memory = MemorySystem(config=self.config.get("memory", {}))
                 return "Memory re-initialized" if self.memory else None
             if name == "ethics" and self.ethics is None:
-                from core.ethics import EthicsGate
+                from adam.ethics.gate import EthicsGate
                 self.ethics = EthicsGate(config=self.config.get("ethics", {}))
                 return "Ethics gate re-initialized" if self.ethics else None
-            if name == "pipeline" and self.pipeline is None:
-                from core.pipeline import Pipeline
-                self.pipeline = Pipeline(config=self.config.get("pipeline", {}))
-                return "Pipeline re-initialized" if self.pipeline else None
             if name == "tools" and self.tools is None:
                 from adam.tools.manager import ToolManager
                 self.tools = ToolManager(config=self.config)
@@ -130,10 +126,6 @@ class AdamPrismEngineUtils(AdamPrismEngineBase):
                 from core.notebook import NotebookEngine
                 self.notebook = NotebookEngine(config=self.config.get("notebook", {}))
                 return "Notebook re-initialized" if self.notebook else None
-            if name == "security" and self.security is None:
-                from core.security import SecurityManager
-                self.security = SecurityManager(config=self.config.get("security", {}))
-                return "Security re-initialized" if self.security else None
             if name == "trace_recorder" and self.trace_recorder is None:
                 from core.trace_recorder import TraceRecorder
                 self.trace_recorder = TraceRecorder()

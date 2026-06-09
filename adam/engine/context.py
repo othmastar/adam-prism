@@ -37,17 +37,20 @@ class AdamPrismEngineContext(AdamPrismEngineUtils):
             try:
                 arch = await self.memory.search(combined_query, collection="project_architecture", top_k=3)
                 if arch: context["project_arch"] = arch
-            except: pass
+            except Exception as e:
+                logger.debug(f"search project_architecture: {e}")
 
             try:
                 profile = await self.memory.search(combined_query, collection="user_profile", top_k=3)
                 if profile: context["user_profile_kb"] = profile
-            except: pass
+            except Exception as e:
+                logger.debug(f"search user_profile: {e}")
 
             try:
                 conv = await self.memory.search(combined_query, collection="conversation_memory", top_k=3)
                 if conv: context["conv_memory"] = conv
-            except: pass
+            except Exception as e:
+                logger.debug(f"search conversation_memory: {e}")
 
             fe_keywords = ["frontend", "ui", "component", "store", "zustand", "nextjs", "next.js",
                           "react", "tailwind", "shadcn", "page", "layout", "chat-interface", "sidebar",
@@ -56,7 +59,8 @@ class AdamPrismEngineContext(AdamPrismEngineUtils):
                 try:
                     fe = await self.memory.search(combined_query, collection="frontend_components", top_k=3)
                     if fe: context["frontend_kb"] = fe
-                except: pass
+                except Exception as e:
+                    logger.debug(f"search frontend_components: {e}")
 
             be_keywords = ["backend", "engine", "memory", "security", "ethics", "notebook", "pipeline",
                           "api", "tool", "module", "class", "function", "server", "python", "fastapi",
@@ -65,7 +69,8 @@ class AdamPrismEngineContext(AdamPrismEngineUtils):
                 try:
                     be = await self.memory.search(combined_query, collection="backend_modules", top_k=3)
                     if be: context["backend_kb"] = be
-                except: pass
+                except Exception as e:
+                    logger.debug(f"search backend_modules: {e}")
 
             tool_keywords = ["tool", "execute", "browser_", "mouse_", "keyboard_", "file_", "screenshot",
                            "clipboard", "search_knowledge", "scrapling", "استعمل", "نفذ", "شغل",
@@ -74,7 +79,8 @@ class AdamPrismEngineContext(AdamPrismEngineUtils):
                 try:
                     td = await self.memory.search(combined_query, collection="tools_docs", top_k=3)
                     if td: context["tools_kb"] = td
-                except: pass
+                except Exception as e:
+                    logger.debug(f"search tools_docs: {e}")
 
             sec_keywords = ["security", "injection", "pii", "jailbreak", "hack", "exploit", "cve",
                            "vuln", "guard", "shield", "firewall", "pentest", "اختراق", "أمان",
@@ -87,7 +93,8 @@ class AdamPrismEngineContext(AdamPrismEngineUtils):
                 try:
                     sec = await self.memory.search(combined_query, collection="security_guard", top_k=3)
                     if sec: context["security_kb"] = sec
-                except: pass
+                except Exception as e:
+                    logger.debug(f"search security_guard: {e}")
 
             dep_keywords = ["docker", "deploy", "compose", "container", "volume", "port", "config",
                            "install", "setup", "start", "run", "server", "nginx", "uvicorn",
@@ -96,14 +103,16 @@ class AdamPrismEngineContext(AdamPrismEngineUtils):
                 try:
                     dep = await self.memory.search(combined_query, collection="deployment_infra", top_k=3)
                     if dep: context["deploy_kb"] = dep
-                except: pass
+                except Exception as e:
+                    logger.debug(f"search deployment_infra: {e}")
 
             if not any(context.get(k) for k in ["project_arch", "user_profile_kb", "conv_memory",
                 "frontend_kb", "backend_kb", "tools_kb", "security_kb", "deploy_kb"]):
                 try:
                     fallback = await self.memory.search(combined_query, collection="project_architecture", top_k=3)
                     if fallback: context["fallback_kb"] = fallback
-                except: pass
+                except Exception as e:
+                    logger.debug(f"search fallback: {e}")
 
         if self.trace_recorder:
             patterns = self.trace_recorder.get_patterns_for_query(

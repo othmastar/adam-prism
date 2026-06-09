@@ -12,6 +12,7 @@ import time
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from functools import wraps
+from pathlib import Path
 from typing import Dict, Any, Callable, Optional, Tuple, List
 
 import httpx
@@ -241,7 +242,6 @@ def sanitize_path(path: str) -> Optional[str]:
             return resolved
     return None
 
-from pathlib import Path  # noqa: E402
 
 
 # ═══════════════════════════════════════
