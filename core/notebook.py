@@ -1,1 +1,1 @@
-from notebook.notebook_system import AdamNotebook as NotebookEngine
+from adam.notebook.system import AdamNotebook as NotebookEngine

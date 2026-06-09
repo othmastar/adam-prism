@@ -63,3 +63,11 @@ temp/
 
 # Repomix output
 repomix-output.xml
+repomix-output.zip
+
+# pytest
+.pytest_cache/
+
+# Package build
+adam_prism.egg-info/
+unsloth_compiled_cache/
