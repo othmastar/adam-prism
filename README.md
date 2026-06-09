@@ -7,7 +7,7 @@
 [![Adam Prism](https://img.shields.io/badge/Adam_Prism-v1.0.0b1-orange)](https://github.com/othmastar/adam-prism)
 [![Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-green)](LICENSE)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue)](https://python.org)
-[![Tests](https://img.shields.io/badge/tests-251%20pass%20%7C%2025%20JS%20pass-brightgreen)](https://github.com/othmastar/adam-prism/actions/workflows/ci.yml)
+[![Tests](https://img.shields.io/badge/tests-261%20pass%20%7C%2025%20JS%20pass-brightgreen)](https://github.com/othmastar/adam-prism/actions/workflows/ci.yml)
 [![CI](https://github.com/othmastar/adam-prism/actions/workflows/ci.yml/badge.svg)](https://github.com/othmastar/adam-prism/actions/workflows/ci.yml)
 [![LOC](https://img.shields.io/badge/core-12K%20LOC-purple)](.)
 [![Channels](https://img.shields.io/badge/channels-25-blue)](adam/channels/)
@@ -46,7 +46,7 @@
 | **Learning Loop** | ✅ | ✅ Auto skills | ✅ Skills | ❌ | ❌ |
 | **تكلفة** | **$0 (local)** | $5–100/mo | $5–100/mo | API $ | API $ |
 | **لغة** | Python | Python | TypeScript | TypeScript | Rust |
-| **Tests** | **251 Python + 25 JS** | — | — | — | — |
+| **Tests** | **261 Python + 25 JS** | — | — | — | — |
 | **Community** | solo | 390 contributors | 500+ | فريق Anthropic | 460 |
 
 ---
@@ -184,6 +184,9 @@ cd deploy && docker-compose up -d
 | **Model** | Qwen3.5 4.2B / Gemma 4 12B (E4B fine-tuned) |
 | **Coming Soon** | **نموذج محلي سيغير قواعد اللعبة عالمياً** 🚀 |
 | **Web UI** | Next.js 16 + Tailwind v4 + shadcn/ui |
+| **Python SDK** | `pip install adam-prism-client` — sync + async |
+| **Monitoring** | Prometheus + Grafana (docker-compose) |
+| **CD** | GitHub Actions → PyPI + GHCR + GitHub Releases |
 
 ---
 
@@ -201,6 +204,48 @@ cd deploy && docker-compose up -d
     "...": "22 more channels"
   }
 }
+```
+
+---
+
+## 🚀 Quickstart / ابدأ في 5 دقايق
+
+```bash
+# 1. Clone
+git clone https://github.com/othmastar/adam-prism.git && cd adam-prism
+
+# 2. Install
+pip install -e .
+
+# 3. شغّل Ollama + Qdrant
+docker compose -f deploy/docker-compose.yml up -d qdrant ollama
+
+# 4. شغّل آدم
+python -m adam --port 8000
+
+# 5. افتح الواجهة
+# http://localhost:8000/docs — Swagger UI
+# http://localhost:3000 — Web UI (npm run dev في web-ui/)
+
+# 6. أو استعمل Python SDK
+pip install adam-prism-client
+python -c "
+from adam_prism_client import AdamPrismClient
+client = AdamPrismClient('http://localhost:8000')
+print(client.chat('ما اسمك؟')['response'])
+"
+```
+
+---
+
+## 🐳 Full Stack / التشغيل الكامل
+
+```bash
+docker compose -f deploy/docker-compose.yml up -d
+# http://localhost:3000 — Web UI
+# http://localhost:8000/docs — API docs
+# http://localhost:9090 — Prometheus
+# http://localhost:3001 — Grafana (admin/admin)
 ```
 
 ---
