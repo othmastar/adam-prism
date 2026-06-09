@@ -58,6 +58,9 @@ models/
 temp/
 *.bak
 
+# Runtime data
+data/learning/reflections.json
+
 # Build artifacts
 *.tsbuildinfo
 
