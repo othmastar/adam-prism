@@ -22,7 +22,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ar" dir="rtl" suppressHydrationWarning>
+    <html lang="ar" dir="rtl" className="dark" suppressHydrationWarning>
       <body
         className={`${inter.variable} antialiased bg-background text-foreground`}
         style={{ fontFamily: "'Noto Sans Arabic', 'Inter', system-ui, sans-serif" }}

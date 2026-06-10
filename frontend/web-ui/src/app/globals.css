@@ -80,6 +80,9 @@
   --sidebar-accent-foreground: #0a0a0f;
   --sidebar-border: #e2e8f0;
   --sidebar-ring: #8b5cf6;
+  --glass-bg: rgba(255, 255, 255, 0.65);
+  --glass-subtle-bg: rgba(255, 255, 255, 0.35);
+  --muted-element-bg: rgba(241, 245, 249, 0.5);
 }
 
 .dark {
@@ -114,6 +117,9 @@
   --sidebar-accent-foreground: #e2e8f0;
   --sidebar-border: rgba(139, 92, 246, 0.15);
   --sidebar-ring: #8b5cf6;
+  --glass-bg: rgba(17, 17, 25, 0.6);
+  --glass-subtle-bg: rgba(17, 17, 25, 0.35);
+  --muted-element-bg: rgba(26, 26, 46, 0.5);
 }
 
 @layer base {
@@ -188,14 +194,14 @@
 
 /* Glass morphism */
 .glass {
-  background: rgba(17, 17, 25, 0.6);
+  background: var(--glass-bg);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(139, 92, 246, 0.12);
 }
 
 .glass-subtle {
-  background: rgba(17, 17, 25, 0.35);
+  background: var(--glass-subtle-bg);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(139, 92, 246, 0.08);
@@ -484,13 +490,13 @@ button, a, input, textarea, select {
   background-color: rgba(139, 92, 246, 0.2);
 }
 .bg-muted\/10 {
-  background-color: rgba(26, 26, 46, 0.1);
+  background-color: var(--muted-element-bg, rgba(26, 26, 46, 0.1));
 }
 .bg-muted\/20 {
-  background-color: rgba(26, 26, 46, 0.2);
+  background-color: var(--muted-element-bg, rgba(26, 26, 46, 0.2));
 }
 .bg-muted\/50 {
-  background-color: rgba(26, 26, 46, 0.5);
+  background-color: var(--muted-element-bg, rgba(26, 26, 46, 0.5));
 }
 .bg-destructive\/10 {
   background-color: rgba(239, 68, 68, 0.1);
