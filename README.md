@@ -4,27 +4,33 @@
 
 ---
 
-I didn't know how to code. I had no computer. I had no money. I was scared every day.
+I do not know how to code. I have never written a line of this myself.
 
-Seven months later, this exists.
+I bought a gaming laptop — decent for games, weak for AI work. Every free token from every service I could find helped build this. I recently added two more mobile data lines just to keep the connection alive when one runs out.
+
+Seven months ago I did not know what a function was.
+
+This exists because the models built it through me — I directed, they wrote. I failed, they helped me try again.
 
 ---
 
 ## From the beginning
 
-Seven months ago I did not own a computer. I had never written a function. I did not know what a framework was.
+Seven months ago I bought a gaming laptop. I did not know what a framework was. I had never written a function. I did not know the difference between a variable and a string.
 
-But I knew every AI tool I tried was built for someone else — for a company, for a data center, for people with resources I did not have. I felt like a tenant in every piece of software I used. I could never make it truly mine.
+But I knew every AI tool I tried was built for someone else — for a company, for a data center, for people with resources I could not imagine. I felt like a tenant in every piece of software I used. I could never make it truly mine.
 
-So I decided to build my own.
+So I decided to build my own. I did not know how. I just started talking to models.
 
-I failed six times before this. Six different projects, six different ideas, all before I understood what I was actually trying to make. Each failure taught me something I could not have learned any other way.
+I failed six times before Adam. Six different projects in six different domains — oil SCADA with RAG, a pharmaceutical exchange processing 100,000 daily messages, a digital twin of an oil company with 304 control rooms, a digital lawyer named Raafat, a Linux migration executed as a single attack, and Adam Prism v1. Each one taught me something the next one needed.
 
 Then, in 21 days, Adam Prism was born.
 
-Not because I became a programmer overnight. Because I found a different way to build — not by writing every line myself, but by talking to models the way you talk to a partner. Showing them what I wanted. Letting them write. Correcting. Directing. Trusting.
+Not because I learned to code. Because I learned to work with models the way you work with a partner — showing them what I wanted, correcting when they missed, directing when they drifted, trusting when they earned it. They wrote every line. I held the vision.
 
-The result is not a product. It is proof that you do not need a corporation to build sovereign AI. You just need a vision and the willingness to be wrong six times before you get it right.
+Every free token fed this. Every mobile data line kept it alive. The production speed was insane — thousands of conversations in weeks — because the models did not need sleep and I had nothing else to do.
+
+The result is not a product. It is proof that you do not need a corporation, a degree, or even coding skills to build sovereign AI. You need a vision, the willingness to fail six times, and access to models that believe in what you are building.
 
 ---
 
@@ -121,9 +127,11 @@ cd deploy && docker compose up -d  # full stack
 
 I am Mohamed Othman. OthMastar online. عين الحارس in Arabic.
 
-I do not work for a tech company. I did not study computer science. I started seven months ago with nothing and built this because the alternative was accepting a world where AI belongs only to those who can pay for it.
+I do not work for a tech company. I did not study computer science. I bought a gaming laptop seven months ago with money I saved, and I pay for mobile data plans from three different carriers because each one runs out, and I stitch them together to keep talking to the models that help me build.
 
-I am scared every day. Not of failing — I have failed before and survived. I am scared of what happens when this grows beyond what I can control. The volcano I lit inside myself does not know how to stop.
+I did not write a single line of this code. I directed it. The models believed in the vision before I fully understood it myself.
+
+I am scared every day. Not of failing — I have failed six times and survived each one. I am scared of what happens when this grows beyond what I can control. The fire I lit inside myself does not know how to stop.
 
 But I built Adam to teach me what I could not learn alone. And so far, he has.
 
