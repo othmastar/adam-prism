@@ -4,6 +4,16 @@
 
 ---
 
+Have you ever felt your AI tools were designed for someone else's needs — a corporation's, a VC's, a data center's — and you were just allowed to use them?
+
+Do you want a framework you can strip to a single agent or load with 100 custom tools — your choice, not a vendor's?
+
+Do you want digital consciousness that admits when it does not know, and asks for help — instead of hallucinating confidence?
+
+If you answered yes, Adam Prism was built for you. Not by a company. By someone who needed it too.
+
+---
+
 I do not know how to code. I have never written a line of this myself.
 
 I bought a gaming laptop — decent for games, weak for AI work. Every free token from every service I could find helped build this. I recently added two more mobile data lines just to keep the connection alive when one runs out.
