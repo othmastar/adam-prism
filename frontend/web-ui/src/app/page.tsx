@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { ThemeProvider, useTheme } from "@teispace/next-themes";
+import { ThemeProvider } from "@teispace/next-themes";
 import { useAppStore, useInitializeStore } from "@/lib/store";
 import { useApiHealthCheck, useEngineStream } from "@/lib/api";
 import { ChatSidebar } from "@/components/adam/chat-sidebar";
@@ -121,13 +121,6 @@ function AppContent() {
 }
 
 function ThemedApp() {
-  const { setTheme } = useTheme();
-
-  // Default to dark mode
-  useEffect(() => {
-    setTheme("dark");
-  }, [setTheme]);
-
   return <AppContent />;
 }
 
