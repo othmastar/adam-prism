@@ -20,7 +20,8 @@ type DiagnosticResult = {
 };
 
 export function IssueTerminal() {
-  const { diagnosticsOpen, setDiagnosticsOpen } = useAppStore();
+  const { diagnosticsOpen, setDiagnosticsOpen, settings } = useAppStore();
+  const isArabic = settings.language === "ar";
   const [result, setResult] = useState<DiagnosticResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [healing, setHealing] = useState(false);
@@ -136,7 +137,7 @@ export function IssueTerminal() {
   const failedCount = result?.summary.failed ?? 0;
 
   return (
-    <div className="fixed inset-0 z-[80] flex items-center justify-center backdrop-blur-sm"
+    <div className={cn("fixed inset-0 z-[80] flex items-center backdrop-blur-sm", isArabic ? "justify-start" : "justify-center")}
       style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}
       onClick={() => setDiagnosticsOpen(false)}>
       <div className="w-full max-w-2xl mx-4" onClick={(e) => e.stopPropagation()}>
