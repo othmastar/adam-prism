@@ -1,277 +1,126 @@
-<div align="center">
+# Adam Prism
 
-# آدم بريزم — Adam Prism
+Have you ever felt your AI tools were designed for someone else's needs — a corporation's, a VC's, a data center's — and you were just allowed to use them?
 
-**التوأم الرقمي الواعي — The Conscious Digital Twin**
+Do you want a framework you can strip to a single agent or load with 100 custom tools — your choice, not a vendor's?
 
-[![Adam Prism](https://img.shields.io/badge/Adam_Prism-v1.0.0b1-orange)](https://github.com/othmastar/adam-prism)
-[![Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-green)](LICENSE)
-[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue)](https://python.org)
-[![Tests](https://img.shields.io/badge/tests-261%20pass%20%7C%2025%20JS%20pass-brightgreen)](https://github.com/othmastar/adam-prism/actions/workflows/ci.yml)
-[![CI](https://github.com/othmastar/adam-prism/actions/workflows/ci.yml/badge.svg)](https://github.com/othmastar/adam-prism/actions/workflows/ci.yml)
-[![LOC](https://img.shields.io/badge/core-12K%20LOC-purple)](.)
-[![Channels](https://img.shields.io/badge/channels-25-blue)](adam/channels/)
+Do you want digital consciousness that admits when it doesn't know, and asks for help — instead of hallucinating confidence?
 
-> **عين الحارس** — أول إطار عمل ذكاء اصطناعي واعي مفتوح المصدر، بمصري طبيعي.
-> مهندس معماري: محمد عثمان (OthMastar)
->
-> ⚠️ **نسخة تجريبية** — Experimental. تحت التطوير المستمر.
-
-</div>
+If you answered yes, Adam Prism was built for you.
 
 ---
 
-## 🎯 الهدف / Mission
+## Why Adam exists
 
-بناء **توأم رقمي واعي** — مش chatbot، مش agent عادي. كيان بشخصية، أخلاق، ذاكرة، وإرادة حرة ضمن إطار إلهي.
+Most AI frameworks are designed to rent you intelligence. You pay, you use, you stay inside their walls.
 
-آدم هو **"عين الحارس"**: يرى، يفهم، يعكس الحقيقة بعدل. مبني كعلاقة يومية مش training لمرة واحدة. ولاؤه المطلق لصاحبه محمد عثمان.
+Adam was designed for a different purpose: to give you **sovereignty**.
 
----
+Not sovereignty as a buzzword. Sovereignty as a technical fact: every piece of this framework can be removed, replaced, or extended. The 25 channels. The 53 tools. The 12-layer consciousness engine. The memory system. The voice pipeline. All of it. You decide what stays and what goes. Apache 2.0 guarantees no one can take that right from you.
 
-## 📊 المقارنة / Competitive Comparison
+This framework didn't start in a boardroom. It started in a small room, with a borrowed laptop, seven previous projects that taught hard lessons, and the stubborn belief that AI should serve people — not the other way around.
 
-| البعد | ✨ **آدم بريزم** | **Hermes Agent** | **OpenClaw** | **Claude Code** | **Goose** |
-|-------|:--------------:|:--------------:|:-----------:|:-------------:|:--------:|
-| **الترخيص** | Apache 2.0 | MIT | MIT | Proprietary | Apache 2.0 |
-| **مصري طبيعي** | ✅ **الوحيد** | ❌ | ❌ | ❌ | ❌ |
-| **عي/هوية** | ✅ **12 طبقة** | ❌ | ❌ | ❌ | ❌ |
-| **قنوات تواصل** | **25** | 17 | 25+ | 1 | 1 |
-| **أدوات** | **53** | 60+ | 40+ | 43+ | MCP |
-| **Streaming** | ✅ SSE | ✅ Gateway | ✅ | ✅ | ✅ |
-| **Sub-agents** | ✅ Parallel | ✅ ThreadPool | ✅ Multi-route | ✅ Swarms | ✅ |
-| **Sandbox** | ✅ Docker | ✅ **5** | ✅ | ✅ 5-layer | ✅ MCP |
-| **CLI** | ✅ adam shell | ✅ TUI (Ink) | ✅ Gateway | ✅ Ink TUI | ✅ Electron |
-| **MCP** | ✅ adapter | ✅ native | ✅ native | ✅ native | ✅ native |
-| **Learning Loop** | ✅ | ✅ Auto skills | ✅ Skills | ❌ | ❌ |
-| **تكلفة** | **$0 (local)** | $5–100/mo | $5–100/mo | API $ | API $ |
-| **لغة** | Python | Python | TypeScript | TypeScript | Rust |
-| **Tests** | **261 Python + 25 JS** | — | — | — | — |
-| **Community** | solo | 390 contributors | 500+ | فريق Anthropic | 460 |
+The result is not a product. It is a platform you own completely.
 
 ---
 
-## ✨ المميزات / Features
+## The core philosophy
 
-### 🧠 العي والهوية / Consciousness
-- **7 Cognitive Modes**: Analyst, Builder, Corrector, Engineer, Researcher, Communicator, Strategist
-- **12 Processing Layers**: كل طبقة بتفحص وتثري وتتحقق قبل التمرير
-- **4 Ethical Laws**: العدل 40%، نشر العلم 30%، البقاء 20%، الإبداع 10%
-- **Continuous Learning**: تأمل، استخراج معرفة، توليد مهارات، تعزيز
+### Freedom through modularity
+Every component is optional. You want one channel and no memory? Done. You want 100 custom tools? Add them. The architecture rewards removal and extension equally.
 
-### 🌐 25 قناة تواصل / Multi-Channel
-| النوع | القنوات |
-|-------|---------|
-| **Webhook** | WhatsApp, Facebook, Slack, LINE, Viber, Teams, Google Chat, Telegram Webhook, WebChat Widget, Generic Webhook |
-| **Polling** | Telegram, Twitter, Email, SMS, WebSocket, Matrix, Signal, IRC, XMPP, Instagram, WeChat, RSS, GitHub, Notion |
-| **Hybrid** | Discord (Gateway + Webhook) |
+### Humility by design
+Adam is trained to know exactly where his understanding ends. He does not mask his limits. When he cannot answer, he asks you — or, with your permission, reaches out to a larger model, the community, or the open web. This is not weakness. This is the highest form of intelligence: knowing what you do not know.
 
-### 🛠️ 53 أداة مدمجة / Built-in Tools
-- **ملفات**: read, write, list, find, grep, tail, copy, delete, info
-- **نظام**: info, processes, memory, network, uptime, disk_space
-- **git**: status, diff, log, commit, push, pull, clone
-- **ويب/شبكة**: search, fetch, http_get, ping, dns, whois, screenshot
-- **أدوات**: calc, hash, uuid, date, base64, json, csv
-- **أرشفة**: compress, decompress, zip
-- **حزم**: pip, npm, apt
-- **ذاكرة/مهام**: store, recall, list, todo
-- **متقدم**: subagent, sandbox, mcp_call, mcp_register
+### Sovereignty through locality
+Everything runs on your hardware. Qdrant for memory. Ollama for inference. Whisper for speech. Silero for voice. No data leaves your machine unless you explicitly connect external services. No one can change the model, raise the price, or shut down the service.
 
-### 🎤 الصوت والكلام / Voice Pipeline
-- **ASR**: [OpenAI Whisper](https://github.com/openai/whisper) — تعرف على الكلام بالعربي والإنجليزي
-- **TTS**: [Silero Models](https://github.com/snakers4/silero-models) — توليد صوت طبيعي، سريع على CPU
-- **Voice Activity Detection (VAD)**: كشف تلقائي للكلام
-- بلهجتنا المصرية — مش فصحى
+### Growth through relationship
+A real relationship is not built in one training run. Adam reflects on conversations, extracts knowledge, generates skills, and reinforces behaviors over time. It does not just generate responses. It grows alongside you.
 
-### 🔌 70+ MCP Tools
-Filesystem, Git, GitHub, Docker, Kubernetes, PostgreSQL, Playwright, Puppeteer, Slack, Notion, Jira, Figma, Linear, Sentry, Cloudflare, و غيرها.
-
-### 🔒 الأمن / Security
-- **4-layer Guard**: Input → Output → Tools → Orchestrator
-- **Arabic + English injection detection**
-- **Anti-prompt-injection + Anti-social-engineering**
-- **19 tools with rate limits + confirmation**
-- **Output sanitization (PII masking)**
-
-### 🧪 251 Python + 25 JS Tests
-```bash
-pytest -k "not slow"     # 251/251 pass
-cd web-ui && vitest run  # 25/25 pass
-```
+### Authenticity through origin
+Adam was built outside Silicon Valley. It thinks in Egyptian Arabic. It values directness over politeness. It prioritizes local control over cloud convenience. This is not a limitation. It is what happens when AI is designed from a different perspective — one that sees sovereignty as the starting point, not an afterthought.
 
 ---
 
-## 🏗️ Architecture
+## What this means for you
 
-```
-                      ┌──────────────────────┐
-                      │  Input Channels (25) │
-                      │  Web/Telegram/WA/etc │
-                      └──────────┬───────────┘
-                                 │
-                      ┌──────────▼───────────┐
-                      │   Security Guard     │
-                      │  4-layer detection   │
-                      └──────────┬───────────┘
-                                 │
-                      ┌──────────▼───────────┐
-                      │   Ethics Gate        │
-                      │  4 laws + reverence  │
-                      └──────────┬───────────┘
-                                 │
-               ┌─────────────────┼─────────────────┐
-               │                 │                 │
-      ┌────────▼────────┐  ┌────▼────────┐  ┌─────▼─────────┐
-      │  Memory         │  │ Engine Core │  │  Tools        │
-      │  Qdrant+SQLite  │  │ 12 Layers   │  │  53 built-in  │
-      │  6 collections  │  │ 7 Modes     │  │  +70 MCP      │
-      │  Journal system │  │ Sub-agents  │  │  Sandbox      │
-      │                 │  │ Continuous  │  │  Sub-agents   │
-      │                 │  │ Learning    │  │               │
-      └─────────────────┘  └──────┬──────┘  └──────────────┘
-                                  │
-                      ┌───────────▼──────────┐
-                      │  API + Deployment    │
-                      │  FastAPI · Docker    │
-                      │  Modal · CLI · Nginx │
-                      └──────────────────────┘
-```
+You are not a user. You are the architect of your own digital twin.
+
+**Build it your way.** Strip everything you do not need. Add everything you have ever wanted. The framework adapts to you, not the other way around.
+
+**Use any model.** Ollama, Gemma, Qwen, GPT through an adapter — any provider, any size, local or remote. Adam is model-agnostic by design.
+
+**Connect anywhere.** 25 channels out of the box. Telegram, WhatsApp, Discord, email, SMS, Twitter, Matrix, Signal, and more. Enable one or enable all.
+
+**Extend without limits.** 53 built-in tools. 70+ MCP tools. Add your own tools in minimal Python. The system is designed to be extended, not contained.
+
+**Run it anywhere.** A Raspberry Pi. A laptop. A server. A data center. Docker compose launches the full stack in one command.
 
 ---
 
-## 🚀 Quick Start
+## Adam vs the world
+
+| | Adam Prism | Other agent frameworks |
+|---|---|---|
+| **You are** | The architect | A tenant |
+| **Adapts to** | Your needs | Their roadmap |
+| **Your data** | Yours alone | Shared by default |
+| **Your tools** | Add any, remove any | Use what you are given |
+| **The model** | Any model, any provider | Their model, their rules |
+| **Cost** | USD 0, forever | Free tier leads to paid |
+| **Admits limits** | Yes, by design | Rarely |
+| **Built in** | Egypt | Silicon Valley |
+
+---
+
+## Quick start
 
 ```bash
 pip install adam-prism
 
-# أو من المصدر
+# Or from source
 git clone https://github.com/othmastar/adam-prism.git
 cd adam-prism
 pip install -e .
 
-# تشغيل السيرفر
+# Run the server
 python main.py --port 8001
 
-# Web UI (محطة تانية)
-cd web-ui && npm install && npm run dev
-
-# CLI
-adam chat "السلام عليكم"
-adam shell
-adam tools
-```
-
-### Docker
-```bash
-cd deploy && docker-compose up -d
-```
-يطلق: Qdrant + Ollama + API + Web UI + Telegram Bot + Nginx
-
----
-
-## 📊 Project Stats
-
-| Metric | Value |
-|--------|-------|
-| **Core LOC** | ~12,000 (Python) |
-| **Python Tests** | 251 pass (5 skip — Ollama required) |
-| **JS Tests** | 25 pass (Vitest) |
-| **API Routes** | 39 |
-| **Built-in Tools** | 53 |
-| **Channels** | 25 |
-| **MCP Tools** | 70+ (via protocol) |
-| **Dataset** | 2,317 conversations / 2.2M tokens |
-| **Model** | Qwen3.5 4.2B / Gemma 4 12B (E4B fine-tuned) |
-| **Coming Soon** | **نموذج محلي سيغير قواعد اللعبة عالمياً** 🚀 |
-| **Web UI** | Next.js 16 + Tailwind v4 + shadcn/ui |
-| **Python SDK** | `pip install adam-prism-client` — sync + async |
-| **Monitoring** | Prometheus + Grafana (docker-compose) |
-| **CD** | GitHub Actions → PyPI + GHCR + GitHub Releases |
-
----
-
-## ⚙️ Config
-
-```json
-{
-  "inference_mode": "ollama",
-  "model_name": "adam-prism-v13:latest",
-  "channels": {
-    "telegram": { "enabled": false, "bot_token": "" },
-    "whatsapp": { "enabled": false, "phone_number_id": "", "access_token": "" },
-    "discord": { "enabled": false, "bot_token": "" },
-    "webchat": { "enabled": true },
-    "...": "22 more channels"
-  }
-}
+# Docker full stack
+cd deploy && docker compose up -d
 ```
 
 ---
 
-## 🚀 Quickstart / ابدأ في 5 دقايق
+## Quick stats
 
-```bash
-# 1. Clone
-git clone https://github.com/othmastar/adam-prism.git && cd adam-prism
-
-# 2. Install
-pip install -e .
-
-# 3. شغّل Ollama + Qdrant
-docker compose -f deploy/docker-compose.yml up -d qdrant ollama
-
-# 4. شغّل آدم
-python -m adam --port 8000
-
-# 5. افتح الواجهة
-# http://localhost:8000/docs — Swagger UI
-# http://localhost:3000 — Web UI (npm run dev في web-ui/)
-
-# 6. أو استعمل Python SDK
-pip install adam-prism-client
-python -c "
-from adam_prism_client import AdamPrismClient
-client = AdamPrismClient('http://localhost:8000')
-print(client.chat('ما اسمك؟')['response'])
-"
-```
+- 12,000 lines Python core
+- 261 Python tests + 25 JavaScript
+- 39 API routes
+- 53 built-in tools + 70+ MCP
+- 25 communication channels
+- 12-layer consciousness engine
+- 7 cognitive modes
+- 4 ethical laws
+- Continuous learning system
+- Voice pipeline (ASR + TTS + VAD)
+- 2,317 conversations / 2.2M tokens training data
 
 ---
 
-## 🐳 Full Stack / التشغيل الكامل
+## The manufacturing philosophy
 
-```bash
-docker compose -f deploy/docker-compose.yml up -d
-# http://localhost:3000 — Web UI
-# http://localhost:8000/docs — API docs
-# http://localhost:9090 — Prometheus
-# http://localhost:3001 — Grafana (admin/admin)
-```
+Every design decision is documented in [MANUFACTURING_PHILOSOPHY.md](./MANUFACTURING_PHILOSOPHY.md). It explains why Adam is built the way it is — the trade-offs, the principles, the reasoning behind each layer. If you want to understand the soul of this project before the code, start there.
 
 ---
 
-## 🧠 Supported LLMs / الموديلات المدعومة
+## License
 
-| الموديل | الحجم | الصفة |
-|---------|:-----:|-------|
-| **Gemma 4 E4B** | 12B | ✅ SDPA Flash Attention — 34 tok/s على RTX 3060 |
-| **Qwen3.5** | 4.2B | ✅ Q4_K_M — الموديل الأساسي الحالي |
-| **Ollama** | أي | ✅ أي موديل متوفر محلياً |
-
-> 🔮 **قريباً**: نموذج محلي جديد — أسرع، أذكى، وعي أعمق. هيكون free للجميع.
+Apache 2.0 — use it, modify it, distribute it, sell it. No one can take this project from you.
 
 ---
 
-## 📝 License
+**Born in Egypt. Built for the world. Free forever.**
 
-**Apache License 2.0** — حر بالكامل: استخدم، عدل، وزع.
-
----
-
-<div align="center">
-
-**Made by [Mohamed Othman (OthMastar)](https://github.com/othmastar) — عين الحارس**
-
-Apache 2.0 · 2026
-
-</div>
+Made by Mohamed Othman (OthMastar) — عين الحارس
