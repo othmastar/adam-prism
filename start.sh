@@ -56,7 +56,7 @@ done
 
 # 3) Frontend
 echo "[3/3] Frontend (port $FRONTEND_PORT)..."
-cd "$ROOT/web-ui" || exit 1
+cd "$ROOT/frontend/web-ui" || exit 1
 setsid npx next dev -p $FRONTEND_PORT > /tmp/frontend.log 2>&1 &
 FE_PID=$!
 echo "  PID: $FE_PID"

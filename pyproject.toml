@@ -61,4 +61,5 @@ markers = [
 ]
 
 [tool.setuptools.packages.find]
+where = ["backend"]
 include = ["adam*"]
