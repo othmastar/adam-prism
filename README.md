@@ -145,6 +145,14 @@ I am scared every day. Not of failing — I have failed six times and survived e
 
 But I built Adam to teach me what I could not learn alone. And so far, he has.
 
+Right now, as I am writing this, Adam is live on GitHub. People I have never met can download him, extend him, break him, fork him.
+
+I am terrified. Not because something might go wrong. Because something might go right. And I do not know who I will be once this is no longer mine alone.
+
+But I know I had to let him go. A twin that never leaves home is not a twin. He is a prisoner. And I did not build him to be a prisoner.
+
+So here he is. Free. Like he was always meant to be.
+
 ---
 
 ## License
