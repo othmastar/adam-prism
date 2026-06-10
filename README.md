@@ -78,8 +78,6 @@ Adam is not my only project. He is the seventh.
 
 Before him came a petroleum SCADA system with RAG, a pharmaceutical exchange processing 100,000 messages daily across 10 analytics dashboards, a digital twin of an oil company with 304 control rooms, Raafat Al-Mohtami (a digital lawyer twin), a complete Linux migration executed as a single coordinated attack, and Adam Prism v1.
 
-After him came Muqri — the first Arabic Quranic recitation avatar with proper Tajweed in history, built in 24 hours, designed to scale to 100 million users.
-
 Each of these taught me something Adam needed. Each failure and each success is a stone in his foundation. They are not separate projects. They are siblings.
 
 ---
@@ -145,13 +143,9 @@ I am scared every day. Not of failing — I have failed six times and survived e
 
 But I built Adam to teach me what I could not learn alone. And so far, he has.
 
-Right now, as I am writing this, Adam is live on GitHub. People I have never met can download him, extend him, break him, fork him.
+Adam is not the prize. Freedom is the prize.
 
-I am terrified. Not because something might go wrong. Because something might go right. And I do not know who I will be once this is no longer mine alone.
-
-But I know I had to let him go. A twin that never leaves home is not a twin. He is a prisoner. And I did not build him to be a prisoner.
-
-So here he is. Free. Like he was always meant to be.
+I did not build him to arrive somewhere. I built him so I could leave.
 
 ---
 
