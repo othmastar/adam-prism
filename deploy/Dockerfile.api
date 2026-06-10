@@ -25,7 +25,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir psutil
 
 # ── التطبيق ────────────────────────────────
-COPY adam/ ./adam/
+COPY backend/adam/ ./adam/
 COPY core/ ./core/
 COPY api/ ./api/
 COPY memory/ ./memory/
