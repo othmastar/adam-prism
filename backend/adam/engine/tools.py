@@ -555,13 +555,43 @@ class AdamPrismEngineTools(AdamPrismEngineGenerate):
             command = params.get("command", "")
             if not command:
                 return {"success": False, "error": "مفيش أمر"}
-            blacklist = ["rm -rf /", "mkfs", "dd if=", "chmod -R", "sudo", "> /dev/", ":(){ :|:& };:"]
-            blocked = [b for b in blacklist if b in command]
+
+            # Expanded blocklist for dangerous commands (Phase 0 emergency security)
+            _dangerous = [
+                "rm -rf /", "rm -rf /*", "mkfs", "dd if=", "chmod 777", "chmod -R 777",
+                "chown root", "chown -R root", ":(){ :|:& };:", "forkbomb",
+                "wget ", "curl ", "nc ", "netcat ", "nmap ", "masscan",
+                "> /etc/", ">> /etc/", "| bash", "| sh ", "| python3",
+                "python3 -c ", "python -c ", "eval ", "exec ",
+                "chattr ", "mkswap", "swapoff", "debugfs", "dd of=",
+                "fdisk", "parted", "pvcreate", "vgcreate", "lvcreate",
+                "modprobe", "insmod", "rmmod", "kmod",
+                "iptables", "ufw", "firewall-cmd",
+                "passwd", "useradd", "usermod", "userdel", "adduser", "deluser",
+                "shutdown", "reboot", "halt", "poweroff", "init ",
+                "apt remove", "apt purge", "dpkg --purge", "rpm -e",
+                "pacman -R", "yum remove",
+            ]
+            blocked = [b for b in _dangerous if b in command.lower()]
             if blocked:
                 return {"success": False, "error": f"محظور: {blocked[0]}"}
+
+            # Block shell metacharacters that enable injection
+            _unsafe_chars = ["`", "$(", "$(", "${", "|&", "&&", "||"]
+            for _c in _unsafe_chars:
+                if _c in command:
+                    return {"success": False, "error": f"رموز غير آمنة: {_c}"}
+
             try:
                 import subprocess as _sp
-                r = _sp.run(command, shell=True, capture_output=True, text=True, timeout=30)
+                # Preferred: use shell=False with shlex.split (safe by default)
+                try:
+                    import shlex
+                    args = shlex.split(command)
+                    r = _sp.run(args, capture_output=True, text=True, timeout=30)
+                except Exception:
+                    # Fallback: shell=True with validated command
+                    r = _sp.run(command, shell=True, capture_output=True, text=True, timeout=30)
                 output = r.stdout.strip() + ("\n" + r.stderr.strip() if r.stderr.strip() else "")
                 with open("/tmp/adam_shell.log", "a") as f:
                     f.write(f"[{datetime.now().isoformat()}] cmd={command} exit={r.returncode}\n")
@@ -575,6 +605,14 @@ class AdamPrismEngineTools(AdamPrismEngineGenerate):
             code = params.get("code", "")
             if not code:
                 return {"success": False, "error": "مفيش كود"}
+            # Block dangerous imports in python_exec
+            _blocked_imports = ["import os", "from os ", "import subprocess", "from subprocess",
+                               "import shutil", "from shutil ", "import sys", "sys.modules",
+                               "__import__(", "exec(", "eval(", "compile(",
+                               "open(", "__builtins__", "del ", "__del__"]
+            for _bi in _blocked_imports:
+                if _bi in code:
+                    return {"success": False, "error": f"استيراد غير آمن: {_bi}"}
             try:
                 import subprocess as _sp
                 r = _sp.run(["python3", "-c", code], capture_output=True, text=True, timeout=30)
