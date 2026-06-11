@@ -407,10 +407,11 @@ button{padding:10px 20px;border-radius:20px;background:#e94560;color:#fff;border
 <div class="chat"><h2>🤖 آدم</h2><div id="messages"></div>
 <input id="msg" placeholder="اكتب رسالتك..."/><button onclick="send()">إرسال</button></div>
 <script>
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 async function send(){const m=document.getElementById('msg');if(!m.value)return;
-const d=document.getElementById('messages');d.innerHTML+='<div class="user">🧑 '+m.value+'</div>';
+const d=document.getElementById('messages');d.innerHTML+='<div class="user">🧑 '+esc(m.value)+'</div>';
 const r=await fetch('/chat/webhook',{method:'POST',body:JSON.stringify({message:m.value}),headers:{'Content-Type':'application/json'}});
-const j=await r.json();d.innerHTML+='<div class="bot">🤖 '+j.response+'</div>';m.value='';d.scrollTop=d.scrollHeight;}
+const j=await r.json();d.innerHTML+='<div class="bot">🤖 '+esc(j.response||'')+'</div>';m.value='';d.scrollTop=d.scrollHeight;}
 document.getElementById('msg').addEventListener('keydown',e=>{if(e.key==='Enter')send()});
 </script></body></html>"""
         return {"content": html, "status_code": 200, "media_type": "text/html"}

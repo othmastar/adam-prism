@@ -18,6 +18,7 @@ from typing import Optional, Dict, List, Any
 
 from core.permissions import classify_tool, log_permission
 from core import memory_store
+from adam.infrastructure import sanitize_path
 from adam.engine.generate import AdamPrismEngineGenerate
 
 logger = logging.getLogger("adam_prism.core")
@@ -406,15 +407,18 @@ class AdamPrismEngineTools(AdamPrismEngineGenerate):
                 path = params.get("path", "")
                 if not path:
                     return {"success": False, "error": "مفيش مسار"}
-                if not os.path.isfile(path):
-                    return {"success": False, "error": f"الملف مش موجود: {path}"}
+                safe = sanitize_path(path)
+                if not safe:
+                    return {"success": False, "error": "مسار غير مصرح به"}
+                if not os.path.isfile(safe):
+                    return {"success": False, "error": f"الملف مش موجود: {safe}"}
                 max_size = 1024 * 1024
-                size = os.path.getsize(path)
+                size = os.path.getsize(safe)
                 if size > max_size:
                     return {"success": False, "error": f"الملف كبير جداً ({size//1024}KB). الحد 1MB."}
-                with open(path, "r", encoding="utf-8", errors="replace") as f:
+                with open(safe, "r", encoding="utf-8", errors="replace") as f:
                     content = f.read()
-                return {"success": True, "data": content, "path": path, "size": size}
+                return {"success": True, "data": content, "path": safe, "size": size}
 
             elif tool_name == "file_write":
                 path = params.get("path", "")
@@ -423,10 +427,13 @@ class AdamPrismEngineTools(AdamPrismEngineGenerate):
                     return {"success": False, "error": "مفيش مسار"}
                 if content is None:
                     return {"success": False, "error": "مفيش محتوى"}
-                os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
-                with open(path, "w", encoding="utf-8") as f:
+                safe = sanitize_path(path)
+                if not safe:
+                    return {"success": False, "error": "مسار غير مصرح به"}
+                os.makedirs(os.path.dirname(safe) or ".", exist_ok=True)
+                with open(safe, "w", encoding="utf-8") as f:
                     f.write(content)
-                return {"success": True, "path": path, "size": len(content)}
+                return {"success": True, "path": safe, "size": len(content)}
 
             elif tool_name == "file_download":
                 url = params.get("url", "")
