@@ -72,9 +72,6 @@ function AppContent() {
       {/* Floating system monitor */}
       <FloatingMonitor />
 
-      {/* IssueTerminal — modal overlay */}
-      <IssueTerminal />
-
       {/* ModelOrchestrator — modal overlay */}
       <ModelOrchestrator />
 
@@ -116,6 +113,9 @@ function AppContent() {
         {activeView === "channels" && <ChannelsPanel />}
         {activeView === "memory" && <MemoryPanel />}
       </main>
+
+      {/* IssueTerminal — modal overlay (renders last for highest z-index) */}
+      <IssueTerminal />
     </div>
   );
 }

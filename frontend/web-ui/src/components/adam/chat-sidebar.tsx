@@ -170,7 +170,7 @@ export function ChatSidebar() {
     if (!conv || conv.messages.length === 0) return;
 
     const text = conv.messages
-      .map((m) => `${m.role === "user" ? "س:" : "آدم:"} ${m.content}`)
+      .map((m) => `${m.role === "user" ? (isArabic ? "س:" : "Q:") : (isArabic ? "آدم:" : "Adam:")} ${m.content}`)
       .join("\n\n");
 
     toast({ title: isArabic ? "جاري التلخيص..." : "Summarizing...", duration: 2000 });
