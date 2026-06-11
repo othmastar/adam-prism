@@ -33,11 +33,17 @@ class AdamPrismEngineBase:
     """
 
     def __init__(self, config: Dict[str, Any]):
-        self.config = config
-        self.lora_server_url = config.get("lora_server_url", "http://localhost:8080")
+        from adam.config import AdamConfig
+        if isinstance(config, AdamConfig):
+            self._adam_cfg = config
+            self.config = config.to_dict()
+        else:
+            self._adam_cfg = AdamConfig.from_dict(config)
+            self.config = config
+        self.lora_server_url = self.config.get("lora_server_url", "http://localhost:8080")
         self.session_id = str(uuid.uuid4())
-        self.context_window = config.get("context_window", 4096)
-        self.token_budget = config.get("token_budget", 4000)
+        self.context_window = self.config.get("context_window", 4096)
+        self.token_budget = self.config.get("token_budget", 4000)
         self.permission = PermissionState(self.session_id)
         self.learner = PreferenceLearner()
 
