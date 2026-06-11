@@ -2478,5 +2478,65 @@
     "feedback": "good",
     "issues": [],
     "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-11T04:21:34.353049",
+    "message_preview": "ما اسمك؟",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-11T04:21:35.761246",
+    "message_preview": "مرحبا",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-11T04:21:37.777282",
+    "message_preview": "كيف حالك؟",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "technical_researcher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-11T04:21:57.139069",
+    "message_preview": "ما اسمك؟",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-11T04:21:58.536651",
+    "message_preview": "مرحبا",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-11T04:22:01.068255",
+    "message_preview": "كيف حالك؟",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "technical_researcher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
   }
 ]
