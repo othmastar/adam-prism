@@ -71,7 +71,7 @@ class AdamPrismEngineTools(
             except (json.JSONDecodeError, ValueError):
                 continue
 
-        json_pattern = r'\{\s*"_tool"\s*:\s*"[^"]+"\s*,"params"\s*:\s*\{[^}]*\}\s*\}'
+        json_pattern = r'\{\s*"_tool"\s*:\s*"[^"]+"\s*,\s*"params"\s*:\s*\{.*?\}\s*\}'
         match = re.search(json_pattern, text, re.DOTALL)
         if match:
             try:
