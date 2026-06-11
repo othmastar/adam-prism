@@ -35,7 +35,7 @@
   "screen_width": 1920,
   "screen_height": 1080,
   "chromium_data_dir": "./data/chromium-profile",
-  "firefox_profile_path": "/home/othmastar/.config/mozilla/firefox/iwdl6mkc.default-release",
+  "firefox_profile_path": "~/.mozilla/firefox/__default__",
   "max_conversation_history": 50,
   "max_tool_calls": 3,
   "tool_timeout": 30,
