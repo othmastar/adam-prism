@@ -157,7 +157,8 @@ class SlackChannel(BaseChannel):
 
     def verify_signature(self, body: bytes, timestamp: str, signature: str) -> bool:
         if not self.signing_secret:
-            return True
+            logger.warning("Slack: signing_secret غير مضبوط — توثيق webhook معطل")
+            return False
         import hashlib, hmac
         base = f"v0:{timestamp}:{body.decode()}"
         expected = "v0=" + hmac.new(self.signing_secret.encode(), base.encode(), hashlib.sha256).hexdigest()
@@ -505,7 +506,8 @@ class FacebookChannel(BaseChannel):
 
     def verify_signature(self, body: bytes, signature: str) -> bool:
         if not self.app_secret:
-            return True
+            logger.warning("Facebook: app_secret غير مضبوط — توثيق webhook معطل")
+            return False
         import hmac, hashlib
         expected = "sha256=" + hmac.new(self.app_secret.encode(), body, hashlib.sha256).hexdigest()
         return hmac.compare_digest(expected, signature)

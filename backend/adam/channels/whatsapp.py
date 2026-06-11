@@ -41,7 +41,8 @@ class WhatsAppChannel(BaseChannel):
 
     def verify_signature(self, raw_body: bytes, signature_header: str) -> bool:
         if not self.app_secret:
-            return True
+            logger.warning("WhatsApp: app_secret غير مضبوط — توثيق webhook معطل")
+            return False
         expected = hmac.new(self.app_secret.encode(), raw_body, hashlib.sha256).hexdigest()
         return hmac.compare_digest(f"sha256={expected}", signature_header)
 
