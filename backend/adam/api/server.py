@@ -16,7 +16,8 @@ from typing import Dict, Any, Optional, List
 import httpx
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Request, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse, HTMLResponse
+from fastapi.responses import StreamingResponse, HTMLResponse, JSONResponse
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 from api.chat_store import ChatStore
 from core.voice_pipeline import VoicePipeline, int16_to_float32, resample_audio
@@ -143,6 +144,19 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    
+    # API Key authentication (optional — only if ADAM_API_KEY env var is set)
+    _api_key = os.environ.get("ADAM_API_KEY", "")
+    if _api_key:
+        @app.middleware("http")
+        async def _check_api_key(request: Request, call_next):
+            if request.url.path in ("/", "/api/status", "/docs", "/openapi.json", "/chat/widget", "/chat/webhook"):
+                return await call_next(request)
+            auth = request.headers.get("Authorization", "")
+            if auth == f"Bearer {_api_key}":
+                return await call_next(request)
+            return JSONResponse(status_code=403, content={"detail": "Unauthorized — set ADAM_API_KEY or provide Bearer token"})
+        logger.info("🔑 API Key authentication enabled")
     
     # Serve static UI files
     import os as _os
