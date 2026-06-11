@@ -23,7 +23,7 @@ class Browser:
         self._healthy = False
         self._browsers_path = self.config.get(
             "browsers_path",
-            "/mnt/Workspace/.local/ms-playwright"
+            os.environ.get("PLAYWRIGHT_BROWSERS_PATH", os.path.expanduser("~/.local/ms-playwright"))
         )
 
     async def initialize(self):

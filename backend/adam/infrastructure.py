@@ -8,6 +8,7 @@ Adam Prism - Production Infrastructure
 import asyncio
 import hashlib
 import logging
+import os
 import time
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
@@ -217,7 +218,7 @@ class MetricsCollector:
 # ═══════════════════════════════════════
 
 ALLOWED_FILE_PATHS = [
-    "/mnt/Workspace/Adam_Prism_Complete_v2",
+    os.path.expanduser("~"),
     "/tmp",
     "./notebook",
     "./data",

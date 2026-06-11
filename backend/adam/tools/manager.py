@@ -108,7 +108,8 @@ class ToolManager:
                     f.write(content)
                 return {"success": True}
             elif at == "disk_space":
-                r = subprocess.run(["df", "-h", "/mnt/Workspace"],
+                _df_path = os.environ.get("ADAM_WORKSPACE", os.path.expanduser("~"))
+                r = subprocess.run(["df", "-h", _df_path],
                                   capture_output=True, text=True, timeout=5)
                 return {"success": True, "data": r.stdout}
             return {"success": False, "error": f"File action unknown: {at}"}
