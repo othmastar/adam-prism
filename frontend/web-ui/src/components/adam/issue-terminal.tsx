@@ -19,6 +19,8 @@ type DiagnosticResult = {
   summary: { passed: number; failed: number; total: number };
 };
 
+const t = (isArabic: boolean, ar: string, en: string) => isArabic ? ar : en;
+
 export function IssueTerminal() {
   const { diagnosticsOpen, setDiagnosticsOpen, settings } = useAppStore();
   const isArabic = settings.language === "ar";
@@ -34,7 +36,9 @@ export function IssueTerminal() {
     setResult(null);
 
     const baseLog = [
-      "> adam.diagnostics() — تشخيص ذاتي للنظام",
+      t(isArabic,
+        "> adam.diagnostics() — تشخيص ذاتي للنظام",
+        "> adam.diagnostics() — system self-diagnosis"),
       "  ╔══════════════════════════════════════╗",
       "  ║  ADAM PRISM — AUTO-DIAGNOSTIC v2.0  ║",
       "  ╚══════════════════════════════════════╝",
@@ -47,7 +51,6 @@ export function IssueTerminal() {
       const res = await fetch(`${url}/api/engine/diagnostics`);
       const data: DiagnosticResult = await res.json();
 
-      // Animate each check in
       const checkLines: string[] = [];
       for (const check of data.checks) {
         const icon = check.status === "pass" ? "[OK]" : "[FAIL]";
@@ -61,12 +64,17 @@ export function IssueTerminal() {
       }
 
       await new Promise((r) => setTimeout(r, 400));
+      const statusMsg = data.status === "healthy"
+        ? t(isArabic, "✅ النظام سليم", "✅ System healthy")
+        : t(isArabic, "⚠️ هناك مشاكل", "⚠️ Issues detected");
       setLogs((prev) => [
         ...prev,
         "",
-        `[DONE]  ${data.summary.passed}/${data.summary.total} passed, ${data.summary.failed} failed — ${data.status === "healthy" ? "✅ النظام سليم" : "⚠️ هناك مشاكل"}`,
+        `[DONE]  ${data.summary.passed}/${data.summary.total} ${t(isArabic, "نجح", "passed")}, ${data.summary.failed} ${t(isArabic, "فشل", "failed")} — ${statusMsg}`,
         "",
-        `${data.status === "healthy" ? "> No critical issues." : `> ${data.summary.failed} issue(s) detected.`}`,
+        data.status === "healthy"
+          ? `> ${t(isArabic, "لا توجد مشكلات حرجة", "No critical issues.")}`
+          : `> ${data.summary.failed} ${t(isArabic, "مشكلة تم اكتشافها", "issue(s) detected.")}`,
       ]);
 
       setResult(data);
@@ -74,19 +82,19 @@ export function IssueTerminal() {
       setLogs((prev) => [
         ...prev,
         "",
-        "[FAIL]  تعذر الاتصال بخادم التشخيص",
+        `[FAIL]  ${t(isArabic, "تعذر الاتصال بخادم التشخيص", "Connection to diagnostic server failed")}`,
         "",
-        "> Connection failed — check if server is running.",
+        `> ${t(isArabic, "تحقق من تشغيل الخادم", "Check if server is running.")}`,
       ]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isArabic]);
 
   const runHealing = useCallback(async () => {
     if (healing) return;
     setHealing(true);
-    setLogs((prev) => [...prev, "", "> بدء التصليح الذاتي..."]);
+    setLogs((prev) => [...prev, "", `> ${t(isArabic, "بدء التصليح الذاتي...", "Starting self-healing...")}`]);
 
     try {
       const url = getFastApiUrl();
@@ -104,20 +112,19 @@ export function IssueTerminal() {
         ...prev,
         "",
         data.status === "healed"
-          ? `[DONE]  ${actions.length} إجراء تم بنجاح`
-          : "[DONE]  لا توجد إجراءات مطلوبة",
+          ? `[DONE]  ${actions.length} ${t(isArabic, "إجراء تم بنجاح", "action(s) completed successfully")}`
+          : `[DONE]  ${t(isArabic, "لا توجد إجراءات مطلوبة", "No actions required")}`,
       ]);
 
-      // إعادة التشخيص بعد الشفاء
       await new Promise((r) => setTimeout(r, 500));
       setResult(null);
       fetchDiagnostics();
     } catch (err) {
-      setLogs((prev) => [...prev, "", `[FAIL]  فشل التصليح: ${err}`]);
+      setLogs((prev) => [...prev, "", `[FAIL]  ${t(isArabic, "فشل التصليح:", "Healing failed:")} ${err}`]);
     } finally {
       setHealing(false);
     }
-  }, [fetchDiagnostics, healing]);
+  }, [fetchDiagnostics, healing, isArabic]);
 
   useEffect(() => {
     if (diagnosticsOpen && !result && !loading) {
@@ -149,21 +156,21 @@ export function IssueTerminal() {
               <div className="h-3 w-3 rounded-full bg-yellow-500" />
               <div className="h-3 w-3 rounded-full bg-emerald-500" />
             </div>
-            <span className="text-[11px] text-zinc-400 font-mono ms-2">adam@diagnostics — real-time</span>
+            <span className="text-[11px] text-zinc-400 font-mono ms-2">{t(isArabic, "آدم@تشخيص", "adam@diagnostics")} — {t(isArabic, "فوري", "real-time")}</span>
           </div>
           <div className="flex items-center gap-2">
             {!loading && result && result.summary.failed > 0 && (
               <Button variant="ghost" size="sm" className="h-6 text-[10px] text-amber-400 hover:text-amber-300 gap-1"
                 onClick={runHealing} disabled={healing}>
                 <Wrench className="h-3 w-3" />
-                {healing ? "..." : "إصلاح"}
+                {t(isArabic, "إصلاح", "Repair")}
               </Button>
             )}
             {!loading && (
               <Button variant="ghost" size="sm" className="h-6 text-[10px] text-zinc-400 hover:text-white gap-1"
                 onClick={fetchDiagnostics}>
                 <RefreshCw className="h-3 w-3" />
-                إعادة
+                {t(isArabic, "إعادة", "Refresh")}
               </Button>
             )}
             <Button variant="ghost" size="icon" className="h-6 w-6 text-zinc-400 hover:text-white"
@@ -195,13 +202,13 @@ export function IssueTerminal() {
           {loading && (
             <div className="flex items-center gap-2 text-zinc-500 mt-2">
               <Loader2 className="h-3 w-3 animate-spin" />
-              <span className="animate-pulse">جاري التشخيص...</span>
+              <span className="animate-pulse">{t(isArabic, "جاري التشخيص...", "Running diagnostics...")}</span>
             </div>
           )}
           {healing && (
             <div className="flex items-center gap-2 text-amber-500 mt-2">
               <Wrench className="h-3 w-3 animate-bounce" />
-              <span className="animate-pulse">جاري التصليح الذاتي...</span>
+              <span className="animate-pulse">{t(isArabic, "جاري التصليح الذاتي...", "Self-healing in progress...")}</span>
             </div>
           )}
 
@@ -217,8 +224,8 @@ export function IssueTerminal() {
               )}
               <span className="text-xs font-medium">
                 {isHealthy
-                  ? "Self-healing complete — النظام سليم"
-                  : `${failedCount} مشكلة تم اكتشافها`}
+                  ? t(isArabic, "Self-healing complete — النظام سليم", "Self-healing complete — system healthy")
+                  : `${failedCount} ${t(isArabic, "مشكلة تم اكتشافها", "issue(s) detected")}`}
               </span>
             </div>
           )}

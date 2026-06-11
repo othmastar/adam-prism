@@ -71,12 +71,11 @@ const stepIcons: Record<string, { icon: string; labelAr: string; labelEn: string
   "اكتمال الدورة": { icon: "✅", labelAr: "اكتمل", labelEn: "Complete" },
 };
 
-function getStepStatus(currentSteps: ProcessingStep[]): { icon: string; text: string } | null {
-  // Find the latest running step
+function getStepStatus(currentSteps: ProcessingStep[], isArabic: boolean): { icon: string; text: string } | null {
   const running = currentSteps.filter((s) => s.status === "running").pop();
   if (!running) return null;
   const info = stepIcons[running.step] || { icon: "⏳", labelAr: running.step, labelEn: running.step };
-  return { icon: info.icon, text: info.labelAr };
+  return { icon: info.icon, text: isArabic ? info.labelAr : info.labelEn };
 }
 
 function CognitiveModeBadge({ mode, isArabic }: { mode: CognitiveMode; isArabic: boolean }) {
@@ -93,7 +92,7 @@ function CognitiveModeBadge({ mode, isArabic }: { mode: CognitiveMode; isArabic:
   );
 }
 
-function AudioPlayButton({ audioUrl }: { audioUrl: string }) {
+function AudioPlayButton({ audioUrl, isArabic }: { audioUrl: string; isArabic: boolean }) {
   const [playing, setPlaying] = useState(false);
   const [ended, setEnded] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -153,7 +152,7 @@ function AudioPlayButton({ audioUrl }: { audioUrl: string }) {
         <button
           onClick={handleReplay}
           className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] bg-muted/50 text-muted-foreground hover:text-primary hover:bg-muted transition-all"
-          title="إعادة"
+          title={isArabic ? "إعادة" : "Replay"}
         >
           <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="1 4 1 10 7 10" />
@@ -170,7 +169,7 @@ function AudioPlayButton({ audioUrl }: { audioUrl: string }) {
               ? "bg-destructive/20 text-destructive"
               : "bg-muted/50 text-muted-foreground hover:text-primary hover:bg-muted"
           )}
-          title={playing ? "إيقاف" : "استماع"}
+          title={playing ? (isArabic ? "إيقاف" : "Stop") : (isArabic ? "استماع" : "Listen")}
         >
           {playing ? (
             <Square className="h-3 w-3" fill="currentColor" />
@@ -239,7 +238,7 @@ function MessageBubble({ message }: { message: Message }) {
         {/* Audio playback for AI messages — يظهر فقط عند hover */}
         {!isUser && message.audioUrl && (
           <div className="px-1">
-            <AudioPlayButton audioUrl={message.audioUrl} />
+            <AudioPlayButton audioUrl={message.audioUrl} isArabic={isArabic} />
           </div>
         )}
 
@@ -801,7 +800,7 @@ export function ChatInterface() {
     const userMessage: Message = {
       id: crypto.randomUUID(),
       role: "user",
-      content: "🎤 [رسالة صوتية]",
+      content: isArabic ? "🎤 [رسالة صوتية]" : "🎤 [Voice message]",
       timestamp: Date.now(),
     };
 
@@ -812,7 +811,7 @@ export function ChatInterface() {
       convId = crypto.randomUUID();
       conv = {
         id: convId,
-        title: "رسالة صوتية",
+        title: isArabic ? "رسالة صوتية" : "Voice message",
         messages: [userMessage],
         createdAt: Date.now(),
         updatedAt: Date.now(),
@@ -1023,7 +1022,7 @@ export function ChatInterface() {
                 <div className="chat-bubble-ai glass rounded-2xl px-4 py-3">
                   <TypingIndicator />
                   {(() => {
-                    const status = getStepStatus(processingSteps);
+                    const status = getStepStatus(processingSteps, isArabic);
                     return status ? (
                       <div className="flex items-center gap-1.5 mt-0.5 text-[10px] text-muted-foreground border-t border-border/50 pt-1.5">
                         <span>{status.icon}</span>
