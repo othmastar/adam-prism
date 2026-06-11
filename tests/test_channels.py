@@ -69,7 +69,7 @@ class TestWhatsAppChannel:
 
     def test_verify_signature_no_secret(self):
         ch = WhatsAppChannel({"whatsapp": {}})
-        assert ch.verify_signature(b"hello", "sig") is True
+        assert ch.verify_signature(b"hello", "sig") is False
 
     def test_verify_signature_valid(self):
         ch = WhatsAppChannel({"whatsapp": {"app_secret": "secret"}})
