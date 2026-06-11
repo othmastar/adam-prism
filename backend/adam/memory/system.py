@@ -4,6 +4,7 @@ Adam Prism - نظام الذاكرة
 ذاكرة طويلة المدى + قصيرة المدى مع Vector Search عبر Qdrant + Nomic Embedding
 """
 
+import asyncio
 import json
 import logging
 import time

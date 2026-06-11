@@ -2388,5 +2388,95 @@
     "feedback": "good",
     "issues": [],
     "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-11T04:15:41.851805",
+    "message_preview": "ما اسمك؟",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-11T04:15:42.788666",
+    "message_preview": "مرحبا",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-11T04:15:43.830339",
+    "message_preview": "كيف حالك؟",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "technical_researcher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-11T04:17:43.351837",
+    "message_preview": "ما اسمك؟",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-11T04:17:44.058958",
+    "message_preview": "مرحبا",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-11T04:17:44.852159",
+    "message_preview": "كيف حالك؟",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "technical_researcher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-11T04:18:25.782883",
+    "message_preview": "ما اسمك؟",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-11T04:18:27.199544",
+    "message_preview": "مرحبا",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-11T04:18:29.135595",
+    "message_preview": "كيف حالك؟",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "technical_researcher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
   }
 ]
