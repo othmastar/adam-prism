@@ -60,6 +60,13 @@ temp/
 
 # Runtime data
 data/learning/reflections.json
+data/uploads/
+
+# Auto-generated summaries
+notebook/summaries/
+
+# Cache
+.mypy_cache/
 
 # Build artifacts
 *.tsbuildinfo
