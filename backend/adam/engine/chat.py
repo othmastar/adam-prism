@@ -17,6 +17,12 @@ from adam.engine.tools import AdamPrismEngineTools
 
 logger = logging.getLogger("adam_prism.core")
 
+def _bg_task(coro):
+    """جدولة مهمة خلفية مع التقاط الاستثناءات — يمنع task exception was never retrieved"""
+    task = asyncio.create_task(coro)
+    task.add_done_callback(lambda t: t.exception() if not t.cancelled() else None)
+    return task
+
 
 class AdamPrismEngineChat(AdamPrismEngineTools):
     """
@@ -373,65 +379,8 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
         return response_text, tool_records, tool_calls_made, errors
 
     def _detect_auto_tool(self, message: str, intent: Dict, has_knowledge: bool = False) -> Optional[Dict]:
-        """يكتشف لو المستخدم عايز حاجة محتاجة أداة، ويرجع auto tool call"""
-        msg_lower = message.lower().strip()
-        intent_type = (intent.get("intent_type") or "").lower()
-
-        # أولاً: shell / file_read — أوامر تنفيذ واضحة
-        if any(w in msg_lower for w in ["شغل", "نفذ", "run ", "شوف محتوى", "ls ", "dir ", "اقرأ ملف", "شوف"]):
-            # ترجمة الأوامر العربية لأوامر bash حقيقية
-            cmd_map = {
-                "شوف محتوى الدايركتوري": "ls -la",
-                "شوف محتوى": "ls -la",
-                "شوف": "ls",
-                "اقرأ ملف": "cat",
-                "شغل": "",
-                "نفذ": "",
-            }
-            command = message[:200]
-            # strip Arabic filler words
-            arabic_filler = ["الدايركتوري", "المحتوى", "دايركتوري", "الملف", "الملفات", "الـ"]
-            for arabic, bash in cmd_map.items():
-                if arabic in command:
-                    if bash:
-                        command = command.replace(arabic, bash)
-                    else:
-                        command = command.replace(arabic, "").strip()
-                    break
-            for filler in arabic_filler:
-                command = command.replace(filler, "")
-            command = command.strip().strip("'\"")
-            return {"_tool": "shell", "params": {"command": command}}
-
-        # قراءة ملف
-        if any(w in msg_lower for w in ["اقرأ", "read file", "display file", "عرض ملف"]):
-            import re as _re
-            paths = _re.findall(r'(?:/[\w.\-]+)+', message)
-            if paths:
-                return {"_tool": "file_read", "params": {"path": paths[0]}}
-            return {"_tool": "file_read", "params": {"path": message.rsplit(None, 1)[-1]}}
-
-        # المتصفح - فتح URL أو أمر browse
-        if any(w in msg_lower for w in ["افتح", "open", "http", "www.", ".com", "دور على"]):
-            import re as _re
-            urls = _re.findall(r'https?://[^\s<>"\'(){}|\\^`\[\]]+', message)
-            if urls:
-                return {"_tool": "browser_open", "params": {"url": urls[0]}}
-            search_term = message.rsplit(None, 1)[-1] if " " in message else message
-            # لو مش URL صالح, اعتبره search
-            if "." not in search_term or search_term.startswith("افتح"):
-                search_term = message.replace("افتح", "").replace("open", "").strip()
-                encoded = search_term.replace(" ", "+")
-                return {"_tool": "browser_open", "params": {"url": f"https://www.google.com/search?q={encoded}"}}
-            return {"_tool": "browser_open", "params": {"url": search_term if search_term.startswith("http") else f"https://{search_term}"}}
-
-        # أخيراً: لو سؤال معرفة ومفيش knowledge في السياق
-        if not has_knowledge:
-            knowledge_triggers = ["إيه", "هو", "ما", "ازاي", "how", "what", "why", "tell me about",
-                                  "اعرف", "قول", "فهمني", "شرح", "دور", "ابحث", "شوف"]
-            if any(message.startswith(t) or f" {t} " in f" {message} " for t in knowledge_triggers):
-                return {"_tool": "search_knowledge", "params": {"query": message[:200], "top_k": 5}}
-
+        """معطل — auto-tool heuristics تسببت في تنفيذ أوامر غير مقصودة.
+        النموذج يقرر استخدام الأدوات عبر التنسيق المنظم بدلاً من keyword matching."""
         return None
 
     async def _chat_finalize(
@@ -471,10 +420,10 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
                 logger.warning(f"فشل حفظ في Qdrant: {e}")
         await self._emit_step("التسجيل والحفظ", "done")
 
-        asyncio.create_task(self._extract_and_save_lessons(user_message, response_text, intent))
+        _bg_task(self._extract_and_save_lessons(user_message, response_text, intent))
 
         if self.continuous_learner:
-            asyncio.create_task(
+            _bg_task(
                 self.continuous_learner.process_interaction(
                     user_message, response_text,
                     {"mode": self.active_mode, "cycle": self.cycle_count}
@@ -497,7 +446,7 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
             )
             self.trace_recorder.record(trace)
             if self.meta_learner and tool_records:
-                asyncio.create_task(self.meta_learner.process_trace(trace))
+                _bg_task(self.meta_learner.process_trace(trace))
 
         await self._emit_step("اكتمال الدورة", "done", {"duration_ms": int(cycle_duration * 1000)})
 

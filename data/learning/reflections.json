@@ -1898,5 +1898,465 @@
     "feedback": "good",
     "issues": [],
     "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-09T06:06:38.304392",
+    "message_preview": "ما اسمك؟",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-09T06:06:52.585361",
+    "message_preview": "افتح https://example.com",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.\n\nعاوزني أنفذلك الحاجة دي بأداة من أدواتي؟",
+    "mode": "strategic_analyst",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-09T06:06:53.930950",
+    "message_preview": "مرحبا",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-09T06:06:55.293669",
+    "message_preview": "كيف حالك؟",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.",
+    "mode": "technical_researcher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-09T06:07:06.799860",
+    "message_preview": "افتح https://example.com",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.\n\nعاوزني أنفذلك الحاجة دي بأداة من أدواتي؟",
+    "mode": "strategic_analyst",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-09T06:07:24.538891",
+    "message_preview": "افتح https://example.com",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.\n\nعاوزني أنفذلك الحاجة دي بأداة من أدواتي؟",
+    "mode": "strategic_analyst",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-09T06:13:28.974644",
+    "message_preview": "ما اسمك؟",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-09T06:13:29.667273",
+    "message_preview": "مرحبا",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-09T06:13:30.410544",
+    "message_preview": "كيف حالك؟",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "technical_researcher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-09T06:13:33.924828",
+    "message_preview": "افتح https://example.com",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.\n\nعاوزني أنفذلك الحاجة دي بأداة من أدواتي؟",
+    "mode": "strategic_analyst",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-09T06:13:48.143693",
+    "message_preview": "ما اسمك؟",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-09T06:13:48.783899",
+    "message_preview": "مرحبا",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-09T06:13:49.559211",
+    "message_preview": "كيف حالك؟",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "technical_researcher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-09T06:13:53.012202",
+    "message_preview": "افتح https://example.com",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.\n\nعاوزني أنفذلك الحاجة دي بأداة من أدواتي؟",
+    "mode": "strategic_analyst",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-09T06:22:49.005538",
+    "message_preview": "ما اسمك؟",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-09T06:22:49.646973",
+    "message_preview": "مرحبا",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-09T06:22:50.424207",
+    "message_preview": "كيف حالك؟",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "technical_researcher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-09T06:22:54.382922",
+    "message_preview": "افتح https://example.com",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.\n\nعاوزني أنفذلك الحاجة دي بأداة من أدواتي؟",
+    "mode": "strategic_analyst",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-10T12:17:29.374069",
+    "message_preview": "ما اسمك؟",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-10T12:17:30.051792",
+    "message_preview": "مرحبا",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-10T12:17:30.863364",
+    "message_preview": "كيف حالك؟",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "technical_researcher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-10T12:19:33.197203",
+    "message_preview": "ما اسمك؟",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-10T12:19:33.845142",
+    "message_preview": "مرحبا",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-10T12:19:34.540046",
+    "message_preview": "كيف حالك؟",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "technical_researcher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-11T03:51:45.974978",
+    "message_preview": "ما اسمك؟",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-11T03:51:46.980824",
+    "message_preview": "مرحبا",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-11T03:51:48.010824",
+    "message_preview": "كيف حالك؟",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "technical_researcher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-11T03:51:49.411712",
+    "message_preview": "ما اسمك؟",
+    "response_preview": "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-11T03:51:58.473006",
+    "message_preview": "ما اسمك؟",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-11T03:51:59.419111",
+    "message_preview": "مرحبا",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-11T03:52:00.489617",
+    "message_preview": "كيف حالك؟",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "technical_researcher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-11T03:52:54.890135",
+    "message_preview": "ما اسمك؟",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-11T03:52:56.288055",
+    "message_preview": "مرحبا",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-11T03:52:57.360039",
+    "message_preview": "كيف حالك؟",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "technical_researcher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-11T03:54:10.666590",
+    "message_preview": "ما اسمك؟",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-11T03:54:11.588619",
+    "message_preview": "مرحبا",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-11T03:54:12.613348",
+    "message_preview": "كيف حالك؟",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "technical_researcher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-11T03:55:57.328354",
+    "message_preview": "ما اسمك؟",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-11T03:55:58.270466",
+    "message_preview": "مرحبا",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-11T03:55:59.294466",
+    "message_preview": "كيف حالك؟",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "technical_researcher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-11T03:56:52.399614",
+    "message_preview": "ما اسمك؟",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-11T03:56:53.333919",
+    "message_preview": "مرحبا",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-11T03:56:54.489104",
+    "message_preview": "كيف حالك؟",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "technical_researcher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-11T03:59:58.059798",
+    "message_preview": "ما اسمك؟",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-11T03:59:59.031130",
+    "message_preview": "مرحبا",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-11T04:00:00.054580",
+    "message_preview": "كيف حالك؟",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "technical_researcher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
   }
 ]
