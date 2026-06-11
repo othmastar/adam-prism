@@ -2358,5 +2358,35 @@
     "feedback": "good",
     "issues": [],
     "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-11T04:04:18.767805",
+    "message_preview": "ما اسمك؟",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-11T04:04:19.792535",
+    "message_preview": "مرحبا",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "teacher",
+    "cycle": 1,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
+  },
+  {
+    "timestamp": "2026-06-11T04:04:20.948283",
+    "message_preview": "كيف حالك؟",
+    "response_preview": "أهلاً بك! أنا آدم.",
+    "mode": "technical_researcher",
+    "cycle": 2,
+    "feedback": "good",
+    "issues": [],
+    "quality_score": 1.0
   }
 ]

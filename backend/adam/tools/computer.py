@@ -12,7 +12,7 @@ from typing import Dict, Any, Optional
 
 logger = logging.getLogger("adam_prism.tools")
 
-_WS_BIN = "/mnt/Workspace/.local/bin"
+_WS_BIN = os.environ.get("ADAM_LOCAL_BIN", os.path.expanduser("~/.local/bin"))
 _ENV = {**os.environ, "PATH": f"{_WS_BIN}:{os.environ.get('PATH', '')}"}
 
 

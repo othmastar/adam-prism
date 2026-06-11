@@ -426,8 +426,8 @@ class LahgtnaTTS:
     def __init__(self, dialect: str = "eg", repo_src: str = "",
                  ckpt_dir: str = ""):
         self._dialect = dialect
-        self._repo_src = repo_src or "/mnt/Workspace/Adam_Prism_Complete_v2/models/lahgtna-chatterbox-repo/src"
-        self._ckpt_dir = ckpt_dir or "/mnt/Workspace/Adam_Prism_Complete_v2/models/lahgtna-chatterbox-v0"
+        self._repo_src = repo_src or os.environ.get("ADAM_VOICE_REPO", "")
+        self._ckpt_dir = ckpt_dir or os.environ.get("ADAM_VOICE_CKPT", "")
         self._pipeline = None
         self._available = False
         self._sample_rate = 24000

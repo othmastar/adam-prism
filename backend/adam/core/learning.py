@@ -17,7 +17,7 @@ from typing import Dict, List, Optional, Tuple
 
 logger = logging.getLogger("adam_prism.learning")
 
-NOTES_DIR = "/mnt/Workspace/.local/adam_notebook"
+NOTES_DIR = os.environ.get("ADAM_NOTEBOOK_DIR", os.path.expanduser("~/.local/adam_notebook"))
 PREFERENCES_PATH = os.path.join(NOTES_DIR, "preferences.json")
 HISTORY_PATH = os.path.join(NOTES_DIR, "decision_history.json")
 

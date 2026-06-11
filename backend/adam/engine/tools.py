@@ -155,11 +155,22 @@ class AdamPrismEngineTools(AdamPrismEngineGenerate):
 
         return True, tool_name, params
 
+    @property
+    def _local_bin(self) -> str:
+        return self.config.get("local_bin", os.path.expanduser("~/.local/bin"))
+
+    @property
+    def _data_dir(self) -> str:
+        return self.config.get("data_dir", os.path.expanduser("~/.local/share/adam"))
+
     async def _tool_browser(self, tool_name: str, params: Dict) -> Dict:
         """أدوات المتصفح — Playwright Firefox مباشرة"""
         try:
             from playwright.async_api import async_playwright
-            os.environ["PLAYWRIGHT_BROWSERS_PATH"] = "/mnt/Workspace/.local/ms-playwright"
+            os.environ["PLAYWRIGHT_BROWSERS_PATH"] = self.config.get(
+                "playwright_browsers_path",
+                os.path.expanduser("~/.local/ms-playwright")
+            )
             if not hasattr(self, '_pw_playwright') or self._pw_playwright is None:
                 self._pw_playwright = await async_playwright().start()
                 self._pw_browser = await self._pw_playwright.firefox.launch(headless=True)
@@ -213,7 +224,7 @@ class AdamPrismEngineTools(AdamPrismEngineGenerate):
 
     async def _tool_mouse(self, tool_name: str, params: Dict) -> Dict:
         """أدوات الماوس — xdotool"""
-        _ws_bin = "/mnt/Workspace/.local/bin"
+        _ws_bin = self._local_bin
         _env = {**os.environ, "PATH": f"{_ws_bin}:{os.environ.get('PATH', '')}"}
 
         try:
@@ -278,7 +289,7 @@ class AdamPrismEngineTools(AdamPrismEngineGenerate):
 
     async def _tool_keyboard(self, tool_name: str, params: Dict) -> Dict:
         """أدوات الكيبورد — xdotool"""
-        _ws_bin = "/mnt/Workspace/.local/bin"
+        _ws_bin = self._local_bin
         _env = {**os.environ, "PATH": f"{_ws_bin}:{os.environ.get('PATH', '')}"}
         try:
             if tool_name == "keyboard_type":
@@ -307,7 +318,7 @@ class AdamPrismEngineTools(AdamPrismEngineGenerate):
 
     async def _tool_clipboard(self, tool_name: str, params: Dict) -> Dict:
         """أدوات الحافظة — xsel"""
-        _ws_bin = "/mnt/Workspace/.local/bin"
+        _ws_bin = self._local_bin
         _env = {**os.environ, "PATH": f"{_ws_bin}:{os.environ.get('PATH', '')}"}
         try:
             if tool_name == "clipboard_read":
@@ -330,7 +341,7 @@ class AdamPrismEngineTools(AdamPrismEngineGenerate):
                 return {"success": r.returncode == 0, "data": r.stdout, "error": r.stderr.strip() or ""}
 
             elif tool_name == "screen_ocr":
-                _ws_bin = "/mnt/Workspace/.local/bin"
+                _ws_bin = self._local_bin
                 _env = {**os.environ, "PATH": f"{_ws_bin}:{os.environ.get('PATH', '')}"}
                 shot = f"/tmp/adam_ocr_{uuid.uuid4().hex[:8]}.png"
                 r1 = subprocess.run(["import", "-window", "root", shot], capture_output=True, text=True, timeout=10, env=_env)
@@ -352,7 +363,7 @@ class AdamPrismEngineTools(AdamPrismEngineGenerate):
 
     async def _tool_window(self, tool_name: str, params: Dict) -> Dict:
         """أدوات النوافذ — xdotool, wmctrl"""
-        _ws_bin = "/mnt/Workspace/.local/bin"
+        _ws_bin = self._local_bin
         _env = {**os.environ, "PATH": f"{_ws_bin}:{os.environ.get('PATH', '')}"}
         try:
             if tool_name == "window_focus":
@@ -391,8 +402,8 @@ class AdamPrismEngineTools(AdamPrismEngineGenerate):
         """أداة مساحة القرص"""
         try:
             disk_data = {}
-            for path in ["/", "/mnt/Workspace"]:
-                if os.path.exists(path):
+            extra_paths = [p for p in self.config.get("extra_disk_paths", []) if os.path.exists(p)]
+            for path in ["/"] + extra_paths:
                     usage = subprocess.check_output(["df", "-h", path]).decode().split("\n")[1].split()
                     disk_data[path] = {"size": usage[1], "used": usage[2], "available": usage[3], "used_pct": usage[4]}
             return {"success": True, "disks": disk_data}
@@ -543,7 +554,7 @@ class AdamPrismEngineTools(AdamPrismEngineGenerate):
             if not data:
                 return {"success": False, "error": "مفيش بيانات"}
             try:
-                notes_dir = "/mnt/Workspace/.local/adam_notebook"
+                notes_dir = self.config.get("notebook_dir", os.path.expanduser("~/.local/adam_notebook"))
                 os.makedirs(notes_dir, exist_ok=True)
                 profile_path = os.path.join(notes_dir, "user_profile.json")
                 profile = {}
@@ -673,7 +684,7 @@ class AdamPrismEngineTools(AdamPrismEngineGenerate):
     async def _tool_planning(self, params: Dict) -> Dict:
         """أداة التخطيط — CRUD للمهام"""
         action = params.get("action", "list")
-        todo_file = "/mnt/Workspace/adam_v8_output/todo_list.json"
+        todo_file = self.config.get("todo_file", os.path.expanduser("~/.local/share/adam/todo_list.json"))
         result = {"success": True, "action": action}
         try:
             from pathlib import Path as _Path
