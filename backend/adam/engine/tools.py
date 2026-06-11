@@ -454,7 +454,7 @@ class AdamPrismEngineTools(AdamPrismEngineGenerate):
             return {"success": False, "error": str(e)}
 
     async def _tool_knowledge(self, params: Dict) -> Dict:
-        """البحث في Qdrant — async"""
+        """البحث في Qdrant — async مع connection pooling"""
         query = params.get("query", "")
         top_k = params.get("top_k", 3)
         if not query:
@@ -462,18 +462,24 @@ class AdamPrismEngineTools(AdamPrismEngineGenerate):
         try:
             from urllib.parse import urlparse
             from qdrant_client import AsyncQdrantClient
-            import httpx
             qdrant_url = self.config.get("qdrant_url", "http://localhost:6333")
             pu = urlparse(qdrant_url)
             ollama_base = self.config.get("ollama_base", "http://localhost:11434")
-            client = AsyncQdrantClient(host=pu.hostname or "localhost", port=pu.port or 6333)
-            collected = []
-            async with httpx.AsyncClient(timeout=10) as hc:
-                o_resp = await hc.post(f"{ollama_base}/api/embeddings", json={
-                    "model": "nomic-embed-text", "prompt": query
-                })
-                o_data = o_resp.json()
+
+            if not hasattr(self, "_qdrant_client") or self._qdrant_client is None:
+                self._qdrant_client = AsyncQdrantClient(
+                    host=pu.hostname or "localhost", port=pu.port or 6333
+                )
+            client = self._qdrant_client
+
+            hc = await self.shared_clients.get("ollama", ollama_base, timeout=10)
+            o_resp = await hc.post("/api/embeddings", json={
+                "model": "nomic-embed-text", "prompt": query
+            })
+            o_data = o_resp.json()
             query_vec = o_data.get("embedding")
+
+            collected = []
             if query_vec and len(query_vec) == 768:
                 cols = await client.get_collections()
                 for col in cols.collections:
@@ -497,7 +503,6 @@ class AdamPrismEngineTools(AdamPrismEngineGenerate):
                                 collected.append({"collection": col.name, "text": text, "score": 0.5})
                     except Exception:
                         pass
-            await client.close()
             collected.sort(key=lambda x: -x["score"])
             return {"success": True, "results": collected[:top_k], "count": min(len(collected), top_k)}
         except Exception as e:

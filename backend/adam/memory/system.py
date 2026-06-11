@@ -191,16 +191,14 @@ class MemorySystem:
             await self._close_client(client)
 
     async def retrieve(self, query: str, top_k: int = 5) -> List[Dict[str, Any]]:
-        """استرجاع ذكريات ذات صلة (من كل المجموعات)"""
+        """استرجاع ذكريات ذات صلة (من كل المجموعات) — بالتوازي"""
+        coll_types = list(self.collections.keys())
+        tasks = [self.search(query, collection=coll_type, top_k=top_k) for coll_type in coll_types]
         all_results = []
-        
-        for coll_type in self.collections:
-            results = await self.search(query, collection=coll_type, top_k=top_k)
+        for coll_type, results in zip(coll_types, await asyncio.gather(*tasks)):
             for r in results:
                 r["source"] = coll_type
                 all_results.append(r)
-        
-        # ترتيب حسب الصلة
         all_results.sort(key=lambda x: x.get("score", 0), reverse=True)
         return all_results[:top_k]
 
