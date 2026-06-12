@@ -217,7 +217,7 @@ cd deploy && docker compose up -d  # full stack
 - Voice pipeline (ASR + TTS), MCP native host
 - Subagent swarm with team coordination
 - Production: rate limiting, auth, admin key, security hardening, CORS
-- 2,317 conversations / 2.2M tokens training data
+- 2,317 conversations / 220 M tokens training data
 - Stack: FastAPI, Qdrant, Ollama, Next.js, Docker, Apache 2.0
 
 ---
