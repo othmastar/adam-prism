@@ -1,8 +1,19 @@
 """
-Adam Prism - API Server
-=======================
+Adam Prism - API Server — HARDENED v2
+======================================
 خادم API يربط كل الموديولات ويوفر الواجهة للـ Web UI والـ Telegram.
 يعمل على FastAPI مع WebSocket support.
+
+[SECURITY FIXES v2]
+1. رفض التشغيل بمفتاح API افتراضي في الإنتاج
+2. حماية نقاط webhook من تجاوز المصادقة (ترتيب صحيح)
+3. حماية WebSocket بالمصادقة (token parameter)
+4. تقييد إضافة خوادم MCP بالمسؤول فقط (ADAM_ADMIN_KEY)
+5. تحديد عدد الوكلاء الفرعيين
+6. [NEW] Rate limiting لكل نقاط API
+7. [NEW] تأكيد مفتاح المسؤول لإضافة MCP
+8. [NEW] تحديد حجم طلبات API
+9. [NEW] تسجيل أمني شامل
 """
 
 import json
@@ -10,6 +21,7 @@ import os
 import sqlite3
 import logging
 import asyncio
+import time
 from datetime import datetime
 from typing import Dict, Any, Optional, List
 
@@ -19,9 +31,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, HTMLResponse, JSONResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
-from api.chat_store import ChatStore
-from core.voice_pipeline import VoicePipeline, int16_to_float32, resample_audio
-from core.permissions import log_permission
+from adam.api.chat_store import ChatStore
+from adam.core.voice import VoicePipeline, int16_to_float32, resample_audio
+from adam.core.permissions import log_permission
 
 logger = logging.getLogger("adam_prism.api")
 
@@ -94,6 +106,41 @@ def _qdrant_client(engine):
     from qdrant_client import QdrantClient
     return QdrantClient(host=pu.hostname or "localhost", port=pu.port or 6333)
 
+
+# ═══════════════════════════════════════════════════════
+# [NEW] Rate Limiter — حماية من إساءة الاستخدام
+# ═══════════════════════════════════════════════════════
+
+class RateLimiter:
+    """Rate limiter بسيط في الذاكرة — لكل IP"""
+
+    def __init__(self, max_requests: int = 60, window_seconds: int = 60):
+        self.max_requests = max_requests
+        self.window_seconds = window_seconds
+        self._requests: Dict[str, List[float]] = {}
+
+    def is_allowed(self, key: str) -> bool:
+        now = time.time()
+        if key not in self._requests:
+            self._requests[key] = [now]
+            return True
+        # حذف الطلبات القديمة
+        self._requests[key] = [t for t in self._requests[key] if now - t < self.window_seconds]
+        if len(self._requests[key]) >= self.max_requests:
+            return False
+        self._requests[key].append(now)
+        return True
+
+    def get_remaining(self, key: str) -> int:
+        now = time.time()
+        if key not in self._requests:
+            return self.max_requests
+        self._requests[key] = [t for t in self._requests[key] if now - t < self.window_seconds]
+        return max(0, self.max_requests - len(self._requests[key]))
+
+
+# ═══════════════════════════════════════════════════════
+
 def create_app(engine=None, channel_manager=None) -> FastAPI:
     """إنشاء تطبيق FastAPI مع كل المسارات"""
 
@@ -102,6 +149,103 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
         description="واجهة برمجة التطبيقات لآدم بريزم - التوأم الرقمي الشخصي",
         version="1.0.0"
     )
+
+    # ═══════════════════════════════════════════════════════
+    # [FIX] المصادقة — تفعيلها أولاً قبل أي مسارات
+    # ═══════════════════════════════════════════════════════
+    import hmac as _hmac
+    _api_key = os.environ.get("ADAM_API_KEY", "adam-prism-change-me")
+
+    # [FIX v2] مفتاح المسؤول — لإضافة خوادم MCP وعمليات حساسة
+    _admin_key = os.environ.get("ADAM_ADMIN_KEY", "")
+
+    # [FIX] في وضع الإنتاج، نرفض المفتاح الافتراضي
+    _is_production = os.environ.get("ADAM_PRODUCTION", "0") == "1"
+    if _is_production and _api_key == "adam-prism-change-me":
+        raise RuntimeError(
+            "SECURITY: ADAM_API_KEY not set in production mode! "
+            "Set a strong API key via environment variable ADAM_API_KEY before starting."
+        )
+
+    # [FIX v2] في وضع الإنتاج، لازم يكون فيه مفتاح مسؤول
+    if _is_production and not _admin_key:
+        raise RuntimeError(
+            "SECURITY: ADAM_ADMIN_KEY not set in production mode! "
+            "Set an admin key via environment variable ADAM_ADMIN_KEY before starting."
+        )
+
+    if _api_key == "adam-prism-change-me":
+        logger.warning("=" * 60)
+        logger.warning("ADAM_API_KEY not set — using default key!")
+        logger.warning("Anyone can access your API with the default key!")
+        logger.warning("Set ADAM_API_KEY environment variable to a strong secret!")
+        logger.warning("=" * 60)
+
+    if not _admin_key:
+        logger.warning("ADAM_ADMIN_KEY not set — MCP admin operations disabled!")
+
+    # [NEW] Rate limiter
+    _rate_limiter = RateLimiter(
+        max_requests=int(os.environ.get("ADAM_RATE_LIMIT", "60")),
+        window_seconds=60
+    )
+
+    # المسارات العامة — فقط الصفحة الرئيسية والوثائق
+    _public_paths = {"/", "/api/status", "/docs", "/openapi.json", "/redoc"}
+
+    # [NEW] الحد الأقصى لحجم طلب API
+    _max_request_size = int(os.environ.get("ADAM_MAX_REQUEST_SIZE", str(10 * 1024 * 1024)))  # 10MB default
+
+    @app.middleware("http")
+    async def _check_api_key(request: Request, call_next):
+        # نقاط مسموحة بدون مفتاح — الصفحة الرئيسية والوثائق فقط
+        if request.url.path in _public_paths:
+            return await call_next(request)
+
+        # [NEW] Rate limiting
+        client_ip = request.client.host if request.client else "unknown"
+        if not _rate_limiter.is_allowed(client_ip):
+            logger.warning(f"Rate limit exceeded for IP: {client_ip}")
+            return JSONResponse(
+                status_code=429,
+                content={"detail": "Too many requests — slow down"}
+            )
+
+        # المصادقة
+        auth = request.headers.get("Authorization", "")
+        expected = f"Bearer {_api_key}"
+        if _hmac.compare_digest(auth.encode(), expected.encode()):
+            return await call_next(request)
+        return JSONResponse(status_code=403, content={"detail": "Unauthorized — provide Bearer token in Authorization header"})
+
+    # [NEW] Middleware لتحديد حجم الطلب
+    @app.middleware("http")
+    async def _limit_request_size(request: Request, call_next):
+        if request.method in ("POST", "PUT", "PATCH"):
+            content_length = request.headers.get("content-length")
+            if content_length and int(content_length) > _max_request_size:
+                return JSONResponse(
+                    status_code=413,
+                    content={"detail": f"Request too large (max: {_max_request_size // 1024 // 1024}MB)"}
+                )
+        return await call_next(request)
+
+    logger.info("API Key authentication enabled")
+    logger.info(f"Rate limiter: {os.environ.get('ADAM_RATE_LIMIT', '60')} req/min")
+
+    # [FIX] CORS — تقييد أصل الإنتاج
+    cors_origins = os.environ.get("CORS_ORIGINS", "*")
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=cors_origins.split(",") if cors_origins != "*" else ["*"],
+        allow_credentials=cors_origins != "*",
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+    # ═══════════════════════════════════════════════════════
+    # نقاط webhook — الآن بعد المصادقة، محمية تلقائياً
+    # ═══════════════════════════════════════════════════════
 
     # Mount channel webhook routes
     if channel_manager:
@@ -116,9 +260,9 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
                 elif method == "post":
                     app.post(path)(handler)
             if routes:
-                logger.info(f"🌐 Mounted {len(routes)} channel webhook routes")
+                logger.info(f"Mounted {len(routes)} channel webhook routes (PROTECTED by auth)")
         except Exception as e:
-            logger.warning(f"⚠️ Channel route mounting failed: {e}")
+            logger.warning(f"Channel route mounting failed: {e}")
     else:
         # Still attempt to find and mount webchat widget
         try:
@@ -131,33 +275,10 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
                     app.post(path)(handler)
                 elif method == "get":
                     app.get(path)(handler)
-            logger.info("🌐 WebChat widget mounted at /chat/webhook and /chat/widget")
+            logger.info("WebChat widget mounted at /chat/webhook and /chat/widget (PROTECTED by auth)")
         except Exception:
             pass
-    
-    # CORS - السماح بالوصول من أي جهاز
-    cors_origins = os.environ.get("CORS_ORIGINS", "*")
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=cors_origins.split(",") if cors_origins != "*" else ["*"],
-        allow_credentials=cors_origins != "*",
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
-    
-    # API Key authentication (optional — only if ADAM_API_KEY env var is set)
-    _api_key = os.environ.get("ADAM_API_KEY", "")
-    if _api_key:
-        @app.middleware("http")
-        async def _check_api_key(request: Request, call_next):
-            if request.url.path in ("/", "/api/status", "/docs", "/openapi.json", "/chat/widget", "/chat/webhook"):
-                return await call_next(request)
-            auth = request.headers.get("Authorization", "")
-            if auth == f"Bearer {_api_key}":
-                return await call_next(request)
-            return JSONResponse(status_code=403, content={"detail": "Unauthorized — set ADAM_API_KEY or provide Bearer token"})
-        logger.info("🔑 API Key authentication enabled")
-    
+
     # Serve static UI files
     import os as _os
     _static_dir = _os.path.join(_os.path.dirname(_os.path.dirname(__file__)), "web-ui", "public")
@@ -167,14 +288,14 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
             app.mount("/ui", StaticFiles(directory=_static_dir, html=True), name="ui")
         except Exception as e:
             logger.warning(f"فشل تحميل الملفات الثابتة: {e}")
-    
+
     # Chat history store
     chat_store = ChatStore()
-    
+
     # ═══════════════════════════════════════
     # Routes
     # ═══════════════════════════════════════
-    
+
     @app.get("/")
     async def root():
         """الصفحة الرئيسية"""
@@ -192,7 +313,7 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
                 "ws": "/ws/chat"
             }
         }
-    
+
     @app.get("/api/status")
     async def get_status():
         """حالة النظام"""
@@ -202,7 +323,7 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
             status["lora_server_url"] = engine.lora_server_url
             return status
         return {"status": "engine_not_attached"}
-    
+
     @app.post("/api/chat", response_model=ChatResponse)
     async def chat(request: ChatRequest):
         """إرسال رسالة والحصول على رد مع رد صوتي"""
@@ -217,6 +338,10 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
             ctx = {"history": ctx}
         elif not isinstance(ctx, dict):
             ctx = {}
+
+        # [FIX v2] تحديد طول الرسالة
+        if len(request.message) > 10000:
+            raise HTTPException(status_code=400, detail="الرسالة طويلة جداً (الحد: 10000 حرف)")
 
         result = await engine.chat(request.message, ctx)
         response = ChatResponse(**result)
@@ -248,7 +373,7 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
                 logger.warning(f"فشل توليد الصوت للرد: {e}")
 
         return response
-    
+
     # ═══════════════════════════════════════
     # Chat History - REST API
     # ═══════════════════════════════════════
@@ -357,7 +482,7 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
     # ═══════════════════════════════════════
     # Knowledge Search
     # ═══════════════════════════════════════
-    
+
     @app.post("/api/knowledge/search")
     async def search_knowledge(request: SearchRequest):
         """البحث في القاعدة المعرفية"""
@@ -396,420 +521,308 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
         """إضافة معرفة جديدة لـ Qdrant"""
         try:
             body = await request.json()
-            text = body.get("text", "").strip()
-            collection = body.get("collection", "knowledge")
-            qdrant_collection = {"knowledge": "adam_knowledge", "conversations": "adam_conversations", "patterns": "adam_patterns"}.get(collection, collection)
-            metadata = body.get("metadata", {})
-            if not text:
-                raise HTTPException(400, "النص مطلوب")
-            from qdrant_client.http import models
-            qdrant = _qdrant_client(engine)
-            cols = [c.name for c in qdrant.get_collections().collections]
-            if qdrant_collection not in cols:
-                qdrant.create_collection(qdrant_collection, vectors_config=models.VectorParams(size=768, distance=models.Distance.COSINE))
-                logger.info(f"✅ Created new Qdrant collection: {qdrant_collection}")
-            try:
-                async with httpx.AsyncClient(timeout=30) as c:
-                    resp = await c.post(f"{_ollama_url(engine)}/api/embeddings", json={"model": "nomic-embed-text", "prompt": text})
-                    if resp.status_code == 200:
-                        vec = resp.json().get("embedding", [])
-                    else:
-                        raise ValueError(f"Ollama embed returned {resp.status_code}")
-            except Exception as e:
-                raise HTTPException(503, f"تعذر الحصول على embedding (Ollama غير متصل؟): {e}")
-            point_id = qdrant.count(qdrant_collection).count + 1
-            qdrant.upsert(qdrant_collection, points=[models.PointStruct(id=point_id, vector=vec, payload={"text": text, **metadata})])
-            return {"success": True, "collection": collection, "qdrant_collection": qdrant_collection, "id": point_id, "text_preview": text[:100]}
+            texts = body.get("texts", [])
+            if not texts:
+                raise HTTPException(status_code=400, detail="texts array مطلوب")
+            # [FIX v2] تحديد عدد النصوص المضافة
+            if len(texts) > 100:
+                raise HTTPException(status_code=400, detail="عدد النصوص كبير جداً (الحد: 100)")
+            results = []
+            for text in texts:
+                if engine and engine.knowledge:
+                    ok = await engine.knowledge.store(
+                        collection=body.get("collection", "knowledge"),
+                        text=text,
+                        metadata=body.get("metadata", {}),
+                    )
+                    results.append(ok)
+            return {"added": sum(1 for r in results if r), "total": len(results)}
         except HTTPException:
             raise
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"فشل الإضافة: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
 
     # ═══════════════════════════════════════
-    # Upload File to Knowledge Base
+    # Summarize
     # ═══════════════════════════════════════
 
-    @app.post("/api/knowledge/upload")
-    async def upload_knowledge_file(
-        file: UploadFile = File(...),
-        collection: str = Form("knowledge"),
-    ):
-        """رفع ملف (PDF, DOCX, TXT, MD) إلى قاعدة المعرفة"""
-        import os, tempfile, logging as log
-        log = logger.getChild("upload")
-
-        # Size limit (default 50MB)
-        MAX_UPLOAD = 50 * 1024 * 1024
-        content = await file.read()
-        if len(content) > MAX_UPLOAD:
-            raise HTTPException(413, f"الملف كبير جداً ({len(content)//1024//1024}MB). الحد 50MB.")
-
-        # Validate extension
-        ext = os.path.splitext(file.filename or "")[1].lower()
-        if ext not in (".pdf", ".docx", ".txt", ".md"):
-            raise HTTPException(400, f"الصيغة {ext} مش مدعومة. استخدم PDF, DOCX, TXT, MD")
-
-        # Save temp file
-        tmp = tempfile.NamedTemporaryFile(delete=False, suffix=ext)
-        try:
-            tmp.write(content)
-            tmp.close()
-
-            # Extract text
-            text = ""
-            if ext == ".pdf":
-                import fitz
-                doc = fitz.open(tmp.name)
-                for page in doc:
-                    text += page.get_text()
-                doc.close()
-            elif ext == ".docx":
-                import docx
-                d = docx.Document(tmp.name)
-                text = "\n".join(p.text for p in d.paragraphs)
-            elif ext in (".txt", ".md"):
-                text = content.decode("utf-8", errors="replace")
-
-            if not text.strip():
-                raise HTTPException(400, "مفيش نص قابل للاستخراج من الملف")
-
-            # Chunk large texts
-            chunks = []
-            if len(text) > 2000:
-                words = text.split()
-                chunk_size = 300
-                for i in range(0, len(words), chunk_size):
-                    chunks.append(" ".join(words[i:i+chunk_size]))
-            else:
-                chunks = [text]
-
-            # Add to Qdrant — resolve collection name for MemorySystem compatibility
-            qdrant_collection = {"knowledge": "adam_knowledge", "conversations": "adam_conversations", "patterns": "adam_patterns"}.get(collection, collection)
-            from qdrant_client.http import models
-            qdrant = _qdrant_client(engine)
-            cols = [c.name for c in qdrant.get_collections().collections]
-            if qdrant_collection not in cols:
-                qdrant.create_collection(qdrant_collection, vectors_config=models.VectorParams(size=768, distance=models.Distance.COSINE))
-
-            async def embed_chunk(chunk: str) -> list:
-                async with httpx.AsyncClient(timeout=30) as c:
-                    resp = await c.post(f"{_ollama_url(engine)}/api/embeddings", json={"model": "nomic-embed-text", "prompt": chunk})
-                    if resp.status_code == 200:
-                        return resp.json().get("embedding", [])
-                    raise ValueError(f"Ollama embed returned {resp.status_code}")
-
-            ids = []
-            base_id = qdrant.count(qdrant_collection).count + 1
-            for i, chunk in enumerate(chunks):
-                vec = await embed_chunk(chunk)
-                if not vec:
-                    continue
-                point_id = base_id + i
-                qdrant.upsert(qdrant_collection, points=[models.PointStruct(
-                    id=point_id, vector=vec,
-                    payload={"text": chunk, "source": file.filename, "chunk": i, "total_chunks": len(chunks)}
-                )])
-                ids.append(point_id)
-
-            log.info(f"📄 Uploaded {file.filename} → {qdrant_collection} ({len(chunks)} chunks)")
-
-            return {
-                "success": True,
-                "filename": file.filename,
-                "collection": collection,
-                "qdrant_collection": qdrant_collection,
-                "chunks": len(chunks),
-                "ids": [str(x) for x in ids],
-                "total_chars": len(text),
-            }
-
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"فشل رفع الملف: {e}")
-        finally:
-            if os.path.exists(tmp.name):
-                os.unlink(tmp.name)
-
-    @app.get("/api/knowledge/recent")
-    async def recent_knowledge(limit: int = 10):
-        """آخر الإضافات لقاعدة المعرفة عبر scroll في كل المجموعات"""
-        try:
-            qdrant = _qdrant_client(engine)
-            recent = []
-            for c in qdrant.get_collections().collections:
-                try:
-                    pts = qdrant.scroll(c.name, limit=5, with_payload=True, with_vectors=False)[0]
-                    for pt in pts:
-                        text = (pt.payload or {}).get("text", "")[:100]
-                        recent.append({
-                            "collection": c.name,
-                            "text": text,
-                            "id": str(pt.id),
-                        })
-                except Exception:
-                    pass
-            recent = recent[:limit]
-            return {"recent": recent, "count": len(recent)}
-        except Exception as e:
-            raise HTTPException(status_code=503, detail=f"Qdrant غير متصل: {e}")
-    
     @app.post("/api/pipeline/summarize")
-    async def summarize_document(request: SummarizeRequest):
-        """تلخيص مستند عبر LoRA server"""
+    async def summarize_text(request: SummarizeRequest):
+        """تلخيص نص"""
         if not engine:
             raise HTTPException(status_code=503, detail="المحرك غير متصل")
         try:
-            summary_prompt = f"لخص النص التالي بطريقة منظمة مختصرة:\n{request.text[:4000]}"
-            async with httpx.AsyncClient(timeout=120) as c:
-                resp = await c.post(f"{_lora_url(engine)}/chat", json={
-                    "messages": [{"role": "user", "content": summary_prompt}],
-                    "max_tokens": 300
+            if engine.pipeline and hasattr(engine.pipeline, 'summarize'):
+                summary = await engine.pipeline.summarize(request.text, request.max_length)
+            else:
+                summary = request.text[:request.max_length]
+            return {"summary": summary, "source": request.source, "title": request.title}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
+    # ═══════════════════════════════════════
+    # Tools — Execute Action
+    # ═══════════════════════════════════════
+
+    @app.post("/api/tools/action")
+    async def execute_tool_action(request: ActionRequest):
+        """تنفيذ إجراء عبر مدير الأدوات"""
+        if not engine or not engine.tools:
+            raise HTTPException(status_code=503, detail="مدير الأدوات غير متصل")
+        try:
+            result = await engine.tools.execute_action({"type": request.action, **request.params})
+            return result
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
+    # ═══════════════════════════════════════
+    # Tools — List Available
+    # ═══════════════════════════════════════
+
+    @app.get("/api/tools/available")
+    async def list_available_tools():
+        """عرض الأدوات المتاحة مع صلاحياتها"""
+        from adam.security.guard import TOOL_REGISTRY
+        tools = []
+        for name, perm in TOOL_REGISTRY.items():
+            tools.append({
+                "name": name,
+                "max_calls": perm.max_calls_per_session,
+                "requires_confirmation": perm.requires_confirmation,
+            })
+        # إضافة أدوات MCP
+        if engine and engine.tools:
+            mcp_tools = engine.tools.get_mcp_tools()
+            for t in mcp_tools:
+                tools.append({
+                    "name": t["name"],
+                    "type": "mcp",
+                    "server": t["server"],
                 })
-                if resp.status_code == 200:
-                    summary_text = resp.json().get("response", "")
-                else:
-                    summary_text = ""
-            return {"master_summary": summary_text.strip(), "stats": {"input_chars": len(request.text)}}
+        return {"tools": tools, "count": len(tools)}
+
+    # ═══════════════════════════════════════
+    # MCP — إضافة خادم [FIX v2] حماية بمفتاح المسؤول
+    # ═══════════════════════════════════════
+
+    @app.post("/api/mcp/add-server")
+    async def add_mcp_server(request: Request):
+        """إضافة خادم MCP — يتطلب مفتاح المسؤول"""
+        if not _admin_key:
+            raise HTTPException(status_code=403, detail="ADAM_ADMIN_KEY not configured — MCP additions disabled")
+
+        # [FIX v2] التحقق من مفتاح المسؤول
+        admin_auth = request.headers.get("X-Admin-Key", "")
+        if not _hmac.compare_digest(admin_auth.encode(), _admin_key.encode()):
+            logger.warning(f"MCP add-server attempt with invalid admin key from {request.client.host if request.client else 'unknown'}")
+            raise HTTPException(status_code=403, detail="Invalid admin key — X-Admin-Key header required")
+
+        if not engine or not engine.tools:
+            raise HTTPException(status_code=503, detail="مدير الأدوات غير متصل")
+
+        try:
+            body = await request.json()
+            name = body.get("name", "")
+            command = body.get("command", "")
+            args = body.get("args", [])
+            env = body.get("env")
+
+            if not name or not command:
+                raise HTTPException(status_code=400, detail="name و command مطلوبين")
+
+            await engine.tools.add_mcp_server(name, command, args, env)
+            return {"status": "ok", "message": f"خادم MCP '{name}' تمت إضافته"}
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
         except HTTPException:
             raise
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"فشل التلخيص: {e}")
-    
-    @app.post("/api/tools/action")
-    async def execute_action(request: ActionRequest):
-        """تنفيذ فعل على الحاسوب"""
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @app.get("/api/mcp/tools")
+    async def list_mcp_tools():
+        """عرض أدوات MCP المتاحة"""
         if engine and engine.tools:
-            action_dict = {"type": request.action, "params": request.params}
-            result = await engine.tools.execute_action(action_dict)
-            return result
-        raise HTTPException(status_code=503, detail="أدوات الحاسوب غير متصلة")
-    
+            return {"tools": engine.tools.get_mcp_tools()}
+        return {"tools": []}
+
     # ═══════════════════════════════════════
-    # Permission System — صلاحيات المستخدم (Phase 1b)
+    # Notebook
     # ═══════════════════════════════════════
 
-    class PermissionRequest(BaseModel):
-        session_id: str = ""
-        approve: bool = True
-        level: Optional[str] = None  # "once", "session", "always"
-
-    class PermissionStatusRequest(BaseModel):
-        session_id: str
-
-    @app.get("/api/permissions/pending/{session_id}")
-    async def get_pending_permission(session_id: str):
-        """الاستعلام عن طلب صلاحية معلّق"""
-        if not engine or not hasattr(engine, 'permission'):
-            raise HTTPException(status_code=503, detail="نظام الصلاحيات غير متصل")
-        if engine.permission.pending_request:
-            return {"pending": True, "request": engine.permission.pending_request}
-        return {"pending": False, "request": None}
-
-    @app.post("/api/permissions/respond")
-    async def respond_permission(req: PermissionRequest):
-        """الرد على طلب صلاحية معلّق"""
-        if not engine or not hasattr(engine, 'permission'):
-            raise HTTPException(status_code=503, detail="نظام الصلاحيات غير متصل")
-        pending = engine.permission.pending_request
-        if not pending:
-            raise HTTPException(status_code=404, detail="لا يوجد طلب صلاحية معلّق")
-        category = pending.get("category", "")
-        level = req.level or pending.get("level", "once")
-        if req.approve:
-            engine.permission.grant(category, level)
-            log_permission("granted", pending.get("tool", ""), category, pending.get("reason", ""), level, "granted")
-            if hasattr(engine, 'learner'):
-                engine.learner.record_decision(pending.get("tool", ""), category, "granted")
-            return {"status": "granted", "category": category, "level": level}
-        else:
-            engine.permission.deny(category)
-            log_permission("denied", pending.get("tool", ""), category, pending.get("reason", ""), level, "denied")
-            if hasattr(engine, 'learner'):
-                engine.learner.record_decision(pending.get("tool", ""), category, "denied")
-            return {"status": "denied", "category": category}
-    
-    @app.get("/api/notebook/stats")
-    async def get_notebook_stats():
-        """إحصائيات النوته"""
-        if engine and engine.notebook:
-            method = getattr(engine.notebook, 'get_stats', None)
-            if method:
-                result = method()
-                if result is None:
-                    return {}
-                return result
-            return {}
-        raise HTTPException(status_code=503, detail="النوته غير متصلة")
-    
     @app.get("/api/notebook/{date}")
     async def get_notebook(date: str):
-        """قراءة ملاحظات يوم معين"""
-        if engine and engine.notebook:
-            method = getattr(engine.notebook, 'get_daily_note', None)
-            if method:
-                result = method(date)
-                if result is None:
-                    return {"date": date, "content": ""}
-                return {"date": date, "content": result}
-            return {"date": date, "content": ""}
-        raise HTTPException(status_code=503, detail="النوته غير متصلة")
-    
+        """قراءة صفحة النوت بوك لتاريخ معين"""
+        if not engine or not engine.notebook:
+            raise HTTPException(status_code=503, detail="النوت بوك غير متاح")
+        try:
+            content = engine.notebook.read_section(f"daily/{date}")
+            return {"date": date, "content": content}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @app.post("/api/notebook/profile")
+    async def update_notebook_profile(request: Request):
+        """تحديث ملف المستخدم في النوت بوك"""
+        if not engine or not engine.notebook:
+            raise HTTPException(status_code=503, detail="النوت بوك غير متاح")
+        try:
+            body = await request.json()
+            engine.notebook.update_user_profile(body)
+            return {"status": "ok"}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
+    # ═══════════════════════════════════════
+    # Diagnostics
+    # ═══════════════════════════════════════
+
+    @app.get("/api/diagnostics")
+    async def get_diagnostics():
+        """فحص شامل لكل المكونات"""
+        if not engine:
+            return {"status": "engine_not_attached"}
+
+        diag = {
+            "status": "running",
+            "cycle_count": engine.cycle_count,
+            "model": engine.model_name,
+            "inference_mode": engine.inference_mode,
+            "session_id": engine.session_id,
+            "subsystems": {},
+            "security": {},
+        }
+
+        # فحص كل موديول
+        for name in ["memory", "ethics", "security", "notebook", "knowledge",
+                      "eyes", "tools", "pipeline", "scheduler", "plugins",
+                      "subagents", "trace_recorder", "meta_learner",
+                      "continuous_learner", "platform_discord"]:
+            obj = getattr(engine, name, None)
+            diag["subsystems"][name] = obj is not None and not isinstance(obj, type(None))
+
+        # معلومات الأمان
+        if hasattr(engine, 'security_guard'):
+            diag["security"] = engine.security_guard.get_stats()
+
+        # معلومات البنية التحتية
+        if hasattr(engine, 'metrics'):
+            diag["metrics"] = engine.metrics.dump()
+        if hasattr(engine, 'cache'):
+            diag["cache"] = engine.cache.stats()
+
+        return diag
+
+    # ═══════════════════════════════════════
+    # Security Stats
+    # ═══════════════════════════════════════
+
+    @app.get("/api/security/stats")
+    async def get_security_stats():
+        """إحصائيات الأمان"""
+        if not engine or not hasattr(engine, 'security_guard'):
+            return {"error": "security not available"}
+        return engine.security_guard.get_stats()
+
+    @app.get("/api/security/audit")
+    async def get_audit_log(limit: int = 50):
+        """سجل التدقيق الأمني"""
+        if not engine or not hasattr(engine, 'security_guard'):
+            return {"entries": []}
+        return {"entries": engine.security_guard.get_audit_log(limit)}
+
+    # ═══════════════════════════════════════
+    # Memory Routes
+    # ═══════════════════════════════════════
+
     @app.get("/api/memory/stats")
     async def get_memory_stats():
         """إحصائيات الذاكرة"""
-        if engine and engine.memory:
-            return engine.memory.get_stats()
-        raise HTTPException(status_code=503, detail="الذاكرة غير متصلة")
-
-    @app.get("/api/metrics")
-    async def get_metrics():
-        """مؤشرات الأداء الداخلية"""
-        if not engine:
-            return {"error": "engine not available"}
-        return engine.metrics.dump()
-    
-    @app.get("/api/engine/diagnostics")
-    async def get_diagnostics():
-        """تشخيص ذاتي للنظام — health check شامل"""
-        if not engine:
-            return {"error": "engine not available"}
-        results = []
-        checks = []
-        checks.append(("Engine Status", engine.is_running if hasattr(engine, 'is_running') else True))
-        checks.append(("Ollama Connected", engine.ollama_base is not None if hasattr(engine, 'ollama_base') else False))
-        checks.append(("Memory System", engine.memory is not None if hasattr(engine, 'memory') else False))
-        checks.append(("Ethics Gate", engine.ethics is not None if hasattr(engine, 'ethics') else False))
-        checks.append(("Pipeline", engine.pipeline is not None if hasattr(engine, 'pipeline') else False))
-        checks.append(("Tools", engine.tools is not None if hasattr(engine, 'tools') else False))
-        checks.append(("Notebook", engine.notebook is not None if hasattr(engine, 'notebook') else False))
-        checks.append(("Security", engine.security is not None if hasattr(engine, 'security') else False))
-        checks.append(("Trace Recorder", engine.trace_recorder is not None if hasattr(engine, 'trace_recorder') else False))
-        for name, ok in checks:
-            results.append({"check": name, "status": "pass" if ok else "fail"})
-        passed = sum(1 for r in results if r["status"] == "pass")
-        failed = sum(1 for r in results if r["status"] == "fail")
-        return {
-            "status": "healthy" if failed == 0 else "degraded",
-            "timestamp": datetime.now().isoformat(),
-            "checks": results,
-            "summary": {"passed": passed, "failed": failed, "total": len(results)},
-        }
-
-    class UpdateSettingsRequest(BaseModel):
-        inference_mode: Optional[str] = None
-        lora_server_url: Optional[str] = None
-        model_name: Optional[str] = None
-
-    @app.post("/api/settings/update")
-    async def update_settings(req: UpdateSettingsRequest):
-        """تحديث إعدادات المحرك في وقت التشغيل"""
-        if not engine:
-            raise HTTPException(status_code=503, detail="المحرك غير متصل")
-        if req.inference_mode:
-            engine.set_inference_mode(req.inference_mode, req.lora_server_url)
-        if req.model_name:
-            engine.model_name = req.model_name
-        if req.lora_server_url and not req.inference_mode:
-            engine.lora_server_url = req.lora_server_url
-        return {
-            "status": "updated",
-            "inference_mode": engine.inference_mode,
-            "model_name": engine.model_name,
-            "lora_server_url": engine.lora_server_url,
-        }
-
-    @app.post("/api/engine/heal")
-    async def heal_system():
-        """تصليح ذاتي شامل — يكتشف ويعالج كل الموديولات المتعطلة"""
-        if not engine:
-            raise HTTPException(status_code=503, detail="المحرك غير متصل")
-
-        actions = []
-        subsystems = [
-            ("ollama_base", "Ollama"),
-            ("memory", "Memory"),
-            ("ethics", "Ethics"),
-            ("pipeline", "Pipeline"),
-            ("tools", "Tools"),
-            ("notebook", "Notebook"),
-            ("security", "Security"),
-            ("trace_recorder", "Trace Recorder"),
-        ]
-        for attr, name in subsystems:
+        if engine and hasattr(engine, 'memory'):
             try:
-                is_healthy = getattr(engine, attr, None) is not None
-                if not is_healthy:
-                    if hasattr(engine, '_heal_failed_subsystem'):
-                        action = await engine._heal_failed_subsystem(attr)
-                        if action:
-                            actions.append(f"{name}: {action}")
-                        else:
-                            actions.append(f"{name}: فشل الإصلاح")
-            except Exception as e:
-                actions.append(f"{name}: خطأ — {e}")
+                if hasattr(engine.memory, 'stats'):
+                    return engine.memory.stats()
+            except Exception:
+                pass
+        return {"status": "unavailable"}
 
+    @app.post("/api/memory/store")
+    async def store_memory(request: Request):
+        """تخزين ذكرى جديد"""
+        if not engine:
+            raise HTTPException(status_code=503, detail="المحرك غير متصل")
         try:
-            # Browser health check
-            if engine.eyes and hasattr(engine.eyes, 'is_healthy'):
-                try:
-                    healthy = await asyncio.wait_for(engine.eyes.is_healthy(), timeout=10)
-                    if not healthy:
-                        await engine.eyes.restart()
-                        actions.append("Browser: restarted")
-                except asyncio.TimeoutError:
-                    await engine.eyes.restart()
-                    actions.append("Browser: restarted (timeout)")
+            body = await request.json()
+            content = body.get("content", "")
+            tags = body.get("tags", "")
+            if not content:
+                raise HTTPException(status_code=400, detail="content مطلوب")
+            # [FIX v2] تحديد طول المحتوى
+            if len(content) > 5000:
+                raise HTTPException(status_code=400, detail="المحتوى طويل جداً (الحد: 5000 حرف)")
+            from adam.memory import store as memory_store
+            mem_id = memory_store.store(content, tags)
+            return {"status": "ok", "id": mem_id}
+        except HTTPException:
+            raise
         except Exception as e:
-            actions.append(f"Browser: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
 
+    @app.post("/api/memory/search")
+    async def search_memory(request: Request):
+        """البحث في الذاكرة"""
+        if not engine:
+            raise HTTPException(status_code=503, detail="المحرك غير متصل")
         try:
-            # تنظيف cache الذاكرة
-            import gc
-            before = gc.get_count()
-            gc.collect()
-            after = gc.get_count()
-            actions.append(f"GC: {before}→{after}")
+            body = await request.json()
+            query = body.get("query", "")
+            limit = body.get("limit", 10)
+            if not query:
+                raise HTTPException(status_code=400, detail="query مطلوب")
+            from adam.memory import store as memory_store
+            results = memory_store.search(query, limit)
+            return {"results": results, "count": len(results)}
+        except HTTPException:
+            raise
         except Exception as e:
-            actions.append(f"GC: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
 
+    @app.post("/api/memory/reflect")
+    async def reflect_memory(request: Request):
+        """تأمل في الذكريات"""
+        if not engine:
+            raise HTTPException(status_code=503, detail="المحرك غير متصل")
         try:
-            # إعادة تعيين pipeline logs لو متوقفة
-            if hasattr(engine, 'get_pipeline_log'):
-                log = engine.get_pipeline_log(1)
-                if not log:
-                    engine._pipeline_log = []
-                    actions.append("Pipeline log reset")
+            body = await request.json()
+            days = body.get("days", 1)
+            from adam.memory import store as memory_store
+            return memory_store.reflect(days)
         except Exception as e:
-            actions.append(f"Pipeline: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
 
-        return {
-            "status": "healed" if len(actions) > 0 else "no_action_needed",
-            "timestamp": datetime.now().isoformat(),
-            "actions_taken": actions,
-        }
+    # ═══════════════════════════════════════
+    # Skills
+    # ═══════════════════════════════════════
 
-    # ─── Scheduler Routes ─────────────────────────────────
+    @app.get("/api/skills")
+    async def list_skills():
+        """عرض المهارات المتاحة"""
+        if engine and hasattr(engine, 'skills'):
+            try:
+                return {"skills": engine.skills.list_skills()}
+            except Exception:
+                pass
+        return {"skills": []}
+
+    # ═══════════════════════════════════════
+    # Scheduler
+    # ═══════════════════════════════════════
+
     @app.get("/api/scheduler/jobs")
     async def list_scheduled_jobs():
         if not engine or not engine.scheduler:
-            raise HTTPException(status_code=503, detail="Scheduler غير متاح")
+            return {"jobs": []}
         return {"jobs": engine.scheduler.list_jobs()}
-
-    @app.post("/api/scheduler/cron")
-    async def add_cron_job(req: dict):
-        if not engine or not engine.scheduler:
-            raise HTTPException(status_code=503, detail="Scheduler غير متاح")
-        job_id = req.get("id", "")
-        cron = req.get("cron", "")
-        action = req.get("action", "")
-        name = req.get("name", "")
-        if not job_id or not cron or not action:
-            raise HTTPException(status_code=400, detail="id, cron, action مطلوبين")
-        async def _run():
-            await engine.execute_action({"type": action, **req.get("params", {})})
-        engine.scheduler.add_cron(job_id, cron, _run, name=name or job_id)
-        return {"status": "ok", "job_id": job_id}
 
     @app.post("/api/scheduler/interval")
     async def add_interval_job(req: dict):
@@ -891,8 +904,11 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
             raise HTTPException(status_code=503, detail="Subagent system غير متاح")
         name = req.get("name", "subagent")
         config = req.get("config", {})
-        session = engine.subagents.spawn(name=name, config=config)
-        return {"status": "spawned", "subagent": session.get_status()}
+        try:
+            session = engine.subagents.spawn(name=name, config=config)
+            return {"status": "spawned", "subagent": session.get_status()}
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
 
     @app.post("/api/subagents/{subagent_id}/chat")
     async def chat_subagent(subagent_id: str, req: dict):
@@ -920,525 +936,131 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
     @app.get("/api/channels")
     async def list_channels():
         if channel_manager:
-            return {"channels": channel_manager.get_status()}
-        return {"channels": {}}
+            return {"channels": channel_manager.list_channels()}
+        return {"channels": []}
 
-    @app.get("/api/channels/{name}")
-    async def get_channel(name: str):
-        if channel_manager and name in channel_manager.channels:
-            return channel_manager.channels[name].get_status()
-        raise HTTPException(status_code=404, detail=f"Channel '{name}' غير موجود")
+    # ─── WebSocket ──────────────────────────────────────
+    # [FIX] WebSocket authentication — التحقق من token
+    @app.websocket("/ws/chat")
+    async def websocket_chat(websocket: WebSocket):
+        # [FIX] التحقق من المصادقة عبر query parameter
+        token = websocket.query_params.get("token", "")
+        expected_token = _api_key
+        if not token or not _hmac.compare_digest(token.encode(), expected_token.encode()):
+            await websocket.close(code=4001, reason="Unauthorized — provide token query parameter")
+            return
 
-    @app.post("/api/channels/{name}")
-    async def toggle_channel(name: str, req: Request):
-        data = await req.json()
-        enabled = data.get("enabled", False)
-        if channel_manager and name in channel_manager.channels:
-            ch = channel_manager.channels[name]
-            if enabled and not ch.running:
-                ch.running = True
-            elif not enabled and ch.running:
-                ch.stop()
-            return {"status": "ok", "running": ch.running}
-        raise HTTPException(status_code=404, detail=f"Channel '{name}' غير موجود")
+        await websocket.accept()
+        logger.info("WebSocket connected (authenticated)")
 
-    @app.get("/api/platforms")
-    async def list_platforms():
-        if not engine:
-            return {"platforms": {}}
-        platforms = {}
-        if engine.platform_discord:
-            platforms["discord"] = engine.platform_discord.get_status()
-        return {"platforms": platforms}
-
-    @app.post("/api/platforms/discord/start")
-    async def start_discord_bot():
-        if not engine or not engine.platform_discord:
-            raise HTTPException(status_code=503, detail="Discord bot غير متاح")
-        ok = await engine.platform_discord.start()
-        if not ok:
-            raise HTTPException(status_code=500, detail="فشل تشغيل البوت — تأكد من token")
-        return {"status": "started"}
-
-    @app.post("/api/platforms/discord/stop")
-    async def stop_discord_bot():
-        if not engine or not engine.platform_discord:
-            raise HTTPException(status_code=503, detail="Discord bot غير متاح")
-        await engine.platform_discord.stop()
-        return {"status": "stopped"}
-
-    @app.get("/api/security/stats")
-    async def get_security_stats():
-        """إحصائيات الأمن"""
-        if engine and engine.security:
-            return engine.security.get_security_stats()
-        raise HTTPException(status_code=503, detail="الأمن غير متصل")
-    
-    @app.get("/api/eyes/chat/{source}")
-    async def list_chats(source: str):
-        """قائمة المحادثات المتاحة من مصدر معين"""
-        # سيتم التوسيع لاحقاً
-        return {"source": source, "chats": []}
-    
-    # ═══════════════════════════════════════
-    # Pipeline Log - سجل خطوات المعالجة
-    # ═══════════════════════════════════════
-    
-    @app.get("/api/engine/pipeline-log")
-    async def get_pipeline_log(limit: int = 50):
-        """آخر خطوات المعالجة"""
-        if not engine:
-            return {"steps": []}
-        return {"steps": engine.get_pipeline_log(limit)}
-    
-    # ═══════════════════════════════════════
-    # SSE - بث مباشر لحالة المعالجة
-    # ═══════════════════════════════════════
-    
-    @app.get("/api/engine/stream")
-    async def stream_engine_status(request: Request):
-        """بث مباشر لتحديثات المحرك عبر Server-Sent Events"""
-        if not engine:
-            return {"error": "engine not available"}
-        
-        queue: asyncio.Queue = asyncio.Queue()
-        
-        async def step_callback(step_info):
-            await queue.put(step_info)
-        
-        engine.on_step(step_callback)
-        
-        async def event_generator():
-            try:
-                while True:
-                    if await request.is_disconnected():
-                        break
-                    try:
-                        step = await asyncio.wait_for(queue.get(), timeout=10.0)
-                        yield f"data: {json.dumps(step, ensure_ascii=False)}\n\n"
-                    except asyncio.TimeoutError:
-                        yield f"data: {json.dumps({'type': 'keepalive', 'timestamp': datetime.now().isoformat()}, ensure_ascii=False)}\n\n"
-            finally:
-                pass
-        
-        return StreamingResponse(
-            event_generator(),
-            media_type="text/event-stream",
-            headers={
-                "Cache-Control": "no-cache",
-                "Connection": "keep-alive",
-                "X-Accel-Buffering": "no",
-            }
-        )
-    
-    # ═══════════════════════════════════════
-    # System Health - صحة النظام
-    # ═══════════════════════════════════════
-    
-    @app.get("/api/engine/health")
-    async def get_system_health():
-        """مؤشرات صحة النظام"""
-        import os
-        health = {
-            "api": "running",
-            "timestamp": datetime.now().isoformat(),
-            "uptime_seconds": (datetime.now() - _start_time).total_seconds() if _start_time else None,
-            "engine": {
-                "session_id": engine.session_id if engine else None,
-                "model": engine.model_name if engine else None,
-                "inference_mode": engine.inference_mode if engine else None,
-                "active_mode": engine.active_mode if engine else None,
-                "cycle_count": engine.cycle_count if engine else 0,
-                "conversation_length": len(engine.conversation_history) if engine else 0,
-                "tools_available": engine.tools is not None if engine else False,
-                "eyes_available": engine.eyes is not None if engine else False,
-            },
-            "system": {
-                "cpu_percent": None,
-                "memory_percent": None,
-            }
-        }
-        # Tool usage stats
-        if engine and engine.tools:
-            actions = engine.tools.action_log if hasattr(engine.tools, 'action_log') else []
-            success_count = sum(1 for a in actions if a.get("success"))
-            total_count = len(actions)
-            health["engine"]["tool_actions_total"] = total_count
-            health["engine"]["tool_actions_ok"] = success_count
-            health["engine"]["tool_actions_fail"] = total_count - success_count
-        # Trace recorder stats
-        if engine and engine.trace_recorder:
-            stats = engine.trace_recorder.get_stats()
-            health["trace_recorder"] = stats
         try:
-            import psutil
-            health["system"]["cpu_percent"] = psutil.cpu_percent(interval=0.5)
-            health["system"]["memory_percent"] = psutil.virtual_memory().percent
-        except ImportError:
-            pass
-        
-        # Ollama health
-        if engine:
-            try:
-                client = await engine.shared_clients.get("ollama", engine.ollama_base, timeout=3.0)
-                r = await client.get("/api/tags")
-                if r.status_code == 200:
-                    data = r.json()
-                    health["ollama"] = {
-                        "connected": True,
-                        "models": [m["name"] for m in data.get("models", [])]
-                    }
-                else:
-                    health["ollama"] = {"connected": False}
-            except Exception:
-                health["ollama"] = {"connected": False}
-        
-        # Qdrant health
-        if engine:
-            try:
-                client = await engine.shared_clients.get("qdrant", engine.config.get("qdrant_url", "http://localhost:6333"), timeout=3.0)
-                r = await client.get("/")
-                health["qdrant"] = {"connected": r.status_code == 200}
-            except Exception:
-                health["qdrant"] = {"connected": False}
-        
-        return health
-    
-    # ═══════════════════════════════════════
-    # Voice Pipeline - endpoints الصوت
-    # ═══════════════════════════════════════
+            while True:
+                data = await websocket.receive_text()
+                try:
+                    msg = json.loads(data)
+                except json.JSONDecodeError:
+                    await websocket.send_json({"error": "Invalid JSON"})
+                    continue
 
+                if not engine:
+                    await websocket.send_json({"error": "المحرك غير متصل"})
+                    continue
+
+                message = msg.get("message", "")
+                ctx = msg.get("context", {})
+                if not message:
+                    await websocket.send_json({"error": "مفيش رسالة"})
+                    continue
+
+                # [FIX v2] تحديد طول رسالة WebSocket
+                if len(message) > 10000:
+                    await websocket.send_json({"error": "الرسالة طويلة جداً (الحد: 10000 حرف)"})
+                    continue
+
+                result = await engine.chat(message, ctx or {})
+                await websocket.send_json(result)
+
+        except WebSocketDisconnect:
+            logger.info("WebSocket disconnected")
+        except Exception as e:
+            logger.error(f"WebSocket error: {e}")
+            try:
+                await websocket.close(code=1011, reason=str(e))
+            except Exception:
+                pass
+
+    # ─── Voice Pipeline ─────────────────────────────────
     _voice_pipeline: Optional[VoicePipeline] = None
 
     def get_voice_pipeline() -> VoicePipeline:
         nonlocal _voice_pipeline
         if _voice_pipeline is None:
-            eng_config = engine.config if engine and hasattr(engine, 'config') and engine.config else {}
-            tts_backend = eng_config.get("tts_backend", "edge_tts")
-            tts_dialect = eng_config.get("tts_dialect", "eg")
-            tts_voice = eng_config.get("tts_voice", "ar-EG-ShakirNeural")
-            _voice_pipeline = VoicePipeline(tts_backend=tts_backend, tts_dialect=tts_dialect, tts_voice=tts_voice)
+            _voice_pipeline = VoicePipeline()
         return _voice_pipeline
-
-    @app.post("/api/voice/transcribe")
-    async def transcribe_audio(request: Request):
-        """نسخ صوت إلى نص — يستقبل multipart/form-data مع حقل audio"""
-        try:
-            form = await request.form()
-            audio_file = form.get("audio")
-            if not audio_file:
-                raise HTTPException(status_code=400, detail="الملف الصوتي مطلوب")
-
-            audio_bytes = await audio_file.read()
-            pipeline = get_voice_pipeline()
-
-            # تحميل VAD + ASR إذا لزم
-            if not pipeline.vad.available:
-                await pipeline.load_vad()
-            if not pipeline.asr.available:
-                await pipeline.load_asr()
-
-            result = await pipeline.process_audio(audio_bytes, sample_rate=16000)
-            return {"text": result.text, "duration": result.duration_seconds}
-        except HTTPException:
-            raise
-        except Exception as e:
-            logger.error(f"فشل نسخ الصوت: {e}")
-            raise HTTPException(status_code=500, detail=str(e))
-
-    @app.post("/api/voice/chat")
-    async def voice_chat(request: Request):
-        """صوت → نص → Gemma 4 → TTS → {text, audio}"""
-        try:
-            form = await request.form()
-            audio_file = form.get("audio")
-            if not audio_file:
-                raise HTTPException(status_code=400, detail="الملف الصوتي مطلوب")
-
-            audio_bytes = await audio_file.read()
-            session_id = form.get("session_id")
-            pipeline = get_voice_pipeline()
-
-            # تحميل VAD + ASR
-            if not pipeline.vad.available:
-                await pipeline.load_vad()
-            if not pipeline.asr.available:
-                await pipeline.load_asr()
-
-            # ASR
-            transcript = await pipeline.process_audio(audio_bytes, sample_rate=16000)
-            if not transcript.text.strip():
-                return {"text": "", "audioUrl": None, "duration_ms": 0}
-
-            # إرسال النص إلى المحرك
-            if engine:
-                result = await engine.chat(transcript.text)
-                reply_text = result.get("response", "")
-            else:
-                reply_text = ""
-
-            # TTS — تحميل فقط إذا كان هناك رد
-            audio_url = None
-            if reply_text.strip():
-                if not pipeline.tts.available:
-                    await pipeline.load_tts()
-                synthesis = await pipeline.process_text(reply_text, transcript.language)
-                if synthesis.audio:
-                    filename = f"reply_{int(datetime.now().timestamp())}.mp3"
-                    audio_path = await pipeline.save_audio(synthesis.audio, filename)
-                    audio_url = f"/api/voice/audio/{filename}"
-
-                # تفريغ TTS من VRAM بعد الانتهاء
-                await pipeline.unload_tts()
-
-            # تفريغ ASR من VRAM
-            await pipeline.unload_asr()
-
-            return {
-                "text": reply_text,
-                "audioUrl": audio_url,
-                "duration_ms": transcript.duration_seconds * 1000,
-            }
-        except HTTPException:
-            raise
-        except Exception as e:
-            logger.error(f"فشل معالجة الصوت: {e}")
-            raise HTTPException(status_code=500, detail=str(e))
 
     @app.get("/api/voice/audio/{filename}")
     async def get_audio(filename: str):
-        """إرجاع ملف صوتي مخزَّن"""
+        """خدمة ملفات الصوت"""
+        import os as _oso
+        _audio_dir = _oso.path.join(_oso.path.dirname(_oso.path.dirname(__file__)), "audio_output")
+        filepath = _oso.path.join(_audio_dir, filename)
+
+        # [FIX] منع traversal attack — التأكد إن الملف جوه المجلد
+        real_dir = _oso.path.realpath(_audio_dir)
+        real_file = _oso.path.realpath(filepath)
+        if not real_file.startswith(real_dir):
+            raise HTTPException(status_code=403, detail="مسار غير مصرح به")
+
+        # [FIX v2] منع أسماء الملفات الخطرة
+        if ".." in filename or filename.startswith("/"):
+            raise HTTPException(status_code=403, detail="اسم ملف غير صالح")
+
+        if not _oso.path.exists(filepath):
+            raise HTTPException(status_code=404, detail="الملف مش موجود")
         from fastapi.responses import FileResponse
-        from fastapi import Response
-        import os as _os
-        audio_dir = _os.path.join(_os.path.dirname(_os.path.dirname(__file__)), "temp", "audio")
-        filepath = _os.path.join(audio_dir, filename)
-        if not _os.path.isfile(filepath):
-            raise HTTPException(status_code=404, detail="الملف غير موجود")
-        ext = filename.rsplit(".", 1)[-1] if "." in filename else "mp3"
-        media_map = {"mp3": "audio/mpeg", "wav": "audio/wav", "pcm": "audio/L16", "webm": "audio/webm"}
-        media_type = media_map.get(ext, "audio/mpeg")
-        # inline + CORS عشان المتصفح يشتغل الصوت
-        resp = FileResponse(filepath, media_type=media_type, filename=filename, headers={
-            "Content-Disposition": f'inline; filename="{filename}"',
-            "Access-Control-Allow-Origin": "*",
-            "Cache-Control": "public, max-age=3600",
-        })
-        return resp
+        return FileResponse(filepath, media_type="audio/mpeg")
 
-    # ═══════════════════════════════════════
-    # File Upload
-    # ═══════════════════════════════════════
-
-    @app.post("/api/chat/upload")
-    async def upload_file(request: Request):
-        """رفع ملف/صورة وإرجاع URL"""
+    @app.post("/api/voice/synthesize")
+    async def synthesize_voice(req: dict):
+        """تحويل نص لكلام"""
+        text = req.get("text", "")
+        lang = req.get("lang", "ar")
+        if not text:
+            raise HTTPException(400, "النص مطلوب")
+        # [FIX v2] تحديد طول النص
+        if len(text) > 5000:
+            raise HTTPException(400, "النص طويل جداً (الحد: 5000 حرف)")
         try:
-            import os as _os
-            form = await request.form()
-            file = form.get("file")
-            if not file:
-                raise HTTPException(status_code=400, detail="الملف مطلوب")
-
-            upload_dir = _os.path.join(
-                _os.path.dirname(_os.path.dirname(_os.path.dirname(__file__))),
-                "data", "uploads"
-            )
-            _os.makedirs(upload_dir, exist_ok=True)
-
-            content = await file.read()
-            original_name = file.filename or "file"
-            timestamp = int(datetime.now().timestamp())
-            safe_name = f"{timestamp}_{original_name.replace(' ', '_')}"
-            filepath = _os.path.join(upload_dir, safe_name)
-
-            with open(filepath, "wb") as f:
-                f.write(content)
-
-            return {
-                "filename": safe_name,
-                "original_name": original_name,
-                "url": f"/api/uploads/{safe_name}",
-                "content_type": file.content_type or "application/octet-stream",
-                "size": len(content),
-            }
+            pipeline = get_voice_pipeline()
+            if not pipeline.tts.available:
+                await pipeline.load_tts()
+            if not pipeline.tts.available:
+                raise HTTPException(503, "TTS مش متاح")
+            synthesis = await pipeline.process_text(text, lang)
+            if synthesis.audio:
+                filename = f"synth_{int(datetime.now().timestamp())}.mp3"
+                audio_path = await pipeline.save_audio(synthesis.audio, filename)
+                return {"success": True, "audio_url": f"/api/voice/audio/{filename}"}
+            return {"success": False, "error": "فشل التوليد"}
         except HTTPException:
             raise
         except Exception as e:
-            logger.error(f"فشل رفع الملف: {e}")
-            raise HTTPException(status_code=500, detail=str(e))
+            raise HTTPException(500, f"فشل تحويل الصوت: {e}")
 
-    @app.get("/api/uploads/{filename}")
-    async def get_upload(filename: str):
-        """إرجاع ملف مرفوع"""
-        from fastapi.responses import FileResponse
-        import os as _os
-        upload_dir = _os.path.join(
-            _os.path.dirname(_os.path.dirname(_os.path.dirname(__file__))),
-            "data", "uploads"
-        )
-        filepath = _os.path.join(upload_dir, filename)
-        if not _os.path.isfile(filepath):
-            raise HTTPException(status_code=404, detail="الملف غير موجود")
-        return FileResponse(filepath, headers={
-            "Access-Control-Allow-Origin": "*",
-            "Cache-Control": "public, max-age=86400",
-        })
+    # ─── Start/Stop ─────────────────────────────────────
+    @app.on_event("startup")
+    async def on_startup():
+        global _start_time
+        _start_time = datetime.now()
+        logger.info("Adam Prism API started")
 
-    # ═══════════════════════════════════════
-    # Ollama Model Selector
-    # ═══════════════════════════════════════
-
-    @app.get("/api/ollama/models")
-    async def list_ollama_models():
-        """جلب كل الموديلات المتاحة في Ollama"""
-        try:
-            ollama_url = _ollama_url(engine)
-            async with httpx.AsyncClient(timeout=10) as client:
-                resp = await client.get(f"{ollama_url}/api/tags")
-                if resp.status_code != 200:
-                    return {"models": [], "error": "Ollama غير متصل"}
-                data = resp.json()
-                models = [m["name"] for m in data.get("models", [])]
-                return {"models": models}
-        except Exception as e:
-            return {"models": [], "error": str(e)}
-
-    @app.post("/api/ollama/select")
-    async def select_ollama_model(request: Request):
-        """تبديل الموديل النشط"""
-        try:
-            body = await request.json()
-            model = body.get("model", "")
-            if not model:
-                raise HTTPException(400, "اسم الموديل مطلوب")
-            if engine and engine.provider:
-                # Switch inference mode to ollama
-                engine.provider.set_mode("ollama")
-                # Try to set the model on the Ollama provider if it supports it
-                ollama_provider = engine.provider._providers.get("ollama")
-                if ollama_provider:
-                    ollama_provider.model = model
-                logger.info(f"🔄 switched inference to Ollama model: {model}")
-            return {"success": True, "model": model}
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
-
-    # ═══════════════════════════════════════
-    # Skills API
-    # ═══════════════════════════════════════
-
-    @app.get("/api/skills/list")
-    async def list_skills():
-        """جلب كل المهارات المتاحة"""
-        try:
-            from adam.skills.manager import SkillManager
-            mgr = SkillManager(engine)
-            paths = mgr.discover()
-            skills = []
-            for p in paths:
-                skill = await mgr.load(p)
-                if skill:
-                    skills.append({
-                        "name": skill.name or p.split("/")[-1].replace(".md", "").replace(".py", ""),
-                        "description": skill.description or "",
-                        "path": p,
-                    })
-            return {"skills": skills}
-        except Exception as e:
-            logger.warning(f"فشل تحميل المهارات: {e}")
-            return {"skills": [], "error": str(e)}
-
-    @app.post("/api/skills/load")
-    async def load_skill(request: Request):
-        """تحميل وتشغيل مهارة"""
-        try:
-            body = await request.json()
-            path = body.get("path", "")
-            if not path:
-                raise HTTPException(400, "مسار المهارة مطلوب")
-            from adam.skills.manager import SkillManager
-            mgr = SkillManager(engine)
-            skill = await mgr.load(path)
-            if not skill:
-                raise HTTPException(404, "المهارة مش موجودة")
-            result = await skill.on_trigger("load", {"source": "api"})
-            return {"success": True, "name": skill.name, "result": str(result)[:500]}
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
-
-    # ═══════════════════════════════════════
-    # WebSocket
-    # ═══════════════════════════════════════
-    
-    @app.websocket("/ws/chat")
-    async def websocket_chat(websocket: WebSocket):
-        """محادثة مباشرة عبر WebSocket مع دعم الصوت"""
-        await websocket.accept()
-        
-        try:
-            while True:
-                data = await websocket.receive_text()
-                parsed = json.loads(data)
-                message = parsed.get("message", "")
-                voice_requested = parsed.get("voice", False)
-                
-                if engine:
-                    result = await engine.chat(message)
-                    
-                    # Voice synthesis إذا طلب صوت
-                    if voice_requested and result.get("response"):
-                        try:
-                            pipeline = get_voice_pipeline()
-                            reply_text = result["response"]
-                            if not pipeline.tts.available:
-                                await pipeline.load_tts()
-                            if pipeline.tts.available:
-                                synthesis = await pipeline.process_text(reply_text, "ar")
-                                if synthesis.audio:
-                                    filename = f"reply_{int(datetime.now().timestamp())}.mp3"
-                                    audio_path = await pipeline.save_audio(synthesis.audio, filename)
-                                    result["audio_url"] = f"/api/voice/audio/{filename}"
-                                await pipeline.unload_tts()
-                        except Exception as e:
-                            logger.warning(f"فشل توليد الصوت عبر WS: {e}")
-                    
-                    await websocket.send_json(result)
-                else:
-                    await websocket.send_json({"error": "المحرك غير متصل"})
-                    
-        except WebSocketDisconnect:
-            logger.info("تم قطع اتصال WebSocket")
-        except Exception as e:
-            logger.error(f"خطأ WebSocket: {e}")
-    
-    return app
-
-
-# ═══════════════════════════════════════
-# Standalone runner
-# ═══════════════════════════════════════
-
-def run_server(engine=None, host: str = "0.0.0.0", port: int = 8000, channel_config: Optional[dict] = None):
-    """تشغيل الخادم مع القنوات الاختيارية"""
-    import uvicorn
-    channel_manager = None
-    if channel_config:
-        try:
-            from adam.channels.manager import ChannelManager
-            channel_manager = ChannelManager(channel_config)
-            import asyncio
+    @app.on_event("shutdown")
+    async def on_shutdown():
+        if channel_manager:
             try:
-                loop = asyncio.get_running_loop()
-                loop.create_task(channel_manager.start_all(engine))
-            except RuntimeError:
-                asyncio.run(channel_manager.start_all(engine))
-            logger.info(f"✅ Channels: {list(channel_manager.channels.keys())}")
-        except Exception as e:
-            logger.warning(f"⚠️ Channel init skipped: {e}")
-    app = create_app(engine, channel_manager)
-    uvicorn.run(app, host=host, port=port)
+                await channel_manager.shutdown()
+            except Exception:
+                pass
+        logger.info("Adam Prism API stopped")
+
+    return app

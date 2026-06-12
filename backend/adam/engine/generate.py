@@ -8,7 +8,7 @@ import json
 import logging
 from typing import Dict, List, Any
 
-from security.security_guard import TOOL_REGISTRY
+from adam.security.guard import TOOL_REGISTRY
 from adam.engine.context import AdamPrismEngineContext
 
 logger = logging.getLogger("adam_prism.core")

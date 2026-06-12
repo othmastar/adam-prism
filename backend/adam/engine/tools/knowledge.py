@@ -5,7 +5,7 @@ import os
 from datetime import datetime
 from typing import Dict
 
-from core.permissions import classify_tool, log_permission
+from adam.core.permissions import classify_tool, log_permission
 
 
 class KnowledgeMixin:

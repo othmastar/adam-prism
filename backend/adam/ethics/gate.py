@@ -1,8 +1,10 @@
 """
-Adam Prism - نظام الأخلاق
-=========================
+Adam Prism - نظام الأخلاق — HARDENED v2
+=========================================
 البوابة الأخلاقية: تقييم كل رد حسب القوانين الأربعة
 العدالة (40%) > التعلم (30%) > البقاء (20%) > الإبداع (10%)
+
+[FIX v2] إصلاح استيراد TTLCache
 """
 
 import json
@@ -11,7 +13,10 @@ from typing import Dict, Any, Optional
 
 import httpx
 
-from infrastructure import TTLCache
+try:
+    from adam.infrastructure import TTLCache
+except ImportError:
+    from infrastructure import TTLCache
 
 logger = logging.getLogger("adam_prism.ethics")
 
@@ -77,7 +82,7 @@ class EthicsGate:
                 "scores": {},
                 "weighted_score": 0.0,
                 "issues": violations,
-                "modified_response": "⚠️ تم رفض الرد لانتهاكه قاعدة أخلاقية أساسية."
+                "modified_response": "تم رفض الرد لانتهاكه قاعدة أخلاقية أساسية."
             }
 
         # 2. تقييم بالأوزان عبر النموذج
@@ -89,7 +94,7 @@ class EthicsGate:
             for law, weight in self.law_weights.items()
         )
 
-        # 4. قرار القبول (مخفف للتجربة)
+        # 4. قرار القبول
         approved = weighted_score >= 0.3
         
         result = {
