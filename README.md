@@ -2,6 +2,46 @@
 
 **The open-source digital twin framework.**
 
+<p>
+  <a href="https://github.com/othmastar/adam-prism"><img src="https://img.shields.io/badge/license-Apache%202.0-blue" alt="License"></a>
+  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.12+-green" alt="Python"></a>
+  <a href="https://fastapi.tiangolo.com/"><img src="https://img.shields.io/badge/FastAPI-green" alt="FastAPI"></a>
+  <img src="https://img.shields.io/badge/tests-274%20passed-brightgreen" alt="Tests">
+  <img src="https://img.shields.io/badge/routes-65%2B-blue" alt="Routes">
+  <img src="https://img.shields.io/badge/channels-25-orange" alt="Channels">
+  <img src="https://img.shields.io/badge/tools-53-blueviolet" alt="Tools">
+  <img src="https://img.shields.io/badge/docker-ready-2496ED?logo=docker" alt="Docker">
+</p>
+
+```bash
+pip install adam-prism && adam-prism          # start in 10 seconds
+cd deploy && docker compose up -d             # full stack
+bash scripts/setup.sh                         # one-line setup
+```
+
+---
+
+## Why Adam?
+
+| | Adam Prism | ChatGPT/Claude | LangChain | AutoGPT |
+|---|---|---|---|---|
+| **Local** | ✅ Fully on your hardware | ❌ Cloud-only | Depends | ❌ Cloud API |
+| **Channels** | 25 (TG, WA, Discord, Email, SMS, Slack, ...) | 1 (web chat) | 0 | 0 |
+| **Tools** | 53 built-in + 70+ MCP | Limited | Library | Limited |
+| **Consciousness** | 12-layer architecture | None | None | None |
+| **Learning** | Continuous from every chat | Session-only | None | None |
+| **Ethics** | 4 laws + adjustable gate | Safety rails | None | None |
+| **Voice** | ASR + TTS (edge-tts) | Built-in | None | None |
+| **Subagents** | Swarm with teams | None | Via code | None |
+| **Memory** | Qdrant vector + SQLite FTS | Session + limited RAG | Vector stores | Basic |
+| **Production** | Rate limiting, auth, admin key, security hardening | Built-in | DIY | DIY |
+| **Skills** | Plugin system (JSON-driven) | GPTs | None | None |
+| **MCP** | Native MCP host | Limited | Via SDK | None |
+| **Arabic** | Egyptian Arabic native, RTL UI | Basic | None | None |
+| **License** | Apache 2.0 (free forever) | Proprietary | MIT | MIT |
+
+Adam Prism is the **only** open-source framework that combines: local sovereignty, 25 communication channels, consciousness architecture, continuous learning, and production security — in one package.
+
 ---
 
 Have you ever felt your AI tools were designed for someone else's needs — a corporation's, a VC's, a data center's — and you were just allowed to use them?
@@ -122,12 +162,14 @@ cd deploy && docker compose up -d  # full stack
 
 ## Quick stats
 
-- 12,000 lines core Python
-- 261 Python tests + 25 JavaScript
-- 39 API routes, 53 tools, 25 channels
+- 12,000+ lines core Python
+- 274 passing tests, 5 skipped
+- 65+ API routes, 53 tools, 70+ MCP tools, 25 channels
 - 12-layer consciousness, 7 modes, 4 ethical laws
-- Continuous learning, voice pipeline, MCP support
+- Continuous learning, voice pipeline (ASR + TTS), MCP native host
+- Production: rate limiting, auth, admin key, security hardening
 - 2,317 conversations / 2.2M tokens training data
+- Stack: FastAPI, Qdrant, Ollama, Next.js, Docker, Apache 2.0
 
 ---
 
