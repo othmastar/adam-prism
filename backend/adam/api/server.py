@@ -29,7 +29,7 @@ import httpx
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Request, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, HTMLResponse, JSONResponse
-from adam.api.diagnostic import router as diagnostic_router
+from adam.api.diagnostic import create_diagnostic_router
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 from adam.api.chat_store import ChatStore
@@ -244,6 +244,13 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
         allow_headers=["*"],
     )
 
+    # === V3: Install security middleware (audit, rate-limit, headers, tracing) ===
+    try:
+        from adam.api.middleware import install_all_middleware
+        install_all_middleware(app, engine=engine)
+    except Exception as e:
+        logger.warning(f"Middleware install failed: {e}")
+
     # ═══════════════════════════════════════════════════════
     # نقاط webhook — الآن بعد المصادقة، محمية تلقائياً
     # ═══════════════════════════════════════════════════════
@@ -292,7 +299,7 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
 
     # Diagnostic & Orchestrator routes
     try:
-        app.include_router(diagnostic_router)
+        app.include_router(create_diagnostic_router(engine=engine))
     except Exception as e:
         logger.warning(f"فشل تحميل مسارات التشخيص: {e}")
 

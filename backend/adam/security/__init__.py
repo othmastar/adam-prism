@@ -1,1 +1,1 @@
-# security package
+"""Adam Prism — security package"""
