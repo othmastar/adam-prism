@@ -14,11 +14,11 @@ import asyncio
 from datetime import datetime
 from typing import Optional, Dict, List, Any, Callable
 
-from security.security_guard import SecurityOrchestrator, TOOL_REGISTRY
-from core.permissions import PermissionState, classify_tool, default_level, log_permission, PERMISSION_CATEGORIES
-from core.learning import PreferenceLearner
-from core import memory_store
-from infrastructure import (
+from adam.security.guard import SecurityOrchestrator, TOOL_REGISTRY
+from adam.core.permissions import PermissionState, classify_tool, default_level, log_permission, PERMISSION_CATEGORIES
+from adam.core.learning import PreferenceLearner
+from adam.memory import store as memory_store
+from adam.infrastructure import (
     SharedClients, TTLCache, MetricsCollector, sanitize_path,
     CircuitBreaker, retry,
 )

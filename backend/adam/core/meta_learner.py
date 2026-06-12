@@ -9,7 +9,7 @@ No Ollama calls - uses lightweight heuristics only.
 
 import logging
 from typing import Dict, List, Optional
-from core.trace_recorder import ConversationTrace
+from adam.core.trace_recorder import ConversationTrace
 
 logger = logging.getLogger("adam_prism.meta_learner")
 

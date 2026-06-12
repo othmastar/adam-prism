@@ -1,7 +1,15 @@
 """
-Adam Prism — Tool Manager
-============================
+Adam Prism — Tool Manager — HARDENED v2
+============================================
 يدير كل الأدوات: browser + computer + MCP + file + shell
+
+[SECURITY FIXES v2]
+1. sanitize_path لكل عمليات الملفات
+2. تسجيل الأفعال مع تفاصيل أمنية
+3. حد أقصى لحجم الكتابة
+4. حماية عمليات الحذف والقائمة
+5. [NEW] تسجيل مفصّل لكل عملية MCP
+6. [NEW] تحقق إضافي من أسماء الملفات
 """
 
 import os
@@ -13,7 +21,8 @@ from typing import Dict, Any, Optional, List
 from adam.eyes.browser import Browser
 from adam.tools.computer import ComputerToolManager
 from adam.tools.mcp import MCPManager
-from adam.core.permissions import classify_tool
+from adam.core.permissions import classify_tool, get_risk_level
+from adam.infrastructure import sanitize_path
 
 logger = logging.getLogger("adam_prism.tools")
 
@@ -37,7 +46,18 @@ class ToolManager:
 
     async def execute_action(self, action: Dict) -> Dict:
         action_type = action.get("type", "")
-        self.action_log.append({"type": action_type, "timestamp": __import__("time").time()})
+
+        # [FIX v2] تسجيل مفصّل مع مستوى الخطورة
+        risk = get_risk_level(classify_tool(action_type))
+        self.action_log.append({
+            "type": action_type,
+            "risk": risk,
+            "timestamp": __import__("time").time(),
+        })
+
+        # تحذير للعمليات عالية الخطورة
+        if risk in ("high", "critical"):
+            logger.warning(f"High-risk action: {action_type} (risk={risk})")
 
         # Browser actions
         browser_actions = {"browser_open", "browser_fetch", "browser_click",
@@ -68,6 +88,8 @@ class ToolManager:
         return self.mcp.get_all_tools()
 
     async def add_mcp_server(self, name: str, command: str, args: List[str] = None, env: Dict[str, str] = None):
+        """[FIX v2] إضافة خادم MCP — مع تسجيل أمني مفصّل"""
+        logger.warning(f"MCP server add request: name={name}, command={command}, args={args}")
         await self.mcp.add_server(name, command, args, env)
 
     async def _exec_browser(self, action: Dict) -> Dict:
@@ -97,16 +119,78 @@ class ToolManager:
                 path = action.get("path", "")
                 if not path:
                     return {"success": False, "error": "مفيش path"}
-                with open(path) as f:
-                    return {"success": True, "data": f.read()}
+                # [FIX] sanitize_path — منع الوصول لملفات النظام
+                safe = sanitize_path(path)
+                if not safe:
+                    logger.warning(f"محاولة وصول لملف غير مصرح: {path}")
+                    return {"success": False, "error": "مسار غير مصرح به"}
+                # [FIX v2] تحقق إضافي من الاسم
+                if ".." in path or path.startswith("/"):
+                    logger.warning(f"مسار مشبوه: {path}")
+                with open(safe) as f:
+                    content = f.read()
+                # [FIX v2] حد أقصى لحجم القراءة
+                MAX_READ_SIZE = 5 * 1024 * 1024  # 5MB
+                if len(content) > MAX_READ_SIZE:
+                    content = content[:MAX_READ_SIZE]
+                    logger.info(f"file_read truncated: {safe}")
+                return {"success": True, "data": content}
             elif at == "file_write":
                 path = action.get("path", "")
                 content = action.get("content", "")
                 if not path:
                     return {"success": False, "error": "مفيش path"}
-                with open(path, "w") as f:
+                # [FIX] sanitize_path — منع الكتابة في مسارات غير مصرحة
+                safe = sanitize_path(path)
+                if not safe:
+                    logger.warning(f"محاولة كتابة لملف غير مصرح: {path}")
+                    return {"success": False, "error": "مسار غير مصرح به"}
+                # [FIX] حد أقصى لحجم المحتوى — منع كتابة ملفات ضخمة
+                MAX_WRITE_SIZE = 5 * 1024 * 1024  # 5MB
+                if len(content) > MAX_WRITE_SIZE:
+                    return {"success": False, "error": f"المحتوى كبير جداً (الحد: {MAX_WRITE_SIZE // 1024 // 1024}MB)"}
+                with open(safe, "w") as f:
                     f.write(content)
+                logger.info(f"file_write: {safe} ({len(content)} chars)")
                 return {"success": True}
+            elif at == "file_delete":
+                # [FIX] إضافة حماية لعملية الحذف
+                path = action.get("path", "")
+                if not path:
+                    return {"success": False, "error": "مفيش path"}
+                safe = sanitize_path(path)
+                if not safe:
+                    logger.warning(f"محاولة حذف ملف غير مصرح: {path}")
+                    return {"success": False, "error": "مسار غير مصرح به"}
+                # [FIX v2] منع حذف ملفات مهمة
+                _protected_extensions = {".py", ".json", ".env", ".yaml", ".yml", ".toml", ".cfg"}
+                _, ext = os.path.splitext(safe)
+                if ext.lower() in _protected_extensions:
+                    logger.warning(f"محاولة حذف ملف محمي: {safe}")
+                    return {"success": False, "error": f"لا يمكن حذف ملفات {ext} — محمية"}
+                if os.path.exists(safe):
+                    os.remove(safe)
+                    logger.warning(f"file_delete: {safe}")
+                    return {"success": True}
+                return {"success": False, "error": "الملف مش موجود"}
+            elif at == "file_list":
+                # [FIX] إضافة حماية لعملية القائمة
+                path = action.get("path", "")
+                if not path:
+                    path = os.environ.get("ADAM_WORKSPACE", os.path.expanduser("~"))
+                safe = sanitize_path(path)
+                if not safe:
+                    logger.warning(f"محاولة قائمة مجلد غير مصرح: {path}")
+                    return {"success": False, "error": "مسار غير مصرح به"}
+                entries = []
+                for entry in os.listdir(safe):
+                    full = os.path.join(safe, entry)
+                    entries.append({
+                        "name": entry,
+                        "is_dir": os.path.isdir(full),
+                        "size": os.path.getsize(full) if os.path.isfile(full) else 0,
+                    })
+                return {"success": True, "data": entries}
             elif at == "disk_space":
                 _df_path = os.environ.get("ADAM_WORKSPACE", os.path.expanduser("~"))
                 r = subprocess.run(["df", "-h", _df_path],
@@ -114,6 +198,7 @@ class ToolManager:
                 return {"success": True, "data": r.stdout}
             return {"success": False, "error": f"File action unknown: {at}"}
         except Exception as e:
+            logger.error(f"file action error: {at} — {e}")
             return {"success": False, "error": str(e)}
 
     def get_action_log(self, limit: int = 50) -> List[Dict]:

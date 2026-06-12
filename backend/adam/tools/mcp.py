@@ -2,6 +2,12 @@
 Adam Prism — MCP (Model Context Protocol) Integration
 ========================================================
 يربط آدم بآلاف الأدوات عبر خوادم MCP القياسية.
+
+[SECURITY FIXES v2]
+1. إصلاح خلل حرج: كود غير قابل للوصول بعد raise ValueError
+2. قائمة بيضاء للأوامر المسموحة
+3. تسجيل كل إضافة خادم جديد
+4. حد أقصى لعدد خوادم MCP
 """
 
 import os
@@ -70,9 +76,9 @@ class MCPConnection:
                 for tool in response.tools
             ]
             self._connected = True
-            logger.info(f"✅ MCP '{self.name}' متصل — {len(self.tools)} أداة: {[t.name for t in self.tools]}")
+            logger.info(f"MCP '{self.name}' متصل — {len(self.tools)} أداة: {[t.name for t in self.tools]}")
         except Exception as e:
-            logger.warning(f"⚠️ MCP '{self.name}' فشل الاتصال: {e}")
+            logger.warning(f"MCP '{self.name}' فشل الاتصال: {e}")
             await self._cleanup()
             raise
 
@@ -109,20 +115,55 @@ class MCPConnection:
 class MCPManager:
     """مدير اتصالات MCP — يدير خوادم متعددة"""
 
+    # الأوامر المسموحة لخوادم MCP — منع تنفيذ أوامر تعسفية
+    ALLOWED_MCP_COMMANDS = {"npx", "node", "python3", "python", "uvx"}
+
+    # [FIX v2] حد أقصى لعدد خوادم MCP
+    MAX_MCP_SERVERS = int(os.environ.get("ADAM_MAX_MCP_SERVERS", "10"))
+
     def __init__(self):
         self.connections: Dict[str, MCPConnection] = {}
         self._tool_map: Dict[str, str] = {}  # tool_name → connection name
 
     async def add_server(self, name: str, command: str, args: List[str] = None, env: Dict[str, str] = None):
-        """يضيف خادم MCP جديد"""
+        """يضيف خادم MCP جديد — مع التحقق من الأمر"""
+        import shlex
+
+        # [FIX v2] التحقق من عدد الخوادم
+        if len(self.connections) >= self.MAX_MCP_SERVERS:
+            raise ValueError(f"عدد خوادم MCP وصل للحد الأقصى ({self.MAX_MCP_SERVERS})")
+
+        # [FIX v2] التحقق من اسم الخادم
+        if not name or len(name) > 50:
+            raise ValueError("اسم خادم MCP لازم يكون بين 1 و 50 حرف")
+
+        # استخراج الأمر الأساسي
+        try:
+            parts = shlex.split(command)
+        except ValueError:
+            raise ValueError(f"أمر MCP غير صالح: {command}")
+        base_cmd = parts[0] if parts else command
+
+        # التحقق من القائمة البيضاء
+        base_basename = os.path.basename(base_cmd)
+        if base_basename not in self.ALLOWED_MCP_COMMANDS:
+            raise ValueError(
+                f"أمر MCP غير مسموح: {base_basename} — "
+                f"الأوامر المتاحة: {', '.join(sorted(self.ALLOWED_MCP_COMMANDS))}"
+            )
+
+        # [FIX] كان فيه raise ValueError فوق وده بيمنع إنشاء الاتصال
+        # الآن الإنشاء بيحصل بعد التحقح فقط
         conn = MCPConnection(name, command, args, env)
         self.connections[name] = conn
         try:
             await conn.connect()
             for tool in conn.tools:
                 self._tool_map[tool.name] = name
-        except Exception:
-            pass
+            logger.warning(f"MCP server added: name={name}, command={command}, tools={len(conn.tools)}")
+        except Exception as e:
+            # حتى لو فشل الاتصال، الخادم موجود في القائمة للمتابعة
+            logger.warning(f"MCP server '{name}' added but connection failed: {e}")
 
     async def initialize(self, servers: List[Dict] = None):
         """تهيئة خوادم MCP من config"""

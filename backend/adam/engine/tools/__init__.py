@@ -10,7 +10,7 @@ import json
 import logging
 from typing import Optional, Dict, List, Any
 
-from core.permissions import classify_tool, log_permission
+from adam.core.permissions import classify_tool, log_permission
 from adam.engine.generate import AdamPrismEngineGenerate
 from adam.engine.tools.browser import BrowserToolsMixin
 from adam.engine.tools.system_tools import SystemToolsMixin

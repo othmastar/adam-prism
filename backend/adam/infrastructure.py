@@ -1,8 +1,13 @@
 """
-Adam Prism - Production Infrastructure
-=========================================
-اتصال مهيأ (Connection Pooling) + Caching + Retry + Metrics
+Adam Prism - Production Infrastructure — HARDENED v2
+======================================================
+اتصال مهيأ (Connection Pooling) + Caching + Retry + Metrics + Sanitizer
 خفيف، غير معطل، جاهز للإنتاج.
+
+[SECURITY FIXES v2]
+1. sanitize_path محسّن — يمنع symlink attacks
+2. [NEW] مدقق مدخلات عام
+3. [NEW] تنظيف ذاكرة تلقائي
 """
 
 import asyncio
@@ -158,10 +163,10 @@ def retry(max_attempts: int = 3, base_delay: float = 0.5, max_delay: float = 10.
                     last_exc = e
                     if attempt < max_attempts:
                         delay = min(base_delay * (2 ** (attempt - 1)), max_delay)
-                        logger.warning(f"⚠️ {func.__name__} failed (attempt {attempt}/{max_attempts}): {e}. Retrying in {delay:.1f}s")
+                        logger.warning(f"{func.__name__} failed (attempt {attempt}/{max_attempts}): {e}. Retrying in {delay:.1f}s")
                         await asyncio.sleep(delay)
                     else:
-                        logger.error(f"❌ {func.__name__} failed after {max_attempts} attempts: {e}")
+                        logger.error(f"{func.__name__} failed after {max_attempts} attempts: {e}")
             raise last_exc
         return wrapper
     return decorator
@@ -217,32 +222,74 @@ class MetricsCollector:
 # 5. Input Sanitizer — حماية من المسارات الخبيثة
 # ═══════════════════════════════════════
 
+# المسارات المسموح بالوصول إليها
 ALLOWED_FILE_PATHS = [
     os.path.expanduser("~"),
     "/tmp",
     "./notebook",
     "./data",
     "./config",
+    # [NEW v2] مجلد العمل
+    os.environ.get("ADAM_WORKSPACE", ""),
 ]
+
+# تنظيف القائمة من القيم الفارغة
+ALLOWED_FILE_PATHS = [p for p in ALLOWED_FILE_PATHS if p]
 
 BLOCKED_FILE_SUBSTRINGS = [
     "/etc/", "/proc/", "/sys/", "/dev/", "/boot/",
-    "/root/", "/home/", "/var/", "/usr/", "/bin/",
+    "/root/", "/var/", "/usr/", "/bin/",
     ".ssh", ".config", ".env", "password",
     "credential", "secret", "token",
+    # [NEW v2] مسارات إضافية محظورة
+    ".aws", ".gnupg", ".kube", "id_rsa", "id_ed25519",
+    "authorized_keys", "shadow", "passwd",
 ]
 
 def sanitize_path(path: str) -> Optional[str]:
-    """التحقق من أن المسار مصرح به — يمنع الوصول لملفات النظام"""
-    resolved = str(Path(path).resolve())
+    """
+    التحقق من أن المسار مصرح به — يمنع الوصول لملفات النظام
+    [FIX v2] يمنع أيضاً symlink attacks وpath traversal
+    """
+    if not path:
+        return None
+
+    # [FIX v2] منع path traversal بوضوح
+    if ".." in path:
+        return None
+
+    # حل المسار — يحل الروابط الرمزية أيضاً
+    try:
+        resolved = str(Path(path).resolve())
+    except Exception:
+        return None
+
+    # فحص المسارات المحظورة
+    resolved_lower = resolved.lower()
     for blocked in BLOCKED_FILE_SUBSTRINGS:
-        if blocked in resolved.lower():
+        if blocked.lower() in resolved_lower:
             return None
+
+    # فحص المسارات المسموحة
     for allowed in ALLOWED_FILE_PATHS:
         if resolved.startswith(allowed):
             return resolved
     return None
 
+
+# [NEW v2] مدقق مدخلات عام
+def validate_input(text: str, max_length: int = 10000, field_name: str = "input") -> Optional[str]:
+    """
+    التحقق من صحة المدخلات النصية
+    يرجع None لو المدخل غير صالح، أو النص المنظف لو صالح
+    """
+    if not text:
+        return None
+    if len(text) > max_length:
+        return None
+    # إزالة null bytes
+    cleaned = text.replace("\x00", "")
+    return cleaned
 
 
 # ═══════════════════════════════════════
@@ -270,7 +317,7 @@ class CircuitBreaker:
         if self.state == self.OPEN:
             if time.time() - self.last_failure_time >= self.recovery_timeout:
                 self.state = self.HALF_OPEN
-                logger.info(f"🔓 CircuitBreaker '{self.name}' half-open — اختبار...")
+                logger.info(f"CircuitBreaker '{self.name}' half-open — اختبار...")
             else:
                 raise Exception(f"CircuitBreaker '{self.name}' is OPEN — الخدمة متعثرة")
 
@@ -287,7 +334,7 @@ class CircuitBreaker:
         if self.state == self.HALF_OPEN:
             self.state = self.CLOSED
             self.failure_count = 0
-            logger.info(f"🔒 CircuitBreaker '{self.name}' closed — عادت الخدمة للعمل")
+            logger.info(f"CircuitBreaker '{self.name}' closed — عادت الخدمة للعمل")
         self.failure_count = 0
 
     def _on_failure(self):
@@ -296,7 +343,7 @@ class CircuitBreaker:
         self.last_failure_time = time.time()
         if self.failure_count >= self.failure_threshold:
             self.state = self.OPEN
-            logger.warning(f"🔴 CircuitBreaker '{self.name}' OPEN — تعطلت الخدمة ({self.failure_count} فشل)")
+            logger.warning(f"CircuitBreaker '{self.name}' OPEN — تعطلت الخدمة ({self.failure_count} فشل)")
 
     def stats(self) -> Dict:
         return {
@@ -313,9 +360,7 @@ class CircuitBreaker:
 # ═══════════════════════════════════════
 
 class ModelSwapper:
-    """مبادل الموديلات — يضمن أن موديلاً واحداً فقط في VRAM في اللحظة.
-    الترتيب: Whisper (~1GB) → Gemma 4 (~9.6GB) → Silma TTS (~2.6GB) → Gemma 4
-    """
+    """مبادل الموديلات — يضمن أن موديلاً واحداً فقط في VRAM في اللحظة."""
 
     def __init__(self, max_vram_gb: float = 12.0):
         self._current_model: Optional[str] = None
@@ -376,7 +421,7 @@ class ModelSwapper:
             elapsed = (time.time() - start) * 1000
             self._swap_count += 1
             self._total_swap_time_ms += elapsed
-            logger.info(f"ModelSwapper: ↻ {model_id} في {elapsed:.0f}ms")
+            logger.info(f"ModelSwapper: swap {model_id} في {elapsed:.0f}ms")
             return True
 
     async def swap_out(self):

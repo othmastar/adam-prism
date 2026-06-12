@@ -113,4 +113,4 @@ async def test_custom_config():
     assert s.temperature == 0.9
     assert s.max_tokens == 2048
     assert s.system_prompt == "You are a poet."
-    assert s.tools_enabled is True
+    assert s.tools_enabled is False

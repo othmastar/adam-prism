@@ -7,6 +7,6 @@ Created by Mohamed Othman (OthMastar)
 Apache 2.0 License
 """
 
-__version__ = "1.0.0-beta"
+__version__ = "1.0.0"
 __author__ = "Mohamed Othman"
 __license__ = "Apache-2.0"
