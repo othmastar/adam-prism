@@ -29,6 +29,7 @@ import httpx
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Request, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, HTMLResponse, JSONResponse
+from adam.api.diagnostic import router as diagnostic_router
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 from adam.api.chat_store import ChatStore
@@ -288,6 +289,12 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
             app.mount("/ui", StaticFiles(directory=_static_dir, html=True), name="ui")
         except Exception as e:
             logger.warning(f"فشل تحميل الملفات الثابتة: {e}")
+
+    # Diagnostic & Orchestrator routes
+    try:
+        app.include_router(diagnostic_router)
+    except Exception as e:
+        logger.warning(f"فشل تحميل مسارات التشخيص: {e}")
 
     # Chat history store
     chat_store = ChatStore()
