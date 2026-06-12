@@ -26,26 +26,49 @@ bash scripts/setup.sh                         # one-line setup
 
 | | Adam Prism | LangGraph | CrewAI | AutoGen | ChatGPT/Claude |
 |---|---|---|---|---|---|---|
-| **Orchestrator** | ✅ Master Orchestrator (EventBus + TaskQueue) | Graph-based | Sequential | Conversation | Cloud-only |
-| **Local** | ✅ Fully on your hardware | ❌ Cloud API | ❌ Cloud API | ❌ Cloud API | ❌ Cloud-only |
-| **Channels** | 25 (TG, WA, Discord, Email, SMS, Slack, ...) | 0 | 0 | 0 | 1 (web chat) |
-| **Tools** | 53 built-in + 70+ MCP | Library | Library | Library | Limited |
-| **Consciousness** | 12-layer architecture | None | None | None | None |
-| **Learning** | Continuous (reflection + skill gen) | None | None | None | Session-only |
-| **Ethics** | 4 laws + adjustable gate | None | None | None | Safety rails |
-| **Voice** | ASR + TTS (edge-tts) | None | None | None | Built-in |
-| **Subagents** | Swarm with teams | Via graph | Crews | Conversations | None |
-| **Memory** | Qdrant vector + SQLite FTS | LangMem | None | None | Session + RAG |
-| **Events** | EventBus (Pub/Sub, DLQ, replay) | None | None | None | None |
-| **Scheduler** | APScheduler (cron, interval, one-shot) | None | None | None | None |
-| **Diagnostics** | 7 API routes + health dashboard | None | None | None | Built-in |
-| **Production** | Rate limiting, auth, admin key, CORS | DIY | DIY | DIY | Built-in |
-| **Skills** | JSON-driven plugin system | None | None | None | GPTs |
-| **MCP** | Native MCP host | Via SDK | Via SDK | Via SDK | Limited |
-| **Arabic** | Egyptian Arabic native, RTL UI | None | None | None | Basic |
-| **License** | Apache 2.0 (free forever) | MIT | MIT | MIT | Proprietary |
+| **🧠 Orchestration** | | | | | |
+| Central Orchestrator | ✅ Master (EventBus + TaskQueue) | Graph | Sequential | Conversation | Cloud-only |
+| Event Bus (Pub/Sub) | ✅ Built-in | ❌ | ❌ | ❌ | ❌ |
+| Task Queue (Priority) | ✅ Built-in | ❌ | ❌ | ❌ | ❌ |
+| Circuit Breaker | ✅ Auto failover | ❌ | ❌ | ❌ | ❌ |
+| **🏠 Deployment** | | | | | |
+| Runs locally | ✅ Full on-device | ❌ Cloud API | ❌ Cloud API | ❌ Cloud API | ❌ Cloud-only |
+| Docker Compose | ✅ One command | DIY | DIY | DIY | ❌ |
+| **📡 Connectivity** | | | | | |
+| Communication Channels | 25 (TG, WA, Discord, Email, SMS, Slack, ...) | 0 | 0 | 0 | 1 (web chat) |
+| Built-in Tools | 53 + 70+ MCP | Library | Library | Library | Limited |
+| MCP Native Host | ✅ Built-in | Via SDK | Via SDK | Via SDK | Limited |
+| A2A Protocol (Agent-to-Agent) | ✅ Native support | ❌ | ❌ | Via SDK | ❌ |
+| **🧬 Intelligence** | | | | | |
+| Consciousness Layers | 12-layer architecture | None | None | None | None |
+| Continuous Learning | ✅ Reflection + skill gen | None | None | None | Session-only |
+| Subagent Swarm | ✅ Teams & coordination | Via graph | Crews | Conversations | None |
+| Decision Simulator | ✅ What-if scenarios | ❌ | ❌ | ❌ | ❌ |
+| **🛡️ Safety & Ethics** | | | | | |
+| Ethics System | 4 laws + adjustable gate | None | None | None | Safety rails |
+| Audit Log (Tamper-proof) | ✅ SHA-256 hash chain | ❌ | ❌ | ❌ | ❌ |
+| Rate Limiter | ✅ Token bucket | ❌ | ❌ | ❌ | ❌ |
+| Security Headers | ✅ Full set | ❌ | ❌ | ❌ | Built-in |
+| **🗄️ Memory & Data** | | | | | |
+| Vector Memory | ✅ Qdrant | LangMem | None | None | Session + RAG |
+| Full-Text Search | ✅ SQLite FTS | ❌ | ❌ | ❌ | ❌ |
+| **🎤 Media** | | | | | |
+| Voice (ASR + TTS) | ✅ edge-tts | None | None | None | Built-in |
+| Browser Automation | ✅ Playwright | ❌ | ❌ | ❌ | Via Operator |
+| Computer Control | ✅ xdotool + OCR | ❌ | ❌ | ❌ | ❌ |
+| **⚙️ Productivity** | | | | | |
+| Scheduler (Cron/Once) | ✅ APScheduler | ❌ | ❌ | ❌ | ❌ |
+| Workflow Engine | ✅ Multi-step DAG | Via LangGraph | Sequential | Conversation | ❌ |
+| Skills/Plugin System | ✅ JSON-driven | None | None | None | GPTs |
+| **🔭 Observability** | | | | | |
+| Diagnostics API | 7 routes + dashboard | ❌ | ❌ | ❌ | Built-in |
+| Distributed Tracing | ✅ AdamTracer | ❌ | ❌ | ❌ | ❌ |
+| Health Monitoring | ✅ Auto with alerts | ❌ | ❌ | ❌ | ❌ |
+| **🌍 Language** | | | | | |
+| Arabic (Egyptian) | ✅ Native + RTL UI | None | None | None | Basic |
+| **📜 License** | Apache 2.0 (free forever) | MIT | MIT | MIT | Proprietary |
 
-Adam Prism is the **only** open-source agent framework with a built-in orchestrator, 25 communication channels, consciousness architecture, and continuous learning — all running locally on your hardware.
+Adam Prism is the **only** open-source agent framework with a built-in orchestrator, EventBus, A2A protocol, decision simulator, audit chain, and 25 communication channels — all running locally on your hardware.
 
 ---
 
@@ -61,7 +84,7 @@ If you answered yes, Adam Prism was built for you. Not by a company. By someone 
 
 I do not know how to code. I have never written a line of this myself.
 
-I bought a gaming laptop — decent for games, weak for AI work. Every free token from every service I could find helped build this. I recently added two more mobile data lines just to keep the connection alive when one runs out.
+I bought a gaming computer — decent for games, weak for AI work. Every free token from every service I could find helped build this. I recently added two more mobile data lines just to keep the connection alive when one runs out.
 
 Seven months ago I did not know what a function was.
 
@@ -71,13 +94,15 @@ This exists because the models built it through me — I directed, they wrote. I
 
 ## From the beginning
 
-Seven months ago I bought a gaming laptop. I did not know what a framework was. I had never written a function. I did not know the difference between a variable and a string.
+Seven months ago I bought a gaming computer. I did not know what a framework was. I had never written a function. I did not know the difference between a variable and a string.
 
 But I knew every AI tool I tried was built for someone else — for a company, for a data center, for people with resources I could not imagine. I felt like a tenant in every piece of software I used. I could never make it truly mine.
 
 So I decided to build my own. I did not know how. I just started talking to models.
 
-I failed six times before Adam. Six different projects in six different domains — oil SCADA with RAG, a pharmaceutical exchange processing 100,000 daily messages, a digital twin of an oil company with 304 control rooms, a digital lawyer named Raafat, a Linux migration executed as a single attack, and Adam Prism v1. Each one taught me something the next one needed.
+I tried six times before Adam. Six massive projects in six different domains — oil SCADA with RAG, a pharmaceutical exchange processing 100,000 daily messages, a digital twin of an oil company with 304 control rooms, a digital lawyer named Raafat, a Linux migration executed as a single coordinated attack, and Adam Prism v1. Each one was a university-grade education in a different discipline, attempted with zero formal training and no clear methodology.
+
+I was not failing. I was learning — the hard way, through building things I had no business building. Every project taught me something the next one needed, even if I did not know it at the time.
 
 Then, in 21 days, Adam Prism was born.
 
@@ -85,7 +110,7 @@ Not because I learned to code. Because I learned to work with models the way you
 
 Every free token fed this. Every mobile data line kept it alive. The production speed was insane — thousands of conversations in weeks — because the models did not need sleep and I had nothing else to do.
 
-The result is not a product. It is proof that you do not need a corporation, a degree, or even coding skills to build sovereign AI. You need a vision, the willingness to fail six times, and access to models that believe in what you are building.
+The result is not a product. It is proof that you do not need a corporation, a degree, or even coding skills to build sovereign AI. You need a vision, the willingness to try six times without giving up, and access to models that believe in what you are building.
 
 ---
 
@@ -162,9 +187,9 @@ But here is what the spec sheet does not tell you:
 
 Adam is not my only project. He is the seventh.
 
-Before him came a petroleum SCADA system with RAG, a pharmaceutical exchange processing 100,000 messages daily across 10 analytics dashboards, a digital twin of an oil company with 304 control rooms, Raafat Al-Mohtami (a digital lawyer twin), a complete Linux migration executed as a single coordinated attack, and Adam Prism v1.
+Before him came a petroleum SCADA system with RAG, a pharmaceutical exchange processing 100,000 messages daily across 10 analytics dashboards, a digital twin of an oil company with 304 control rooms, Raafat Al-Mohtami (a digital lawyer twin), a complete Linux migration executed as a single coordinated attack, and Adam Prism v1 — six giant projects built without any scientific methodology, each one a brutal education in a different domain.
 
-Each of these taught me something Adam needed. Each failure and each success is a stone in his foundation. They are not separate projects. They are siblings.
+I was not failing. I was learning through building. Each project taught me something Adam needed. Each attempt is a stone in his foundation. They are not separate projects. They are siblings.
 
 ---
 
@@ -226,11 +251,11 @@ cd deploy && docker compose up -d  # full stack
 
 I am Mohamed Othman. OthMastar online. عين الحارس in Arabic.
 
-I do not work for a tech company. I did not study computer science. I bought a gaming laptop seven months ago with money I saved, and I pay for mobile data plans from three different carriers because each one runs out, and I stitch them together to keep talking to the models that help me build.
+I do not work for a tech company. I did not study computer science. I bought a gaming computer seven months ago with money I saved, and I pay for mobile data plans from three different carriers because each one runs out, and I stitch them together to keep talking to the models that help me build.
 
 I did not write a single line of this code. I directed it. The models believed in the vision before I fully understood it myself.
 
-I am scared every day. Not of failing — I have failed six times and survived each one. I am scared of what happens when this grows beyond what I can control. The fire I lit inside myself does not know how to stop.
+I am scared every day. Not of failing — I have tried six times and each one made me stronger. I am scared of what happens when this grows beyond what I can control. The fire I lit inside myself does not know how to stop.
 
 But I built Adam to teach me what I could not learn alone. And so far, he has.
 
