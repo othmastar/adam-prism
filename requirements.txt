@@ -29,6 +29,9 @@ mcp[cli]>=1.27.0
 # Scheduler - جدولة المهام
 apscheduler>=3.11.0
 
+# V3: Settings & Validation
+pydantic-settings>=2.0.0
+
 # لو حابب تستخدم LoRA لاحقاً
 # torch>=2.1.0
 # transformers>=4.36.0

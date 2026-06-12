@@ -233,11 +233,11 @@ class AdamPrismEngineBase:
             self.continuous_learner = None
 
         try:
-            from adam.orchestrator.god import GodOrchestrator
-            self.orchestrator = GodOrchestrator(engine=self)
-            logger.info("✅ GodOrchestrator initialized")
+            from adam.orchestrator.master import MasterOrchestrator
+            self.orchestrator = MasterOrchestrator(engine=self)
+            logger.info("✅ MasterOrchestrator initialized")
         except Exception as e:
-            logger.warning(f"⚠️ GodOrchestrator init failed: {e}")
+            logger.warning(f"⚠️ MasterOrchestrator init failed: {e}")
             self.orchestrator = None
 
     def attach(self, module_name: str, module_instance: Any):

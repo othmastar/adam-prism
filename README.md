@@ -26,7 +26,7 @@ bash scripts/setup.sh                         # one-line setup
 
 | | Adam Prism | LangGraph | CrewAI | AutoGen | ChatGPT/Claude |
 |---|---|---|---|---|---|---|
-| **Orchestrator** | ✅ God Orchestrator (EventBus + TaskQueue) | Graph-based | Sequential | Conversation | Cloud-only |
+| **Orchestrator** | ✅ Master Orchestrator (EventBus + TaskQueue) | Graph-based | Sequential | Conversation | Cloud-only |
 | **Local** | ✅ Fully on your hardware | ❌ Cloud API | ❌ Cloud API | ❌ Cloud API | ❌ Cloud-only |
 | **Channels** | 25 (TG, WA, Discord, Email, SMS, Slack, ...) | 0 | 0 | 0 | 1 (web chat) |
 | **Tools** | 53 built-in + 70+ MCP | Library | Library | Library | Limited |
@@ -100,7 +100,7 @@ The result is not a product. It is proof that you do not need a corporation, a d
                     └──────────┬───────────┘
                                │
 ┌──────────────────────────────▼───────────────────────────┐
-│                  God Orchestrator                         │
+│                  Master Orchestrator                      │
 │  ┌─────────────┐  ┌──────────────┐  ┌──────────────────┐ │
 │  │  EventBus   │  │  TaskQueue   │  │  Router          │ │
 │  │  (Pub/Sub)  │  │  (Priority)  │  │  (Smart Dispatch)│ │
@@ -119,11 +119,11 @@ The result is not a product. It is proof that you do not need a corporation, a d
   └─────────┘ └─────────┘ └─────────┘ └──────────────┘
 ```
 
-Adam Prism is a **digital twin framework** with a **God Orchestrator** at its core — an intelligent coordinator that routes requests, manages tasks, broadcasts events, and monitors every subsystem.
+Adam Prism is a **digital twin framework** with a **Master Orchestrator** at its core — an intelligent coordinator that routes requests, manages tasks, broadcasts events, and monitors every subsystem.
 
 **Features no other framework has together:**
 
-- 🧠 **God Orchestrator** — Central coordinator with EventBus (Pub/Sub, dead letter queue, replay buffer), TaskQueue (priority-based, deduplication, exponential backoff), and smart routing
+- 🧠 **Master Orchestrator** — Central coordinator with EventBus (Pub/Sub, dead letter queue, replay buffer), TaskQueue (priority-based, deduplication, exponential backoff), and smart routing
 - 🧬 **12-layer consciousness** — 7 cognitive modes, 4 ethical laws, adjustable ethics gate
 - 📡 **25 communication channels** — Telegram, WhatsApp, Discord, Slack, Email, SMS, Twitter, Facebook, Matrix, Signal, Instagram, LINE, Viber, Teams, Google Chat, IRC, XMPP, RSS, Notion, GitHub, WeChat, WebChat, generic webhook, and more
 - 🔧 **53 built-in tools + 70+ MCP tools** — Browser automation, computer control (mouse/keyboard/clipboard/screen), file operations, shell, Python exec, memory, knowledge search, planning, and more
@@ -211,7 +211,7 @@ cd deploy && docker compose up -d  # full stack
 - 12,000+ lines core Python
 - 274 passing tests, 5 skipped
 - 70+ API routes, 53 tools, 70+ MCP tools, 25 channels
-- God Orchestrator (EventBus + TaskQueue + Smart Router)
+- Master Orchestrator (EventBus + TaskQueue + Smart Router)
 - 12-layer consciousness, 7 modes, 4 ethical laws
 - Continuous learning (reflection + skill generation)
 - Voice pipeline (ASR + TTS), MCP native host
