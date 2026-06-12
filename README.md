@@ -25,7 +25,7 @@ bash scripts/setup.sh                         # one-line setup
 ## Why Adam?
 
 | | Adam Prism | LangGraph | CrewAI | AutoGen | ChatGPT/Claude |
-|---|---|---|---|---|---|---|
+|---|---|---|---|---|---|
 | **🧠 Orchestration** | | | | | |
 | Central Orchestrator | ✅ Master (EventBus + TaskQueue) | Graph | Sequential | Conversation | Cloud-only |
 | Event Bus (Pub/Sub) | ✅ Built-in | ❌ | ❌ | ❌ | ❌ |
@@ -35,20 +35,20 @@ bash scripts/setup.sh                         # one-line setup
 | Runs locally | ✅ Full on-device | ❌ Cloud API | ❌ Cloud API | ❌ Cloud API | ❌ Cloud-only |
 | Docker Compose | ✅ One command | DIY | DIY | DIY | ❌ |
 | **📡 Connectivity** | | | | | |
-| Communication Channels | 25 (TG, WA, Discord, Email, SMS, Slack, ...) | 0 | 0 | 0 | 1 (web chat) |
+| Communication Channels | 25 (TG, WA, Discord, …) | 0 | 0 | 0 | 1 (web chat) |
 | Built-in Tools | 53 + 70+ MCP | Library | Library | Library | Limited |
 | MCP Native Host | ✅ Built-in | Via SDK | Via SDK | Via SDK | Limited |
-| A2A Protocol (Agent-to-Agent) | ✅ Native support | ❌ | ❌ | Via SDK | ❌ |
+| A2A Protocol | ✅ Native | ❌ | ❌ | Via SDK | ❌ |
 | **🧬 Intelligence** | | | | | |
 | Consciousness Layers | 12-layer architecture | None | None | None | None |
 | Continuous Learning | ✅ Reflection + skill gen | None | None | None | Session-only |
-| Subagent Swarm | ✅ Teams & coordination | Via graph | Crews | Conversations | None |
-| Decision Simulator | ✅ What-if scenarios | ❌ | ❌ | ❌ | ❌ |
+| Subagent Swarm | ✅ Teams | Via graph | Crews | Conversations | None |
+| Decision Simulator | ✅ What-if | ❌ | ❌ | ❌ | ❌ |
 | **🛡️ Safety & Ethics** | | | | | |
-| Ethics System | 4 laws + adjustable gate | None | None | None | Safety rails |
-| Audit Log (Tamper-proof) | ✅ SHA-256 hash chain | ❌ | ❌ | ❌ | ❌ |
+| Ethics System | 4 laws + gate | None | None | None | Safety rails |
+| Audit Log (SHA-256 chain) | ✅ Built-in | ❌ | ❌ | ❌ | ❌ |
 | Rate Limiter | ✅ Token bucket | ❌ | ❌ | ❌ | ❌ |
-| Security Headers | ✅ Full set | ❌ | ❌ | ❌ | Built-in |
+| Security Headers | ✅ Full | ❌ | ❌ | ❌ | Built-in |
 | **🗄️ Memory & Data** | | | | | |
 | Vector Memory | ✅ Qdrant | LangMem | None | None | Session + RAG |
 | Full-Text Search | ✅ SQLite FTS | ❌ | ❌ | ❌ | ❌ |
@@ -57,16 +57,16 @@ bash scripts/setup.sh                         # one-line setup
 | Browser Automation | ✅ Playwright | ❌ | ❌ | ❌ | Via Operator |
 | Computer Control | ✅ xdotool + OCR | ❌ | ❌ | ❌ | ❌ |
 | **⚙️ Productivity** | | | | | |
-| Scheduler (Cron/Once) | ✅ APScheduler | ❌ | ❌ | ❌ | ❌ |
-| Workflow Engine | ✅ Multi-step DAG | Via LangGraph | Sequential | Conversation | ❌ |
-| Skills/Plugin System | ✅ JSON-driven | None | None | None | GPTs |
+| Scheduler | ✅ APScheduler | ❌ | ❌ | ❌ | ❌ |
+| Workflow Engine | ✅ Multi-step | Via LangGraph | Sequential | Conversation | ❌ |
+| Skills / Plugins | ✅ JSON-driven | None | None | None | GPTs |
 | **🔭 Observability** | | | | | |
-| Diagnostics API | 7 routes + dashboard | ❌ | ❌ | ❌ | Built-in |
+| Diagnostics API | ✅ 7 routes | ❌ | ❌ | ❌ | Built-in |
 | Distributed Tracing | ✅ AdamTracer | ❌ | ❌ | ❌ | ❌ |
-| Health Monitoring | ✅ Auto with alerts | ❌ | ❌ | ❌ | ❌ |
+| Health Monitoring | ✅ Auto alerts | ❌ | ❌ | ❌ | ❌ |
 | **🌍 Language** | | | | | |
-| Arabic (Egyptian) | ✅ Native + RTL UI | None | None | None | Basic |
-| **📜 License** | Apache 2.0 (free forever) | MIT | MIT | MIT | Proprietary |
+| Arabic (Egyptian) | ✅ Native | None | None | None | Basic |
+| **📜 License** | Apache 2.0 (free) | MIT | MIT | MIT | Proprietary |
 
 Adam Prism is the **only** open-source agent framework with a built-in orchestrator, EventBus, A2A protocol, decision simulator, audit chain, and 25 communication channels — all running locally on your hardware.
 
