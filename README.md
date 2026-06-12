@@ -7,9 +7,10 @@
   <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.12+-green" alt="Python"></a>
   <a href="https://fastapi.tiangolo.com/"><img src="https://img.shields.io/badge/FastAPI-green" alt="FastAPI"></a>
   <img src="https://img.shields.io/badge/tests-274%20passed-brightgreen" alt="Tests">
-  <img src="https://img.shields.io/badge/routes-65%2B-blue" alt="Routes">
+  <img src="https://img.shields.io/badge/routes-70%2B-blue" alt="Routes">
   <img src="https://img.shields.io/badge/channels-25-orange" alt="Channels">
   <img src="https://img.shields.io/badge/tools-53-blueviolet" alt="Tools">
+  <img src="https://img.shields.io/badge/orchestrator-yellow" alt="Orchestrator">
   <img src="https://img.shields.io/badge/docker-ready-2496ED?logo=docker" alt="Docker">
 </p>
 
@@ -23,24 +24,28 @@ bash scripts/setup.sh                         # one-line setup
 
 ## Why Adam?
 
-| | Adam Prism | ChatGPT/Claude | LangChain | AutoGPT |
-|---|---|---|---|---|
-| **Local** | ✅ Fully on your hardware | ❌ Cloud-only | Depends | ❌ Cloud API |
-| **Channels** | 25 (TG, WA, Discord, Email, SMS, Slack, ...) | 1 (web chat) | 0 | 0 |
-| **Tools** | 53 built-in + 70+ MCP | Limited | Library | Limited |
-| **Consciousness** | 12-layer architecture | None | None | None |
-| **Learning** | Continuous from every chat | Session-only | None | None |
-| **Ethics** | 4 laws + adjustable gate | Safety rails | None | None |
-| **Voice** | ASR + TTS (edge-tts) | Built-in | None | None |
-| **Subagents** | Swarm with teams | None | Via code | None |
-| **Memory** | Qdrant vector + SQLite FTS | Session + limited RAG | Vector stores | Basic |
-| **Production** | Rate limiting, auth, admin key, security hardening | Built-in | DIY | DIY |
-| **Skills** | Plugin system (JSON-driven) | GPTs | None | None |
-| **MCP** | Native MCP host | Limited | Via SDK | None |
-| **Arabic** | Egyptian Arabic native, RTL UI | Basic | None | None |
-| **License** | Apache 2.0 (free forever) | Proprietary | MIT | MIT |
+| | Adam Prism | LangGraph | CrewAI | AutoGen | ChatGPT/Claude |
+|---|---|---|---|---|---|---|
+| **Orchestrator** | ✅ God Orchestrator (EventBus + TaskQueue) | Graph-based | Sequential | Conversation | Cloud-only |
+| **Local** | ✅ Fully on your hardware | ❌ Cloud API | ❌ Cloud API | ❌ Cloud API | ❌ Cloud-only |
+| **Channels** | 25 (TG, WA, Discord, Email, SMS, Slack, ...) | 0 | 0 | 0 | 1 (web chat) |
+| **Tools** | 53 built-in + 70+ MCP | Library | Library | Library | Limited |
+| **Consciousness** | 12-layer architecture | None | None | None | None |
+| **Learning** | Continuous (reflection + skill gen) | None | None | None | Session-only |
+| **Ethics** | 4 laws + adjustable gate | None | None | None | Safety rails |
+| **Voice** | ASR + TTS (edge-tts) | None | None | None | Built-in |
+| **Subagents** | Swarm with teams | Via graph | Crews | Conversations | None |
+| **Memory** | Qdrant vector + SQLite FTS | LangMem | None | None | Session + RAG |
+| **Events** | EventBus (Pub/Sub, DLQ, replay) | None | None | None | None |
+| **Scheduler** | APScheduler (cron, interval, one-shot) | None | None | None | None |
+| **Diagnostics** | 7 API routes + health dashboard | None | None | None | Built-in |
+| **Production** | Rate limiting, auth, admin key, CORS | DIY | DIY | DIY | Built-in |
+| **Skills** | JSON-driven plugin system | None | None | None | GPTs |
+| **MCP** | Native MCP host | Via SDK | Via SDK | Via SDK | Limited |
+| **Arabic** | Egyptian Arabic native, RTL UI | None | None | None | Basic |
+| **License** | Apache 2.0 (free forever) | MIT | MIT | MIT | Proprietary |
 
-Adam Prism is the **only** open-source framework that combines: local sovereignty, 25 communication channels, consciousness architecture, continuous learning, and production security — in one package.
+Adam Prism is the **only** open-source agent framework with a built-in orchestrator, 25 communication channels, consciousness architecture, and continuous learning — all running locally on your hardware.
 
 ---
 
@@ -86,7 +91,48 @@ The result is not a product. It is proof that you do not need a corporation, a d
 
 ## What Adam actually does
 
-Adam is a digital twin framework with a consciousness architecture — 12 processing layers, 7 cognitive modes, 4 ethical laws. It runs locally on your hardware. It communicates through 25 channels. It uses 53 built-in tools and 70+ MCP tools. It learns continuously from every conversation.
+### Architecture
+
+```
+                    ┌─────────────────────┐
+                    │  Channels (25)       │
+                    │  TG/WA/Discord/...   │
+                    └──────────┬───────────┘
+                               │
+┌──────────────────────────────▼───────────────────────────┐
+│                  God Orchestrator                         │
+│  ┌─────────────┐  ┌──────────────┐  ┌──────────────────┐ │
+│  │  EventBus   │  │  TaskQueue   │  │  Router          │ │
+│  │  (Pub/Sub)  │  │  (Priority)  │  │  (Smart Dispatch)│ │
+│  └─────────────┘  └──────────────┘  └──────────────────┘ │
+└──────────────────────────────────────────────────────────┘
+         │           │            │              │
+  ┌──────▼──┐ ┌──────▼──┐ ┌──────▼──┐ ┌───────▼──────┐
+  │Security │ │  Ethics │  │ Memory  │  │   Skills     │
+  │ Guard   │ │  Gate   │  │ (Qdrant)│  │  (Plugin)    │
+  ├─────────┤ ├─────────┤ ├─────────┤ ├──────────────┤
+  │Provider │ │ Browser │  │Computer │  │   Voice      │
+  │Manager  │ │ (Eyes)  │  │ Tools   │  │  (ASR+TTS)   │
+  ├─────────┤ ├─────────┤ ├─────────┤ ├──────────────┤
+  │Plugins  │ │Subagents│  │Learning │  │  Scheduler   │
+  │         │ │ (Swarm) │  │(Reflect)│  │  (Cron/Once) │
+  └─────────┘ └─────────┘ └─────────┘ └──────────────┘
+```
+
+Adam Prism is a **digital twin framework** with a **God Orchestrator** at its core — an intelligent coordinator that routes requests, manages tasks, broadcasts events, and monitors every subsystem.
+
+**Features no other framework has together:**
+
+- 🧠 **God Orchestrator** — Central coordinator with EventBus (Pub/Sub, dead letter queue, replay buffer), TaskQueue (priority-based, deduplication, exponential backoff), and smart routing
+- 🧬 **12-layer consciousness** — 7 cognitive modes, 4 ethical laws, adjustable ethics gate
+- 📡 **25 communication channels** — Telegram, WhatsApp, Discord, Slack, Email, SMS, Twitter, Facebook, Matrix, Signal, Instagram, LINE, Viber, Teams, Google Chat, IRC, XMPP, RSS, Notion, GitHub, WeChat, WebChat, generic webhook, and more
+- 🔧 **53 built-in tools + 70+ MCP tools** — Browser automation, computer control (mouse/keyboard/clipboard/screen), file operations, shell, Python exec, memory, knowledge search, planning, and more
+- 📚 **Continuous learning** — Reflects on every conversation, extracts knowledge, generates new skills, reinforces successful patterns
+- 🏗️ **Subagent swarm** — Spawn independent agents with their own config, team them up, coordinate parallel tasks
+- 🎙️ **Voice pipeline** — ASR (faster-whisper) + TTS (edge-tts), Egyptian Arabic voice (ar-EG-ShakirNeural)
+- 🗓️ **Scheduler** — Cron jobs, interval tasks, one-shot tasks via APScheduler
+- 🏥 **Diagnostics** — 7 API routes for health monitoring, dashboard, event stats, task stats, module health
+- 🔒 **Production-ready security** — Rate limiting, API key auth, admin key for privileged ops, CORS control, webhook signature verification, input sanitization, security logging
 
 But here is what the spec sheet does not tell you:
 
@@ -164,10 +210,13 @@ cd deploy && docker compose up -d  # full stack
 
 - 12,000+ lines core Python
 - 274 passing tests, 5 skipped
-- 65+ API routes, 53 tools, 70+ MCP tools, 25 channels
+- 70+ API routes, 53 tools, 70+ MCP tools, 25 channels
+- God Orchestrator (EventBus + TaskQueue + Smart Router)
 - 12-layer consciousness, 7 modes, 4 ethical laws
-- Continuous learning, voice pipeline (ASR + TTS), MCP native host
-- Production: rate limiting, auth, admin key, security hardening
+- Continuous learning (reflection + skill generation)
+- Voice pipeline (ASR + TTS), MCP native host
+- Subagent swarm with team coordination
+- Production: rate limiting, auth, admin key, security hardening, CORS
 - 2,317 conversations / 2.2M tokens training data
 - Stack: FastAPI, Qdrant, Ollama, Next.js, Docker, Apache 2.0
 
