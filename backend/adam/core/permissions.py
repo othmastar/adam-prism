@@ -1,12 +1,12 @@
 """
-Adam Prism — Permission Manager (Phase 1b) — HARDENED
-======================================================
+Adam Prism — Permission Manager (Phase 1b)
+===========================================
 يدير صلاحيات تنفيذ الأدوات حسب التصنيف والمستوى.
 
-[SECURITY FIX v2]
-1. الأذونات الخطيرة أصبحت "always-ask" بدلاً من "auto-allow"
-2. إضافة تصنيفات أمنية واضحة
-3. دعم وضع الإنتاج (ADAM_PRODUCTION=1) يغلّظ الصلاحيات تلقائياً
+[FIXES in this version]
+1. تغيير الافتراضي من auto-allow إلى always-ask للأدوات الخطرة
+2. حفظ السجل في مسار دائم بدلاً من /tmp
+3. إضافة تصنيفات جديدة: mcp, subagent, workflow
 """
 
 import json
@@ -19,101 +19,39 @@ from typing import Dict, Optional
 
 logger = logging.getLogger("adam_prism.permissions")
 
-PERMISSION_LOG = Path(os.environ.get("ADAM_PERMISSION_LOG", "/tmp/adam_permissions.log"))
+# [FIX] مسار دائم للسجل بدلاً من /tmp — الذي يُفقد عند إعادة التشغيل
+_DATA_DIR = os.environ.get("ADAM_DATA_DIR", os.path.join(os.path.expanduser("~"), ".adam_prism"))
+PERMISSION_LOG = Path(_DATA_DIR) / "logs" / "permissions.log"
 
-# هل نحن في وضع الإنتاج؟
-IS_PRODUCTION = os.environ.get("ADAM_PRODUCTION", "0") == "1"
+# تأكد من وجود المجلد
+try:
+    PERMISSION_LOG.parent.mkdir(parents=True, exist_ok=True)
+except Exception:
+    # Fallback to /tmp if home directory is not writable
+    PERMISSION_LOG = Path("/tmp/adam_permissions.log")
 
 # تصنيفات الصلاحيات والتوصيف
-# [FIX v2] الأذونات الخطيرة أصبحت "always-ask" في كل الأوضاع
-# في وضع التطوير: الأذونات البسيطة "auto-allow"
-# في وضع الإنتاج: كل شيء "always-ask" ما عدا القراءة البسيطة
+# [FIX] الأدوات الخطرة الآن تتطلب إذن (always-ask) بدلاً من auto-allow
 PERMISSION_CATEGORIES = {
-    "shell.read": {
-        "default": "auto-allow" if not IS_PRODUCTION else "ask-once",
-        "description": "أوامر قراءة (ls, cat, df)",
-        "risk": "low"
-    },
-    "shell.write": {
-        "default": "ask-once",
-        "description": "أوامر كتابة (touch, mkdir, cp في الورك سبيس)",
-        "risk": "medium"
-    },
-    "shell.dangerous": {
-        "default": "always-ask",
-        "description": "أوامر خطيرة (rm, sudo, chmod, kill)",
-        "risk": "critical"
-    },
-    "python": {
-        "default": "ask-once",
-        "description": "تشغيل كود Python",
-        "risk": "high"
-    },
-    "file.read": {
-        "default": "auto-allow" if not IS_PRODUCTION else "ask-once",
-        "description": "قراءة ملفات في الورك سبيس",
-        "risk": "low"
-    },
-    "file.write": {
-        "default": "ask-once",
-        "description": "كتابة ملفات في الورك سبيس",
-        "risk": "medium"
-    },
-    "file.write.system": {
-        "default": "always-ask",
-        "description": "كتابة خارج الورك سبيس",
-        "risk": "critical"
-    },
-    "browser": {
-        "default": "auto-allow" if not IS_PRODUCTION else "ask-once",
-        "description": "فتح متصفح وتصفح",
-        "risk": "low"
-    },
-    "mouse": {
-        "default": "ask-once",
-        "description": "تحريك الماوس والنقر",
-        "risk": "medium"
-    },
-    "keyboard": {
-        "default": "ask-once",
-        "description": "كتابة عبر لوحة المفاتيح",
-        "risk": "high"
-    },
-    "clipboard": {
-        "default": "always-ask",
-        "description": "قراءة/كتابة الحافظة — قد تحتوي بيانات حساسة",
-        "risk": "high"
-    },
-    "screen": {
-        "default": "ask-once",
-        "description": "تصوير أو قراءة الشاشة",
-        "risk": "medium"
-    },
-    "window": {
-        "default": "ask-once",
-        "description": "التحكم في النوافذ",
-        "risk": "medium"
-    },
-    "knowledge": {
-        "default": "auto-allow",
-        "description": "البحث في قاعدة المعرفة",
-        "risk": "low"
-    },
-    "notebook": {
-        "default": "auto-allow" if not IS_PRODUCTION else "ask-once",
-        "description": "قراءة/كتابة النوت بوك",
-        "risk": "low"
-    },
-    "mcp": {
-        "default": "always-ask",
-        "description": "استدعاء أدوات MCP خارجية",
-        "risk": "high"
-    },
-    "subagent": {
-        "default": "ask-once",
-        "description": "إنشاء/إدارة وكلاء فرعيين",
-        "risk": "medium"
-    },
+    "shell.read": {"default": "auto-allow", "description": "Read commands (ls, cat, df, ps)"},
+    "shell.write": {"default": "once", "description": "Write commands (touch, mkdir, cp in workspace)"},
+    "shell.dangerous": {"default": "always-ask", "description": "Dangerous commands (rm, sudo, chmod, kill)"},
+    "python": {"default": "once", "description": "Execute Python code"},
+    "file.read": {"default": "auto-allow", "description": "Read files in workspace"},
+    "file.write": {"default": "once", "description": "Write files in workspace"},
+    "file.write.system": {"default": "always-ask", "description": "Write outside workspace"},
+    "file.delete": {"default": "always-ask", "description": "Delete files"},
+    "browser": {"default": "once", "description": "Open and browse browser"},
+    "mouse": {"default": "always-ask", "description": "Move and click mouse"},
+    "keyboard": {"default": "always-ask", "description": "Type via keyboard"},
+    "clipboard": {"default": "once", "description": "Read/write clipboard"},
+    "screen": {"default": "once", "description": "Capture or read screen"},
+    "window": {"default": "once", "description": "Control windows"},
+    "knowledge": {"default": "auto-allow", "description": "Search knowledge base"},
+    "notebook": {"default": "auto-allow", "description": "Read/write notebook"},
+    "mcp": {"default": "always-ask", "description": "Execute MCP server tools"},
+    "subagent": {"default": "once", "description": "Manage subagents"},
+    "workflow": {"default": "once", "description": "Execute workflows"},
 }
 
 # أداة → تصنيف
@@ -122,8 +60,7 @@ TOOL_CATEGORY_MAP = {
     "python_exec": "python",
     "file_read": "file.read",
     "file_write": "file.write",
-    "file_delete": "shell.dangerous",
-    "file_list": "file.read",
+    "file_delete": "file.delete",
     "file_download": "file.write",
     "disk_space": "shell.read",
     "browser_open": "browser",
@@ -150,6 +87,10 @@ TOOL_CATEGORY_MAP = {
     "notebook_update_profile": "notebook",
     "request_permission": "notebook",
     "web_search": "browser",
+    "mcp_call": "mcp",
+    "subagent_spawn": "subagent",
+    "subagent_chat": "subagent",
+    "workflow_execute": "workflow",
 }
 
 
@@ -159,11 +100,6 @@ def classify_tool(tool_name: str) -> str:
 
 def default_level(category: str) -> str:
     return PERMISSION_CATEGORIES.get(category, {}).get("default", "always-ask")
-
-
-def get_risk_level(category: str) -> str:
-    """[FIX v2] مستوى الخطورة للتصنيف"""
-    return PERMISSION_CATEGORIES.get(category, {}).get("risk", "unknown")
 
 
 class PermissionState:
@@ -210,7 +146,6 @@ def log_permission(action: str, tool: str, category: str, reason: str, level: st
         "action": action,
         "tool": tool,
         "category": category,
-        "risk": get_risk_level(category),
         "reason": reason,
         "level": level,
         "verdict": verdict,
@@ -219,5 +154,5 @@ def log_permission(action: str, tool: str, category: str, reason: str, level: st
         with open(PERMISSION_LOG, "a", encoding="utf-8") as f:
             f.write(json.dumps(entry, ensure_ascii=False) + "\n")
     except Exception as e:
-        logger.warning(f"فشل تسجيل الصلاحية: {e}")
+        logger.warning(f"Failed to log permission: {e}")
     return entry

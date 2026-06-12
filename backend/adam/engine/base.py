@@ -178,7 +178,7 @@ class AdamPrismEngineBase:
     def _init_real_modules(self):
         """تهيئة الموديولات الحقيقية — تستبدل الـ stubs"""
         try:
-            from memory.memory_system import MemorySystem
+            from adam.memory.system import MemorySystem
             memory_config = {
                 "qdrant_url": self.config.get("qdrant_url", "http://localhost:6333"),
                 "ollama_base": self.config.get("ollama_base", "http://localhost:11434"),
@@ -231,6 +231,14 @@ class AdamPrismEngineBase:
         except Exception as e:
             logger.warning(f"⚠️ ContinuousLearner init failed: {e}")
             self.continuous_learner = None
+
+        try:
+            from adam.orchestrator.god import GodOrchestrator
+            self.orchestrator = GodOrchestrator(engine=self)
+            logger.info("✅ GodOrchestrator initialized")
+        except Exception as e:
+            logger.warning(f"⚠️ GodOrchestrator init failed: {e}")
+            self.orchestrator = None
 
     def attach(self, module_name: str, module_instance: Any):
         """حقن موديول في المحرك"""

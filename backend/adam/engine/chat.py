@@ -3,6 +3,11 @@ Adam Prism Engine Chat - دورة المعالجة الكاملة
 ================================================
 The main chat() method and its sub-methods: vision, security, classify+context,
 generate+tools, finalize.
+
+[FIXES in this version]
+1. إصلاح bug في _chat_check_vision — كان `for _ in [1]` يجعل الشرط دائماً True
+2. إزالة الـ stray `pass` بعد تعليق GPU memory
+3. تحسين إدارة الأخطاء
 """
 
 import re
@@ -16,6 +21,7 @@ from typing import Optional, Dict, List, Any
 from adam.engine.tools import AdamPrismEngineTools
 
 logger = logging.getLogger("adam_prism.core")
+
 
 def _bg_task(coro):
     """جدولة مهمة خلفية مع التقاط الاستثناءات — يمنع task exception was never retrieved"""
@@ -45,14 +51,14 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
             return {"response": "...", "mode": "teacher", "intent": {"mode": "teacher", "intent_type": "empty"}, "knowledge_used": 0, "cycle": self.cycle_count}
         max_input_len = self.config.get("max_input_length", 8000)
         if len(user_message) > max_input_len:
-            user_message = user_message[:max_input_len] + "\n\n[تم اقتطاع الرسالة لطولها]"
+            user_message = user_message[:max_input_len] + "\n\n[Message truncated due to length]"
 
         vision_blocked = await self._chat_check_vision(user_message)
         if vision_blocked:
             return vision_blocked
 
-        await self._emit_step("استقبال", "running", {"message": user_message[:100]})
-        logger.info(f"[دورة {self.cycle_count}] بدء المعالجة")
+        await self._emit_step("Receiving", "running", {"message": user_message[:100]})
+        logger.info(f"[Cycle {self.cycle_count}] Processing started")
         total_deadline = time.time() + self.config.get("cycle_timeout", 120)
 
         blocked = await self._chat_run_security(user_message)
@@ -77,44 +83,60 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
         )
 
     async def _chat_check_vision(self, user_message: str) -> Optional[Dict]:
-        """Edge case: الكشف عن الصور — الموديل لا يدعمها"""
+        """
+        Edge case: الكشف عن الصور — الموديل لا يدعمها
+
+        [FIX] الكود القديم كان:
+            any(f"Screenshot from" in user_message or f"screenshot_{int(time.time()):0f}" for _ in [1])
+        هذا `for _ in [1]` يخلي التعبير دائماً True لأنه بيقارن string في user_message
+        مش بيشوف لو في screenshot فعلية. تم إصلاحه.
+        """
         VISION_EXTENSIONS = (".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp")
-        if any(user_message.lower().strip().endswith(ext) for ext in VISION_EXTENSIONS) or \
-           any(f"Screenshot from" in user_message or f"screenshot_{int(time.time()):0f}" for _ in [1]):
-            pass
-        vision_refs = [w for w in user_message.split() if any(w.lower().endswith(ext) for ext in VISION_EXTENSIONS) or "screenshot" in w.lower()]
+
+        # [FIX] فحص صحيح — بدون `for _ in [1]`
+        vision_refs = [
+            w for w in user_message.split()
+            if any(w.lower().endswith(ext) for ext in VISION_EXTENSIONS)
+            or "screenshot" in w.lower()
+        ]
+
+        # Also check if the message itself ends with an image extension
+        msg_stripped = user_message.lower().strip()
+        if any(msg_stripped.endswith(ext) for ext in VISION_EXTENSIONS):
+            vision_refs.append(msg_stripped)
+
         if vision_refs:
-            logger.warning(f"اكتشاف مرجع صورة — الموديل لا يدعم الصور: {vision_refs[0]}")
+            logger.warning(f"Image reference detected — model does not support images: {vision_refs[0]}")
             return {
-                "response": "⚠️ هذا الموديل النصي لا يدعم معالجة الصور. لاستخدام الصور، غيّر الموديل إلى نموذج multimodal مثل `llava` أو `gemma3-vision` عبر الإعدادات.",
+                "response": "This text model does not support image processing. To use images, switch to a multimodal model like `llava` or `gemma3-vision` in settings.",
                 "mode": "communicator", "intent": {"mode": "communicator", "intent_type": "image_ref"}, "knowledge_used": 0, "cycle": self.cycle_count,
             }
         return None
 
     async def _chat_run_security(self, user_message: str) -> Optional[Dict]:
         """المرحلة 1: فحص الأمان + Input Guard. يرجع dict لو ممنوع، None لو تمام"""
-        await self._emit_step("فحص الأمان", "running")
+        await self._emit_step("Security check", "running")
         try:
             if self.security:
                 security_check = await self._security_check_with_timeout(user_message)
                 if not security_check["allowed"]:
-                    await self._emit_step("فحص الأمان", "blocked", {"reason": security_check.get("reason", "")})
+                    await self._emit_step("Security check", "blocked", {"reason": security_check.get("reason", "")})
                     return {
-                        "response": "⚠️ تم رفض الطلب لأسباب أمنية.",
+                        "response": "Request rejected for security reasons.",
                         "reason": security_check["reason"],
                         "cycle": self.cycle_count
                     }
         except Exception as e:
-            logger.warning(f"فحص الأمان فشل: {e}")
+            logger.warning(f"Security check failed: {e}")
             return {"_error": f"security:{e}"}
-        await self._emit_step("فحص الأمان", "done")
+        await self._emit_step("Security check", "done")
 
         if self.security_guard:
             guard_verdict = await self.security_guard.check_input(user_message)
             if guard_verdict.action.value == "block":
                 await self._emit_step("Input Guard", "blocked", {"reason": guard_verdict.reason})
                 return {
-                    "response": "⚠️ تم رفض الطلب. لا يمكنني معالجة هذا النوع من الطلبات.",
+                    "response": "Request rejected. Cannot process this type of request.",
                     "reason": f"input_guard:{guard_verdict.reason}",
                     "cycle": self.cycle_count
                 }
@@ -124,30 +146,30 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
 
     async def _chat_classify_context(self, user_message: str, errors: List) -> tuple:
         """المرحلة 2-4: تصنيف القصد + بناء السياق + بحث + URL handling"""
-        await self._emit_step("تحليل القصد", "running")
+        await self._emit_step("Intent analysis", "running")
         try:
             intent = self._quick_classify_intent(user_message)
             self.active_mode = intent.get("mode", "communicator")
         except Exception as e:
-            logger.warning(f"تحليل القصد فشل: {e}")
+            logger.warning(f"Intent analysis failed: {e}")
             errors.append(f"intent:{e}")
             intent = {"mode": "communicator", "intent_type": "general", "confidence": 1.0, "topics": []}
             self.active_mode = "communicator"
-        await self._emit_step("تحليل القصد", "done", {"mode": self.active_mode, "intent": intent.get("intent_type", "")})
+        await self._emit_step("Intent analysis", "done", {"mode": self.active_mode, "intent": intent.get("intent_type", "")})
 
-        await self._emit_step("بناء السياق", "running")
+        await self._emit_step("Building context", "running")
         ctx_start = time.time()
         try:
             enriched_context = await self._build_context(user_message, intent)
         except Exception as e:
-            logger.warning(f"بناء السياق فشل: {e}")
+            logger.warning(f"Context building failed: {e}")
             errors.append(f"context:{e}")
             enriched_context = {"intent": intent, "mode": self.active_mode, "cycle": self.cycle_count}
         self.metrics.timing("chat.build_context", (time.time() - ctx_start) * 1000)
         self.metrics.inc("chat.cycles")
-        await self._emit_step("بناء السياق", "done", {"memories": len(enriched_context.get("memories", []))})
+        await self._emit_step("Building context", "done", {"memories": len(enriched_context.get("memories", []))})
 
-        await self._emit_step("البحث في الذاكرة", "running")
+        await self._emit_step("Knowledge search", "running")
         relevant_knowledge = []
         ks_start = time.time()
         if self.knowledge:
@@ -157,13 +179,13 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
                 )
                 enriched_context["knowledge"] = relevant_knowledge
             except asyncio.TimeoutError:
-                logger.warning("بحث المعرفة timed out")
+                logger.warning("Knowledge search timed out")
                 errors.append("knowledge:timeout")
             except Exception as e:
-                logger.warning(f"بحث المعرفة فشل: {e}")
+                logger.warning(f"Knowledge search failed: {e}")
                 errors.append(f"knowledge:{e}")
         self.metrics.timing("chat.knowledge_search", (time.time() - ks_start) * 1000)
-        await self._emit_step("البحث في الذاكرة", "done", {"results": len(relevant_knowledge)})
+        await self._emit_step("Knowledge search", "done", {"results": len(relevant_knowledge)})
 
         url_pattern = r'https?://[^\s<>"\'(){}|\\^`\[\]]+'
         has_url = bool(re.search(url_pattern, user_message))
@@ -215,7 +237,7 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
         original_message: str = ""
     ) -> tuple:
         """المرحلة 5-6: توليد الرد + تنفيذ الأدوات + plugin hooks"""
-        fallback_response = "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى."
+        fallback_response = "Sorry, an error occurred while processing your request. Please try again."
         max_tool_calls = self.config.get("max_tool_calls", 5)
         tool_calls_made = 0
         tool_records = []
@@ -227,14 +249,14 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
         auto_tool = self._detect_auto_tool(cleaned_message, intent, bool(relevant_knowledge))
         if auto_tool and time.time() < deadline:
             tool_calls_made += 1
-            await self._emit_step("تنفيذ أداة (تلقائي)", "running", {"tool": auto_tool["_tool"]})
+            await self._emit_step("Auto tool execution", "running", {"tool": auto_tool["_tool"]})
             try:
                 tool_result = await asyncio.wait_for(
                     self._execute_tool(auto_tool["_tool"], auto_tool.get("params", {})),
                     timeout=self.config.get("tool_timeout", 30)
                 )
             except asyncio.TimeoutError:
-                tool_result = {"success": False, "error": "الأداة تجاوزت الوقت المحدد"}
+                tool_result = {"success": False, "error": "Tool timed out"}
                 errors.append(f"auto_tool:{auto_tool['_tool']}:timeout")
             except Exception as e:
                 tool_result = {"success": False, "error": str(e)}
@@ -261,21 +283,21 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
                     content = "\n".join(lines)
                 else:
                     content = str(raw)[:2000]
-                content = content or f"✅ {auto_tool['_tool']} completed"
+                content = content or f"Done: {auto_tool['_tool']}"
                 enriched_context["auto_tool_result"] = {
                     "tool": auto_tool["_tool"],
                     "content": content
                 }
-            await self._emit_step("تنفيذ أداة (تلقائي)", "done", {"tool": auto_tool["_tool"], "success": tool_result.get("success", False)})
+            await self._emit_step("Auto tool execution", "done", {"tool": auto_tool["_tool"], "success": tool_result.get("success", False)})
 
         try:
             response_text = await self._generate_with_timeout(cleaned_message, enriched_context, deadline=deadline)
         except asyncio.TimeoutError:
-            logger.warning(f"التوليد تجاوز الوقت المحدد")
+            logger.warning("Generation timed out")
             errors.append("generation:timeout")
             response_text = ""
         except Exception as e:
-            logger.error(f"التوليد فشل: {e}")
+            logger.error(f"Generation failed: {e}")
             errors.append(f"generation:{e}")
             response_text = ""
 
@@ -295,39 +317,38 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
             tool_calls_made += 1
             tool_name = tool_request.get("_tool", "")
             tool_params = tool_request.get("params", {})
-            # لو الأداة اتنفذت قبل كده في auto-inject, ندي النتيجة للموديل ونخرجه
             if tool_name == enriched_context.get("auto_tool_result", {}).get("tool"):
-                await self._emit_step("تخطي أداة", "skipped", {"tool": tool_name, "reason": "auto-injected already"})
+                await self._emit_step("Skip tool", "skipped", {"tool": tool_name, "reason": "auto-injected already"})
                 errors.append(f"tool:{tool_name}:skipped_duplicate")
-                result_data = enriched_context.get("auto_tool_result", {}).get("content", "✅ done")
+                result_data = enriched_context.get("auto_tool_result", {}).get("content", "Done")
                 msgs = self._build_messages(cleaned_message, enriched_context)
                 msgs.append({"role": "assistant", "content": response_text})
-                msgs.append({"role": "user", "content": f"نتيجة الأداة [{tool_name}]:\n{result_data[:2000]}\n\nاستخدم هذه النتيجة للرد على المستخدم."})
+                msgs.append({"role": "user", "content": f"Tool result [{tool_name}]:\n{result_data[:2000]}\n\nUse this result to respond to the user."})
                 try:
                     response_text = await self._call_lora_server(msgs)
                     m = re.search(r'<\|?tool_call\|?>', response_text)
-                    if m:  # still has tool call, take text before it
-                        response_text = response_text[:m.start()].strip() or "✅ Done. What else?"
+                    if m:
+                        response_text = response_text[:m.start()].strip() or "Done. What else?"
                     final_response = response_text
                     break
                 except Exception as e:
                     logger.error(f"Skip callback gen failed: {e}")
-                    final_response = "✅ Already done. How can I help?"
+                    final_response = "Done. How can I help?"
                     break
 
-            await self._emit_step("تنفيذ أداة", "running", {"tool": tool_name})
+            await self._emit_step("Tool execution", "running", {"tool": tool_name})
             try:
                 tool_result = await asyncio.wait_for(
                     self._execute_tool(tool_name, tool_params),
                     timeout=self.config.get("tool_timeout", 30)
                 )
             except asyncio.TimeoutError:
-                tool_result = {"success": False, "error": "الأداة تجاوزت الوقت المحدد"}
+                tool_result = {"success": False, "error": "Tool timed out"}
                 errors.append(f"tool:{tool_name}:timeout")
             except Exception as e:
                 tool_result = {"success": False, "error": str(e)}
                 errors.append(f"tool:{tool_name}:{e}")
-            await self._emit_step("تنفيذ أداة", "done", {"tool": tool_name, "success": tool_result.get("success", False)})
+            await self._emit_step("Tool execution", "done", {"tool": tool_name, "success": tool_result.get("success", False)})
 
             tool_records.append({
                 "name": tool_name, "params": tool_params,
@@ -338,13 +359,12 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
             try:
                 tool_result_str = json.dumps(tool_result, ensure_ascii=False, indent=2)
                 if len(tool_result_str) > 2000:
-                    tool_result_str = tool_result_str[:2000] + "\n... [مقتطع - النتيجة كبيرة]"
-                system_message = f"نتيجة '{tool_name}':\n{tool_result_str}"
+                    tool_result_str = tool_result_str[:2000] + "\n... [truncated - result too large]"
+                system_message = f"Result of '{tool_name}':\n{tool_result_str}"
                 msgs = self._build_messages(cleaned_message, enriched_context)
                 msgs.append({"role": "assistant", "content": response_text})
                 msgs.append({"role": "user", "content": system_message})
-                # GPU memory managed by LoRA server process
-                pass
+                # [FIX] إزالة الـ stray `pass` — كان لا يفعل شيئاً
                 response_text = await self._call_lora_server(msgs)
 
                 m = re.search(r'<\|?tool_call\|?>', response_text)
@@ -374,13 +394,13 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
 
         self_msg = original_message or cleaned_message
         response_text = self._self_verify_response(response_text, self_msg, intent)
-        await self._emit_step("التوليد", "done", {"length": len(response_text), "tool_calls": tool_calls_made, "verified": True})
+        await self._emit_step("Generation", "done", {"length": len(response_text), "tool_calls": tool_calls_made, "verified": True})
 
         return response_text, tool_records, tool_calls_made, errors
 
     def _detect_auto_tool(self, message: str, intent: Dict, has_knowledge: bool = False) -> Optional[Dict]:
-        """معطل — auto-tool heuristics تسببت في تنفيذ أوامر غير مقصودة.
-        النموذج يقرر استخدام الأدوات عبر التنسيق المنظم بدلاً من keyword matching."""
+        """Disabled — auto-tool heuristics caused unintended command execution.
+        The model decides tool usage through structured formatting instead of keyword matching."""
         return None
 
     async def _chat_finalize(
@@ -389,11 +409,11 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
         errors: List, cycle_start: float
     ) -> Dict[str, Any]:
         """المرحلة 7-8: حفظ + trace + Output Guard + return"""
-        fallback_response = "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى."
+        fallback_response = "Sorry, an error occurred while processing your request. Please try again."
         cycle_duration = time.time() - cycle_start
         self.metrics.timing("chat.cycle.total", cycle_duration * 1000)
 
-        await self._emit_step("التسجيل والحفظ", "running")
+        await self._emit_step("Logging and saving", "running")
         if response_text != fallback_response and self.max_history > 0:
             self.conversation_history.append({"role": "user", "content": user_message, "timestamp": datetime.now().isoformat()})
             self.conversation_history.append({"role": "assistant", "content": response_text, "timestamp": datetime.now().isoformat()})
@@ -408,7 +428,7 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
                     "timestamp": datetime.now().isoformat()
                 })
             except Exception as e:
-                logger.warning(f"فشل حفظ في الدفتر: {e}")
+                logger.warning(f"Failed to save to notebook: {e}")
 
         if self.knowledge:
             try:
@@ -417,8 +437,8 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
                     metadata={"mode": self.active_mode, "cycle": self.cycle_count, "intent": intent}
                 )
             except Exception as e:
-                logger.warning(f"فشل حفظ في Qdrant: {e}")
-        await self._emit_step("التسجيل والحفظ", "done")
+                logger.warning(f"Failed to save to Qdrant: {e}")
+        await self._emit_step("Logging and saving", "done")
 
         _bg_task(self._extract_and_save_lessons(user_message, response_text, intent))
 
@@ -448,7 +468,7 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
             if self.meta_learner and tool_records:
                 _bg_task(self.meta_learner.process_trace(trace))
 
-        await self._emit_step("اكتمال الدورة", "done", {"duration_ms": int(cycle_duration * 1000)})
+        await self._emit_step("Cycle complete", "done", {"duration_ms": int(cycle_duration * 1000)})
 
         if self.security_guard and response_text:
             try:
@@ -456,7 +476,7 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
                 logger.debug(f"Output Guard: action={output_verdict.action.value if hasattr(output_verdict, 'action') else '?'}")
                 if hasattr(output_verdict, 'action') and output_verdict.action.value == "block":
                     logger.warning(f"Output Guard BLOCKED response (len={len(response_text)}): {response_text[:200]}")
-                    response_text = "⚠️ لا يمكنني عرض هذا الرد لأسباب أمنية."
+                    response_text = "Cannot display this response for security reasons."
                 elif hasattr(output_verdict, 'sanitized_content') and output_verdict.sanitized_content:
                     response_text = output_verdict.sanitized_content
             except Exception as e:
