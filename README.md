@@ -185,18 +185,19 @@ LangGraph excels at stateful workflows. CrewAI is the fastest path to a prototyp
 
 **But:** They all leave you to complete the rest on your own.
 
-| | Adam Prism | LangGraph | CrewAI | Claude Code |
-|---|---|---|---|---|
-| **Installation** | `pip install` | pip + LangSmith + config | pip + config | npm + API key |
-| **Memory** | Built-in (Qdrant + SQLite + FTS5) | Separate library | Limited | JSONL (3 GB issue) |
-| **Communication** | 25 built-in | Zero | Zero | Zero |
-| **Security** | 3 layers built-in | DIY | DIY | 6 patterns |
-| **Ethics** | 4 laws built-in | None | None | Safety rails |
-| **Continuous Learning** | Every conversation | None | None | None |
-| **Voice** | ASR + TTS built-in | None | None | None |
-| **100% Local** | ✅ | Partial | Partial | ❌ |
-| **Open Source** | Apache 2.0 full | MIT (limited) | MIT | Closed |
-| **Android + iOS** | Available | ❌ | ❌ | ❌ |
+| | Adam Prism | LangGraph | CrewAI | Claude Code | Hermes Agent | OpenClaw |
+|---|---|---|---|---|---|---|---|
+| **Installation** | `pip install` | pip + LangSmith + config | pip + config | npm + API key | Model + infra | pip + sandbox |
+| **Memory** | Built-in (4-layer Iron: Hot + FTS5 + Vector + Skills) | Separate library | Limited | JSONL (3 GB issue) | Iron Memory paper (research) | Minimal |
+| **Communication** | 25 built-in | Zero | Zero | Zero | Zero | Zero |
+| **Security** | 3 layers + AST sandbox + SSRF | DIY | DIY | 6 patterns | Model-level only | Sandboxed exec |
+| **Ethics** | 4 laws built-in | None | None | Safety rails | None | None |
+| **Continuous Learning** | Closed Loop + Skill Curator | None | None | None | No | No |
+| **Customizability** | 12 layers, each independently disableable | Rigid graph structure | Limited agent roles | Black box | Moderate (open model) | Moderate |
+| **Voice** | ASR + TTS built-in | None | None | None | None | None |
+| **100% Local** | ✅ | Partial | Partial | ❌ | ✅ | ✅ |
+| **Open Source** | Apache 2.0 full | MIT (limited) | MIT | Closed | Apache 2.0 | MIT |
+| **Android + iOS** | Flutter + Electron apps | ❌ | ❌ | ❌ | ❌ | ❌ |
 
 ---
 
