@@ -25,22 +25,14 @@ logger = logging.getLogger("adam_prism.core")
 
 
 def _bg_task(coro):
-    """جدولة مهمة خلفية مع التقاط الاستثناءات — يمنع task exception was never retrieved
-    
-    [FIX v3] Wrap callback in try/except to handle InvalidStateError
-    When a task is cancelled, calling t.exception() raises InvalidStateError.
-    Now we catch that instead of letting it propagate.
-    """
+    """جدولة مهمة خلفية مع التقاط وتسجيل الاستثناءات — يمنع task exception was never retrieved"""
+    def _handle_done(t: asyncio.Task):
+        if not t.cancelled():
+            exc = t.exception()
+            if exc:
+                logger.error(f"مهمة خلفية فشلت: {exc}", exc_info=exc)
     task = asyncio.create_task(coro)
-    
-    def _safe_callback(t):
-        try:
-            if not t.cancelled():
-                t.exception()
-        except (asyncio.InvalidStateError, Exception) as e:
-            logger.debug(f"Background task callback error (safe to ignore): {e}")
-    
-    task.add_done_callback(_safe_callback)
+    task.add_done_callback(_handle_done)
     return task
 
 
@@ -97,20 +89,18 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
         )
 
     async def _chat_check_vision(self, user_message: str) -> Optional[Dict]:
-        """Edge case: الكشف عن الصور — الموديل لا يدعمها"""
+        """فحص ذكي — يكتشف امتدادات الصور مع فحص نوع الموديل الفعلي"""
         VISION_EXTENSIONS = (".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp")
-        # فحص صحيح: هل الرسالة تحتوي على مرجع صورة؟
-        msg_lower = user_message.lower().strip()
-        has_image_ext = any(msg_lower.endswith(ext) for ext in VISION_EXTENSIONS)
-        has_screenshot_ref = "screenshot" in msg_lower or "Screenshot from" in user_message
-        has_image_word = any(w.lower() in ("image", "photo", "picture", "صورة", "صور") for w in user_message.split())
-        vision_refs = []
-        if has_image_ext or has_screenshot_ref or has_image_word:
-            vision_refs = [w for w in user_message.split() if any(w.lower().endswith(ext) for ext in VISION_EXTENSIONS) or "screenshot" in w.lower()]
-            if not vision_refs and (has_image_ext or has_screenshot_ref):
-                vision_refs = [user_message[:50]]
-        if vision_refs:
-            logger.warning(f"اكتشاف مرجع صورة — الموديل لا يدعم الصور: {vision_refs[0]}")
+        has_image_ref = any(
+            w.lower().endswith(VISION_EXTENSIONS) for w in user_message.split()
+        )
+        model_supports_vision = (
+            hasattr(self, 'provider') and
+            hasattr(self.provider, 'current') and
+            getattr(self.provider.current, 'supports_vision', False)
+        )
+        if has_image_ref and not model_supports_vision:
+            logger.info("مرجع صورة مع موديل نصي — تنبيه المستخدم")
             return {
                 "response": "⚠️ هذا الموديل النصي لا يدعم معالجة الصور. لاستخدام الصور، غيّر الموديل إلى نموذج multimodal مثل `llava` أو `gemma3-vision` عبر الإعدادات.",
                 "mode": "communicator", "intent": {"mode": "communicator", "intent_type": "image_ref"}, "knowledge_used": 0, "cycle": self.cycle_count,

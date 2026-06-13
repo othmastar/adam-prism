@@ -222,74 +222,33 @@ class MetricsCollector:
 # 5. Input Sanitizer — حماية من المسارات الخبيثة
 # ═══════════════════════════════════════
 
-# المسارات المسموح بالوصول إليها
 ALLOWED_FILE_PATHS = [
     os.path.expanduser("~"),
     "/tmp",
     "./notebook",
     "./data",
     "./config",
-    # [NEW v2] مجلد العمل
-    os.environ.get("ADAM_WORKSPACE", ""),
 ]
-
-# تنظيف القائمة من القيم الفارغة
-ALLOWED_FILE_PATHS = [p for p in ALLOWED_FILE_PATHS if p]
 
 BLOCKED_FILE_SUBSTRINGS = [
     "/etc/", "/proc/", "/sys/", "/dev/", "/boot/",
     "/root/", "/var/", "/usr/", "/bin/",
     ".ssh", ".config", ".env", "password",
     "credential", "secret", "token",
-    # [NEW v2] مسارات إضافية محظورة
-    ".aws", ".gnupg", ".kube", "id_rsa", "id_ed25519",
-    "authorized_keys", "shadow", "passwd",
 ]
 
 def sanitize_path(path: str) -> Optional[str]:
-    """
-    التحقق من أن المسار مصرح به — يمنع الوصول لملفات النظام
-    [FIX v2] يمنع أيضاً symlink attacks وpath traversal
-    """
-    if not path:
+    """التحقق من أن المسار مصرح به — يمنع الوصول لملفات النظام"""
+    if not path or ".." in path:
         return None
-
-    # [FIX v2] منع path traversal بوضوح
-    if ".." in path:
-        return None
-
-    # حل المسار — يحل الروابط الرمزية أيضاً
-    try:
-        resolved = str(Path(path).resolve())
-    except Exception:
-        return None
-
-    # فحص المسارات المحظورة
-    resolved_lower = resolved.lower()
-    for blocked in BLOCKED_FILE_SUBSTRINGS:
-        if blocked.lower() in resolved_lower:
-            return None
-
-    # فحص المسارات المسموحة
+    resolved = str(Path(path).resolve())
     for allowed in ALLOWED_FILE_PATHS:
         if resolved.startswith(allowed):
             return resolved
+    for blocked in BLOCKED_FILE_SUBSTRINGS:
+        if blocked in resolved.lower():
+            return None
     return None
-
-
-# [NEW v2] مدقق مدخلات عام
-def validate_input(text: str, max_length: int = 10000, field_name: str = "input") -> Optional[str]:
-    """
-    التحقق من صحة المدخلات النصية
-    يرجع None لو المدخل غير صالح، أو النص المنظف لو صالح
-    """
-    if not text:
-        return None
-    if len(text) > max_length:
-        return None
-    # إزالة null bytes
-    cleaned = text.replace("\x00", "")
-    return cleaned
 
 
 # ═══════════════════════════════════════

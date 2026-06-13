@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "adam-prism"
-version = "1.0.0"
+version = "1.0.0b1"
 description = "Egyptian Arabic conscious AI framework — personal digital twin with ethics, memory, and tools"
 readme = "README.md"
 license = {text = "Apache-2.0"}
@@ -40,6 +40,9 @@ dependencies = [
     "Pillow>=10.0.0",
     "mcp[cli]>=1.27.0",
     "apscheduler>=3.11.0",
+    "PyMuPDF>=1.23.0",
+    "python-docx>=1.1.0",
+    "edge-tts>=6.1.0",
 ]
 
 [project.urls]

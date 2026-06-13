@@ -21,6 +21,14 @@ services:
       - "6334:6334"
     networks:
       - adam_net
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+          cpus: '2.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
 
   # ─── 2. Ollama ──────────────────────────────────────
   ollama:
@@ -38,7 +46,12 @@ services:
       - adam_net
     deploy:
       resources:
+        limits:
+          memory: 8G
+          cpus: '4.0'
         reservations:
+          memory: 2G
+          cpus: '1.0'
           devices:
             - driver: nvidia
               count: all
@@ -47,12 +60,12 @@ services:
   # ─── 3. API (Python/FastAPI) ────────────────────────
   api:
     build:
-      context: /mnt/Workspace/Adam_Prism_Complete_v2
+      context: ../
       dockerfile: deploy/Dockerfile.api
     container_name: adam-api
     restart: unless-stopped
     env_file:
-      - deploy/.env
+      - .env
     environment:
       - OLLAMA_BASE=http://ollama:11434
       - QDRANT_URL=http://qdrant:6333
@@ -75,17 +88,25 @@ services:
       retries: 5
     networks:
       - adam_net
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '2.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
 
   # ─── 4. Telegram Bot ────────────────────────────────
   telegram-bot:
     build:
-      context: /mnt/Workspace/Adam_Prism_Complete_v2
+      context: ../
       dockerfile: deploy/Dockerfile.api
     container_name: adam-telegram-bot
     restart: unless-stopped
     entrypoint: ["python", "/app/deploy/bot_entrypoint.py"]
     env_file:
-      - deploy/.env
+      - .env
     environment:
       - OLLAMA_BASE=http://ollama:11434
       - QDRANT_URL=http://qdrant:6333
@@ -99,11 +120,19 @@ services:
       - api
     networks:
       - adam_net
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
 
   # ─── 5. Web UI (Next.js) ────────────────────────────
   web:
     build:
-      context: /mnt/Workspace/Adam_Prism_Complete_v2
+      context: ../
       dockerfile: deploy/Dockerfile.web
     container_name: adam-web
     restart: unless-stopped
@@ -121,6 +150,14 @@ services:
       retries: 3
     networks:
       - adam_net
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '1.0'
+        reservations:
+          memory: 128M
+          cpus: '0.25'
 
   # ─── 6. Nginx Reverse Proxy ─────────────────────────
   nginx:
@@ -131,13 +168,21 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./deploy/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - nginx_logs:/var/log/nginx
     depends_on:
       - api
       - web
     networks:
       - adam_net
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+        reservations:
+          memory: 64M
+          cpus: '0.1'
 
   # ─── 7. Prometheus ───────────────────────────────────
   prometheus:
@@ -145,7 +190,7 @@ services:
     container_name: adam-prometheus
     restart: unless-stopped
     volumes:
-      - ./deploy/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
     ports:
       - "9090:9090"
@@ -153,6 +198,14 @@ services:
       - api
     networks:
       - adam_net
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
 
   # ─── 8. Grafana ─────────────────────────────────────
   grafana:
@@ -160,11 +213,11 @@ services:
     container_name: adam-grafana
     restart: unless-stopped
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:?GRAFANA_ADMIN_PASSWORD must be set in .env}
       - GF_INSTALL_PLUGINS=
     volumes:
-      - ./deploy/grafana/datasources:/etc/grafana/provisioning/datasources:ro
-      - ./deploy/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
       - grafana_data:/var/lib/grafana
     ports:
       - "3001:3000"
@@ -172,6 +225,14 @@ services:
       - prometheus
     networks:
       - adam_net
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 128M
+          cpus: '0.1'
 
 # ─── Volumes ────────────────────────────────────────
 volumes:

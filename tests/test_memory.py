@@ -144,13 +144,21 @@ class TestMemorySearch:
 
 class TestMemoryRetrieve:
     @pytest.mark.asyncio
-    async def test_retrieve_searches_all_collections(self, mem):
+    async def test_retrieve_searches_default_collections(self, mem):
         mem.search = AsyncMock(side_effect=lambda q, collection="knowledge", **kw: (
             [{"id": f"{collection}_1", "score": 0.9}]
         ))
         results = await mem.retrieve("test", top_k=5)
         assert len(results) >= 1
-        assert mem.search.call_count >= 6  # all collections
+        assert mem.search.call_count == 2  # knowledge + conversations فقط
+
+    @pytest.mark.asyncio
+    async def test_retrieve_all_collections_with_param(self, mem):
+        mem.search = AsyncMock(side_effect=lambda q, collection="knowledge", **kw: (
+            [{"id": f"{collection}_1", "score": 0.9}]
+        ))
+        results = await mem.retrieve("test", top_k=5, collections=list(mem.collections.keys()))
+        assert mem.search.call_count >= 6
 
     @pytest.mark.asyncio
     async def test_retrieve_raises_on_failure(self, mem):

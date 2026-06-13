@@ -37,6 +37,7 @@ class MemorySystem:
         self.short_term_limit = config.get("short_term_limit", 50)
         self.embed_cache = TTLCache(default_ttl=600.0, max_size=200)
         self.search_cache = TTLCache(default_ttl=120.0, max_size=100)
+        self._init_lock = asyncio.Lock()
         self.collections = {
             "knowledge": "adam_knowledge",
             "conversations": "adam_conversations",
@@ -66,26 +67,27 @@ class MemorySystem:
 
     async def initialize(self):
         """تهيئة المجموعات في Qdrant"""
-        client = await self._get_client("qdrant", self.qdrant_url, 30.0)
-        try:
-            for coll_type, coll_name in self.collections.items():
-                try:
-                    resp = await client.get(f"/collections/{coll_name}")
-                    if resp.status_code == 404:
-                        await client.put(
-                            f"/collections/{coll_name}",
-                            json={
-                                "vectors": {
-                                    "size": 768,
-                                    "distance": "Cosine"
+        async with self._init_lock:
+            client = await self._get_client("qdrant", self.qdrant_url, 30.0)
+            try:
+                for coll_type, coll_name in self.collections.items():
+                    try:
+                        resp = await client.get(f"/collections/{coll_name}")
+                        if resp.status_code == 404:
+                            await client.put(
+                                f"/collections/{coll_name}",
+                                json={
+                                    "vectors": {
+                                        "size": 768,
+                                        "distance": "Cosine"
+                                    }
                                 }
-                            }
-                        )
-                        logger.info(f"تم إنشاء مجموعة: {coll_name}")
-                except Exception as e:
-                    logger.error(f"خطأ في تهيئة {coll_name}: {e}")
-        finally:
-            await self._close_client(client)
+                            )
+                            logger.info(f"تم إنشاء مجموعة: {coll_name}")
+                    except Exception as e:
+                        logger.error(f"خطأ في تهيئة {coll_name}: {e}")
+            finally:
+                await self._close_client(client)
 
     async def embed(self, text: str) -> List[float]:
         """تحويل النص إلى embedding عبر Ollama مع كاش"""
@@ -191,9 +193,9 @@ class MemorySystem:
         finally:
             await self._close_client(client)
 
-    async def retrieve(self, query: str, top_k: int = 5) -> List[Dict[str, Any]]:
-        """استرجاع ذكريات ذات صلة (من كل المجموعات) — بالتوازي"""
-        coll_types = list(self.collections.keys())
+    async def retrieve(self, query: str, top_k: int = 5, collections: Optional[List[str]] = None) -> List[Dict[str, Any]]:
+        """استرجاع ذكريات ذات صلة (من collections محددة) — بالتوازي"""
+        coll_types = collections or ["knowledge", "conversations"]
         tasks = [self.search(query, collection=coll_type, top_k=top_k) for coll_type in coll_types]
         all_results = []
         for coll_type, results in zip(coll_types, await asyncio.gather(*tasks)):

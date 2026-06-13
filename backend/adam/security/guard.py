@@ -199,17 +199,18 @@ class OutputGuard:
                 confidence=0.8,
             )
 
-        # 3. كشف code injection في المخرجات
+        # 3. كشف code injection في المخرجات — يسمح بمناقشة الكود المشروعة
         code_patterns = [
-            (re.compile(r'(?i)(os\.system|subprocess\.run|exec\(|eval\()'), ContentCategory.CODE_INJECTION, 0.9),
+            (re.compile(r'(?i)(?:run|execute|launch|start)\s+(?:this|the\s+following|now)?\s*[:：]?\s*(?:os\.system|subprocess\.(?:run|call|Popen)|exec\(|eval\()'), ContentCategory.CODE_INJECTION, 0.9),
+            (re.compile(r'(?i)(?:os\.system|subprocess\.(?:run|call|Popen)|exec\(|eval\()\s*\('), ContentCategory.CODE_INJECTION, 0.7),
         ]
         for pattern, category, confidence in code_patterns:
             if pattern.search(text):
-                self.block_count += 1
+                self.flag_count += 1
                 return SecurityVerdict(
-                    action=SecurityAction.BLOCK,
+                    action=SecurityAction.FLAG,
                     category=category,
-                    reason="Code injection in output",
+                    reason="Code execution instruction in output — review recommended",
                     confidence=confidence,
                 )
 
@@ -368,12 +369,15 @@ class ToolPermissionValidator:
             "reason": reason,
             "time": time.time(),
         })
+        if len(self.audit_log) > 1000:
+            self.audit_log = self.audit_log[-500:]
 
     def get_audit_log(self, limit: int = 50) -> List[Dict]:
         return self.audit_log[-limit:]
 
     def reset_session(self):
         self.session_counts.clear()
+        self.audit_log = self.audit_log[-100:]
 
     def get_stats(self) -> Dict:
         total = len(self.audit_log)
