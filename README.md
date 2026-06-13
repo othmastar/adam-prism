@@ -187,17 +187,18 @@ LangGraph excels at stateful workflows. CrewAI is the fastest path to a prototyp
 
 | | Adam Prism | LangGraph | CrewAI | Claude Code | Hermes Agent | OpenClaw |
 |---|---|---|---|---|---|---|---|
-| **Installation** | `pip install` | pip + LangSmith + config | pip + config | npm + API key | Model + infra | pip + sandbox |
-| **Memory** | Built-in (4-layer Iron: Hot + FTS5 + Vector + Skills) | Separate library | Limited | JSONL (3 GB issue) | Iron Memory paper (research) | Minimal |
-| **Communication** | 25 built-in | Zero | Zero | Zero | Zero | Zero |
-| **Security** | 3 layers + AST sandbox + SSRF | DIY | DIY | 6 patterns | Model-level only | Sandboxed exec |
+| **Language** | Python | Python | Python | TypeScript | Python | TypeScript |
+| **Installation** | `pip install` | pip + LangSmith | pip | npm + API key | `curl \| bash` | `npm install -g` |
+| **Memory** | 4-layer Iron: Hot (MEMORY.md) + FTS5 + Qdrant Vector + Skills Curator | Separate library | Limited | JSONL (3 GB issue) | MEMORY.md + FTS5 + Honcho + Closed Loop | MEMORY.md + SQLite/LanceDB + Dreaming |
+| **Channels** | 25 built-in | Zero | Zero | Zero | 6 (TG/Discord/Slack/WA/Signal/CLI) | 20+ built-in |
+| **Security** | 3-layer guard + AST sandbox + SSRF + fail-closed | DIY | DIY | 6 patterns | Cmd approval + container isolation | Docker sandbox + cmd approval |
 | **Ethics** | 4 laws built-in | None | None | Safety rails | None | None |
-| **Continuous Learning** | Closed Loop + Skill Curator | None | None | None | No | No |
-| **Customizability** | 12 layers, each independently disableable | Rigid graph structure | Limited agent roles | Black box | Moderate (open model) | Moderate |
-| **Voice** | ASR + TTS built-in | None | None | None | None | None |
+| **Learning Loop** | Closed Loop: nudge + skill create + skill improve | None | None | None | Closed Loop: nudge + skill create + skill improve | Dreaming (background consolidation) |
+| **Customizability** | 12 layers, each independently disableable | Rigid graph | Limited roles | Black box | Skills + toolsets + MCP | Skills + plugins + hooks |
+| **Voice** | ASR + TTS built-in | None | None | None | CLI + TG + Discord VC | macOS/iOS wake + TTS |
 | **100% Local** | ✅ | Partial | Partial | ❌ | ✅ | ✅ |
-| **Open Source** | Apache 2.0 full | MIT (limited) | MIT | Closed | Apache 2.0 | MIT |
-| **Android + iOS** | Flutter + Electron apps | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Open Source** | Apache 2.0 | MIT (limited) | MIT | Closed | MIT | MIT |
+| **Apps** | Flutter (Android/iOS) + Electron (Desktop) + Web UI + VS Code | ❌ | ❌ | ❌ | TUI only | macOS/Windows Hub + iOS/Android nodes |
 
 ---
 
