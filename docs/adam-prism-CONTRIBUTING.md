@@ -1,6 +1,6 @@
 # Contributing to Adam Prism
 
-> **"This project is open source for God's sake — ليس من أجل المال."**
+> **"This project is open source for Master's sake — ليس من أجل المال."**
 
 You are not reading this by accident.
 
