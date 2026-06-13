@@ -112,5 +112,5 @@ class MetaLearner:
             if patterns:
                 logger.debug(f"Stored {len(patterns)} patterns from cycle {trace.cycle}")
 
-        except Exception as e:
-            logger.warning(f"Meta-learner background extraction failed: {e}")
+        except Exception:
+            logger.exception("Meta-learner background extraction failed:")

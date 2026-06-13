@@ -128,7 +128,7 @@ class SubagentSession:
         try:
             response = await self.engine.provider.chat(messages)
         except Exception as e:
-            logger.warning(f"Subagent '{self.name}' generation failed: {e}")
+            logger.exception("Subagent '{self.name}' generation failed:")
             response = f"خطأ في التوليد: {e}"
 
         # حفظ التاريخ

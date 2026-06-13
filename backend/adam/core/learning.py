@@ -34,8 +34,8 @@ class PreferenceLearner:
             if os.path.exists(PREFERENCES_PATH):
                 with open(PREFERENCES_PATH, encoding="utf-8") as f:
                     return json.load(f)
-        except Exception as e:
-            logger.warning(f"تعذر تحميل التفضيلات: {e}")
+        except Exception:
+            logger.exception("تعذر تحميل التفضيلات:")
         return {}
 
     def _save_preferences(self):
@@ -43,8 +43,8 @@ class PreferenceLearner:
             os.makedirs(NOTES_DIR, exist_ok=True)
             with open(PREFERENCES_PATH, "w", encoding="utf-8") as f:
                 json.dump(self.preferences, f, ensure_ascii=False, indent=2)
-        except Exception as e:
-            logger.warning(f"تعذر حفظ التفضيلات: {e}")
+        except Exception:
+            logger.exception("تعذر حفظ التفضيلات:")
 
     def _load_history(self) -> list:
         try:
@@ -59,8 +59,8 @@ class PreferenceLearner:
         try:
             with open(HISTORY_PATH, "w", encoding="utf-8") as f:
                 json.dump(self.history[-500:], f, ensure_ascii=False, indent=2)
-        except Exception as e:
-            logger.warning(f"تعذر حفظ التاريخ: {e}")
+        except Exception:
+            logger.exception("تعذر حفظ التاريخ:")
 
     # ─── التسجيل ─────────────────────────────────
 

@@ -59,8 +59,8 @@ class AnthropicProvider(BaseProvider):
                 data = r.json()
                 texts = [block["text"] for block in data.get("content", []) if block.get("type") == "text"]
                 return "\n".join(texts)
-        except Exception as e:
-            logger.warning(f"Anthropic chat failed: {e}")
+        except Exception:
+            logger.exception("Anthropic chat failed:")
             raise
 
     async def generate(self, prompt: str, system: str = "", **kwargs) -> str:
@@ -115,5 +115,5 @@ class AnthropicProvider(BaseProvider):
                                         yield delta.get("text", "")
                             except Exception:
                                 pass
-        except Exception as e:
-            logger.warning(f"Anthropic stream failed: {e}")
+        except Exception:
+            logger.exception("Anthropic stream failed:")

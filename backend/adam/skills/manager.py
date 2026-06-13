@@ -55,8 +55,8 @@ class SkillManager:
             self._skills[name] = skill
             logger.info(f"📘 Skill loaded: {name} — {skill.description[:60]}")
             return skill
-        except Exception as e:
-            logger.warning(f"⚠️ Failed to load skill {path}: {e}")
+        except Exception:
+            logger.exception("⚠️ Failed to load skill {path}:")
             return None
 
     def _load_python_skill(self, path: Path) -> Skill:

@@ -67,8 +67,8 @@ class DiscordChannel(BaseChannel):
                         await self._handle_dispatch(data)
                     elif data["op"] == 11:
                         pass
-            except Exception as e:
-                logger.error(f"Discord WS error: {e}")
+            except Exception:
+                logger.exception("Discord WS error:")
                 if not self.running:
                     break
                 import asyncio
@@ -110,8 +110,8 @@ class DiscordChannel(BaseChannel):
                 for chunk in self._chunk(text, 2000):
                     await client.post(f"{self.api_base}/channels/{target}/messages", headers=self._headers(),
                                       json={"content": chunk})
-            except Exception as e:
-                logger.error(f"Discord send failed: {e}")
+            except Exception:
+                logger.exception("Discord send failed:")
 
     def _chunk(self, text: str, size: int):
         return [text[i:i+size] for i in range(0, len(text), size)]
@@ -155,8 +155,8 @@ class SlackChannel(BaseChannel):
                 await client.post(f"{self.api_base}/chat.postMessage",
                                   headers={"Authorization": f"Bearer {self.bot_token}", "Content-Type": "application/json"},
                                   json={"channel": target, "text": text})
-            except Exception as e:
-                logger.error(f"Slack send failed: {e}")
+            except Exception:
+                logger.exception("Slack send failed:")
 
     def verify_signature(self, body: bytes, timestamp: str, signature: str) -> bool:
         if not self.signing_secret:
@@ -222,8 +222,8 @@ class EmailChannel(BaseChannel):
         while self.running:
             try:
                 await self._check_inbox()
-            except Exception as e:
-                logger.error(f"Email poll error: {e}")
+            except Exception:
+                logger.exception("Email poll error:")
             await asyncio.sleep(60)
 
     async def _check_inbox(self):
@@ -306,8 +306,8 @@ class SMSChannel(BaseChannel):
                     auth=(self.account_sid, self.auth_token),
                     data={"From": self.from_number, "To": target, "Body": text},
                 )
-            except Exception as e:
-                logger.error(f"SMS send failed: {e}")
+            except Exception:
+                logger.exception("SMS send failed:")
 
     def get_webhook_routes(self) -> list:
         return [{"path": "/webhook/sms", "method": "POST", "handler": self._webhook_post}]
@@ -466,8 +466,8 @@ class TwitterChannel(BaseChannel):
                         if sender and text and self.engine:
                             result = await self.engine.chat(text)
                             await self.send_message(sender, result.get("response", ""))
-                except Exception as e:
-                    logger.error(f"Twitter poll error: {e}")
+                except Exception:
+                    logger.exception("Twitter poll error:")
                 await asyncio.sleep(30)
 
     async def send_message(self, target: str, text: str):
@@ -479,8 +479,8 @@ class TwitterChannel(BaseChannel):
                     headers={"Authorization": f"Bearer {self.bearer_token}", "Content-Type": "application/json"},
                     json={"conversation_type": "Personal", "participant_ids": [target],
                           "message": {"data": {"text": text}}})
-            except Exception as e:
-                logger.error(f"Twitter DM send failed: {e}")
+            except Exception:
+                logger.exception("Twitter DM send failed:")
 
 
 # ─── FACEBOOK MESSENGER ────────────────────────────────────────────────
@@ -511,8 +511,8 @@ class FacebookChannel(BaseChannel):
                     params={"access_token": self.page_access_token},
                     json={"recipient": {"id": target}, "message": {"text": text}},
                 )
-            except Exception as e:
-                logger.error(f"Facebook send failed: {e}")
+            except Exception:
+                logger.exception("Facebook send failed:")
 
     def verify_signature(self, body: bytes, signature: str) -> bool:
         if not self.app_secret:
@@ -594,8 +594,8 @@ class MatrixChannel(BaseChannel):
                                 if body and self.engine:
                                     result = await self.engine.chat(body)
                                     await self._send_room(room_id, result.get("response", ""), client)
-                except Exception as e:
-                    logger.error(f"Matrix sync error: {e}")
+                except Exception:
+                    logger.exception("Matrix sync error:")
                 await asyncio.sleep(5)
 
     async def _send_room(self, room_id: str, text: str, client):
@@ -605,8 +605,8 @@ class MatrixChannel(BaseChannel):
                 headers={"Authorization": f"Bearer {self.access_token}", "Content-Type": "application/json"},
                 json={"msgtype": "m.text", "body": text},
             )
-        except Exception as e:
-            logger.error(f"Matrix send failed: {e}")
+        except Exception:
+            logger.exception("Matrix send failed:")
 
     async def send_message(self, target: str, text: str):
         import httpx
@@ -643,8 +643,8 @@ class SignalChannel(BaseChannel):
                         text = line.split("Body:", 1)[1].strip()
                         result = await self.engine.chat(text)
                         logger.info(f"Signal reply: {result.get('response', '')[:50]}...")
-            except Exception as e:
-                logger.error(f"Signal poll error: {e}")
+            except Exception:
+                logger.exception("Signal poll error:")
             await asyncio.sleep(30)
 
     async def send_message(self, target: str, text: str):
@@ -655,8 +655,8 @@ class SignalChannel(BaseChannel):
                 stdout=asyncio.subprocess.DEVNULL, stderr=asyncio.subprocess.DEVNULL,
             )
             await proc.wait()
-        except Exception as e:
-            logger.error(f"Signal send failed: {e}")
+        except Exception:
+            logger.exception("Signal send failed:")
 
 
 # ══════════════════════════════════════════════════════════════════════
@@ -711,8 +711,8 @@ class LINEChannel(BaseChannel):
                     headers={"Authorization": f"Bearer {self.access_token}", "Content-Type": "application/json"},
                     json={"to": target, "messages": [{"type": "text", "text": text}]},
                 )
-            except Exception as e:
-                logger.error(f"LINE send failed: {e}")
+            except Exception:
+                logger.exception("LINE send failed:")
 
     def get_webhook_routes(self) -> list:
         return [{"path": "/webhook/line", "method": "POST", "handler": self._webhook_post}]
@@ -760,8 +760,8 @@ class ViberChannel(BaseChannel):
                     headers={"X-Viber-Auth-Token": self.auth_token},
                     json={"receiver": target, "type": "text", "text": text},
                 )
-            except Exception as e:
-                logger.error(f"Viber send failed: {e}")
+            except Exception:
+                logger.exception("Viber send failed:")
 
     def get_webhook_routes(self) -> list:
         return [{"path": "/webhook/viber", "method": "POST", "handler": self._webhook_post}]
@@ -799,8 +799,8 @@ class TeamsChannel(BaseChannel):
         async with httpx.AsyncClient() as client:
             try:
                 await client.post(url, json={"text": text})
-            except Exception as e:
-                logger.error(f"Teams send failed: {e}")
+            except Exception:
+                logger.exception("Teams send failed:")
 
     def get_webhook_routes(self) -> list:
         return [{"path": "/webhook/teams", "method": "POST", "handler": self._webhook_post}]
@@ -836,8 +836,8 @@ class GoogleChatChannel(BaseChannel):
         async with httpx.AsyncClient() as client:
             try:
                 await client.post(url, json={"text": text})
-            except Exception as e:
-                logger.error(f"Google Chat send failed: {e}")
+            except Exception:
+                logger.exception("Google Chat send failed:")
 
     def get_webhook_routes(self) -> list:
         return [{"path": "/webhook/googletalk", "method": "POST", "handler": self._webhook_post}]
@@ -894,8 +894,8 @@ class IRCChannel(BaseChannel):
                             for resp_line in result.get("response", "").split("\n"):
                                 writer.write(f"PRIVMSG {channel} :{resp_line[:400]}\r\n".encode())
                             await writer.drain()
-            except Exception as e:
-                logger.error(f"IRC error: {e}")
+            except Exception:
+                logger.exception("IRC error:")
             await asyncio.sleep(0.1)
         writer.close()
 
@@ -949,8 +949,8 @@ class TelegramWebhookChannel(BaseChannel):
             try:
                 for chunk in [text[i:i+4096] for i in range(0, len(text), 4096)]:
                     await client.post(f"{self.api_base}/sendMessage", json={"chat_id": int(target), "text": chunk})
-            except Exception as e:
-                logger.error(f"Telegram webhook send failed: {e}")
+            except Exception:
+                logger.exception("Telegram webhook send failed:")
 
     def get_webhook_routes(self) -> list:
         return [{"path": "/webhook/telegram", "method": "POST", "handler": self._webhook_post}]
@@ -1029,8 +1029,8 @@ class RSSChannel(BaseChannel):
                         if self._last_seen.get(url) != h:
                             self._last_seen[url] = h
                             logger.info(f"📰 RSS update from {url}")
-                    except Exception as e:
-                        logger.error(f"RSS error: {e}")
+                    except Exception:
+                        logger.exception("RSS error:")
                 await asyncio.sleep(300)
 
     async def send_message(self, target: str, text: str):
@@ -1068,8 +1068,8 @@ class NotionChannel(BaseChannel):
                     json={"parent": {"database_id": self.database_id or target},
                           "properties": {"title": {"title": [{"text": {"content": text[:100]}}]}}},
                 )
-            except Exception as e:
-                logger.error(f"Notion send failed: {e}")
+            except Exception:
+                logger.exception("Notion send failed:")
 
 
 @_register
@@ -1108,8 +1108,8 @@ class GitHubChannel(BaseChannel):
                                 title = issue.get("title", "")
                                 num = issue.get("number", 0)
                                 logger.info(f"🐙 {repo}#{num}: {title}")
-                    except Exception as e:
-                        logger.error(f"GitHub poll error: {e}")
+                    except Exception:
+                        logger.exception("GitHub poll error:")
                 await asyncio.sleep(300)
 
     async def send_message(self, target: str, text: str):
@@ -1123,8 +1123,8 @@ class GitHubChannel(BaseChannel):
                     headers={"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"},
                     json={"title": text[:256], "body": text},
                 )
-            except Exception as e:
-                logger.error(f"GitHub issue creation failed: {e}")
+            except Exception:
+                logger.exception("GitHub issue creation failed:")
 
 
 @_register
@@ -1157,5 +1157,5 @@ class WeChatChannel(BaseChannel):
                     f"https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token={token}",
                     json={"touser": target, "msgtype": "text", "agentid": self.agent_id, "text": {"content": text}},
                 )
-            except Exception as e:
-                logger.error(f"WeChat send failed: {e}")
+            except Exception:
+                logger.exception("WeChat send failed:")

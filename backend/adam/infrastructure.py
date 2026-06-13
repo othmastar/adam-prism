@@ -163,10 +163,10 @@ def retry(max_attempts: int = 3, base_delay: float = 0.5, max_delay: float = 10.
                     last_exc = e
                     if attempt < max_attempts:
                         delay = min(base_delay * (2 ** (attempt - 1)), max_delay)
-                        logger.warning(f"{func.__name__} failed (attempt {attempt}/{max_attempts}): {e}. Retrying in {delay:.1f}s")
+                        logger.exception("{func.__name__} failed (attempt {attempt}/{max_attempts}): . Retrying in {delay:.1f}s")
                         await asyncio.sleep(delay)
                     else:
-                        logger.error(f"{func.__name__} failed after {max_attempts} attempts: {e}")
+                        logger.exception("{func.__name__} failed after {max_attempts} attempts:")
             raise last_exc
         return wrapper
     return decorator
@@ -412,8 +412,8 @@ class ModelSwapper:
                         await current["unload_fn"]()
                         current["loaded"] = False
                         logger.info(f"ModelSwapper: {self._current_model} مُفرغ")
-                    except Exception as e:
-                        logger.error(f"تعذر تفريغ {self._current_model}: {e}")
+                    except Exception:
+                        logger.exception("تعذر تفريغ {self._current_model}:")
 
             # تحميل الموديل الجديد
             target = self._models[model_id]
@@ -422,8 +422,8 @@ class ModelSwapper:
                     await target["load_fn"]()
                     target["loaded"] = True
                     logger.info(f"ModelSwapper: {model_id} محمّل")
-                except Exception as e:
-                    logger.error(f"تعذر تحميل {model_id}: {e}")
+                except Exception:
+                    logger.exception("تعذر تحميل {model_id}:")
                     self._current_model = None
                     return False
 
@@ -444,8 +444,8 @@ class ModelSwapper:
                 try:
                     await current["unload_fn"]()
                     current["loaded"] = False
-                except Exception as e:
-                    logger.error(f"تعذر تفريغ {self._current_model}: {e}")
+                except Exception:
+                    logger.exception("تعذر تفريغ {self._current_model}:")
             self._current_model = None
             logger.info("ModelSwapper: VRAM فارغ")
 

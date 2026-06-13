@@ -83,8 +83,8 @@ class MemorySystem:
                                 }
                             )
                             logger.info(f"تم إنشاء مجموعة: {coll_name}")
-                    except Exception as e:
-                        logger.error(f"خطأ في تهيئة {coll_name}: {e}")
+                    except Exception:
+                        logger.exception("خطأ في تهيئة {coll_name}:")
             finally:
                 await self._close_client(client)
 
@@ -143,8 +143,8 @@ class MemorySystem:
                 }
             )
             return response.status_code == 200
-        except Exception as e:
-            logger.error(f"خطأ في التخزين: {e}")
+        except Exception:
+            logger.exception("خطأ في التخزين:")
             return False
         finally:
             await self._close_client(client)
@@ -186,8 +186,8 @@ class MemorySystem:
             ]
             self.search_cache.set(cache_key, parsed, ttl=120.0)
             return parsed
-        except Exception as e:
-            logger.error(f"خطأ في البحث: {e}")
+        except Exception:
+            logger.exception("خطأ في البحث:")
             return []
         finally:
             await self._close_client(client)

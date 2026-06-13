@@ -46,8 +46,8 @@ class OllamaProvider(BaseProvider):
             })
             r.raise_for_status()
             return r.json().get("message", {}).get("content", "")
-        except Exception as e:
-            logger.warning(f"Ollama chat failed: {e}")
+        except Exception:
+            logger.exception("Ollama chat failed:")
             raise
 
     async def generate(self, prompt: str, system: str = "", **kwargs) -> str:
@@ -65,8 +65,8 @@ class OllamaProvider(BaseProvider):
             })
             r.raise_for_status()
             return r.json().get("response", "")
-        except Exception as e:
-            logger.warning(f"Ollama generate failed: {e}")
+        except Exception:
+            logger.exception("Ollama generate failed:")
             raise
 
     async def chat_stream(self, messages: list[dict], **kwargs):
@@ -89,6 +89,6 @@ class OllamaProvider(BaseProvider):
                                 yield content
                         except Exception:
                             pass
-        except Exception as e:
-            logger.warning(f"Ollama stream failed: {e}")
+        except Exception:
+            logger.exception("Ollama stream failed:")
             raise

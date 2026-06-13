@@ -197,7 +197,7 @@ class ToolManager:
                 return {"success": True, "data": r.stdout}
             return {"success": False, "error": f"File action unknown: {at}"}
         except Exception as e:
-            logger.error(f"file action error: {at} — {e}")
+            logger.exception("file action error: {at} —")
             return {"success": False, "error": str(e)}
 
     def get_action_log(self, limit: int = 50) -> list[dict]:

@@ -122,7 +122,7 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
                         "cycle": self.cycle_count
                     }
         except Exception as e:
-            logger.warning(f"فحص الأمان تعذر: {e}")
+            logger.exception("فحص الأمان تعذر:")
             return {"_error": f"security:{e}"}
         await self._emit_step("فحص الأمان", "done")
 
@@ -146,7 +146,7 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
             intent = self._quick_classify_intent(user_message)
             self.active_mode = intent.get("mode", "communicator")
         except Exception as e:
-            logger.warning(f"تحليل القصد تعذر: {e}")
+            logger.exception("تحليل القصد تعذر:")
             errors.append(f"intent:{e}")
             intent = {"mode": "communicator", "intent_type": "general", "confidence": 1.0, "topics": []}
             self.active_mode = "communicator"
@@ -157,7 +157,7 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
         try:
             enriched_context = await self._build_context(user_message, intent)
         except Exception as e:
-            logger.warning(f"بناء السياق تعذر: {e}")
+            logger.exception("بناء السياق تعذر:")
             errors.append(f"context:{e}")
             enriched_context = {"intent": intent, "mode": self.active_mode, "cycle": self.cycle_count}
         self.metrics.timing("chat.build_context", (time.time() - ctx_start) * 1000)
@@ -177,7 +177,7 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
                 logger.warning("بحث المعرفة timed out")
                 errors.append("knowledge:timeout")
             except Exception as e:
-                logger.warning(f"بحث المعرفة تعذر: {e}")
+                logger.exception("بحث المعرفة تعذر:")
                 errors.append(f"knowledge:{e}")
         self.metrics.timing("chat.knowledge_search", (time.time() - ks_start) * 1000)
         await self._emit_step("البحث في الذاكرة", "done", {"results": len(relevant_knowledge)})
@@ -219,7 +219,7 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
                     logger.warning("URL auto-fetch timed out")
                     errors.append("url_fetch:timeout")
                 except Exception as e:
-                    logger.warning(f"URL fetch failed: {e}")
+                    logger.exception("URL fetch failed:")
                     errors.append(f"url_fetch:{e}")
 
         return intent, enriched_context, relevant_knowledge, cleaned_message, errors
@@ -248,7 +248,7 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
             errors.append("generation:timeout")
             response_text = ""
         except Exception as e:
-            logger.error(f"التوليد تعذر: {e}")
+            logger.exception("التوليد تعذر:")
             errors.append(f"generation:{e}")
             response_text = ""
 
@@ -283,8 +283,8 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
                         response_text = response_text[:m.start()].strip() or "✅ Done. What else?"
                     final_response = response_text
                     break
-                except Exception as e:
-                    logger.error(f"Skip callback gen failed: {e}")
+                except Exception:
+                    logger.exception("Skip callback gen failed:")
                     final_response = "✅ Already done. How can I help?"
                     break
 
@@ -328,7 +328,7 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
                     final_response = response_text
                     break
             except Exception as e:
-                logger.error(f"Tool callback generation failed: {e}")
+                logger.exception("Tool callback generation failed:")
                 errors.append(f"tool_callback:{e}")
                 final_response = response_text
                 break
@@ -379,8 +379,8 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
                     "knowledge_used": len(enriched_context.get("knowledge", [])),
                     "timestamp": datetime.now().isoformat()
                 })
-            except Exception as e:
-                logger.warning(f"تعذر حفظ في الدفتر: {e}")
+            except Exception:
+                logger.exception("تعذر حفظ في الدفتر:")
 
         if self.knowledge:
             try:
@@ -388,8 +388,8 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
                     question=user_message, answer=response_text,
                     metadata={"mode": self.active_mode, "cycle": self.cycle_count, "intent": intent}
                 )
-            except Exception as e:
-                logger.warning(f"تعذر حفظ في Qdrant: {e}")
+            except Exception:
+                logger.exception("تعذر حفظ في Qdrant:")
         await self._emit_step("التسجيل والحفظ", "done")
 
         _bg_task(self._extract_and_save_lessons(user_message, response_text, intent))
@@ -431,8 +431,8 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
                     response_text = "⚠️ لا يمكنني عرض هذا الرد لأسباب أمنية."
                 elif hasattr(output_verdict, 'sanitized_content') and output_verdict.sanitized_content:
                     response_text = output_verdict.sanitized_content
-            except Exception as e:
-                logger.warning(f"Output Guard error: {e}")
+            except Exception:
+                logger.exception("Output Guard error:")
 
         return {
             "response": response_text,

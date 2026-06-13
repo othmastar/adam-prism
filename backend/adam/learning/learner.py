@@ -41,8 +41,8 @@ class ContinuousLearner:
                 try:
                     data = json.loads(path.read_text(encoding="utf-8"))
                     setattr(self, f"_{name}", data)
-                except Exception as e:
-                    logger.warning(f"Failed to load {name}: {e}")
+                except Exception:
+                    logger.exception("Failed to load {name}:")
 
     def _save(self, name: str):
         path = self.base_path / f"{name}.json"

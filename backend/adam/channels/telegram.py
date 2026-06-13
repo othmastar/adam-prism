@@ -56,8 +56,8 @@ class TelegramChannel(BaseChannel):
                 for update in resp.json().get("result", []):
                     self.last_update_id = update.get("update_id", 0)
                     await self._process(update)
-            except Exception as e:
-                logger.error(f"Telegram polling error: {e}")
+            except Exception:
+                logger.exception("Telegram polling error:")
                 import asyncio
                 await asyncio.sleep(5)
 
@@ -90,8 +90,8 @@ class TelegramChannel(BaseChannel):
                     f"{self.api_base}/sendMessage",
                     json={"chat_id": int(target), "text": chunk, "parse_mode": parse_mode},
                 )
-        except Exception as e:
-            logger.error(f"Telegram send failed: {e}")
+        except Exception:
+            logger.exception("Telegram send failed:")
 
     async def close(self):
         """[M20] Properly close the persistent HTTP client."""

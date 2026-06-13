@@ -165,8 +165,8 @@ class AdamNotebook:
                 with open(f, encoding="utf-8") as fh:
                     data = json.load(fh)
                     profile[section] = data
-            except (json.JSONDecodeError, Exception) as e:
-                logger.warning(f"تعذر قراءة {f}: {e}")
+            except (json.JSONDecodeError, Exception):
+                logger.exception("تعذر قراءة {f}:")
 
         return profile
 

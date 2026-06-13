@@ -225,7 +225,7 @@ class LiveSummarizer:
             )
             return response.json().get("response", "")
         except Exception as e:
-            logger.error(f"تعذر تلخيص الجزء {chunk_index}: {e}")
+            logger.exception("تعذر تلخيص الجزء {chunk_index}:")
             return f"[تعذر التلخيص: {str(e)[:100]}]"
         finally:
             if not self.shared_clients and 'client' in dir() and client:

@@ -336,8 +336,8 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
                     app.post(path)(handler)
             if routes:
                 logger.info(f"Mounted {len(routes)} channel webhook routes (PROTECTED by auth)")
-        except Exception as e:
-            logger.warning(f"Channel route mounting failed: {e}")
+        except Exception:
+            logger.exception("Channel route mounting failed:")
     else:
         # Still attempt to find and mount webchat widget
         try:
@@ -361,8 +361,8 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
         try:
             from fastapi.staticfiles import StaticFiles
             app.mount("/ui", StaticFiles(directory=_static_dir, html=True), name="ui")
-        except Exception as e:
-            logger.warning(f"تعذر تحميل الملفات الثابتة: {e}")
+        except Exception:
+            logger.exception("تعذر تحميل الملفات الثابتة:")
 
     # Chat history store
     chat_store = ChatStore()
@@ -429,10 +429,10 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
                 app.include_router(router_module.router)
 
         logger.info("API routers loaded successfully")
-    except ImportError as e:
-        logger.warning(f"Could not load API routers (running in monolith mode): {e}")
-    except Exception as e:
-        logger.warning(f"Router setup error: {e}")
+    except ImportError:
+        logger.exception("Could not load API routers (running in monolith mode):")
+    except Exception:
+        logger.exception("Router setup error:")
 
     # ═══════════════════════════════════════
     # Core Routes (kept in main file for reliability)
@@ -511,8 +511,8 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
 
                     # تفريغ TTS من VRAM بعد الانتهاء
                     await pipeline.unload_tts()
-            except Exception as e:
-                logger.warning(f"تعذر توليد الصوت للرد: {e}")
+            except Exception:
+                logger.exception("تعذر توليد الصوت للرد:")
 
         return response
 
@@ -1397,7 +1397,7 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
         except WebSocketDisconnect:
             logger.info("WebSocket disconnected")
         except Exception as e:
-            logger.error(f"WebSocket error: {e}")
+            logger.exception("WebSocket error:")
             with contextlib.suppress(Exception):
                 await websocket.close(code=1011, reason=str(e))
 

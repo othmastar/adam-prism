@@ -206,15 +206,15 @@ class AdamPrismEngineBase:
             self.memory = MemorySystem(config=memory_config)
             self.knowledge = self.memory  # Qdrant knowledge = MemorySystem
             logger.info("✅ MemorySystem initialized (real)")
-        except Exception as e:
-            logger.warning(f"⚠️ MemorySystem init failed, using stub: {e}")
+        except Exception:
+            logger.exception("⚠️ MemorySystem init failed, using stub:")
 
         try:
             from adam.scheduler import AdamScheduler
             self.scheduler = AdamScheduler(engine=self)
             logger.info("✅ Scheduler initialized (real)")
-        except Exception as e:
-            logger.warning(f"⚠️ Scheduler init failed: {e}")
+        except Exception:
+            logger.exception("⚠️ Scheduler init failed:")
 
         try:
             from adam.plugins.manager import PluginManager
@@ -223,15 +223,15 @@ class AdamPrismEngineBase:
             if os.path.isdir(plugin_dir):
                 self.plugins.load_from_dir(plugin_dir)
             logger.info(f"✅ PluginManager initialized ({len(self.plugins.list_plugins())} plugins)")
-        except Exception as e:
-            logger.warning(f"⚠️ PluginManager init failed: {e}")
+        except Exception:
+            logger.exception("⚠️ PluginManager init failed:")
 
         try:
             from adam.subagents.manager import SubagentManager
             self.subagents = SubagentManager(engine=self)
             logger.info("✅ SubagentManager initialized (real)")
-        except Exception as e:
-            logger.warning(f"⚠️ SubagentManager init failed: {e}")
+        except Exception:
+            logger.exception("⚠️ SubagentManager init failed:")
 
         try:
             from adam.platforms.discord_bot import DiscordBot
@@ -240,15 +240,15 @@ class AdamPrismEngineBase:
                 logger.info("✅ DiscordBot initialized (real)")
             else:
                 logger.info("ℹ️ Discord bot disabled in config")
-        except Exception as e:
-            logger.warning(f"⚠️ DiscordBot init failed: {e}")
+        except Exception:
+            logger.exception("⚠️ DiscordBot init failed:")
 
         try:
             from adam.learning.learner import ContinuousLearner
             self.continuous_learner = ContinuousLearner(config=self.config)
             logger.info("✅ ContinuousLearner initialized")
-        except Exception as e:
-            logger.warning(f"⚠️ ContinuousLearner init failed: {e}")
+        except Exception:
+            logger.exception("⚠️ ContinuousLearner init failed:")
             self.continuous_learner = None
 
     def attach(self, module_name: str, module_instance: Any):
@@ -277,8 +277,8 @@ class AdamPrismEngineBase:
                     await listener(step_info)
                 else:
                     listener(step_info)
-            except Exception as e:
-                logger.warning(f"خطأ في مستمع الخطوات: {e}")
+            except Exception:
+                logger.exception("خطأ في مستمع الخطوات:")
 
     def get_pipeline_log(self, limit: int = 50) -> list[dict]:
         """آخر سجل لخطوات المعالجة"""
@@ -323,15 +323,15 @@ class AdamPrismEngineBase:
                         except TimeoutError:
                             logger.warning("فحص المتصفح تجاوز الوقت — إعادة تشغيل...")
                             await self.eyes.restart()
-                        except Exception as e:
-                            logger.warning(f"خطأ في فحص المتصفح: {e}")
+                        except Exception:
+                            logger.exception("خطأ في فحص المتصفح:")
                     if self.cycle_count % 5 == 0:
                         import gc
                         gc.collect()
                 except asyncio.CancelledError:
                     break
-                except Exception as e:
-                    logger.warning(f"خطأ في دورة المراقبة: {e}")
+                except Exception:
+                    logger.exception("خطأ في دورة المراقبة:")
         self._watchdog_task = asyncio.create_task(_watchdog_loop())
         logger.info(f"✅ تم تشغيل مراقب الصحة (كل {interval} ثانية)")
 
