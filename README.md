@@ -216,7 +216,7 @@ LangGraph excels at stateful workflows. CrewAI is the fastest path to a prototyp
 | Thinking modes | 7 |
 | Ethics laws | 4 |
 | Training conversations | 2,317 |
-| Training tokens | 2.2 million |
+| Training tokens | 220 million |
 
 **The code was thoroughly tested by massive models trying to break it — and it stood.**
 
