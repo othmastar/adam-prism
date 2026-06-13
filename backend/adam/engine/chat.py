@@ -1,15 +1,14 @@
 """
-Adam Prism Engine Chat - دورة المعالجة الكاملة — HARDENED v3
-============================================================
+Adam Prism Engine Chat - دورة المعالجة الكاملة
+================================================
 The main chat() method and its sub-methods: vision, security, classify+context,
 generate+tools, finalize.
 
-[BUG FIXES v3]
-1. إصلاح `_chat_check_vision`: حذف dead code مع `for _ in [1]`
-2. إزالة stray `pass` بعد تعليق GPU memory
-3. إزالة dead auto-tool code (كان ينفذ كود عديم الفائدة كل دورة)
-4. إصلاح استيراد `core.trace_recorder` → `adam.core.trace_recorder`
-5. إضافة streaming support عبر `_emit_step`
+[FIX v3]
+1. إصلاح bug في _chat_check_vision — كان `for _ in [1]` يجعل الشرط دائماً True
+2. إزالة الـ stray `pass` بعد تعليق GPU memory
+3. تحسين إدارة الأخطاء
+4. [NEW — FIX] _bg_task callback now handles InvalidStateError on cancelled tasks
 """
 
 import re
@@ -26,9 +25,22 @@ logger = logging.getLogger("adam_prism.core")
 
 
 def _bg_task(coro):
-    """جدولة مهمة خلفية مع التقاط الاستثناءات — يمنع task exception was never retrieved"""
+    """جدولة مهمة خلفية مع التقاط الاستثناءات — يمنع task exception was never retrieved
+    
+    [FIX v3] Wrap callback in try/except to handle InvalidStateError
+    When a task is cancelled, calling t.exception() raises InvalidStateError.
+    Now we catch that instead of letting it propagate.
+    """
     task = asyncio.create_task(coro)
-    task.add_done_callback(lambda t: t.exception() if not t.cancelled() else None)
+    
+    def _safe_callback(t):
+        try:
+            if not t.cancelled():
+                t.exception()
+        except (asyncio.InvalidStateError, Exception) as e:
+            logger.debug(f"Background task callback error (safe to ignore): {e}")
+    
+    task.add_done_callback(_safe_callback)
     return task
 
 
@@ -85,17 +97,18 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
         )
 
     async def _chat_check_vision(self, user_message: str) -> Optional[Dict]:
-        """Edge case: الكشف عن الصور — الموديل لا يدعمها
-        [FIX v3] إزالة dead code مع `for _ in [1]` — كان عديم الفائدة"""
+        """Edge case: الكشف عن الصور — الموديل لا يدعمها"""
         VISION_EXTENSIONS = (".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp")
-        VISION_KEYWORDS = ("screenshot", "screenshot_from", "screenshot_")
-
-        # فحص حقيقي: الامتدادات + كلمات الصور
-        vision_refs = [
-            w for w in user_message.split()
-            if any(w.lower().endswith(ext) for ext in VISION_EXTENSIONS)
-            or any(kw in w.lower() for kw in VISION_KEYWORDS)
-        ]
+        # فحص صحيح: هل الرسالة تحتوي على مرجع صورة؟
+        msg_lower = user_message.lower().strip()
+        has_image_ext = any(msg_lower.endswith(ext) for ext in VISION_EXTENSIONS)
+        has_screenshot_ref = "screenshot" in msg_lower or "Screenshot from" in user_message
+        has_image_word = any(w.lower() in ("image", "photo", "picture", "صورة", "صور") for w in user_message.split())
+        vision_refs = []
+        if has_image_ext or has_screenshot_ref or has_image_word:
+            vision_refs = [w for w in user_message.split() if any(w.lower().endswith(ext) for ext in VISION_EXTENSIONS) or "screenshot" in w.lower()]
+            if not vision_refs and (has_image_ext or has_screenshot_ref):
+                vision_refs = [user_message[:50]]
         if vision_refs:
             logger.warning(f"اكتشاف مرجع صورة — الموديل لا يدعم الصور: {vision_refs[0]}")
             return {
@@ -227,8 +240,7 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
         deadline: float, errors: List, relevant_knowledge: List,
         original_message: str = ""
     ) -> tuple:
-        """المرحلة 5-6: توليد الرد + تنفيذ الأدوات + plugin hooks
-        [FIX v3] إزالة dead auto-tool code — النموذج يقرر الأدوات بنفسه"""
+        """المرحلة 5-6: توليد الرد + تنفيذ الأدوات + plugin hooks"""
         fallback_response = "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى."
         max_tool_calls = self.config.get("max_tool_calls", 5)
         tool_calls_made = 0
@@ -237,8 +249,8 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
         if self.plugins:
             cleaned_message, enriched_context = await self.plugins.run_before_generate(cleaned_message, enriched_context)
 
-        # [REMOVED v3] auto_tool heuristics — كانت تسبب تنفيذ أوامر غير مقصودة
-        # النموذج يقرر استخدام الأدوات عبر tool_call format فقط
+        # [DISABLED] auto-tool injection — النموذج يقرر الأدوات عبر <|tool_call|>
+        # [REMOVED] auto_tool injection block
 
         try:
             response_text = await self._generate_with_timeout(cleaned_message, enriched_context, deadline=deadline)
@@ -267,6 +279,25 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
             tool_calls_made += 1
             tool_name = tool_request.get("_tool", "")
             tool_params = tool_request.get("params", {})
+            # لو الأداة اتنفذت قبل كده في auto-inject, ندي النتيجة للموديل ونخرجه
+            if tool_name == enriched_context.get("auto_tool_result", {}).get("tool"):
+                await self._emit_step("تخطي أداة", "skipped", {"tool": tool_name, "reason": "auto-injected already"})
+                errors.append(f"tool:{tool_name}:skipped_duplicate")
+                result_data = enriched_context.get("auto_tool_result", {}).get("content", "✅ done")
+                msgs = self._build_messages(cleaned_message, enriched_context)
+                msgs.append({"role": "assistant", "content": response_text})
+                msgs.append({"role": "user", "content": f"نتيجة الأداة [{tool_name}]:\n{result_data[:2000]}\n\nاستخدم هذه النتيجة للرد على المستخدم."})
+                try:
+                    response_text = await self._call_lora_server(msgs)
+                    m = re.search(r'<\|?tool_call\|?>', response_text)
+                    if m:  # still has tool call, take text before it
+                        response_text = response_text[:m.start()].strip() or "✅ Done. What else?"
+                    final_response = response_text
+                    break
+                except Exception as e:
+                    logger.error(f"Skip callback gen failed: {e}")
+                    final_response = "✅ Already done. How can I help?"
+                    break
 
             await self._emit_step("تنفيذ أداة", "running", {"tool": tool_name})
             try:
@@ -296,7 +327,6 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
                 msgs = self._build_messages(cleaned_message, enriched_context)
                 msgs.append({"role": "assistant", "content": response_text})
                 msgs.append({"role": "user", "content": system_message})
-                # [FIX v3] إزالة stray pass — GPU memory managed by LoRA server process
                 response_text = await self._call_lora_server(msgs)
 
                 m = re.search(r'<\|?tool_call\|?>', response_text)
@@ -330,19 +360,22 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
 
         return response_text, tool_records, tool_calls_made, errors
 
+    # [REMOVED] _detect_auto_tool — تم الحذف نهائياً
+    # النموذج يقرر استخدام الأدوات عبر التنسيق المنظم <|tool_call|> بدلاً من heuristic keyword matching
+    # كان يسبب تنفيذ أوامر غير مقصودة
+
     async def _chat_finalize(
         self, user_message: str, response_text: str, intent: Dict,
         enriched_context: Dict, tool_records: List, tool_calls_made: int,
         errors: List, cycle_start: float
     ) -> Dict[str, Any]:
-        """المرحلة 7-8: حفظ + trace + Output Guard + return
-        [FIX v3] إصلاح استيراد ConversationTrace"""
+        """المرحلة 7-8: حفظ + trace + Output Guard + return"""
         fallback_response = "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى."
         cycle_duration = time.time() - cycle_start
         self.metrics.timing("chat.cycle.total", cycle_duration * 1000)
 
         await self._emit_step("التسجيل والحفظ", "running")
-        if response_text != fallback_response and self.max_history > 0:
+        if self.max_history > 0:
             self.conversation_history.append({"role": "user", "content": user_message, "timestamp": datetime.now().isoformat()})
             self.conversation_history.append({"role": "assistant", "content": response_text, "timestamp": datetime.now().isoformat()})
             self._trim_conversation_history(self.max_history)
@@ -385,10 +418,7 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
                 outcome = "partial"
             elif not response_text.strip():
                 outcome = "failure"
-            try:
-                from adam.core.trace_recorder import ConversationTrace
-            except ImportError:
-                from core.trace_recorder import ConversationTrace
+            from adam.core.trace_recorder import ConversationTrace
             trace = ConversationTrace(
                 query=user_message, intent=intent, mode=self.active_mode,
                 tool_calls=tool_records, outcome=outcome,

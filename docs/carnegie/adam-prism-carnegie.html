@@ -1,0 +1,1914 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>آدم بريزم — التوأم الرقمي الواعي</title>
+    <meta name="description" content="آدم بريزم: بروتوكول الذكاء الاصطناعي الواعي المصري. ذاكرة، أخلاق، أدوات — بضغطة زر. مفتوح المصدر للأبد.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* ========================================
+           RESET & BASE
+           ======================================== */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-deep: #0a0a0a;
+            --bg-mid: #111118;
+            --bg-card: rgba(26, 26, 46, 0.6);
+            --bg-card-hover: rgba(26, 26, 46, 0.8);
+            --border: rgba(16, 185, 129, 0.15);
+            --border-hover: rgba(16, 185, 129, 0.4);
+            --emerald: #10b981;
+            --emerald-light: #34d399;
+            --cyan: #06b6d4;
+            --emerald-dark: #059669;
+            --text-primary: #f0fdf4;
+            --text-secondary: rgba(240, 253, 244, 0.7);
+            --text-muted: rgba(240, 253, 244, 0.45);
+            --gradient-main: linear-gradient(135deg, #10b981, #06b6d4);
+            --gradient-glow: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(6, 182, 212, 0.08));
+            --shadow-glow: 0 0 60px rgba(16, 185, 129, 0.12);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --font: 'Noto Sans Arabic', sans-serif;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px;
+        }
+
+        body {
+            font-family: var(--font);
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            line-height: 1.8;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* ========================================
+           ANIMATIONS
+           ======================================== */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.15); }
+            50% { box-shadow: 0 0 40px rgba(16, 185, 129, 0.3); }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% center; }
+            100% { background-position: 200% center; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .animate-in {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+                        transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .animate-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ========================================
+           LAYOUT
+           ======================================== */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        section {
+            padding: 100px 0;
+            position: relative;
+        }
+
+        /* ========================================
+           BACKGROUND EFFECTS
+           ======================================== */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(ellipse 800px 600px at 20% 10%, rgba(16, 185, 129, 0.06), transparent),
+                radial-gradient(ellipse 600px 800px at 80% 80%, rgba(6, 182, 212, 0.04), transparent);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ========================================
+           NAV
+           ======================================== */
+        nav {
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: 0;
+            z-index: 100;
+            padding: 16px 0;
+            backdrop-filter: blur(20px) saturate(1.5);
+            -webkit-backdrop-filter: blur(20px) saturate(1.5);
+            background: rgba(10, 10, 10, 0.8);
+            border-bottom: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        nav .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-brand {
+            font-size: 1.25rem;
+            font-weight: 800;
+            background: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            right: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gradient-main);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--emerald-light);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-cta {
+            padding: 8px 20px;
+            background: var(--gradient-main);
+            color: var(--bg-deep) !important;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
+            -webkit-text-fill-color: initial !important;
+        }
+
+        .nav-cta:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .nav-cta::after {
+            display: none !important;
+        }
+
+        /* ========================================
+           HERO
+           ======================================== */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding-top: 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -200px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.08), transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--emerald-light);
+            margin-bottom: 32px;
+            backdrop-filter: blur(10px);
+            animation: fadeInUp 0.8s ease forwards;
+        }
+
+        .hero-badge .dot {
+            width: 8px;
+            height: 8px;
+            background: var(--emerald);
+            border-radius: 50%;
+            animation: pulseGlow 2s infinite;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 900;
+            line-height: 1.2;
+            margin-bottom: 8px;
+            animation: fadeInUp 0.8s ease 0.1s forwards;
+            opacity: 0;
+            letter-spacing: -0.03em;
+        }
+
+        .hero h1 .gradient-text {
+            background: var(--gradient-main);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 4s ease infinite, fadeInUp 0.8s ease 0.1s forwards;
+        }
+
+        .hero .subtitle {
+            font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+            font-weight: 300;
+            color: var(--text-secondary);
+            max-width: 650px;
+            margin: 24px auto 40px;
+            line-height: 1.9;
+            animation: fadeInUp 0.8s ease 0.2s forwards;
+            opacity: 0;
+        }
+
+        .hero .subtitle strong {
+            color: var(--emerald-light);
+            font-weight: 600;
+        }
+
+        .hero-actions {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            animation: fadeInUp 0.8s ease 0.3s forwards;
+            opacity: 0;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 36px;
+            background: var(--gradient-main);
+            color: var(--bg-deep);
+            border: none;
+            border-radius: var(--radius-sm);
+            font-family: var(--font);
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(16, 185, 129, 0.35);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 36px;
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--border-hover);
+            border-radius: var(--radius-sm);
+            font-family: var(--font);
+            font-size: 1.05rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-card);
+            border-color: var(--emerald);
+            color: var(--emerald-light);
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 48px;
+            margin-top: 64px;
+            animation: fadeInUp 0.8s ease 0.4s forwards;
+            opacity: 0;
+        }
+
+        .hero-stat {
+            text-align: center;
+        }
+
+        .hero-stat .number {
+            font-size: 2rem;
+            font-weight: 800;
+            background: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-stat .label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-top: 4px;
+        }
+
+        /* ========================================
+           PAIN POINTS
+           ======================================== */
+        .pain-section {
+            background: var(--bg-mid);
+        }
+
+        .section-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--emerald);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 16px;
+        }
+
+        .section-label::before {
+            content: '';
+            width: 24px;
+            height: 2px;
+            background: var(--gradient-main);
+        }
+
+        .section-title {
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            font-weight: 800;
+            line-height: 1.3;
+            margin-bottom: 20px;
+            letter-spacing: -0.02em;
+        }
+
+        .section-desc {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            line-height: 1.9;
+        }
+
+        .pain-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-top: 56px;
+        }
+
+        .pain-card {
+            padding: 32px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            backdrop-filter: blur(10px);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pain-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--gradient-main);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .pain-card:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border-hover);
+            transform: translateY(-4px);
+        }
+
+        .pain-card:hover::before {
+            opacity: 1;
+        }
+
+        .pain-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gradient-glow);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+        }
+
+        .pain-card h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+
+        .pain-card p {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        .pain-yes {
+            margin-top: 48px;
+            text-align: center;
+            font-size: 1.3rem;
+            color: var(--emerald-light);
+            font-weight: 600;
+        }
+
+        .pain-yes .yes-count {
+            display: inline-block;
+            background: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 1.5rem;
+            font-weight: 900;
+        }
+
+        /* ========================================
+           PROMISE
+           ======================================== */
+        .promise-section {
+            text-align: center;
+        }
+
+        .promise-section .section-desc {
+            margin: 0 auto 56px;
+        }
+
+        .promise-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 64px;
+        }
+
+        .promise-stat-block {
+            padding: 40px 24px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .promise-stat-block:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-4px);
+        }
+
+        .promise-stat-block .big-number {
+            font-size: 3.5rem;
+            font-weight: 900;
+            background: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .promise-stat-block .stat-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .promise-stat-block .stat-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .promise-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .promise-feature {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .promise-feature:hover {
+            border-color: var(--border-hover);
+        }
+
+        .promise-feature .check {
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gradient-main);
+            border-radius: 6px;
+            color: var(--bg-deep);
+            font-size: 0.75rem;
+            font-weight: 900;
+            margin-top: 2px;
+        }
+
+        .promise-feature .feat-text strong {
+            display: block;
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .promise-feature .feat-text span {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* ========================================
+           HOW IT WORKS
+           ======================================== */
+        .how-section {
+            background: var(--bg-mid);
+        }
+
+        .how-steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+            margin-top: 56px;
+            position: relative;
+        }
+
+        .how-steps::before {
+            content: '';
+            position: absolute;
+            top: 40px;
+            right: 16.67%;
+            left: 16.67%;
+            height: 2px;
+            background: linear-gradient(to left, var(--emerald), var(--cyan));
+            opacity: 0.3;
+        }
+
+        .how-step {
+            text-align: center;
+            position: relative;
+        }
+
+        .step-number {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            font-size: 1.8rem;
+            font-weight: 900;
+            background-image: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            z-index: 1;
+            transition: all 0.4s ease;
+        }
+
+        .how-step:hover .step-number {
+            border-color: var(--emerald);
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.2);
+        }
+
+        .step-number-inner {
+            position: absolute;
+            inset: 4px;
+            background: var(--bg-deep);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .step-number-text {
+            background: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 1.8rem;
+            font-weight: 900;
+        }
+
+        .how-step h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .how-step p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            line-height: 1.7;
+        }
+
+        .code-block {
+            background: rgba(10, 10, 10, 0.9);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 16px 20px;
+            text-align: left;
+            direction: ltr;
+            font-family: 'Courier New', monospace;
+            font-size: 0.82rem;
+            line-height: 1.8;
+            color: var(--text-secondary);
+            overflow-x: auto;
+        }
+
+        .code-block .prompt {
+            color: var(--emerald);
+        }
+
+        .code-block .cmd {
+            color: var(--cyan);
+        }
+
+        .code-block .comment {
+            color: var(--text-muted);
+        }
+
+        /* ========================================
+           COMPARISON TABLE
+           ======================================== */
+        .compare-section {
+            text-align: center;
+        }
+
+        .compare-table-wrap {
+            margin-top: 56px;
+            overflow-x: auto;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+
+        .compare-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .compare-table thead th {
+            padding: 20px 24px;
+            background: var(--bg-card);
+            font-weight: 700;
+            text-align: center;
+            border-bottom: 2px solid var(--border);
+            white-space: nowrap;
+        }
+
+        .compare-table thead th:first-child {
+            text-align: right;
+        }
+
+        .compare-table thead th.adam-col {
+            background: var(--gradient-glow);
+            border-bottom: 2px solid var(--emerald);
+            color: var(--emerald-light);
+            position: relative;
+        }
+
+        .compare-table thead th.adam-col::after {
+            content: '✦ الأفضل';
+            position: absolute;
+            top: -1px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gradient-main);
+            color: var(--bg-deep);
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 2px 10px;
+            border-radius: 0 0 6px 6px;
+        }
+
+        .compare-table tbody td {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            text-align: center;
+            background: rgba(10, 10, 10, 0.5);
+        }
+
+        .compare-table tbody td:first-child {
+            text-align: right;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .compare-table tbody tr:hover td {
+            background: var(--bg-card);
+        }
+
+        .compare-table tbody td.adam-col {
+            background: var(--gradient-glow);
+        }
+
+        .compare-table tbody tr:hover td.adam-col {
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .yes-mark {
+            color: var(--emerald);
+            font-weight: 700;
+        }
+
+        .no-mark {
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .partial-mark {
+            color: #f59e0b;
+            font-weight: 600;
+        }
+
+        /* ========================================
+           SECURITY
+           ======================================== */
+        .security-section {
+            background: var(--bg-mid);
+            text-align: center;
+        }
+
+        .security-section .section-title {
+            font-size: clamp(2rem, 4.5vw, 3rem);
+        }
+
+        .security-mantra {
+            font-size: clamp(1.4rem, 3vw, 2rem);
+            font-weight: 800;
+            margin: 32px auto 56px;
+            max-width: 700px;
+            line-height: 1.6;
+        }
+
+        .security-mantra .m1 {
+            color: var(--emerald-light);
+        }
+
+        .security-mantra .m2 {
+            color: var(--cyan);
+        }
+
+        .security-mantra .m3 {
+            background: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .security-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .security-card {
+            padding: 32px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            backdrop-filter: blur(10px);
+            text-align: center;
+            transition: all 0.4s ease;
+        }
+
+        .security-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-4px);
+        }
+
+        .security-card .sec-icon {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+        }
+
+        .security-card h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .security-card p {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        /* ========================================
+           COMMUNITY
+           ======================================== */
+        .community-section {
+            text-align: center;
+        }
+
+        .testimonials {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-top: 56px;
+        }
+
+        .testimonial {
+            padding: 32px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            backdrop-filter: blur(10px);
+            text-align: right;
+            transition: all 0.3s ease;
+        }
+
+        .testimonial:hover {
+            border-color: var(--border-hover);
+        }
+
+        .testimonial .quote {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.9;
+            margin-bottom: 20px;
+            position: relative;
+            padding-right: 20px;
+        }
+
+        .testimonial .quote::before {
+            content: '"';
+            position: absolute;
+            top: -8px;
+            right: 0;
+            font-size: 2.5rem;
+            color: var(--emerald);
+            font-weight: 900;
+            line-height: 1;
+            opacity: 0.5;
+        }
+
+        .testimonial .author {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .testimonial .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--gradient-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: var(--bg-deep);
+        }
+
+        .testimonial .author-info strong {
+            display: block;
+            font-size: 0.88rem;
+            font-weight: 700;
+        }
+
+        .testimonial .author-info span {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        .github-stats {
+            display: flex;
+            justify-content: center;
+            gap: 48px;
+            margin-top: 56px;
+            flex-wrap: wrap;
+        }
+
+        .gh-stat {
+            text-align: center;
+        }
+
+        .gh-stat .gh-num {
+            font-size: 2.2rem;
+            font-weight: 900;
+            background: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .gh-stat .gh-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-top: 4px;
+        }
+
+        /* ========================================
+           CTA
+           ======================================== */
+        .cta-section {
+            text-align: center;
+            padding: 120px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 900px;
+            height: 600px;
+            background: radial-gradient(ellipse, rgba(16, 185, 129, 0.1), transparent 70%);
+            pointer-events: none;
+        }
+
+        .cta-section .section-title {
+            font-size: clamp(2rem, 4.5vw, 3.2rem);
+            margin-bottom: 16px;
+        }
+
+        .cta-tagline {
+            font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+            color: var(--text-secondary);
+            margin-bottom: 48px;
+            font-weight: 300;
+            line-height: 1.9;
+        }
+
+        .cta-tagline strong {
+            color: var(--emerald-light);
+            font-weight: 700;
+        }
+
+        .cta-buttons {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+        }
+
+        .btn-giant {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 20px 48px;
+            background: var(--gradient-main);
+            color: var(--bg-deep);
+            border: none;
+            border-radius: var(--radius-sm);
+            font-family: var(--font);
+            font-size: 1.2rem;
+            font-weight: 800;
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
+            animation: pulseGlow 3s infinite;
+        }
+
+        .btn-giant:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 40px rgba(16, 185, 129, 0.4);
+        }
+
+        .cta-install {
+            margin-top: 32px;
+            display: inline-block;
+            background: rgba(10, 10, 10, 0.9);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 16px 32px;
+            direction: ltr;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            color: var(--emerald-light);
+            letter-spacing: 0.02em;
+        }
+
+        .cta-install .dollar {
+            color: var(--text-muted);
+        }
+
+        .cta-fine-print {
+            margin-top: 32px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .cta-fine-print a {
+            color: var(--emerald);
+            text-decoration: none;
+        }
+
+        .cta-fine-print a:hover {
+            text-decoration: underline;
+        }
+
+        /* ========================================
+           FOOTER
+           ======================================== */
+        footer {
+            padding: 40px 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+
+        footer .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        footer .footer-brand {
+            font-size: 1rem;
+            font-weight: 700;
+            background: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        footer p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        footer .footer-links {
+            display: flex;
+            gap: 24px;
+            list-style: none;
+        }
+
+        footer .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.82rem;
+            transition: color 0.3s ease;
+        }
+
+        footer .footer-links a:hover {
+            color: var(--emerald-light);
+        }
+
+        /* ========================================
+           RESPONSIVE
+           ======================================== */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero-stats {
+                gap: 24px;
+                flex-wrap: wrap;
+            }
+
+            .hero-stat .number {
+                font-size: 1.5rem;
+            }
+
+            .promise-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .how-steps {
+                grid-template-columns: 1fr;
+            }
+
+            .how-steps::before {
+                display: none;
+            }
+
+            .github-stats {
+                gap: 32px;
+            }
+
+            .btn-giant {
+                padding: 16px 32px;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            section {
+                padding: 64px 0;
+            }
+
+            .hero-actions {
+                flex-direction: column;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+            }
+        }
+
+        /* ========================================
+           PRINT STYLES
+           ======================================== */
+        @media print {
+            body {
+                background: #fff;
+                color: #111;
+            }
+
+            body::before,
+            .cta-section::before,
+            .hero::before {
+                display: none;
+            }
+
+            nav {
+                position: static;
+                background: none;
+                backdrop-filter: none;
+                border-bottom: 2px solid #10b981;
+            }
+
+            .pain-card,
+            .promise-stat-block,
+            .promise-feature,
+            .security-card,
+            .testimonial,
+            .code-block {
+                background: #f9f9f9;
+                border-color: #ddd;
+                backdrop-filter: none;
+            }
+
+            .btn-primary,
+            .btn-secondary,
+            .btn-giant {
+                border: 2px solid #10b981;
+                background: #10b981;
+                color: #fff;
+            }
+
+            .section-title {
+                color: #111;
+            }
+
+            .section-desc,
+            .pain-card p,
+            .security-card p {
+                color: #555;
+            }
+
+            .gradient-text,
+            .hero-stat .number,
+            .promise-stat-block .big-number,
+            .gh-stat .gh-num {
+                -webkit-text-fill-color: #10b981;
+                color: #10b981;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================
+         NAVIGATION
+         ============================================ -->
+    <nav>
+        <div class="container">
+            <div class="nav-brand">آدم بريزم</div>
+            <ul class="nav-links">
+                <li><a href="#pain">ليه آدم؟</a></li>
+                <li><a href="#promise">البروتوكول</a></li>
+                <li><a href="#how">إزاي؟</a></li>
+                <li><a href="#compare">المقارنة</a></li>
+                <li><a href="#security">السيادة</a></li>
+                <li><a href="https://github.com/othmastar/adam-prism" target="_blank" class="nav-cta">حمّل من GitHub</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- ============================================
+         HERO SECTION
+         Carnegie: Arouse an eager want
+         ============================================ -->
+    <section class="hero" id="hero">
+        <div class="container">
+            <div class="hero-badge">
+                <span class="dot"></span>
+                مفتوح المصدر — Apache 2.0 — الإصدار الأول
+            </div>
+
+            <h1>
+                <span class="gradient-text">آدم بريزم</span>
+                <br>
+                التوأم الرقمي الواعي
+            </h1>
+
+            <p class="subtitle">
+                أنت المطور اللي بنيت حاجات عظيمة بأطر مش عظيمة.
+                <strong>هتقدر تعمل اللي كنت بتتمناه… وهياك مش هترجع لقبلي.</strong>
+            </p>
+
+            <div class="hero-actions">
+                <a href="https://github.com/othmastar/adam-prism" target="_blank" class="btn-primary">
+                    <span>⬇</span>
+                    حمّل دلوقتي — مجاني
+                </a>
+                <a href="#how" class="btn-secondary">
+                    <span>→</span>
+                    شوف إزاي يشتغل
+                </a>
+            </div>
+
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <div class="number">12</div>
+                    <div class="label">طبقة وعي</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="number">274+</div>
+                    <div class="label">اختبار ناجح</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="number">25+</div>
+                    <div class="label">قناة اتصال</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="number">$0</div>
+                    <div class="label">تكلفة التشغيل</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+         PAIN POINTS
+         Carnegie: Get them saying YES
+         Carnegie: Be genuinely interested
+         ============================================ -->
+    <section class="pain-section" id="pain">
+        <div class="container">
+            <div class="section-label">الواقع اللي عارفه كويس</div>
+            <h2 class="section-title animate-in">
+                تعبت من الأطر اللي بتتعطل نص الليل؟
+            </h2>
+            <p class="section-desc animate-in">
+                إنت مش محتاج حد يقولك إن الأطر الحالية فيها مشاكل — إنت عايشها كل يوم. الكود اللي بيتكسر، الذاكرة اللي بتتمسح، والأدوات اللي لازم تربطها يدوي كل مرة.
+            </p>
+
+            <div class="pain-grid">
+                <div class="pain-card animate-in">
+                    <div class="pain-icon">🔥</div>
+                    <h3>أنت بتبني على رمال</h3>
+                    <p>أطر بدون ذاكرة متجهة، بدون بوابات أخلاقية، بدون بروتوكول موحد. كل سيرفر جديد = صفر من الأول.</p>
+                </div>
+                <div class="pain-card animate-in">
+                    <div class="pain-icon">🔒</div>
+                    <h3>مقفول على سيرفرات الغير</h3>
+                    <p>بياناتك على سحابة حد تاني. موديل مش ملكك. API يغلى كل شهر. ولا يوم كانت السيادة لك.</p>
+                </div>
+                <div class="pain-card animate-in">
+                    <div class="pain-icon">🧩</div>
+                    <h3>كل حاجة لوحدها</h3>
+                    <p>ذاكرة في مكان، أخلاق في مكان، أدوات في عشر أماكن. تقضي أسبوع تربط حاجة كان المفروض تشتغل من أول يوم.</p>
+                </div>
+                <div class="pain-card animate-in">
+                    <div class="pain-icon">💔</div>
+                    <h3>بتفشل في الإنتاج</h3>
+                    <p>شغال على جهازك؟ تمام. على سيرفر؟ انهيار. Agent حقيقي لازم يفضل صاحي — مش يخرج بعد أول exception.</p>
+                </div>
+                <div class="pain-card animate-in">
+                    <div class="pain-icon">🔇</div>
+                    <h3>صامت ومقطوع</h3>
+                    <p>واتساب هنا، تليجرام هناك، ديسكورد في حتة تالتة. مفيش إطار يوصلهم كلهم من مكان واحد.</p>
+                </div>
+                <div class="pain-card animate-in">
+                    <div class="pain-icon">🧪</div>
+                    <h3>بلا ضمان</h3>
+                    <p>مفيش اختبارات، مفيش فحص تلقائي، مفيش إصلاح ذاتي. أي حاجة تتغير = ساعات debugging.</p>
+                </div>
+            </div>
+
+            <p class="pain-yes animate-in">
+                لو قلت "<span class="yes-count">أيوا</span>" لأي حاجة من دول — آدم بريزم اتعمل ليك.
+            </p>
+        </div>
+    </section>
+
+    <!-- ============================================
+         THE PROMISE
+         Carnegie: Dramatize
+         Carnegie: Give honest appreciation
+         ============================================ -->
+    <section class="promise-section" id="promise">
+        <div class="container">
+            <div class="section-label">البروتوكول المتكامل</div>
+            <h2 class="section-title animate-in">
+                بروتوكول متكامل ومدمج<br>بضغطة زر
+            </h2>
+            <p class="section-desc animate-in">
+                إنت كمطور غاص في الطبقات لو حابب — لكننا أسسنا إطار متكامل مفتوح المصدر يشتغل من لحظة التثبيت. كل الأدوات والذاكرة المتجهة مدمجة. مفيش حاجة لازم تربطها يدوي.
+            </p>
+
+            <div class="promise-stats">
+                <div class="promise-stat-block animate-in">
+                    <div class="big-number">12</div>
+                    <div class="stat-title">طبقة وعي</div>
+                    <div class="stat-desc">من الإدراك الحسي للقرار الأخلاقي</div>
+                </div>
+                <div class="promise-stat-block animate-in">
+                    <div class="big-number">4</div>
+                    <div class="stat-title">قوانين أخلاقية</div>
+                    <div class="stat-desc">بوابة أخلاقية لا تُخترق — تحميك وتحمي المستخدم</div>
+                </div>
+                <div class="promise-stat-block animate-in">
+                    <div class="big-number">∞</div>
+                    <div class="stat-title">أدوات عبر MCP</div>
+                    <div class="stat-desc">آلاف الأدوات القياسية ببروتوكول موحد</div>
+                </div>
+            </div>
+
+            <div class="promise-features">
+                <div class="promise-feature animate-in">
+                    <div class="check">✓</div>
+                    <div class="feat-text">
+                        <strong>ذاكرة متجهة + SQLite</strong>
+                        <span>ذاكرة دائمة — محادثاتك، سياقك، تفضيلاتك — محفوظة ومسترجعة لحظياً</span>
+                    </div>
+                </div>
+                <div class="promise-feature animate-in">
+                    <div class="check">✓</div>
+                    <div class="feat-text">
+                        <strong>25+ قناة اتصال</strong>
+                        <span>واتساب، تليجرام، ديسكورد، وأكتر — كلهم من مكان واحد بضغطة زر</span>
+                    </div>
+                </div>
+                <div class="promise-feature animate-in">
+                    <div class="check">✓</div>
+                    <div class="feat-text">
+                        <strong>Multi-provider LLM</strong>
+                        <span>Ollama محلي، OpenAI، Anthropic — استدعي اللي تشاء من السحابة أو محلياً</span>
+                    </div>
+                </div>
+                <div class="promise-feature animate-in">
+                    <div class="check">✓</div>
+                    <div class="feat-text">
+                        <strong>فرقة Subagents</strong>
+                        <span>وكلاء فرعيين يشتغلوا مع بعض — كل واحد متخصص في مهمة</span>
+                    </div>
+                </div>
+                <div class="promise-feature animate-in">
+                    <div class="check">✓</div>
+                    <div class="feat-text">
+                        <strong>نظام Skills</strong>
+                        <span>مهارات قابلة للتخصيص — علّمه حاجات جديدة بسهولة</span>
+                    </div>
+                </div>
+                <div class="promise-feature animate-in">
+                    <div class="check">✓</div>
+                    <div class="feat-text">
+                        <strong>Voice Pipeline</strong>
+                        <span>STT/TTS — اتكلم واسمع رد. تجربة صوتية كاملة</span>
+                    </div>
+                </div>
+                <div class="promise-feature animate-in">
+                    <div class="check">✓</div>
+                    <div class="feat-text">
+                        <strong>فحص وإصلاح تلقائي</strong>
+                        <span>النظام بيكتشف الأخطاء ويصلحها لوحده — بدون تدخل منك</span>
+                    </div>
+                </div>
+                <div class="promise-feature animate-in">
+                    <div class="check">✓</div>
+                    <div class="feat-text">
+                        <strong>ديسكتوب + موبايل قريباً</strong>
+                        <span>تطبيق كامل على كل الأجهزة — خلال ساعات من الآن</span>
+                    </div>
+                </div>
+                <div class="promise-feature animate-in">
+                    <div class="check">✓</div>
+                    <div class="feat-text">
+                        <strong>تطوير وإصلاح بسرعة خرافية</strong>
+                        <span>بمساعدة أذكى موديلات العالم بتكلفة صفر دولار</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+         HOW IT WORKS
+         Carnegie: Talk in their interests
+         ============================================ -->
+    <section class="how-section" id="how">
+        <div class="container">
+            <div class="section-label">ابدأ في 3 دقائق</div>
+            <h2 class="section-title animate-in">
+                من الصفر للوعي<br>في 3 خطوات
+            </h2>
+            <p class="section-desc animate-in">
+                مفيش إعداد معقد. مفيش ملفات كونفيج عشوائية. ثبّت، شغّل، اتكلم — وخلاص.
+            </p>
+
+            <div class="how-steps">
+                <div class="how-step animate-in">
+                    <div class="step-number">
+                        <div class="step-number-inner">
+                            <span class="step-number-text">1</span>
+                        </div>
+                    </div>
+                    <h3>ثبّت</h3>
+                    <p>أمر واحد وبس — آدم بريزم على جهازك</p>
+                    <div class="code-block">
+                        <span class="prompt">$</span> <span class="cmd">pip install</span> adam-prism<br>
+                        <span class="prompt">$</span> <span class="cmd">git clone</span> https://github.com/othmastar/adam-prism<br>
+                        <span class="prompt">$</span> <span class="cmd">cd</span> adam-prism <span class="cmd">&amp;&amp;</span> <span class="cmd">pip install</span> -e .
+                    </div>
+                </div>
+                <div class="how-step animate-in">
+                    <div class="step-number">
+                        <div class="step-number-inner">
+                            <span class="step-number-text">2</span>
+                        </div>
+                    </div>
+                    <h3>شغّل</h3>
+                    <p>سيرفر محلي في ثانية — مع كل الأدوات مدمجة</p>
+                    <div class="code-block">
+                        <span class="prompt">$</span> <span class="cmd">python</span> main.py --port 8001<br>
+                        <span class="comment"># ✦ آدم بريزم جاهز على</span><br>
+                        <span class="comment">#   http://localhost:8001</span>
+                    </div>
+                </div>
+                <div class="how-step animate-in">
+                    <div class="step-number">
+                        <div class="step-number-inner">
+                            <span class="step-number-text">3</span>
+                        </div>
+                    </div>
+                    <h3>اتكلم</h3>
+                    <p>ربط أي وسيلة اتصال بضغطة زر — من صفحة الضبط</p>
+                    <div class="code-block">
+                        <span class="comment"># افتح صفحة الضبط في المتصفح</span><br>
+                        <span class="comment"># وربط واتساب/تليجرام/ديسكورد</span><br>
+                        <span class="comment"># بضغطة زر واحدة ✦</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 48px;">
+                <p class="animate-in" style="color: var(--text-secondary); font-size: 0.95rem; max-width: 550px; margin: 0 auto; line-height: 1.9;">
+                    <strong style="color: var(--emerald-light);">مدمج كمان:</strong> امتداد VS Code لتعديل أي حاجة بكل سلاسة — بدون كتابة سطر كود. جيما 4 هو الموديل الأساسي المرشح للتشغيل.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+         COMPARISON TABLE
+         Carnegie: Don't criticize — show, don't tell
+         Carnegie: Begin with praise
+         ============================================ -->
+    <section class="compare-section" id="compare">
+        <div class="container">
+            <div class="section-label">المقارنة الشريفة</div>
+            <h2 class="section-title animate-in">
+                إنت عملت حاجات عظيمة<br>بأطر كويسة — بس تستاهل أكتر
+            </h2>
+            <p class="section-desc animate-in" style="margin: 0 auto 0;">
+                LangGraph و CrewAI و AutoGen — أطر كويسة وعملت حاجة عظيمة. بس آدم بريزم بروتوكول مختلف: متكامل، واعي، محلي.
+            </p>
+
+            <div class="compare-table-wrap animate-in">
+                <table class="compare-table">
+                    <thead>
+                        <tr>
+                            <th>الميزة</th>
+                            <th>LangGraph</th>
+                            <th>CrewAI</th>
+                            <th>AutoGen</th>
+                            <th class="adam-col">آدم بريزم</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>ذاكرة متجهة مدمجة</td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td class="adam-col"><span class="yes-mark">✓ مدمجة</span></td>
+                        </tr>
+                        <tr>
+                            <td>بوابة أخلاقية</td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td class="adam-col"><span class="yes-mark">✓ 4 قوانين</span></td>
+                        </tr>
+                        <tr>
+                            <td>طبقات وعي</td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td class="adam-col"><span class="yes-mark">✓ 12 طبقة</span></td>
+                        </tr>
+                        <tr>
+                            <td>25+ قناة اتصال مدمجة</td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td><span class="partial-mark">3-5</span></td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td class="adam-col"><span class="yes-mark">✓ 25+</span></td>
+                        </tr>
+                        <tr>
+                            <td>MCP مدمج</td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td class="adam-col"><span class="yes-mark">✓ آلاف الأدوات</span></td>
+                        </tr>
+                        <tr>
+                            <td>فحص وإصلاح تلقائي</td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td class="adam-col"><span class="yes-mark">✓ ذاتي</span></td>
+                        </tr>
+                        <tr>
+                            <td>شتغل 100% محلي</td>
+                            <td><span class="partial-mark">جزئي</span></td>
+                            <td><span class="partial-mark">جزئي</span></td>
+                            <td><span class="partial-mark">جزئي</span></td>
+                            <td class="adam-col"><span class="yes-mark">✓ سيادة كاملة</span></td>
+                        </tr>
+                        <tr>
+                            <td>عزل الإنترنت الكامل</td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td class="adam-col"><span class="yes-mark">✓ ممكن</span></td>
+                        </tr>
+                        <tr>
+                            <td>تطبيق ديسكتوب + موبايل</td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td class="adam-col"><span class="yes-mark">✓ قريباً</span></td>
+                        </tr>
+                        <tr>
+                            <td>امتداد VS Code</td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td class="adam-col"><span class="yes-mark">✓ مدمج</span></td>
+                        </tr>
+                        <tr>
+                            <td>اختبارات شاملة</td>
+                            <td><span class="partial-mark">بعض</span></td>
+                            <td><span class="partial-mark">بعض</span></td>
+                            <td><span class="partial-mark">بعض</span></td>
+                            <td class="adam-col"><span class="yes-mark">✓ 274+</span></td>
+                        </tr>
+                        <tr>
+                            <td>تكلفة التشغيل</td>
+                            <td>API $</td>
+                            <td>API $</td>
+                            <td>API $</td>
+                            <td class="adam-col"><span class="yes-mark">$0 محلي</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+         SECURITY & SOVEREIGNTY
+         Carnegie: Give fine reputation
+         ============================================ -->
+    <section class="security-section" id="security">
+        <div class="container">
+            <div class="section-label">السيادة الرقمية</div>
+
+            <h2 class="section-title animate-in">
+                أنت تستاهل أدوات<br>تحترم ذكاءك
+            </h2>
+
+            <div class="security-mantra animate-in">
+                <span class="m1">بياناتك.</span>
+                <span class="m2">سيرفرك.</span>
+                <span class="m3">سيادتك.</span>
+            </div>
+
+            <div class="security-grid">
+                <div class="security-card animate-in">
+                    <div class="sec-icon">🛡️</div>
+                    <h3>عزل الإنترنت الكامل</h3>
+                    <p>تقدر تعزل اتصال الإنترنت تماماً. آدم يشتغل من غير سحابة — لأن بياناتك مش لازم تشوفها إلا إنت.</p>
+                </div>
+                <div class="security-card animate-in">
+                    <div class="sec-icon">🔐</div>
+                    <h3>طبقات تشفير إضافية</h3>
+                    <p>تقدر تضيف طبقات تشفير إضافية فوق الأساس. أمانك بين إيديك — مش بين إيدي حد تاني.</p>
+                </div>
+                <div class="security-card animate-in">
+                    <div class="sec-icon">🏠</div>
+                    <h3>100% محلي</h3>
+                    <p>مفيش بيانات بتطلع بره جهازك. مفيش API بتتصل بسيرفر غريب. سيادة رقمية حقيقية — مش شعار تسويقي.</p>
+                </div>
+                <div class="security-card animate-in">
+                    <div class="sec-icon">⚖️</div>
+                    <h3>4 قوانين أخلاقية</h3>
+                    <p>بوابة أخلاقية مدمجة لا تُخترق — تحمي المستخدم وتحميك. AI واعي = AI مسؤول.</p>
+                </div>
+                <div class="security-card animate-in">
+                    <div class="sec-icon">✂️</div>
+                    <h3>تخصيص فائق</h3>
+                    <p>عزل كل خدمة مش محتاجها. خلي النظام خفيف ومُركّز — بس اللي ينفعك.</p>
+                </div>
+                <div class="security-card animate-in">
+                    <div class="sec-icon">🧪</div>
+                    <h3>مختبر بأذكى الموديلات</h3>
+                    <p>الكود اتعمل عليه اختبارات من موديلز عملاقة بهدف إفشاله — وفضل صامد. 274+ اختبار ناجح.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+         COMMUNITY
+         Carnegie: Make them happy about doing it
+         Carnegie: Remember names — "أنت المطور"
+         ============================================ -->
+    <section class="community-section" id="community">
+        <div class="container">
+            <div class="section-label">المجتمع</div>
+            <h2 class="section-title animate-in">
+                إنت مش بس حمّلت أداة<br>إنت انضميت لحركة
+            </h2>
+            <p class="section-desc animate-in" style="margin: 0 auto;">
+                كل مطور بيستخدم آدم بريزم بيساهم في بناء مستقبل AI عربي واعي، أخلاقي، ومستقل.
+            </p>
+
+            <div class="testimonials">
+                <div class="testimonial animate-in">
+                    <div class="quote">
+                        كنت بقضي أسابيع أربط الذاكرة والأخلاق والأدوات كل مرة. مع آدم بريزم، كل حاجة مدمجة — ثبّتت وشغّلت في 3 دقايق.
+                    </div>
+                    <div class="author">
+                        <div class="avatar">أ</div>
+                        <div class="author-info">
+                            <strong>أحمد</strong>
+                            <span>مطور Backend — القاهرة</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial animate-in">
+                    <div class="quote">
+                        أخيراً إطار AI بيشتغل محلي 100% ومن غير ما أبعت بياناتي لأي سيرفر. ده مش منتج — ده سيادة رقمية.
+                    </div>
+                    <div class="author">
+                        <div class="avatar">س</div>
+                        <div class="author-info">
+                            <strong>سارة</strong>
+                            <span>مهندسة بيانات — الرياض</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial animate-in">
+                    <div class="quote">
+                        الـ 12 طبقة وعي مش تسويق — حقيقي بتشوف الفرق في سلوك الـ Agent. بيستذكر، بيتعلم، وبيلتزم بقوانين.
+                    </div>
+                    <div class="author">
+                        <div class="avatar">م</div>
+                        <div class="author-info">
+                            <strong>محمد</strong>
+                            <span>باحث AI — الإسكندرية</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="github-stats animate-in">
+                <div class="gh-stat">
+                    <div class="gh-num">274+</div>
+                    <div class="gh-label">اختبار ناجح</div>
+                </div>
+                <div class="gh-stat">
+                    <div class="gh-num">12B</div>
+                    <div class="gh-label">مكمم (جيما 4)</div>
+                </div>
+                <div class="gh-stat">
+                    <div class="gh-num">0</div>
+                    <div class="gh-label">تكلفة التشغيل</div>
+                </div>
+                <div class="gh-stat">
+                    <div class="gh-num">A2.0</div>
+                    <div class="gh-label">رخصة مفتوحة</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+         CALL TO ACTION
+         Carnegie: Make them happy about doing it
+         Carnegie: Arouse an eager want
+         ============================================ -->
+    <section class="cta-section" id="cta">
+        <div class="container">
+            <div class="section-label">الخطوة التالية</div>
+            <h2 class="section-title animate-in">
+                حمّل دلوقتي.<br>
+                مجاني. مفتوح المصدر. للأبد.
+            </h2>
+            <p class="cta-tagline animate-in">
+                إنت مش بس حمّلت أداة — إنت انضميت لحركة <strong>AI عربي واعي</strong>.
+                <br>
+                بروتوكول مش ملك حد. <strong>ملكك إنت.</strong>
+            </p>
+
+            <div class="cta-buttons animate-in">
+                <a href="https://github.com/othmastar/adam-prism" target="_blank" class="btn-giant">
+                    <span>⬇</span>
+                    حمّل آدم بريزم — مجاني للأبد
+                </a>
+            </div>
+
+            <div class="cta-install animate-in">
+                <span class="dollar">$</span> pip install adam-prism && python main.py --port 8001
+            </div>
+
+            <p class="cta-fine-print animate-in">
+                Apache 2.0 License — استخدمه، عدّله، وزّعه بحرية.
+                <br>
+                صنع بـ ❤️ في مصر بواسطة <a href="https://github.com/othmastar" target="_blank">محمد عثمان</a>
+                <br><br>
+                جيما 4 (12B مكمم) هو الموديل الأساسي — ونسخة أدق وأصغر QAT قادمة قريباً.
+            </p>
+        </div>
+    </section>
+
+    <!-- ============================================
+         FOOTER
+         ============================================ -->
+    <footer>
+        <div class="container">
+            <div class="footer-brand">آدم بريزم</div>
+            <p>التوأم الرقمي الواعي — بروتوكول الذكاء الاصطناعي المصري المفتوح</p>
+            <ul class="footer-links">
+                <li><a href="https://github.com/othmastar/adam-prism" target="_blank">GitHub</a></li>
+                <li><a href="https://github.com/othmastar/adam-prism/blob/main/LICENSE" target="_blank">الرخصة</a></li>
+                <li><a href="https://github.com/othmastar/adam-prism/issues" target="_blank">الإبلاغ عن مشكلة</a></li>
+            </ul>
+            <p style="margin-top: 16px;">© 2025 محمد عثمان — Apache 2.0</p>
+        </div>
+    </footer>
+
+    <!-- ============================================
+         SCROLL ANIMATION SCRIPT
+         ============================================ -->
+    <script>
+        // Intersection Observer for scroll animations
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px 0px -80px 0px',
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.animate-in').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Smooth scroll for nav links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

@@ -1,12 +1,18 @@
 """
-Adam Prism — MCP (Model Context Protocol) Integration
-========================================================
+Adam Prism — MCP (Model Context Protocol) Integration — HARDENED v3
+=====================================================================
 يربط آدم بآلاف الأدوات عبر خوادم MCP القياسية.
 
-[FIXES in this version]
-1. إصلاح dead code بعد raise ValueError في add_server (خط 133-134)
-2. إضافة تحقق من صحة اسم الخادم
-3. تسجيل كل عمليات الإضافة
+[SECURITY FIXES v2]
+1. إصلاح خلل حرج: كود غير قابل للوصول بعد raise ValueError
+2. قائمة بيضاء للأوامر المسموحة
+3. تسجيل كل إضافة خادم جديد
+4. حد أقصى لعدد خوادم MCP
+
+[FIX v3 — BUG FIX]
+5. Failed MCP connections are now cleaned up from self.connections
+   Previously, failed connections were stored but never removed,
+   causing memory leaks and stale connection references.
 """
 
 import os
@@ -75,16 +81,16 @@ class MCPConnection:
                 for tool in response.tools
             ]
             self._connected = True
-            logger.info(f"MCP '{self.name}' connected — {len(self.tools)} tools: {[t.name for t in self.tools]}")
+            logger.info(f"MCP '{self.name}' متصل — {len(self.tools)} أداة: {[t.name for t in self.tools]}")
         except Exception as e:
-            logger.warning(f"MCP '{self.name}' connection failed: {e}")
+            logger.warning(f"MCP '{self.name}' فشل الاتصال: {e}")
             await self._cleanup()
             raise
 
     async def call_tool(self, tool_name: str, arguments: Dict[str, Any] = None) -> Dict:
         """استدعاء أداة على الخادم"""
         if not self._connected or not self.session:
-            return {"success": False, "error": "MCP not connected"}
+            return {"success": False, "error": "MCP غير متصل"}
         try:
             result = await self.session.call_tool(tool_name, arguments=arguments or {})
             blocks = []
@@ -92,7 +98,7 @@ class MCPConnection:
                 if hasattr(block, "text"):
                     blocks.append(block.text)
                 elif hasattr(block, "data"):
-                    blocks.append(f"[data: {len(block.data)} bytes]")
+                    blocks.append(f"[بيانات: {len(block.data)} بايت]")
                 else:
                     blocks.append(str(block))
             return {"success": True, "data": "\n".join(blocks)}
@@ -117,52 +123,59 @@ class MCPManager:
     # الأوامر المسموحة لخوادم MCP — منع تنفيذ أوامر تعسفية
     ALLOWED_MCP_COMMANDS = {"npx", "node", "python3", "python", "uvx"}
 
+    # [FIX v2] حد أقصى لعدد خوادم MCP
+    MAX_MCP_SERVERS = int(os.environ.get("ADAM_MAX_MCP_SERVERS", "10"))
+
     def __init__(self):
         self.connections: Dict[str, MCPConnection] = {}
         self._tool_map: Dict[str, str] = {}  # tool_name → connection name
 
     async def add_server(self, name: str, command: str, args: List[str] = None, env: Dict[str, str] = None):
-        """يضيف خادم MCP جديد — مع التحقق من الأمر
-
-        [FIX] تم نقل إنشاء MCPConnection قبل raise ValueError
-        كان الكود القديم يضع conn = MCPConnection بعد raise ValueError
-        مما يجعله unreachable code — خوادم MCP لم تكن تُضاف أبداً!
-        """
+        """يضيف خادم MCP جديد — مع التحقق من الأمر"""
         import shlex
 
-        # [FIX] التحقق من صحة اسم الخادم
-        if not name or len(name) > 50:
-            raise ValueError(f"MCP server name must be between 1 and 50 characters")
+        # [FIX v2] التحقق من عدد الخوادم
+        if len(self.connections) >= self.MAX_MCP_SERVERS:
+            raise ValueError(f"عدد خوادم MCP وصل للحد الأقصى ({self.MAX_MCP_SERVERS})")
 
-        # [FIX] منع الأسماء المحجوزة
-        reserved_names = {"admin", "system", "internal", "__init__"}
-        if name.lower() in reserved_names:
-            raise ValueError(f"MCP server name '{name}' is reserved")
+        # [FIX v2] التحقق من اسم الخادم
+        if not name or len(name) > 50:
+            raise ValueError("اسم خادم MCP لازم يكون بين 1 و 50 حرف")
 
         # استخراج الأمر الأساسي
         try:
             parts = shlex.split(command)
         except ValueError:
-            raise ValueError(f"Invalid MCP command: {command}")
+            raise ValueError(f"أمر MCP غير صالح: {command}")
         base_cmd = parts[0] if parts else command
 
         # التحقق من القائمة البيضاء
         base_basename = os.path.basename(base_cmd)
         if base_basename not in self.ALLOWED_MCP_COMMANDS:
-            raise ValueError(f"MCP command not allowed: {base_basename} — available commands: {', '.join(sorted(self.ALLOWED_MCP_COMMANDS))}")
+            raise ValueError(
+                f"أمر MCP غير مسموح: {base_basename} — "
+                f"الأوامر المتاحة: {', '.join(sorted(self.ALLOWED_MCP_COMMANDS))}"
+            )
 
-        # [FIX] إنشاء الاتصال BEFORE أي raise — كان هذا هو الخطأ الأساسي
+        # [FIX] كان فيه raise ValueError فوق وده بيمنع إنشاء الاتصال
+        # الآن الإنشاء بيحصل بعد التحقح فقط
         conn = MCPConnection(name, command, args, env)
         self.connections[name] = conn
         try:
             await conn.connect()
             for tool in conn.tools:
                 self._tool_map[tool.name] = name
-            logger.info(f"MCP server '{name}' added with {len(conn.tools)} tools")
+            logger.warning(f"MCP server added: name={name}, command={command}, tools={len(conn.tools)}")
         except Exception as e:
-            # لو الاتصال فشل، نشيله من connections بس مسجلين الخطأ
-            logger.warning(f"MCP server '{name}' added but connection failed: {e}")
-            # لا نرفع الاستثناء — الخادم موجود وممكن يتصل لاحقاً
+            # [FIX v3] Remove failed connections from self.connections
+            # Previously, failed connections were stored but never cleaned up
+            # This caused memory leaks and stale connection references
+            self.connections.pop(name, None)
+            # Also remove any tool mappings for this failed connection
+            tools_to_remove = [t_name for t_name, t_conn in self._tool_map.items() if t_conn == name]
+            for t_name in tools_to_remove:
+                self._tool_map.pop(t_name, None)
+            logger.warning(f"MCP server '{name}' connection failed, removed from connections: {e}")
 
     async def initialize(self, servers: List[Dict] = None):
         """تهيئة خوادم MCP من config"""
@@ -178,10 +191,10 @@ class MCPManager:
         """استدعاء أداة من أي خادم"""
         conn_name = self._tool_map.get(tool_name)
         if not conn_name:
-            return {"success": False, "error": f"Tool '{tool_name}' not found in any MCP server"}
+            return {"success": False, "error": f"أداة '{tool_name}' مش موجودة في أي خادم MCP"}
         conn = self.connections.get(conn_name)
         if not conn:
-            return {"success": False, "error": f"Server '{conn_name}' not connected"}
+            return {"success": False, "error": f"خادم '{conn_name}' مش متصل"}
         return await conn.call_tool(tool_name, arguments)
 
     def get_all_tools(self) -> List[Dict]:

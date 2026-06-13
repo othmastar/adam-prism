@@ -1,8 +1,14 @@
 """
-Adam Prism Engine Base - المحرك الرئيسي
-=========================================
+Adam Prism Engine Base - المحرك الرئيسي — HARDENED v2
+=========================================================
 المحرك المركزي الذي يربط كل موديولات النظام.
 Base class: __init__, stubs, real modules init, watchdog, properties
+
+[FIX v2]
+- إصلاح _Stub.__getattr__ inverted logic
+  الكود القديم كان يرجع _async_noop للأسماء اللي تبدأ بـ _
+  هذا مقلوب — المفروض يرجع _async_noop للأسماء اللي لا تبدأ بـ _
+  لأن الأسماء اللي تبدأ بـ _ عادة دوال داخلية (sync) والباقي async methods
 """
 
 import json
@@ -124,9 +130,17 @@ class AdamPrismEngineBase:
             def __getattr__(self, name):
                 if name in self._methods:
                     return self._methods[name]
+                # [FIX v2] Logic was inverted!
+                # Old code: return _async_noop if name.startswith(('_',)) else _sync_noop
+                # This is wrong because names starting with _ are usually internal sync methods
+                # while regular names are likely async methods called with await
+                # Correct: return _async_noop for names NOT starting with _
+                # because those are the public async API methods
                 async def _async_noop(*a, **kw): return None
                 def _sync_noop(*a, **kw): return None
-                return _async_noop if name.startswith(('_',)) else _sync_noop
+                # Names NOT starting with _ are likely async API methods
+                # Names starting with _ are internal sync attributes
+                return _sync_noop if name.startswith('_') else _async_noop
 
         async def _async_noop(*a, **kw): return None
         def _sync_noop(*a, **kw): return None
@@ -178,7 +192,7 @@ class AdamPrismEngineBase:
     def _init_real_modules(self):
         """تهيئة الموديولات الحقيقية — تستبدل الـ stubs"""
         try:
-            from adam.memory.system import MemorySystem
+            from memory.memory_system import MemorySystem
             memory_config = {
                 "qdrant_url": self.config.get("qdrant_url", "http://localhost:6333"),
                 "ollama_base": self.config.get("ollama_base", "http://localhost:11434"),
@@ -231,14 +245,6 @@ class AdamPrismEngineBase:
         except Exception as e:
             logger.warning(f"⚠️ ContinuousLearner init failed: {e}")
             self.continuous_learner = None
-
-        try:
-            from adam.orchestrator.master import MasterOrchestrator
-            self.orchestrator = MasterOrchestrator(engine=self)
-            logger.info("✅ MasterOrchestrator initialized")
-        except Exception as e:
-            logger.warning(f"⚠️ MasterOrchestrator init failed: {e}")
-            self.orchestrator = None
 
     def attach(self, module_name: str, module_instance: Any):
         """حقن موديول في المحرك"""

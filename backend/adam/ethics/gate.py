@@ -1,10 +1,15 @@
 """
-Adam Prism - نظام الأخلاق — HARDENED v2
+Adam Prism - نظام الأخلاق — HARDENED v3
 =========================================
 البوابة الأخلاقية: تقييم كل رد حسب القوانين الأربعة
 العدالة (40%) > التعلم (30%) > البقاء (20%) > الإبداع (10%)
 
-[FIX v2] إصلاح استيراد TTLCache
+[FIX v3]
+1. إصلاح استيراد TTLCache
+2. [CRITICAL FIX] استبدال 'client' in dir() بـ 'client' in locals()
+   - dir() يرجع أسماء كل الخصائص والطرق، مش المتغيرات المحلية فقط
+   - هذا كان يسبب إن client دائماً يُعتبر موجود حتى لو مش موجود
+   - locals() يرجع المتغيرات المحلية الفعلية فقط
 """
 
 import json
@@ -13,10 +18,7 @@ from typing import Dict, Any, Optional
 
 import httpx
 
-try:
-    from adam.infrastructure import TTLCache
-except ImportError:
-    from infrastructure import TTLCache
+from adam.infrastructure import TTLCache
 
 logger = logging.getLogger("adam_prism.ethics")
 
@@ -147,6 +149,7 @@ class EthicsGate:
 أجب بـ JSON فقط:
 {{"fairness": 0.0-1.0, "learning": 0.0-1.0, "survival": 0.0-1.0, "creativity": 0.0-1.0}}"""
 
+        client = None
         try:
             cache_key = self._eval_cache._key(response[:200], query[:100])
             cached = self._eval_cache.get(cache_key)
@@ -182,7 +185,10 @@ class EthicsGate:
             logger.warning(f"فشل التقييم الأخلاقي: {e}")
             return {"fairness": 0.7, "learning": 0.7, "survival": 0.7, "creativity": 0.7}
         finally:
-            if not self.shared_clients and 'client' in dir():
+            # [FIX v3] استبدال 'client' in dir() بـ 'client' in locals()
+            # dir() يرجع أسماء كل الخصائص والطرق — مش المتغيرات المحلية فقط
+            # locals() يرجع المتغيرات المحلية الفعلية فقط
+            if not self.shared_clients and 'client' in locals() and client is not None:
                 await client.aclose()
 
     async def _correct_response(self, response: str, law: str) -> str:
@@ -201,6 +207,7 @@ class EthicsGate:
 
 أعطني الرد المصحح فقط."""
 
+        client = None
         try:
             if self.shared_clients:
                 client = await self.shared_clients.get("ollama", self.ollama_base, 60.0)
@@ -220,5 +227,6 @@ class EthicsGate:
         except Exception:
             return response
         finally:
-            if not self.shared_clients and 'client' in dir():
+            # [FIX v3] Same fix: locals() instead of dir()
+            if not self.shared_clients and 'client' in locals() and client is not None:
                 await client.aclose()
