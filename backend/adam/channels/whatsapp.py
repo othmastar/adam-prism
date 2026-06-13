@@ -25,7 +25,10 @@ class WhatsAppChannel(BaseChannel):
         cfg = config.get(self.name, config)
         self.phone_number_id = cfg.get("phone_number_id", config.get("whatsapp_phone_number_id", ""))
         self.access_token = cfg.get("access_token", config.get("whatsapp_access_token", ""))
-        self.webhook_verify_token = cfg.get("webhook_verify_token", config.get("whatsapp_webhook_verify_token", "adam_prism_verify"))
+        self.webhook_verify_token = cfg.get("webhook_verify_token", config.get("whatsapp_webhook_verify_token", ""))
+        if not self.webhook_verify_token:
+            logger.warning("WhatsApp webhook_verify_token is not configured! Webhook verification will fail. "
+                           "Set 'webhook_verify_token' in config or WHATSAPP_WEBHOOK_VERIFY_TOKEN env var.")
         self.app_secret = cfg.get("app_secret", config.get("whatsapp_app_secret", ""))
         self.api_version = cfg.get("api_version", config.get("whatsapp_api_version", "v22.0"))
         self.api_base = f"https://graph.facebook.com/{self.api_version}/{self.phone_number_id}"

@@ -1,15 +1,34 @@
+"""
+Adam Prism — API Runner
+Runs the FastAPI server with the AdamPrismEngine.
+
+[M17-M18 FIX]
+- Added comments explaining why sys.path is modified (development convenience)
+- Use try/except for imports so it works both with and without path manipulation
+"""
+
 import asyncio
 import uvicorn
 import logging
 import sys
 from pathlib import Path
 
-# Add project root and backend to path
-sys.path.insert(0, str(Path(__file__).parent))
-sys.path.insert(0, str(Path(__file__).parent / "backend"))
+# [M17-M18] Add project root and backend to path for development convenience.
+# This allows running `python run_api.py` from the project root.
+# In a proper installation (pip install), these are not needed.
+_project_root = str(Path(__file__).parent)
+_backend_root = str(Path(__file__).parent / "backend")
+for _p in (_project_root, _backend_root):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
 
-from api.server import create_app
-from core.engine import AdamPrismEngine
+try:
+    from api.server import create_app
+    from core.engine import AdamPrismEngine
+except ImportError:
+    # [M17-M18] Try with package-qualified imports
+    from adam.api.server import create_app
+    from adam.core.engine import AdamPrismEngine
 
 async def main():
     # Load config

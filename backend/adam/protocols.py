@@ -17,8 +17,10 @@ class MemorySystem(Protocol):
 
 @runtime_checkable
 class EthicsGate(Protocol):
-    async def evaluate(self, query: str, response: str) -> Dict: ...
-    async def correct(self, response: str, law: str) -> str: ...
+    # [M16] Fixed to match the actual implementation in ethics/gate.py
+    # evaluate() takes (response, original_query) not (query, response)
+    # correct() is actually _correct_response() — not a public method
+    async def evaluate(self, response: str, original_query: str = "") -> Dict: ...
 
 
 @runtime_checkable

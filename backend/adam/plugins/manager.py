@@ -1,7 +1,12 @@
 """
-Adam Prism — Plugin Manager
-=============================
+Adam Prism — Plugin Manager — HARDENED v2
+=============================================
 يكتشف ويدير الإضافات. يشغل hooks قبل وبعد كل عملية.
+
+[C4 — CRITICAL SECURITY]
+- Plugin loading restricted to ALLOWED_PLUGIN_DIR only
+- Resolved paths validated to be within the allowed directory
+- Prevents path traversal and arbitrary code execution from untrusted dirs
 """
 
 import os
@@ -14,6 +19,29 @@ from typing import Dict, Any, List, Optional, Type
 from adam.plugins.base import AdamPlugin
 
 logger = logging.getLogger("adam_prism.plugins")
+
+# [C4] المجلدات المسموح بتحميل الإضافات منها فقط
+ALLOWED_PLUGIN_DIR = os.environ.get(
+    "ADAM_PLUGIN_DIR",
+    os.path.join(os.getcwd(), "plugins")
+)
+
+
+def _validate_plugin_path(path: str) -> bool:
+    """التحقق من أن المسار داخل المجلد المسموح — منع path traversal"""
+    if not path:
+        return False
+    try:
+        resolved = os.path.realpath(path)
+        allowed_resolved = os.path.realpath(ALLOWED_PLUGIN_DIR)
+        # Check that the resolved path is within the allowed directory
+        if not resolved.startswith(allowed_resolved + os.sep) and resolved != allowed_resolved:
+            logger.warning(f"⚠️ Plugin path rejected (outside allowed dir): {path} -> {resolved} (allowed: {allowed_resolved})")
+            return False
+        return True
+    except Exception as e:
+        logger.warning(f"⚠️ Plugin path validation error: {e}")
+        return False
 
 
 class PluginManager:
@@ -31,6 +59,10 @@ class PluginManager:
         """يبحث عن plugins في مجلدات معينة"""
         found = []
         for directory in directories:
+            # [C4] Validate directory is within allowed path
+            if not _validate_plugin_path(directory):
+                logger.warning(f"⚠️ Plugin directory rejected: {directory}")
+                continue
             if not os.path.isdir(directory):
                 continue
             for entry in os.listdir(directory):
@@ -38,13 +70,21 @@ class PluginManager:
                     continue
                 plugin_dir = os.path.join(directory, entry)
                 if os.path.isdir(plugin_dir) and os.path.isfile(os.path.join(plugin_dir, "__init__.py")):
-                    found.append(plugin_dir)
+                    # [C4] Validate each discovered path
+                    if _validate_plugin_path(plugin_dir):
+                        found.append(plugin_dir)
                 elif entry.endswith(".py") and not entry.startswith("_"):
-                    found.append(plugin_dir)
+                    # [C4] Validate single file path
+                    if _validate_plugin_path(plugin_dir):
+                        found.append(plugin_dir)
         return found
 
     def load_from_dir(self, directory: str):
         """يحمل كل الـ plugins من مجلد"""
+        # [C4] Validate before discovering
+        if not _validate_plugin_path(directory):
+            logger.error(f"🚫 Plugin load rejected — directory outside allowed path: {directory}")
+            return
         entries = self.discover(directory)
         self._hook_order = []
         for path in entries:
@@ -65,6 +105,10 @@ class PluginManager:
 
     def _load_single(self, path: str):
         """يحمل plugin واحد من مسار"""
+        # [C4] Validate path before loading
+        if not _validate_plugin_path(path):
+            logger.error(f"🚫 Plugin load rejected — path outside allowed dir: {path}")
+            return
         try:
             module_name = os.path.splitext(os.path.basename(path))[0]
             if path.endswith(".py"):

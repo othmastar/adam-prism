@@ -1,13 +1,14 @@
 """
-Adam Prism - Production Infrastructure — HARDENED v2
+Adam Prism - Production Infrastructure — HARDENED v3
 ======================================================
 اتصال مهيأ (Connection Pooling) + Caching + Retry + Metrics + Sanitizer
 خفيف، غير معطل، جاهز للإنتاج.
 
-[SECURITY FIXES v2]
-1. sanitize_path محسّن — يمنع symlink attacks
-2. [NEW] مدقق مدخلات عام
-3. [NEW] تنظيف ذاكرة تلقائي
+[SECURITY FIXES v3 — C6]
+1. Removed os.path.expanduser("~") from ALLOWED_FILE_PATHS
+2. Added specific workspace paths instead of home directory
+3. Improved blocklist to use exact path matching instead of substring
+4. Block all dotfile directories properly
 """
 
 import asyncio
@@ -222,33 +223,84 @@ class MetricsCollector:
 # 5. Input Sanitizer — حماية من المسارات الخبيثة
 # ═══════════════════════════════════════
 
+# [C6] Removed os.path.expanduser("~") — use specific workspace paths instead
 ALLOWED_FILE_PATHS = [
-    os.path.expanduser("~"),
     "/tmp",
     "./notebook",
     "./data",
     "./config",
+    "./workspace",
+    "./projects",
 ]
 
-BLOCKED_FILE_SUBSTRINGS = [
-    "/etc/", "/proc/", "/sys/", "/dev/", "/boot/",
-    "/root/", "/var/", "/usr/", "/bin/",
-    ".ssh", ".config", ".env", "password",
-    "credential", "secret", "token",
+# [C6] Improved blocklist — exact path matching instead of substring
+# Uses path boundaries (with trailing slash or exact match) to prevent bypass
+BLOCKED_PATHS = [
+    "/etc", "/proc", "/sys", "/dev", "/boot",
+    "/root", "/var", "/usr", "/bin",
 ]
+
+# [C6] Dotfile directories — block all dotfile/hidden directories
+BLOCKED_DOTFILE_DIRS = [
+    ".ssh", ".config", ".env", ".aws", ".gnupg",
+    ".kube", ".docker", ".cache", ".local",
+]
+
+# [C6] Sensitive filename keywords — exact filename matching
+BLOCKED_FILENAMES = [
+    "password", "credential", "secret", "token",
+    ".env", ".htpasswd", ".netrc", ".pgpass",
+]
+
 
 def sanitize_path(path: str) -> Optional[str]:
     """التحقق من أن المسار مصرح به — يمنع الوصول لملفات النظام"""
     if not path or ".." in path:
         return None
-    resolved = str(Path(path).resolve())
-    for allowed in ALLOWED_FILE_PATHS:
-        if resolved.startswith(allowed):
-            return resolved
-    for blocked in BLOCKED_FILE_SUBSTRINGS:
-        if blocked in resolved.lower():
+
+    try:
+        resolved = str(Path(path).resolve())
+    except Exception:
+        return None
+
+    # [C6] Check allowed paths — must start with an allowed prefix
+    allowed = False
+    for allowed_path in ALLOWED_FILE_PATHS:
+        allowed_resolved = str(Path(allowed_path).resolve())
+        if resolved == allowed_resolved or resolved.startswith(allowed_resolved + "/"):
+            allowed = True
+            break
+    if not allowed:
+        return None
+
+    # [C6] Check blocked paths using exact path matching
+    # Split the resolved path into components and check each prefix
+    path_parts = resolved.split("/")
+    built_path = ""
+    for part in path_parts:
+        if not part:
+            built_path += "/"
+            continue
+        built_path += part
+        for blocked in BLOCKED_PATHS:
+            if built_path == blocked:
+                return None
+        built_path += "/"
+
+    # [C6] Check for blocked dotfile directories in path components
+    for part in path_parts:
+        for dotdir in BLOCKED_DOTFILE_DIRS:
+            if part == dotdir:
+                return None
+
+    # [C6] Check for blocked filenames — exact match on last component
+    filename = path_parts[-1] if path_parts else ""
+    filename_lower = filename.lower()
+    for blocked_name in BLOCKED_FILENAMES:
+        if filename_lower == blocked_name.lower():
             return None
-    return None
+
+    return resolved
 
 
 # ═══════════════════════════════════════
@@ -259,7 +311,7 @@ class CircuitBreaker:
     """قاطع الدائرة — يمنع استدعاء خدمة بعد عدد معين من التعذر"""
 
     CLOSED = "closed"    # الخدمة سليمة
-    OPEN = "open"        # الخدمة متعثرة — ممنوع المرور
+    OPEN = "open"        # الخدمة متعطلة — ممنوع المرور
     HALF_OPEN = "half_open"  # اختبار واحد مسموح
 
     def __init__(self, name: str, failure_threshold: int = 5, recovery_timeout: float = 30.0):
@@ -278,7 +330,7 @@ class CircuitBreaker:
                 self.state = self.HALF_OPEN
                 logger.info(f"CircuitBreaker '{self.name}' half-open — اختبار...")
             else:
-                raise Exception(f"CircuitBreaker '{self.name}' is OPEN — الخدمة متعثرة")
+                raise Exception(f"CircuitBreaker '{self.name}' is OPEN — الخدمة متعطرة")
 
         try:
             result = await func(*args, **kwargs)

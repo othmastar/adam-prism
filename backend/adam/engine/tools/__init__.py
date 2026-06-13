@@ -140,8 +140,14 @@ class AdamPrismEngineTools(
             cat = classify_tool(tool_name)
             need = self.permission.needs_permission(cat)
             if need:
-                log_permission("blocked (deferred)", tool_name, cat,
-                               "يحتاج صلاحية (phase 1b not activated)", need, "deferred")
+                # [M3] Actually enforce permission — check if granted
+                granted = self.permission.is_granted(cat)
+                if not granted:
+                    log_permission("blocked", tool_name, cat,
+                                   "يحتاج صلاحية ولم يتم منحها", need, "blocked")
+                    return False, tool_name, params
+                log_permission("allowed (granted)", tool_name, cat,
+                               "صلاحية ممنوحة", need, "granted")
 
         if self.plugins:
             action_check = await self.plugins.run_before_tool({"type": tool_name, "params": params})

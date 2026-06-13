@@ -31,6 +31,23 @@ class ChatStore:
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self._init_db()
 
+    @staticmethod
+    def _escape_fts5(query: str) -> str:
+        """Escape FTS5 special characters from user input to prevent injection.
+        
+        FTS5 special characters: " * + - : ^ ( )
+        We wrap each token in double quotes after escaping internal quotes.
+        """
+        # Split into tokens, escape each, and rejoin with AND
+        tokens = query.strip().split()
+        escaped = []
+        for token in tokens:
+            # Escape any existing double-quote characters
+            safe = token.replace('"', '""')
+            # Wrap in double quotes to treat as literal phrase
+            escaped.append(f'"{safe}"')
+        return ' '.join(escaped) if escaped else '""'
+
     def _get_conn(self) -> sqlite3.Connection:
         conn = sqlite3.connect(str(self.db_path))
         conn.row_factory = sqlite3.Row
@@ -190,6 +207,7 @@ class ChatStore:
 
     def search_messages(self, query: str, limit: int = 20) -> List[Dict[str, Any]]:
         """البحث في محتوى الرسائل باستخدام FTS"""
+        safe_query = self._escape_fts5(query)
         with self._get_conn() as conn:
             rows = conn.execute(
                 """SELECT m.id, m.session_id, m.role, m.content, m.mode, m.metadata, m.timestamp
@@ -198,7 +216,7 @@ class ChatStore:
                    WHERE messages_fts MATCH ?
                    ORDER BY rank
                    LIMIT ?""",
-                (query, limit)
+                (safe_query, limit)
             ).fetchall()
             result = []
             for r in rows:

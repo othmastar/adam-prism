@@ -154,6 +154,7 @@ class EthicsGate:
 أجب بـ JSON فقط:
 {{"fairness": 0.0-1.0, "learning": 0.0-1.0, "survival": 0.0-1.0, "creativity": 0.0-1.0}}"""
 
+        client = None  # [M4] Initialize before try to avoid scope issues
         try:
             cache_key = self._eval_cache._key(response[:200], query[:100])
             cached = self._eval_cache.get(cache_key)
@@ -189,7 +190,8 @@ class EthicsGate:
             logger.warning(f"فشل التقييم الأخلاقي: {e}")
             return {"fairness": 0.5, "learning": 0.5, "survival": 0.5, "creativity": 0.5}
         finally:
-            if not self.shared_clients and 'client' in locals():
+            # [M4] Use client is not None instead of 'client' in locals()
+            if not self.shared_clients and client is not None:
                 await client.aclose()
 
     async def _correct_response(self, response: str, law: str) -> str:
@@ -208,6 +210,7 @@ class EthicsGate:
 
 أعطني الرد المصحح فقط."""
 
+        client = None  # [M4] Initialize before try to avoid scope issues
         try:
             if self.shared_clients:
                 client = await self.shared_clients.get("ollama", self.ollama_base, 60.0)
@@ -227,5 +230,6 @@ class EthicsGate:
         except Exception:
             return response
         finally:
-            if not self.shared_clients and 'client' in locals():
+            # [M4] Use client is not None instead of 'client' in locals()
+            if not self.shared_clients and client is not None:
                 await client.aclose()

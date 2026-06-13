@@ -366,9 +366,11 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
 
         await self._emit_step("التسجيل والحفظ", "running")
         if response_text != fallback_response and self.max_history > 0:
-            self.conversation_history.append({"role": "user", "content": user_message, "timestamp": datetime.now().isoformat()})
-            self.conversation_history.append({"role": "assistant", "content": response_text, "timestamp": datetime.now().isoformat()})
-            self._trim_conversation_history(self.max_history)
+            # [M5] Use history lock for thread-safe modifications
+            async with self._history_lock:
+                self.conversation_history.append({"role": "user", "content": user_message, "timestamp": datetime.now().isoformat()})
+                self.conversation_history.append({"role": "assistant", "content": response_text, "timestamp": datetime.now().isoformat()})
+                self._trim_conversation_history(self.max_history)
 
         if self.notebook:
             try:

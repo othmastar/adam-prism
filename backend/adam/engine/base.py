@@ -17,6 +17,7 @@ import time
 import uuid
 import logging
 import asyncio
+from collections import deque
 from datetime import datetime
 from typing import Optional, Dict, List, Any, Callable
 
@@ -95,10 +96,11 @@ class AdamPrismEngineBase:
         self.max_history = config.get("max_conversation_history", 50)
         self.active_mode = "teacher"  # الوضع الافتراضي
         self._watchdog_task = None
+        self._history_lock = asyncio.Lock()  # [M5] Thread-safe conversation history
 
         # نظام تتبع خطوات المعالجة
         self._step_listeners: List[Callable] = []
-        self._pipeline_log: List[Dict] = []
+        self._pipeline_log: deque = deque(maxlen=200)  # [M7] Replaced list with deque to prevent truncation race
         self._current_cycle_steps: List[Dict] = []
 
         # الأوضاع المعرفية السبعة (7 Cognitive Modes)
@@ -142,7 +144,7 @@ class AdamPrismEngineBase:
                 def _sync_noop(*a, **kw):
                     logger.debug(f"_Stub.{name}() تم الاستدعاء بصمت — يعيد None")
                     return None
-                return _async_noop if name.startswith(('_',)) else _sync_noop
+                return _sync_noop if name.startswith('__') else _async_noop
 
         async def _async_noop(*a, **kw): return None
         def _sync_noop(*a, **kw): return None
@@ -268,9 +270,7 @@ class AdamPrismEngineBase:
             "timestamp": datetime.now().isoformat()
         }
         self._current_cycle_steps.append(step_info)
-        self._pipeline_log.append(step_info)
-        if len(self._pipeline_log) > 200:
-            self._pipeline_log = self._pipeline_log[-200:]
+        self._pipeline_log.append(step_info)  # deque(maxlen=200) auto-evicts old entries
         for listener in self._step_listeners:
             try:
                 if asyncio.iscoroutinefunction(listener):
@@ -282,7 +282,7 @@ class AdamPrismEngineBase:
 
     def get_pipeline_log(self, limit: int = 50) -> List[Dict]:
         """آخر سجل لخطوات المعالجة"""
-        return self._pipeline_log[-limit:]
+        return list(self._pipeline_log)[-limit:]  # [M7] deque → list for slicing
 
     async def start_watchdog(self, interval: int = 60):
         """خلفية مراقبة صحة جميع الموديولات وإعادة تشغيلها تلقائياً"""

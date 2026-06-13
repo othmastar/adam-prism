@@ -1,14 +1,16 @@
 """
-Adam Prism — Subagent Session — HARDENED v2
+Adam Prism — Subagent Session — HARDENED v3
 ==============================================
 جلسة وكيل فرعي معزولة — كل subagent ليه history وشخصية خاصة.
 
 [SECURITY FIXES v2]
-1. منع تفعيل الأدوات للوكلاء الفرعيين — always False
-2. تحديد طول system_prompt — منع prompt injection
-3. تحديد طول الرسالة — منع إرسال رسائل ضخمة
-4. تسجيل كل المحادثات للمراجعة
-5. [NEW] كشف أنماط prompt injection في رسائل الوكلاء الفرعيين
+1. تحديد طول system_prompt — منع prompt injection
+2. تحديد طول الرسالة — منع إرسال رسائل ضخمة
+3. تسجيل كل المحادثات للمراجعة
+4. [NEW] كشف أنماط prompt injection في رسائل الوكلاء الفرعيين
+
+[M19 FIX v3]
+5. Allow controlled tool access via tools_enabled parameter with restricted toolset
 """
 
 import re
@@ -27,6 +29,13 @@ _SUBAGENT_DANGEROUS_PATTERNS = [
     re.compile(r'(?i)(execute|run|eval|exec)\s*(\(.*\)|\{.*\})'),
     re.compile(r'(?i)(import\s+os|import\s+subprocess|__import__|os\.system|subprocess\.)'),
 ]
+
+# [M19] Restricted toolset allowed for subagents — safe, read-only tools only
+_SUBAGENT_ALLOWED_TOOLS = frozenset({
+    "search_knowledge", "file_read", "disk_space",
+    "memory_recall", "memory_reflect", "check_preferences",
+    "screen_info", "browser_read",
+})
 
 
 class SubagentSession:
@@ -66,10 +75,24 @@ class SubagentSession:
         self.temperature = self.config.get("temperature", 0.7)
         self.max_tokens = min(self.config.get("max_tokens", 1024), 2048)  # حد أقصى
 
-        # الأدوات دايماً متعطلة للوكلاء الفرعيين — أمن أهم
-        self.tools_enabled = False
-        if self.config.get("tools_enabled", False):
-            logger.warning(f"Subagent '{name}': tools_enabled=True تم تجاهله — الأدوات مش متاحة للوكلاء الفرعيين")
+        # [M19] Allow controlled tool access with restricted toolset
+        # tools_enabled can be True, False, or a list of allowed tool names
+        raw_tools = self.config.get("tools_enabled", False)
+        if raw_tools is True:
+            self.tools_enabled = True
+            self.allowed_tools = _SUBAGENT_ALLOWED_TOOLS
+            logger.info(f"Subagent '{name}': tools enabled with restricted toolset")
+        elif isinstance(raw_tools, (list, set, frozenset)):
+            # Only allow tools that are in the safe set
+            self.allowed_tools = frozenset(raw_tools) & _SUBAGENT_ALLOWED_TOOLS
+            self.tools_enabled = len(self.allowed_tools) > 0
+            if self.tools_enabled:
+                logger.info(f"Subagent '{name}': tools enabled with {len(self.allowed_tools)} allowed tools")
+            else:
+                logger.warning(f"Subagent '{name}': requested tools not in allowed set — no tools enabled")
+        else:
+            self.tools_enabled = False
+            self.allowed_tools = frozenset()
 
     async def chat(self, message: str) -> Dict[str, Any]:
         """إرسال رسالة للوكيل الفرعي واستقبال الرد"""
@@ -137,5 +160,6 @@ class SubagentSession:
             "temperature": self.temperature,
             "max_tokens": self.max_tokens,
             "tools_enabled": self.tools_enabled,
-            "blocked_count": self._blocked_count,  # [NEW]
+            "allowed_tools": list(self.allowed_tools) if self.tools_enabled else [],  # [M19]
+            "blocked_count": self._blocked_count,
         }

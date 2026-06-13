@@ -62,8 +62,9 @@ class MemorySystem:
         return getattr(self, attr)
 
     async def _close_client(self, client):
-        if not self.shared_clients:
-            pass
+        if not self.shared_clients and client is not None:
+            if hasattr(client, 'aclose') and not client.is_closed:
+                await client.aclose()
 
     async def initialize(self):
         """تهيئة المجموعات في Qdrant"""
