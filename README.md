@@ -13,9 +13,9 @@
 **The Conscious Digital Twin — The First Protocol That Speaks Your Language and Runs on Your Machine**
 
 <p>
-  <img src="https://img.shields.io/badge/مجاني-للأبد-10b981?style=for-the-badge" alt="Free Forever">
-  <img src="https://img.shields.io/badge/مفتوح_المصدر-Apache_2.0-blue?style=for-the-badge" alt="Apache 2.0">
-  <img src="https://img.shields.io/badge/يعمل_محليا-100%25-10b981?style=for-the-badge" alt="100% Local">
+  <img src="https://img.shields.io/badge/Free-Forever-10b981?style=for-the-badge" alt="Free Forever">
+  <img src="https://img.shields.io/badge/Open_Source-Apache_2.0-blue?style=for-the-badge" alt="Apache 2.0">
+  <img src="https://img.shields.io/badge/Runs_Locally-100%25-10b981?style=for-the-badge" alt="100% Local">
 </p>
 
 <p>
@@ -181,24 +181,34 @@ WhatsApp, Telegram, Discord, Slack, Email, SMS, Signal, Matrix, Mattermost, Team
 
 ## 🏗️ Honest Comparison
 
-LangGraph excels at stateful workflows. CrewAI is the fastest path to a prototype. AutoGen is extremely flexible from Microsoft. **We respect all of them.**
+### vs Traditional Frameworks
 
-**But:** They all leave you to complete the rest on your own.
+| | Adam Prism | LangGraph | CrewAI | Claude Code |
+|---|---|---|---|---|
+| **Memory** | 4-layer Iron: Hot (MEMORY.md) + FTS5 + Qdrant Vector + Skills Curator | Separate library | Limited | JSONL |
+| **Channels** | 25 built-in | ❌ | ❌ | ❌ |
+| **Security** | 3-layer guard + AST sandbox + SSRF | DIY | DIY | 6 patterns |
+| **Ethics** | 4 laws built-in | ❌ | ❌ | Safety rails |
+| **Learning Loop** | Closed Loop: nudge + skill create + improve | ❌ | ❌ | ❌ |
+| **Customizability** | 12 independent layers | Rigid graph | Limited roles | Black box |
+| **Voice** | ASR + TTS built-in | ❌ | ❌ | ❌ |
+| **100% Local** | ✅ | Partial | Partial | ❌ |
+| **Open Source** | Apache 2.0 | MIT | MIT | Closed |
+| **Apps** | Flutter + Electron + Web UI + VS Code | ❌ | ❌ | ❌ |
 
-| | Adam Prism | LangGraph | CrewAI | Claude Code | Hermes Agent | OpenClaw |
-|---|---|---|---|---|---|---|---|
-| **Language** | Python | Python | Python | TypeScript | Python | TypeScript |
-| **Installation** | `pip install` | pip + LangSmith | pip | npm + API key | `curl \| bash` | `npm install -g` |
-| **Memory** | 4-layer Iron: Hot (MEMORY.md) + FTS5 + Qdrant Vector + Skills Curator | Separate library | Limited | JSONL (3 GB issue) | MEMORY.md + FTS5 + Honcho + Closed Loop | MEMORY.md + SQLite/LanceDB + Dreaming |
-| **Channels** | 25 built-in | Zero | Zero | Zero | 6 (TG/Discord/Slack/WA/Signal/CLI) | 20+ built-in |
-| **Security** | 3-layer guard + AST sandbox + SSRF + fail-closed | DIY | DIY | 6 patterns | Cmd approval + container isolation | Docker sandbox + cmd approval |
-| **Ethics** | 4 laws built-in | None | None | Safety rails | None | None |
-| **Learning Loop** | Closed Loop: nudge + skill create + skill improve | None | None | None | Closed Loop: nudge + skill create + skill improve | Dreaming (background consolidation) |
-| **Customizability** | 12 layers, each independently disableable | Rigid graph | Limited roles | Black box | Skills + toolsets + MCP | Skills + plugins + hooks |
-| **Voice** | ASR + TTS built-in | None | None | None | CLI + TG + Discord VC | macOS/iOS wake + TTS |
-| **100% Local** | ✅ | Partial | Partial | ❌ | ✅ | ✅ |
-| **Open Source** | Apache 2.0 | MIT (limited) | MIT | Closed | MIT | MIT |
-| **Apps** | Flutter (Android/iOS) + Electron (Desktop) + Web UI + VS Code | ❌ | ❌ | ❌ | TUI only | macOS/Windows Hub + iOS/Android nodes |
+### vs Modern Open-Source Agents
+
+| | Adam Prism | Hermes Agent | OpenClaw |
+|---|---|---|---|
+| **Language** | Python | Python | TypeScript / Node.js |
+| **Memory** | 4-layer Iron: Hot + FTS5 + Qdrant Vector + Skills | MEMORY.md + FTS5 + Honcho + Closed Loop | MEMORY.md + SQLite/LanceDB + Dreaming |
+| **Channels** | 25 built-in | 6 (TG/Discord/Slack/WA/Signal/CLI) | 20+ built-in |
+| **Security** | 3-layer guard + AST sandbox + SSRF | Cmd approval + container isolation | Docker sandbox + cmd approval |
+| **Learning Loop** | Closed Loop: nudge + skill create + improve | Closed Loop: nudge + skill create + improve | Dreaming (background consolidation) |
+| **Voice** | ASR + TTS built-in | CLI + TG + Discord VC | macOS/iOS wake + TTS |
+| **100% Local** | ✅ | ✅ | ✅ |
+| **Open Source** | Apache 2.0 | MIT | MIT |
+| **Apps** | Flutter + Electron + Web UI + VS Code | TUI only | macOS/Windows Hub + iOS/Android nodes |
 
 ---
 
