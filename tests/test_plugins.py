@@ -96,6 +96,8 @@ async def test_unload():
 @pytest.mark.asyncio
 async def test_load_from_dir():
     import os, tempfile
+    # [C4] السماح بـ /tmp لاختبارات
+    os.environ["ADAM_PLUGIN_DIR"] = "/tmp"
     pm = PluginManager()
 
     # Create a temp plugin file

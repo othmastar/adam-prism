@@ -9,6 +9,7 @@ import base64
 import logging
 import re
 import time
+from collections import deque
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import Dict, Any, List, Optional, Set, Tuple
@@ -312,7 +313,7 @@ class ToolPermissionValidator:
 
     def __init__(self):
         self.session_counts: Dict[str, int] = {}
-        self.audit_log: List[Dict] = []
+        self.audit_log: deque = deque(maxlen=1000)  # [M7] Replaced list with deque to prevent truncation race
 
     async def validate(self, tool_name: str, params: Dict) -> SecurityVerdict:
         # 1. هل الأداة مسجلة؟
@@ -362,22 +363,23 @@ class ToolPermissionValidator:
 
     def _audit(self, tool_name: str, params: Dict, allowed: bool, reason: str):
         safe_params = {k: (v if len(str(v)) < 200 else str(v)[:200]) for k, v in params.items()}
-        self.audit_log.append({
+        self.audit_log.append({  # [M7] deque(maxlen=1000) auto-evicts old entries
             "tool": tool_name,
             "params": safe_params,
             "allowed": allowed,
             "reason": reason,
             "time": time.time(),
         })
-        if len(self.audit_log) > 1000:
-            self.audit_log = self.audit_log[-500:]
 
     def get_audit_log(self, limit: int = 50) -> List[Dict]:
-        return self.audit_log[-limit:]
+        return list(self.audit_log)[-limit:]  # [M7] deque → list for slicing
 
     def reset_session(self):
         self.session_counts.clear()
-        self.audit_log = self.audit_log[-100:]
+        # [M7] deque doesn't support slice assignment; clear and rebuild with last 100
+        old = list(self.audit_log)[-100:]
+        self.audit_log.clear()
+        self.audit_log.extend(old)
 
     def get_stats(self) -> Dict:
         total = len(self.audit_log)

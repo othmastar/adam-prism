@@ -1,7 +1,11 @@
 """
-Adam Prism — Telegram Channel Adapter
-======================================
+Adam Prism — Telegram Channel Adapter — HARDENED v2
+======================================================
 Long-polling عبر Telegram Bot API.
+
+[M20 FIX]
+- Create a persistent httpx.AsyncClient in __init__ and reuse it
+  instead of creating a new client per message
 """
 
 import logging
@@ -24,6 +28,16 @@ class TelegramChannel(BaseChannel):
         self.authorized_chat_ids = cfg.get("authorized_chat_ids", config.get("authorized_chat_ids", []))
         self.api_base = f"https://api.telegram.org/bot{self.bot_token}"
         self.last_update_id = 0
+        # [M20] Persistent HTTP client — reused for all requests
+        import httpx
+        self._http_client: httpx.AsyncClient | None = None
+
+    async def _get_client(self):
+        """[M20] Get or create the persistent HTTP client."""
+        import httpx
+        if self._http_client is None or self._http_client.is_closed:
+            self._http_client = httpx.AsyncClient(timeout=60.0)
+        return self._http_client
 
     async def start_polling(self):
         if not self.bot_token:
@@ -31,21 +45,20 @@ class TelegramChannel(BaseChannel):
             return
         self.running = True
         logger.info("📡 Telegram polling active")
-        import httpx
-        async with httpx.AsyncClient(timeout=60.0) as client:
-            while self.running:
-                try:
-                    resp = await client.get(
-                        f"{self.api_base}/getUpdates",
-                        params={"offset": self.last_update_id + 1, "timeout": 30},
-                    )
-                    for update in resp.json().get("result", []):
-                        self.last_update_id = update.get("update_id", 0)
-                        await self._process(update)
-                except Exception as e:
-                    logger.error(f"Telegram polling error: {e}")
-                    import asyncio
-                    await asyncio.sleep(5)
+        client = await self._get_client()  # [M20] Reuse persistent client
+        while self.running:
+            try:
+                resp = await client.get(
+                    f"{self.api_base}/getUpdates",
+                    params={"offset": self.last_update_id + 1, "timeout": 30},
+                )
+                for update in resp.json().get("result", []):
+                    self.last_update_id = update.get("update_id", 0)
+                    await self._process(update)
+            except Exception as e:
+                logger.error(f"Telegram polling error: {e}")
+                import asyncio
+                await asyncio.sleep(5)
 
     async def _process(self, update: Dict):
         msg = update.get("message", {})
@@ -68,16 +81,22 @@ class TelegramChannel(BaseChannel):
     async def send_message(self, target: str, text: str, parse_mode: str = "Markdown"):
         if not self.bot_token:
             return
-        import httpx
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            try:
-                for chunk in [text[i:i+4096] for i in range(0, len(text), 4096)]:
-                    await client.post(
-                        f"{self.api_base}/sendMessage",
-                        json={"chat_id": int(target), "text": chunk, "parse_mode": parse_mode},
-                    )
-            except Exception as e:
-                logger.error(f"Telegram send failed: {e}")
+        # [M20] Reuse persistent client instead of creating a new one per message
+        client = await self._get_client()
+        try:
+            for chunk in [text[i:i+4096] for i in range(0, len(text), 4096)]:
+                await client.post(
+                    f"{self.api_base}/sendMessage",
+                    json={"chat_id": int(target), "text": chunk, "parse_mode": parse_mode},
+                )
+        except Exception as e:
+            logger.error(f"Telegram send failed: {e}")
+
+    async def close(self):
+        """[M20] Properly close the persistent HTTP client."""
+        if self._http_client is not None and not self._http_client.is_closed:
+            await self._http_client.aclose()
+            self._http_client = None
 
     def stop(self):
         self.running = False

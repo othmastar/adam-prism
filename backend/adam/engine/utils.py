@@ -80,10 +80,12 @@ class AdamPrismEngineUtils(AdamPrismEngineBase):
                 return {"allowed": True, "reason": "no_security_module"}
             return result
         except asyncio.TimeoutError:
-            return {"allowed": True, "reason": "security_check_timeout"}
+            # [M2] Fail-closed: timeout must deny, not allow
+            return {"allowed": False, "reason": "security_check_timeout"}
         except Exception as e:
             logger.warning(f"Security check error: {e}")
-            return {"allowed": True, "reason": f"security_check_error:{e}"}
+            # [M2] Fail-closed: errors must deny, not allow
+            return {"allowed": False, "reason": f"security_check_error:{e}"}
 
     async def _generate_with_timeout(self, message: str, context: Dict, deadline: float) -> str:
         """توليد مع deadline مطلق للمسار بالكامل"""
@@ -237,7 +239,6 @@ class AdamPrismEngineUtils(AdamPrismEngineBase):
     async def _call_lora_server(self, messages: List[Dict]) -> str:
         """استدعاء LoRA server مع manual retry (async-safe)"""
         import logging as _log
-        import httpx
         start = time.time()
         last_exc = None
         messages = self._truncate_messages_for_lora(messages, max_chars=10000)
@@ -247,17 +248,17 @@ class AdamPrismEngineUtils(AdamPrismEngineBase):
                 sys_len = len(messages[0].get("content", "")) if messages else 0
                 user_msg = messages[-1].get("content", "") if len(messages) > 1 else ""
                 _log.getLogger("adam_prism.core").info(f"LoRA call: sys_{sys_len}c user='{user_msg}' (attempt {attempt})")
-                async with httpx.AsyncClient(timeout=httpx.Timeout(180.0)) as c:
-                    r = await c.post(
-                        f"{self.lora_server_url.rstrip('/')}/chat",
-                        json={"messages": messages}
-                    )
-                    r.raise_for_status()
-                    resp_text = r.json().get("response", "")
-                    _log.getLogger("adam_prism.core").info(f"LoRA resp: {len(resp_text)}c starts with '{resp_text[:150]}'")
-                    self.metrics.timing("ollama.chat", (time.time() - start) * 1000)
-                    self.metrics.inc("ollama.chat_calls")
-                    return resp_text
+                c = await self.shared_clients.get("lora", self.lora_server_url.rstrip('/'), timeout=180.0)
+                r = await c.post(
+                    "/chat",
+                    json={"messages": messages}
+                )
+                r.raise_for_status()
+                resp_text = r.json().get("response", "")
+                _log.getLogger("adam_prism.core").info(f"LoRA resp: {len(resp_text)}c starts with '{resp_text[:150]}'")
+                self.metrics.timing("ollama.chat", (time.time() - start) * 1000)
+                self.metrics.inc("ollama.chat_calls")
+                return resp_text
             except (httpx.TimeoutException, httpx.ConnectError, httpx.RemoteProtocolError,
                     ConnectionError, TimeoutError) as e:
                 last_exc = e

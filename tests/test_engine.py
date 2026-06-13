@@ -132,7 +132,7 @@ class TestEngineWithMocks:
         engine.security = MagicMock()
         engine.security.check = AsyncMock(side_effect=asyncio.TimeoutError)
         result = await engine._security_check_with_timeout("hello")
-        assert result["allowed"] is True
+        assert result["allowed"] is False
         assert "timeout" in result["reason"]
 
     @pytest.mark.asyncio

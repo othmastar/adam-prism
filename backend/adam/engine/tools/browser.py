@@ -147,3 +147,27 @@ class BrowserToolsMixin:
             return {"success": False, "error": str(e)}
 
         return {"success": False, "error": "أداة متصفح غير معروفة"}
+
+    async def _browser_cleanup(self):
+        """[M8] Properly close Playwright resources to prevent resource leaks."""
+        try:
+            if hasattr(self, '_pw_page') and self._pw_page is not None:
+                await self._pw_page.close()
+                self._pw_page = None
+        except Exception as e:
+            import logging
+            logging.getLogger("adam_prism.core").warning(f"Error closing browser page: {e}")
+        try:
+            if hasattr(self, '_pw_browser') and self._pw_browser is not None:
+                await self._pw_browser.close()
+                self._pw_browser = None
+        except Exception as e:
+            import logging
+            logging.getLogger("adam_prism.core").warning(f"Error closing browser: {e}")
+        try:
+            if hasattr(self, '_pw_playwright') and self._pw_playwright is not None:
+                await self._pw_playwright.stop()
+                self._pw_playwright = None
+        except Exception as e:
+            import logging
+            logging.getLogger("adam_prism.core").warning(f"Error stopping playwright: {e}")

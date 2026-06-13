@@ -2,6 +2,7 @@
 Adam Prism — Anthropic (Claude) Provider
 """
 
+import json
 import os
 import httpx
 import logging
@@ -107,7 +108,7 @@ class AnthropicProvider(BaseProvider):
                                 break
                             if data:
                                 try:
-                                    chunk = __import__("json").loads(data)
+                                    chunk = json.loads(data)
                                     if chunk.get("type") == "content_block_delta":
                                         delta = chunk.get("delta", {})
                                         if delta.get("type") == "text_delta":

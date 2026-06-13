@@ -118,7 +118,9 @@ def _qdrant_client(engine):
 # ═══════════════════════════════════════════════════════
 
 class RateLimiter:
-    """Rate limiter بسيط في الذاكرة — لكل IP"""
+    """Rate limiter بسيط في الذاكرة — لكل IP — [M6] with periodic cleanup and max size"""
+
+    MAX_ENTRIES = 10000  # [M6] Prevent unbounded memory growth
 
     def __init__(self, max_requests: int = 60, window_seconds: int = 60):
         self.max_requests = max_requests
@@ -129,12 +131,14 @@ class RateLimiter:
         now = time.time()
         if key not in self._requests:
             self._requests[key] = [now]
+            self._cleanup(now)
             return True
         # حذف الطلبات القديمة
         self._requests[key] = [t for t in self._requests[key] if now - t < self.window_seconds]
         if len(self._requests[key]) >= self.max_requests:
             return False
         self._requests[key].append(now)
+        self._cleanup(now)
         return True
 
     def get_remaining(self, key: str) -> int:
@@ -143,6 +147,23 @@ class RateLimiter:
             return self.max_requests
         self._requests[key] = [t for t in self._requests[key] if now - t < self.window_seconds]
         return max(0, self.max_requests - len(self._requests[key]))
+
+    def _cleanup(self, now: float):
+        """[M6] Remove stale entries older than the rate window and cap dict size."""
+        stale_keys = [
+            k for k, timestamps in self._requests.items()
+            if not timestamps or now - timestamps[-1] > self.window_seconds
+        ]
+        for k in stale_keys:
+            del self._requests[k]
+        # If still over limit, evict oldest entries
+        if len(self._requests) > self.MAX_ENTRIES:
+            sorted_keys = sorted(
+                self._requests,
+                key=lambda k: self._requests[k][-1] if self._requests[k] else 0
+            )
+            for k in sorted_keys[:len(self._requests) - self.MAX_ENTRIES]:
+                del self._requests[k]
 
 
 # ═══════════════════════════════════════
@@ -160,13 +181,38 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
     # [FIX] المصادقة — تفعيلها أولاً قبل أي مسارات
     # ═══════════════════════════════════════════════════════
     import hmac as _hmac
+    import secrets as _secrets
     _api_key = os.environ.get("ADAM_API_KEY", "adam-prism-change-me")
 
     # [FIX v2] مفتاح المسؤول — لإضافة خوادم MCP وعمليات حساسة
     _admin_key = os.environ.get("ADAM_ADMIN_KEY", "")
 
-    # [FIX] في وضع الإنتاج، نرفض المفتاح الافتراضي
+    # [FIX v3] في وضع الإنتاج، نرفض المفتاح الافتراضي
     _is_production = os.environ.get("ADAM_PRODUCTION", "0") == "1" or os.environ.get("ADAM_ENV", "") == "production"
+
+    # [FIX H7] Generate a random API key on first startup if the default key is detected
+    _data_dir = os.environ.get("ADAM_DATA_DIR", os.path.join(os.path.expanduser("~"), ".adam_prism"))
+    _api_key_file = os.path.join(_data_dir, ".api_key")
+    if _api_key == "adam-prism-change-me":
+        if os.path.isfile(_api_key_file):
+            # Reuse previously generated key
+            with open(_api_key_file, "r") as f:
+                _api_key = f.read().strip()
+        else:
+            # Generate a new random key and persist it
+            os.makedirs(_data_dir, exist_ok=True)
+            _api_key = f"adam-{_secrets.token_hex(24)}"
+            with open(_api_key_file, "w") as f:
+                f.write(_api_key)
+            # Restrict file permissions to owner-only
+            os.chmod(_api_key_file, 0o600)
+            logger.warning("=" * 60)
+            logger.warning("SECURITY: Default API key detected — a random key has been generated!")
+            logger.warning(f"Generated API Key: {_api_key}")
+            logger.warning(f"Key saved to: {_api_key_file}")
+            logger.warning("Set ADAM_API_KEY environment variable to override.")
+            logger.warning("=" * 60)
+
     if _is_production and _api_key == "adam-prism-change-me":
         raise RuntimeError(
             "SECURITY: ADAM_API_KEY not set in production mode! "
@@ -180,7 +226,7 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
             "Set an admin key via environment variable ADAM_ADMIN_KEY before starting."
         )
 
-    if _api_key == "adam-prism-change-me":
+    if _api_key == "adam-prism-change-me" and not os.path.isfile(os.path.join(os.environ.get("ADAM_DATA_DIR", os.path.join(os.path.expanduser("~"), ".adam_prism")), ".api_key")):
         logger.warning("=" * 60)
         logger.warning("ADAM_API_KEY not set — using default key!")
         logger.warning("Anyone can access your API with the default key!")
@@ -956,6 +1002,10 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
         path = req.get("path", "")
         if not path:
             raise HTTPException(status_code=400, detail="path مطلوب")
+        # [C4] Validate plugin path before loading
+        from adam.plugins.manager import _validate_plugin_path
+        if not _validate_plugin_path(path):
+            raise HTTPException(status_code=403, detail="مسار الإضافة غير مصرح به — يجب أن يكون داخل المجلد المسموح")
         engine.plugins.load_from_dir(path)
         return {"status": "ok", "plugins": engine.plugins.list_plugins()}
 

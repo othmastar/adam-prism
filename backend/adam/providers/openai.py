@@ -2,6 +2,7 @@
 Adam Prism — OpenAI Provider (also OpenRouter, Groq, etc.)
 """
 
+import json
 import os
 import httpx
 import logging
@@ -74,7 +75,7 @@ class OpenAIProvider(BaseProvider):
                                 break
                             if data:
                                 try:
-                                    chunk = __import__("json").loads(data)
+                                    chunk = json.loads(data)
                                     delta = chunk.get("choices", [{}])[0].get("delta", {})
                                     content = delta.get("content", "")
                                     if content:

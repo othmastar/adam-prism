@@ -102,6 +102,38 @@ def default_level(category: str) -> str:
     return PERMISSION_CATEGORIES.get(category, {}).get("default", "always-ask")
 
 
+# [FIX H11] Map categories to risk levels
+def get_risk_level(category: str) -> str:
+    """Map a permission category to a risk level string.
+    
+    Risk levels: critical, high, medium, low
+    """
+    _RISK_MAP = {
+        "shell.dangerous": "critical",
+        "python": "high",
+        "file": "high",
+        "file.write": "high",
+        "file.write.system": "critical",
+        "file.delete": "critical",
+        "browser": "medium",
+        "mouse": "high",
+        "keyboard": "high",
+        "clipboard": "medium",
+        "screen": "medium",
+        "window": "medium",
+        "knowledge": "low",
+        "memory": "low",
+        "notebook": "low",
+        "shell.read": "low",
+        "shell.write": "medium",
+        "file.read": "low",
+        "mcp": "high",
+        "subagent": "medium",
+        "workflow": "medium",
+    }
+    return _RISK_MAP.get(category, "high")
+
+
 class PermissionState:
     """تتبع حالة الصلاحيات لكل جلسة"""
 
