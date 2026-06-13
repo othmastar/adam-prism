@@ -100,14 +100,14 @@ class DecisionSimulator:
             try:
                 self._decision_history = json.loads(history_path.read_text(encoding="utf-8"))
             except Exception as e:
-                logger.warning(f"فشل تحميل سجل القرارات: {e}")
+                logger.warning(f"تعذر تحميل سجل القرارات: {e}")
         
         patterns_path = self.data_path / "patterns.json"
         if patterns_path.exists():
             try:
                 self._user_patterns = json.loads(patterns_path.read_text(encoding="utf-8"))
             except Exception as e:
-                logger.warning(f"فشل تحميل أنماط القرار: {e}")
+                logger.warning(f"تعذر تحميل أنماط القرار: {e}")
     
     def _save_history(self):
         """حفظ سجل القرارات"""

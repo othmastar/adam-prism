@@ -167,7 +167,7 @@ class AdamNotebook:
                     data = json.load(fh)
                     profile[section] = data
             except (json.JSONDecodeError, Exception) as e:
-                logger.warning(f"فشل قراءة {f}: {e}")
+                logger.warning(f"تعذر قراءة {f}: {e}")
         
         return profile
 

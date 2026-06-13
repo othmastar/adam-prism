@@ -225,8 +225,8 @@ class LiveSummarizer:
             )
             return response.json().get("response", "")
         except Exception as e:
-            logger.error(f"فشل تلخيص الجزء {chunk_index}: {e}")
-            return f"[فشل التلخيص: {str(e)[:100]}]"
+            logger.error(f"تعذر تلخيص الجزء {chunk_index}: {e}")
+            return f"[تعذر التلخيص: {str(e)[:100]}]"
         finally:
             if not self.shared_clients and 'client' in dir() and client:
                 await client.aclose()
@@ -331,7 +331,7 @@ class LiveSummarizer:
             )
             return response.json().get("response", "")
         except Exception as e:
-            return f"[فشل إنشاء الملخص الشامل: {e}]"
+            return f"[تعذر إنشاء الملخص الشامل: {e}]"
         finally:
             if not self.shared_clients and 'client' in dir() and client:
                 await client.aclose()

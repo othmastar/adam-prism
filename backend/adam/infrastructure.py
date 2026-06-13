@@ -145,7 +145,7 @@ class TTLCache:
 
 
 # ═══════════════════════════════════════
-# 3. Retry Decorator — إعادة المحاولة عند الفشل
+# 3. Retry Decorator — إعادة المحاولة عند التعذر
 # ═══════════════════════════════════════
 
 def retry(max_attempts: int = 3, base_delay: float = 0.5, max_delay: float = 10.0,
@@ -297,7 +297,7 @@ def validate_input(text: str, max_length: int = 10000, field_name: str = "input"
 # ═══════════════════════════════════════
 
 class CircuitBreaker:
-    """قاطع الدائرة — يمنع استدعاء خدمة بعد عدد معين من الفشل"""
+    """قاطع الدائرة — يمنع استدعاء خدمة بعد عدد معين من التعذر"""
 
     CLOSED = "closed"    # الخدمة سليمة
     OPEN = "open"        # الخدمة متعثرة — ممنوع المرور
@@ -343,7 +343,7 @@ class CircuitBreaker:
         self.last_failure_time = time.time()
         if self.failure_count >= self.failure_threshold:
             self.state = self.OPEN
-            logger.warning(f"CircuitBreaker '{self.name}' OPEN — تعطلت الخدمة ({self.failure_count} فشل)")
+            logger.warning(f"CircuitBreaker '{self.name}' OPEN — تعطلت الخدمة ({self.failure_count} تعذر)")
 
     def stats(self) -> Dict:
         return {
@@ -403,7 +403,7 @@ class ModelSwapper:
                         current["loaded"] = False
                         logger.info(f"ModelSwapper: {self._current_model} مُفرغ")
                     except Exception as e:
-                        logger.error(f"فشل تفريغ {self._current_model}: {e}")
+                        logger.error(f"تعذر تفريغ {self._current_model}: {e}")
 
             # تحميل الموديل الجديد
             target = self._models[model_id]
@@ -413,7 +413,7 @@ class ModelSwapper:
                     target["loaded"] = True
                     logger.info(f"ModelSwapper: {model_id} محمّل")
                 except Exception as e:
-                    logger.error(f"فشل تحميل {model_id}: {e}")
+                    logger.error(f"تعذر تحميل {model_id}: {e}")
                     self._current_model = None
                     return False
 
@@ -434,8 +434,8 @@ class ModelSwapper:
                 try:
                     await current["unload_fn"]()
                     current["loaded"] = False
-                except Exception as e:
-                    logger.error(f"فشل تفريغ {self._current_model}: {e}")
+                    except Exception as e:
+                        logger.error(f"تعذر تفريغ {self._current_model}: {e}")
             self._current_model = None
             logger.info("ModelSwapper: VRAM فارغ")
 

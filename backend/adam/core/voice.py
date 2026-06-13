@@ -109,7 +109,7 @@ class SileroVAD:
             logger.info("Silero VAD جاهز على CPU")
             return True
         except Exception as e:
-            logger.warning(f"فشل تحميل Silero VAD: {e}")
+            logger.warning(f"تعذر تحميل Silero VAD: {e}")
             self._available = False
             return False
 
@@ -223,7 +223,7 @@ class FasterWhisperASR:
             logger.info(f"faster-whisper {self._model_size} جاهز على {self._device}")
             return True
         except Exception as e:
-            logger.warning(f"فشل تحميل faster-whisper: {e}")
+            logger.warning(f"تعذر تحميل faster-whisper: {e}")
             self._available = False
             return False
 
@@ -272,7 +272,7 @@ class FasterWhisperASR:
                 is_final=True,
             )
         except Exception as e:
-            logger.error(f"فشل النسخ الصوتي: {e}")
+            logger.error(f"تعذر النسخ الصوتي: {e}")
             return TranscriptionResult(
                 text="", language="ar", duration_seconds=0.0,
                 segments=[], is_final=False,
@@ -403,7 +403,7 @@ class EdgeTTS:
                 text=text,
             )
         except Exception as e:
-            logger.error(f"EdgeTTS فشل: {e}")
+            logger.error(f"EdgeTTS تعذر: {e}")
             return SynthesisResult(audio=b"", text=text)
 
     def unload(self):
@@ -469,7 +469,7 @@ class LahgtnaTTS:
             logger.info(f"LahgtnaTTS جاهز — لهجة: {self._dialect} ({self.DIALECTS.get(self._dialect, {}).get('name', '')})")
             return True
         except Exception as e:
-            logger.warning(f"LahgtnaTTS فشل تحميل: {e}")
+            logger.warning(f"LahgtnaTTS تعذر تحميل: {e}")
             self._available = False
             return False
 
@@ -511,7 +511,7 @@ class LahgtnaTTS:
                 duration_seconds=duration, text=text,
             )
         except Exception as e:
-            logger.error(f"LahgtnaTTS فشل: {e}")
+            logger.error(f"LahgtnaTTS تعذر: {e}")
             return SynthesisResult(audio=b"", text=text)
 
     def unload(self):
@@ -648,7 +648,7 @@ class VoicePipeline:
                 audio = np.frombuffer(raw, dtype=np.int16).astype(np.float32) / 32767.0
                 return np.clip(audio, -1.0, 1.0), seg.frame_rate
             except Exception as e:
-                logger.warning(f"فشل فك WebM: {e}")
+                logger.warning(f"تعذر فك WebM: {e}")
         # افتراضي: PCM int16 raw
         audio = int16_to_float32(audio_data)
         return audio, self.TARGET_SAMPLE_RATE

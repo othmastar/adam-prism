@@ -42,7 +42,7 @@ class AdamPrismEngineGenerate(AdamPrismEngineContext):
             parsed = json.loads(result.strip().replace("```json", "").replace("```", ""))
             return parsed
         except (json.JSONDecodeError, Exception) as e:
-            logger.warning(f"فشل تصنيف القصد: {e}")
+            logger.warning(f"تعذر تصنيف القصد: {e}")
             return {"mode": "teacher", "intent_type": "general", "confidence": 0.5, "topics": []}
 
     async def _generate(self, message: str, context: Dict[str, Any]) -> str:

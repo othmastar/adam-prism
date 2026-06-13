@@ -60,7 +60,7 @@ class ProviderManager:
         return list(self._providers.keys())
 
     async def chat(self, messages: List[Dict], **kwargs) -> str:
-        """يحاول مع الـ provider الحالي، لو فشل يجرب الباقي (auto-fallback)"""
+        """يحاول مع الـ provider الحالي، لو تعذر يجرب الباقي (auto-fallback)"""
         errors = []
 
         # Try current mode first

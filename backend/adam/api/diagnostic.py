@@ -1,326 +1,229 @@
 """
-Adam Prism — Diagnostic API Router
-====================================
-مسار API للتشخيص ولوحة المعلومات والمراقبة.
+Adam Prism — Diagnostic & Orchestrator API Endpoints
+======================================================
+نقاط تشخيص وتنسيق إضافية لـ API server.
+يتم دمجها في server.py عبر include_router.
 
-FastAPI router providing diagnostic endpoints for system health,
-event bus stats, task queue stats, smart routing, and workflow execution.
-
-نقاط النهاية / Endpoints:
-  - GET  /api/orchestrator/diagnostic     → تشخيص شامل — Full diagnostics
-  - GET  /api/orchestrator/dashboard       → بيانات لوحة المعلومات — Dashboard data
-  - GET  /api/orchestrator/health/{module} → صحة موديول — Module health
-  - GET  /api/orchestrator/events/stats    → إحصائيات ناقل الأحداث — Event bus stats
-  - GET  /api/orchestrator/tasks/stats     → إحصائيات طابور المهام — Task queue stats
-  - POST /api/orchestrator/route           → توجيه ذكي — Smart route a request
-  - POST /api/orchestrator/workflow        → تنفيذ سير عمل — Execute a workflow
+Features:
+1. System diagnostic endpoint
+2. Master Orchestrator dashboard
+3. Event bus stats
+4. Task queue management
+5. Module health check
 """
 
-from __future__ import annotations
-
 import logging
-from typing import Any, Dict, Optional
+from typing import Dict, Any, Optional
 
 from fastapi import APIRouter, HTTPException, Request
-from pydantic import BaseModel, Field
 
 logger = logging.getLogger("adam_prism.api.diagnostic")
 
-
-# ═══════════════════════════════════════════════════════════════
-# نماذج الطلب/الاستجابة / Request/Response Models
-# ═══════════════════════════════════════════════════════════════
-
-class RouteRequest(BaseModel):
-    """
-    طلب توجيه — Smart routing request.
-    """
-    request_type: str = Field(
-        ...,
-        description="نوع الطلب — Request type (CHAT, CODE_GENERATION, RESEARCH, ANALYSIS, TOOL_EXECUTION, WORKFLOW, SYSTEM)",
-        examples=["CHAT"],
-    )
-    data: Dict[str, Any] = Field(
-        default_factory=dict,
-        description="بيانات الطلب — Request data",
-    )
+router = APIRouter(prefix="/api/orchestrator", tags=["orchestrator"])
 
 
-class WorkflowRequest(BaseModel):
-    """
-    طلب سير عمل — Workflow execution request.
-    """
-    name: str = Field(
-        ...,
-        description="اسم سير العمل — Workflow name",
-        examples=["research_and_summarize"],
-    )
-    steps: list = Field(
-        ...,
-        description="خطوات سير العمل — Workflow steps",
-        examples=[[{"name": "search", "module": "memory", "action": "search"}]],
-    )
-    stop_on_failure: bool = Field(
-        default=True,
-        description="إيقاف عند الفشل — Stop on first failure",
-    )
+@router.get("/diagnostic")
+async def run_diagnostic(request: Request):
+    """تشخيص كامل للنظام — يفحص كل مكون ويقدم توصيات"""
+    engine = request.app.state.engine if hasattr(request.app.state, "engine") else None
+    if not engine:
+        raise HTTPException(status_code=503, detail="Engine not attached")
 
+    diagnosis = {
+        "timestamp": _now(),
+        "overall_health": "unknown",
+        "modules": {},
+        "issues": [],
+        "recommendations": [],
+    }
 
-class DiagnosticResponse(BaseModel):
-    """
-    استجابة التشخيص — Diagnostic response.
-    """
-    status: str = "ok"
-    data: Dict[str, Any] = Field(default_factory=dict)
+    healthy_count = 0
+    total_count = 0
+    critical_modules = ["security_guard", "security", "provider", "knowledge"]
 
+    module_list = [
+        ("memory", engine.memory),
+        ("ethics", engine.ethics),
+        ("security", engine.security),
+        ("notebook", engine.notebook),
+        ("knowledge", engine.knowledge),
+        ("eyes", engine.eyes),
+        ("tools", engine.tools),
+        ("pipeline", engine.pipeline),
+        ("trace_recorder", engine.trace_recorder),
+        ("scheduler", engine.scheduler),
+        ("plugins", engine.plugins),
+        ("subagents", engine.subagents),
+        ("security_guard", engine.security_guard),
+        ("continuous_learner", engine.continuous_learner),
+    ]
 
-# ═══════════════════════════════════════════════════════════════
-# Router Creation
-# ═══════════════════════════════════════════════════════════════
+    for name, module in module_list:
+        total_count += 1
+        is_healthy = module is not None
+        is_stub = is_healthy and hasattr(module, '_methods')  # _Stub detection
 
-def create_diagnostic_router(engine: Any = None) -> APIRouter:
-    """
-    إنشاء مسار التشخيص — Create the diagnostic API router.
+        module_diag = {
+            "attached": is_healthy,
+            "is_stub": is_stub,
+            "health": "healthy" if (is_healthy and not is_stub) else ("degraded" if is_stub else "offline"),
+        }
 
-    Args / المعاملات:
-        engine: مرجع المحرك الرئيسي — Reference to the main engine
+        if is_healthy and not is_stub:
+            healthy_count += 1
+        elif is_stub:
+            diagnosis["issues"].append(f"Module '{name}' is running as stub (degraded)")
+        else:
+            diagnosis["issues"].append(f"Module '{name}' is offline")
 
-    Returns / المخرجات:
-        مسار FastAPI — FastAPI APIRouter
-    """
-    router = APIRouter(
-        prefix="/api/orchestrator",
-        tags=["orchestrator", "diagnostics"],
-    )
+        if name in critical_modules and not is_healthy:
+            diagnosis["recommendations"].append(f"CRITICAL: Initialize '{name}' module immediately")
 
-    def _get_master() -> Any:
-        """
-        الحصول على المنسق من المحرك — Get MasterOrchestrator from engine.
-        """
-        if engine is None:
-            raise HTTPException(status_code=503, detail="Engine not available")
-        master = getattr(engine, "orchestrator", None) or getattr(engine, "master", None)
-        if master is None:
-            raise HTTPException(status_code=503, detail="Orchestrator not initialized")
-        return master
+        diagnosis["modules"][name] = module_diag
 
-    # ─────────────────────────────────────────────
-    # تشخيص شامل / Full Diagnostics
-    # ─────────────────────────────────────────────
+    # Overall health
+    if total_count > 0:
+        health_ratio = healthy_count / total_count
+        if health_ratio >= 0.8:
+            diagnosis["overall_health"] = "healthy"
+        elif health_ratio >= 0.5:
+            diagnosis["overall_health"] = "degraded"
+        else:
+            diagnosis["overall_health"] = "critical"
 
-    @router.get(
-        "/diagnostic",
-        response_model=DiagnosticResponse,
-        summary="تشخيص شامل للنظام — Full system diagnostic",
-        description="يعيد تشخيصاً شاملاً يشمل صحة الموديولات وناقل الأحداث وطابور المهام.",
-    )
-    async def get_diagnostic() -> DiagnosticResponse:
-        """
-        تشخيص شامل — Get comprehensive system diagnostics.
-        """
+    # Provider health
+    if engine.provider:
         try:
-            master = _get_master()
-            diagnostics = await master.get_diagnostics()
-            return DiagnosticResponse(status="ok", data=diagnostics)
-        except HTTPException:
-            raise
-        except Exception as exc:
-            logger.error("Diagnostic failed: %s", exc, exc_info=True)
-            return DiagnosticResponse(
-                status="error",
-                data={"error": str(exc)},
-            )
-
-    # ─────────────────────────────────────────────
-    # لوحة المعلومات / Dashboard
-    # ─────────────────────────────────────────────
-
-    @router.get(
-        "/dashboard",
-        summary="بيانات لوحة المعلومات — Dashboard data",
-        description="بيانات مختصرة للوحة المعلومات تشمل صحة النظام والإحصائيات.",
-    )
-    async def get_dashboard() -> Dict[str, Any]:
-        """
-        بيانات لوحة المعلومات — Get dashboard summary data.
-        """
-        try:
-            master = _get_master()
-            health = await master.check_health()
-            event_stats = await master.event_bus.get_stats()
-            task_stats = await master.task_queue.get_stats()
-
-            return {
-                "status": "healthy" if health.get("overall_healthy") else "degraded",
-                "health": {
-                    "overall": health.get("overall_healthy", False),
-                    "modules": {
-                        name: info["healthy"]
-                        for name, info in health.get("modules", {}).items()
-                    },
-                },
-                "events": {
-                    "published": event_stats.get("total_published", 0),
-                    "delivered": event_stats.get("total_delivered", 0),
-                    "failed": event_stats.get("total_failed", 0),
-                    "subscribers": event_stats.get("subscriber_count", 0),
-                },
-                "tasks": {
-                    "pending": task_stats.get("pending", 0),
-                    "running": task_stats.get("running", 0),
-                    "completed": task_stats.get("completed", 0),
-                    "failed": task_stats.get("failed", 0),
-                },
-                "circuit_breakers": {
-                    name: info.get("open", False)
-                    for name, info in (await master.get_diagnostics()).get("master_orchestrator", {}).get("circuit_breakers", {}).items()
-                },
+            provider_mode = engine.provider.mode
+            diagnosis["provider"] = {
+                "mode": provider_mode,
+                "healthy": True,
             }
-        except HTTPException:
-            raise
-        except Exception as exc:
-            logger.error("Dashboard failed: %s", exc, exc_info=True)
-            return {"status": "error", "error": str(exc)}
+        except Exception as e:
+            diagnosis["provider"] = {"healthy": False, "error": str(e)}
 
-    # ─────────────────────────────────────────────
-    # صحة موديول / Module Health
-    # ─────────────────────────────────────────────
+    # Metrics
+    if engine.metrics:
+        diagnosis["metrics"] = engine.metrics.dump()
 
-    @router.get(
-        "/health/{module_name}",
-        summary="صحة موديول محدد — Module health check",
-        description="يعيد حالة صحة موديول محدد.",
-    )
-    async def get_module_health(module_name: str) -> Dict[str, Any]:
-        """
-        صحة موديول محدد — Get health for a specific module.
-        """
+    return diagnosis
+
+
+@router.get("/dashboard")
+async def orchestrator_dashboard(request: Request):
+    """لوحة تحكم Master Orchestrator"""
+    orchestrator = getattr(request.app.state, "orchestrator", None)
+    if not orchestrator:
+        return {
+            "status": "orchestrator_not_initialized",
+            "message": "Master Orchestrator is not running. Start it to enable advanced coordination."
+        }
+    return orchestrator.get_dashboard()
+
+
+@router.get("/health/{module_name}")
+async def module_health(module_name: str, request: Request):
+    """فحص صحة موديول محدد"""
+    engine = request.app.state.engine if hasattr(request.app.state, "engine") else None
+    if not engine:
+        raise HTTPException(status_code=503, detail="Engine not attached")
+
+    module = getattr(engine, module_name, None)
+    if module is None:
+        return {"module": module_name, "health": "offline", "attached": False}
+
+    is_stub = hasattr(module, '_methods')
+    health_info = {
+        "module": module_name,
+        "attached": True,
+        "is_stub": is_stub,
+        "health": "degraded" if is_stub else "healthy",
+    }
+
+    # Get module-specific status if available
+    if hasattr(module, 'get_status'):
         try:
-            master = _get_master()
-            health = await master.get_module_health(module_name)
-            return {
-                "module": health.name,
-                "healthy": health.healthy,
-                "latency_ms": health.latency_ms,
-                "failure_count": health.failure_count,
-                "last_check": health.last_check,
-                "circuit_open": master._is_circuit_open(module_name),
-            }
-        except HTTPException:
-            raise
-        except Exception as exc:
-            logger.error("Module health check failed for '%s': %s", module_name, exc)
-            raise HTTPException(status_code=500, detail=str(exc))
+            health_info["details"] = module.get_status()
+        except Exception:
+            pass
 
-    # ─────────────────────────────────────────────
-    # إحصائيات ناقل الأحداث / Event Bus Stats
-    # ─────────────────────────────────────────────
+    return health_info
 
-    @router.get(
-        "/events/stats",
-        summary="إحصائيات ناقل الأحداث — Event bus statistics",
-        description="يعيد إحصائيات ناقل الأحداث.",
-    )
-    async def get_event_stats() -> Dict[str, Any]:
-        """
-        إحصائيات ناقل الأحداث — Get event bus statistics.
-        """
-        try:
-            master = _get_master()
-            return await master.event_bus.get_stats()
-        except HTTPException:
-            raise
-        except Exception as exc:
-            logger.error("Event stats failed: %s", exc)
-            return {"error": str(exc)}
 
-    # ─────────────────────────────────────────────
-    # إحصائيات طابور المهام / Task Queue Stats
-    # ─────────────────────────────────────────────
+@router.get("/events/stats")
+async def event_bus_stats(request: Request):
+    """إحصائيات ناقل الأحداث"""
+    orchestrator = getattr(request.app.state, "orchestrator", None)
+    if not orchestrator:
+        return {"status": "orchestrator_not_initialized"}
+    return orchestrator.event_bus.stats()
 
-    @router.get(
-        "/tasks/stats",
-        summary="إحصائيات طابور المهام — Task queue statistics",
-        description="يعيد إحصائيات طابور المهام.",
-    )
-    async def get_task_stats() -> Dict[str, Any]:
-        """
-        إحصائيات طابور المهام — Get task queue statistics.
-        """
-        try:
-            master = _get_master()
-            return await master.task_queue.get_stats()
-        except HTTPException:
-            raise
-        except Exception as exc:
-            logger.error("Task stats failed: %s", exc)
-            return {"error": str(exc)}
 
-    # ─────────────────────────────────────────────
-    # توجيه ذكي / Smart Route
-    # ─────────────────────────────────────────────
+@router.get("/tasks/stats")
+async def task_queue_stats(request: Request):
+    """إحصائيات طابور المهام"""
+    orchestrator = getattr(request.app.state, "orchestrator", None)
+    if not orchestrator:
+        return {"status": "orchestrator_not_initialized"}
+    return orchestrator.task_queue.stats()
 
-    @router.post(
-        "/route",
-        summary="توجيه ذكي للطلب — Smart route a request",
-        description="يوجه الطلب إلى الموديول الأنسب بناءً على النوع والأنماط المتعلمة.",
-    )
-    async def smart_route(request: RouteRequest) -> Dict[str, Any]:
-        """
-        توجيه ذكي — Smart route a request to the best module.
-        """
-        try:
-            master = _get_master()
-            from adam.orchestrator.master import RequestType
 
-            # تحويل نوع الطلب — Parse request type
-            try:
-                req_type = RequestType(request.request_type.upper())
-            except ValueError:
-                valid = [rt.value for rt in RequestType]
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Invalid request_type '{request.request_type}'. Valid: {valid}",
-                )
+@router.get("/tasks/list")
+async def task_list(request: Request, status: Optional[str] = None, limit: int = 50):
+    """قائمة المهام"""
+    orchestrator = getattr(request.app.state, "orchestrator", None)
+    if not orchestrator:
+        return {"status": "orchestrator_not_initialized"}
+    return {"tasks": orchestrator.task_queue.list_tasks(status=status, limit=limit)}
 
-            result = await master.route_request(req_type, request.data)
-            return result
 
-        except HTTPException:
-            raise
-        except Exception as exc:
-            logger.error("Smart route failed: %s", exc, exc_info=True)
-            raise HTTPException(status_code=500, detail=str(exc))
+@router.post("/route")
+async def route_request(request: Request):
+    """توجيه طلب عبر Master Orchestrator"""
+    orchestrator = getattr(request.app.state, "orchestrator", None)
+    if not orchestrator:
+        raise HTTPException(status_code=503, detail="Orchestrator not initialized")
 
-    # ─────────────────────────────────────────────
-    # تنفيذ سير عمل / Execute Workflow
-    # ─────────────────────────────────────────────
+    body = await request.json()
+    message = body.get("message", "")
+    context = body.get("context", {})
 
-    @router.post(
-        "/workflow",
-        summary="تنفيذ سير عمل — Execute a workflow",
-        description="ينفذ سير عمل متعدد الخطوات مع إمكانية التدهور البديل.",
-    )
-    async def execute_workflow(request: WorkflowRequest) -> Dict[str, Any]:
-        """
-        تنفيذ سير عمل — Execute a multi-step workflow.
-        """
-        try:
-            master = _get_master()
+    if not message:
+        raise HTTPException(status_code=400, detail="Message is required")
 
-            workflow_def = {
-                "name": request.name,
-                "steps": request.steps,
-                "stop_on_failure": request.stop_on_failure,
-            }
+    result = await orchestrator.route_request(message, context)
+    return result
 
-            result = await master.execute_workflow(workflow_def)
-            return result
 
-        except HTTPException:
-            raise
-        except Exception as exc:
-            logger.error("Workflow execution failed: %s", exc, exc_info=True)
-            raise HTTPException(status_code=500, detail=str(exc))
+@router.post("/workflow")
+async def execute_workflow(request: Request):
+    """تنفيذ سير عمل عبر Master Orchestrator"""
+    from adam.orchestrator.master import Workflow, WorkflowStep
 
-    return router
+    orchestrator = getattr(request.app.state, "orchestrator", None)
+    if not orchestrator:
+        raise HTTPException(status_code=503, detail="Orchestrator not initialized")
+
+    body = await request.json()
+    name = body.get("name", "unnamed")
+    steps_data = body.get("steps", [])
+
+    steps = []
+    for s in steps_data:
+        steps.append(WorkflowStep(
+            name=s.get("name", "step"),
+            module=s.get("module", "engine"),
+            action=s.get("action", ""),
+            params=s.get("params", {}),
+            depends_on=s.get("depends_on", []),
+            timeout=s.get("timeout", 30.0),
+        ))
+
+    workflow = Workflow(name=name, steps=steps)
+    result = await orchestrator.execute_workflow(workflow)
+    return result
+
+
+def _now():
+    from datetime import datetime, timezone
+    return datetime.now(timezone.utc).isoformat()

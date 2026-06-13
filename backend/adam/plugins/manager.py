@@ -90,7 +90,7 @@ class PluginManager:
                 if issubclass(obj, AdamPlugin) and obj is not AdamPlugin:
                     self.load_plugin(obj)
         except Exception as e:
-            logger.warning(f"⚠️ فشل تحميل plugin من {path}: {e}")
+            logger.warning(f"⚠️ تعذر تحميل plugin من {path}: {e}")
 
     async def unload(self, plugin_name: str) -> bool:
         """إلغاء تحميل plugin"""

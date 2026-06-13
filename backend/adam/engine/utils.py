@@ -47,7 +47,7 @@ class AdamPrismEngineUtils(AdamPrismEngineBase):
                     logger.info(f"📝 درس مستفاد: {section}")
                     break
         except Exception as e:
-            logger.debug(f"فشل استخلاص درس: {e}")
+            logger.debug(f"تعذر استخلاص درس: {e}")
 
     def _quick_classify_intent(self, message: str) -> Dict[str, Any]:
         """تصنيف سريع بدون Ollama — كلمات مفتاحية فقط"""
@@ -144,7 +144,7 @@ class AdamPrismEngineUtils(AdamPrismEngineBase):
                         return "Browser restarted (timeout)"
             return None
         except Exception as e:
-            logger.warning(f"فشل إصلاح {name}: {e}")
+            logger.warning(f"تعذر إصلاح {name}: {e}")
             return None
 
     def _self_verify_response(self, response: str, user_message: str, intent: Dict) -> str:

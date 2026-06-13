@@ -1,0 +1,2046 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>آدم بريزم — الإقراني الرسمي</title>
+    <meta name="description" content="آدم بريزم: بروتوكول الذكاء الاصطناعي الواعي. بُني على تجربة 6 مشاريع في قطاعات حرجة. ذاكرة، أخلاق، أدوات — بضغطة زر. مفتوح المصدر للأبد.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* ========================================
+           RESET & BASE
+           ======================================== */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-deep: #050510;
+            --bg-mid: #0a0a1a;
+            --bg-card: rgba(20, 20, 45, 0.55);
+            --bg-card-hover: rgba(30, 30, 60, 0.7);
+            --border: rgba(16, 185, 129, 0.12);
+            --border-hover: rgba(16, 185, 129, 0.35);
+            --emerald: #10b981;
+            --emerald-light: #34d399;
+            --cyan: #06b6d4;
+            --amber: #f59e0b;
+            --amber-light: #fbbf24;
+            --red: #ef4444;
+            --red-light: #f87171;
+            --violet: #8b5cf6;
+            --text-primary: #f0fdf4;
+            --text-secondary: rgba(240, 253, 244, 0.72);
+            --text-muted: rgba(240, 253, 244, 0.4);
+            --gradient-main: linear-gradient(135deg, #10b981, #06b6d4);
+            --gradient-amber: linear-gradient(135deg, #f59e0b, #f97316);
+            --gradient-glow: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(6, 182, 212, 0.06));
+            --shadow-glow: 0 0 80px rgba(16, 185, 129, 0.1);
+            --radius: 18px;
+            --radius-sm: 10px;
+            --font: 'Noto Sans Arabic', system-ui, -apple-system, sans-serif;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font);
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            line-height: 1.8;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ========================================
+           ANIMATIONS
+           ======================================== */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 8px rgba(16, 185, 129, 0.4); }
+            50% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.7); }
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        @keyframes countUp {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes slideRight {
+            from { opacity: 0; transform: translateX(-40px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes slideLeft {
+            from { opacity: 0; transform: translateX(40px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes breathe {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .animate-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .animate-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .animate-in.delay-1 { transition-delay: 0.1s; }
+        .animate-in.delay-2 { transition-delay: 0.2s; }
+        .animate-in.delay-3 { transition-delay: 0.3s; }
+        .animate-in.delay-4 { transition-delay: 0.4s; }
+
+        /* ========================================
+           LAYOUT
+           ======================================== */
+        .container {
+            max-width: 1140px;
+            margin: 0 auto;
+            padding: 0 28px;
+        }
+
+        section {
+            padding: 110px 0;
+            position: relative;
+        }
+
+        /* ========================================
+           BACKGROUND EFFECTS
+           ======================================== */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(ellipse 900px 700px at 15% 5%, rgba(16, 185, 129, 0.05), transparent),
+                radial-gradient(ellipse 700px 900px at 85% 85%, rgba(6, 182, 212, 0.03), transparent),
+                radial-gradient(ellipse 500px 500px at 50% 50%, rgba(139, 92, 246, 0.02), transparent);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ========================================
+           NAV
+           ======================================== */
+        nav {
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: 0;
+            z-index: 100;
+            padding: 14px 0;
+            backdrop-filter: blur(24px) saturate(1.6);
+            -webkit-backdrop-filter: blur(24px) saturate(1.6);
+            background: rgba(5, 5, 16, 0.85);
+            border-bottom: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        nav .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-brand {
+            font-size: 1.3rem;
+            font-weight: 900;
+            background: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 28px;
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            right: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gradient-main);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover { color: var(--emerald-light); }
+        .nav-links a:hover::after { width: 100%; }
+
+        .nav-cta {
+            padding: 8px 22px;
+            background: var(--gradient-main);
+            color: var(--bg-deep) !important;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
+            -webkit-text-fill-color: initial !important;
+        }
+
+        .nav-cta:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 24px rgba(16, 185, 129, 0.4);
+        }
+
+        .nav-cta::after { display: none !important; }
+
+        /* ========================================
+           HERO
+           ======================================== */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding-top: 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -300px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 1000px;
+            height: 1000px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.07), transparent 65%);
+            pointer-events: none;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 22px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: var(--emerald-light);
+            margin-bottom: 28px;
+            backdrop-filter: blur(10px);
+            animation: fadeInUp 0.8s ease forwards;
+        }
+
+        .hero-badge .dot {
+            width: 8px;
+            height: 8px;
+            background: var(--emerald);
+            border-radius: 50%;
+            animation: pulseGlow 2s infinite;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.8rem, 6.5vw, 5rem);
+            font-weight: 900;
+            line-height: 1.15;
+            margin-bottom: 10px;
+            animation: fadeInUp 0.8s ease 0.1s forwards;
+            opacity: 0;
+            letter-spacing: -0.03em;
+        }
+
+        .hero h1 .gradient-text {
+            background: var(--gradient-main);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 4s ease infinite, fadeInUp 0.8s ease 0.1s forwards;
+        }
+
+        .hero .subtitle {
+            font-size: clamp(1.1rem, 2.5vw, 1.45rem);
+            font-weight: 300;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 20px auto 36px;
+            line-height: 2;
+            animation: fadeInUp 0.8s ease 0.2s forwards;
+            opacity: 0;
+        }
+
+        .hero .subtitle strong {
+            color: var(--emerald-light);
+            font-weight: 600;
+        }
+
+        .hero-actions {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            animation: fadeInUp 0.8s ease 0.3s forwards;
+            opacity: 0;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 17px 40px;
+            background: var(--gradient-main);
+            color: var(--bg-deep);
+            border: none;
+            border-radius: var(--radius-sm);
+            font-family: var(--font);
+            font-size: 1.08rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 40px rgba(16, 185, 129, 0.35);
+        }
+
+        .btn-primary:active { transform: translateY(0); }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 17px 40px;
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--border-hover);
+            border-radius: var(--radius-sm);
+            font-family: var(--font);
+            font-size: 1.08rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-card);
+            border-color: var(--emerald);
+            color: var(--emerald-light);
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 52px;
+            margin-top: 60px;
+            animation: fadeInUp 0.8s ease 0.4s forwards;
+            opacity: 0;
+            flex-wrap: wrap;
+        }
+
+        .hero-stat { text-align: center; }
+
+        .hero-stat .number {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-stat .label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-top: 4px;
+        }
+
+        /* ========================================
+           SECTION LABELS
+           ======================================== */
+        .section-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--emerald);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 16px;
+        }
+
+        .section-label::before {
+            content: '';
+            width: 28px;
+            height: 2px;
+            background: var(--gradient-main);
+        }
+
+        .section-label.amber { color: var(--amber); }
+        .section-label.amber::before { background: var(--gradient-amber); }
+
+        .section-title {
+            font-size: clamp(1.9rem, 4vw, 3rem);
+            font-weight: 800;
+            line-height: 1.3;
+            margin-bottom: 20px;
+            letter-spacing: -0.02em;
+        }
+
+        .section-desc {
+            font-size: 1.08rem;
+            color: var(--text-secondary);
+            max-width: 650px;
+            line-height: 2;
+        }
+
+        /* ========================================
+           JOURNEY / STORY
+           Carnegie: Be genuinely interested
+           Carnegie: Talk in terms of their interests
+           ======================================== */
+        .journey-section {
+            background: var(--bg-mid);
+            position: relative;
+        }
+
+        .journey-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--emerald), transparent);
+            opacity: 0.3;
+        }
+
+        .journey-intro {
+            max-width: 800px;
+            margin-bottom: 64px;
+        }
+
+        .journey-timeline {
+            position: relative;
+            padding-right: 40px;
+        }
+
+        .journey-timeline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 14px;
+            width: 2px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--emerald), var(--cyan), var(--violet));
+            opacity: 0.3;
+        }
+
+        .journey-item {
+            position: relative;
+            padding: 28px 32px;
+            margin-bottom: 24px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            backdrop-filter: blur(10px);
+            transition: all 0.4s ease;
+        }
+
+        .journey-item:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border-hover);
+            transform: translateX(-4px);
+        }
+
+        .journey-item::before {
+            content: '';
+            position: absolute;
+            right: -33px;
+            top: 36px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--emerald);
+            border: 3px solid var(--bg-mid);
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.5);
+        }
+
+        .journey-item:nth-child(2)::before { background: var(--cyan); box-shadow: 0 0 12px rgba(6, 182, 212, 0.5); }
+        .journey-item:nth-child(3)::before { background: var(--violet); box-shadow: 0 0 12px rgba(139, 92, 246, 0.5); }
+        .journey-item:nth-child(4)::before { background: var(--amber); box-shadow: 0 0 12px rgba(245, 158, 11, 0.5); }
+        .journey-item:nth-child(5)::before { background: var(--emerald); box-shadow: 0 0 12px rgba(16, 185, 129, 0.5); }
+        .journey-item:nth-child(6)::before { background: linear-gradient(135deg, var(--emerald), var(--cyan)); box-shadow: 0 0 16px rgba(16, 185, 129, 0.6); width: 18px; height: 18px; right: -35px; }
+
+        .journey-number {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--emerald);
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            margin-bottom: 8px;
+        }
+
+        .journey-item h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .journey-item p {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.9;
+        }
+
+        .journey-metrics {
+            display: inline-flex;
+            gap: 16px;
+            margin-top: 14px;
+            flex-wrap: wrap;
+        }
+
+        .journey-metric {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 14px;
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.15);
+            border-radius: 50px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--emerald-light);
+        }
+
+        .journey-metric.cyan {
+            background: rgba(6, 182, 212, 0.08);
+            border-color: rgba(6, 182, 212, 0.15);
+            color: var(--cyan);
+        }
+
+        .journey-metric.amber {
+            background: rgba(245, 158, 11, 0.08);
+            border-color: rgba(245, 158, 11, 0.15);
+            color: var(--amber-light);
+        }
+
+        .journey-metric.violet {
+            background: rgba(139, 92, 246, 0.08);
+            border-color: rgba(139, 92, 246, 0.15);
+            color: #a78bfa;
+        }
+
+        .journey-lesson {
+            margin-top: 56px;
+            padding: 32px;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(6, 182, 212, 0.04));
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+        }
+
+        .journey-lesson h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--emerald-light);
+            margin-bottom: 12px;
+        }
+
+        .journey-lesson p {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            line-height: 2;
+            max-width: 700px;
+        }
+
+        /* ========================================
+           PAIN POINTS
+           Carnegie: Get them saying YES
+           Carnegie: Don't criticize — empathize
+           ======================================== */
+        .pain-section {
+            background: var(--bg-deep);
+        }
+
+        .pain-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+            margin-top: 56px;
+        }
+
+        .pain-card {
+            padding: 32px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            backdrop-filter: blur(10px);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pain-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--gradient-amber);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .pain-card:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border-hover);
+            transform: translateY(-4px);
+        }
+
+        .pain-card:hover::before { opacity: 1; }
+
+        .pain-icon {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gradient-glow);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
+        .pain-card h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+
+        .pain-card p {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        .pain-yes {
+            margin-top: 48px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 2;
+        }
+
+        .pain-yes .yes-count {
+            color: var(--emerald-light);
+            font-size: 1.4rem;
+        }
+
+        /* ========================================
+           PROMISE
+           Carnegie: Arouse an eager want
+           Carnegie: Dramatize your ideas
+           ======================================== */
+        .promise-section {
+            background: var(--bg-mid);
+        }
+
+        .promise-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+            margin-top: 56px;
+            margin-bottom: 56px;
+        }
+
+        .promise-stat-block {
+            text-align: center;
+            padding: 36px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .promise-stat-block:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-4px);
+        }
+
+        .big-number {
+            font-size: 3.5rem;
+            font-weight: 900;
+            background: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+        }
+
+        .stat-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-top: 8px;
+            color: var(--text-primary);
+        }
+
+        .stat-desc {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-top: 6px;
+            line-height: 1.7;
+        }
+
+        .promise-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 16px;
+        }
+
+        .promise-feature {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 20px 24px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .promise-feature:hover {
+            border-color: var(--border-hover);
+            background: var(--bg-card-hover);
+        }
+
+        .check {
+            width: 28px;
+            height: 28px;
+            min-width: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--emerald-light);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-top: 2px;
+        }
+
+        .feat-text strong {
+            display: block;
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+
+        .feat-text span {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        /* ========================================
+           HOW IT WORKS
+           Carnegie: Talk in terms of their interests
+           ======================================== */
+        .how-section {
+            background: var(--bg-deep);
+        }
+
+        .how-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 32px;
+            margin-top: 56px;
+        }
+
+        .how-step {
+            padding: 32px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .how-step:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-4px);
+        }
+
+        .step-number {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--gradient-glow);
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .step-number-inner {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--gradient-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .step-number-text {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--bg-deep);
+        }
+
+        .how-step h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .how-step p {
+            font-size: 0.92rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 18px;
+        }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 10px;
+            padding: 16px 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 2;
+            direction: ltr;
+            text-align: left;
+            color: var(--text-secondary);
+        }
+
+        .code-block .prompt { color: var(--emerald-light); font-weight: 700; }
+        .code-block .cmd { color: var(--cyan); }
+        .code-block .comment { color: var(--text-muted); }
+
+        /* ========================================
+           COMPETITOR COMPARISON
+           Carnegie: Begin with praise
+           Carnegie: Don't criticize — show, don't tell
+           ======================================== */
+        .compare-section {
+            background: var(--bg-mid);
+        }
+
+        .compare-praise {
+            max-width: 700px;
+            margin-bottom: 48px;
+        }
+
+        .compare-praise p {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            line-height: 2;
+        }
+
+        .compare-table-wrap {
+            overflow-x: auto;
+            margin-top: 40px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+        }
+
+        .compare-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 750px;
+        }
+
+        .compare-table thead th {
+            padding: 18px 20px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        .compare-table thead th:first-child {
+            text-align: right;
+        }
+
+        .compare-table tbody td {
+            padding: 14px 20px;
+            font-size: 0.88rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            color: var(--text-secondary);
+        }
+
+        .compare-table tbody td:first-child {
+            text-align: right;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .compare-table tbody tr:hover {
+            background: rgba(16, 185, 129, 0.03);
+        }
+
+        .adam-col {
+            background: rgba(16, 185, 129, 0.06);
+            font-weight: 600 !important;
+        }
+
+        .yes-mark {
+            color: var(--emerald-light);
+            font-weight: 600;
+        }
+
+        .no-mark {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .partial-mark {
+            color: var(--amber);
+            font-weight: 500;
+        }
+
+        .warn-mark {
+            color: var(--red-light);
+            font-weight: 500;
+            font-size: 0.82rem;
+        }
+
+        /* ========================================
+           SECURITY
+           Carnegie: Give a fine reputation to live up to
+           ======================================== */
+        .security-section {
+            background: var(--bg-deep);
+        }
+
+        .security-mantra {
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 40px 0;
+            font-size: clamp(1.5rem, 3vw, 2.2rem);
+            font-weight: 900;
+            text-align: center;
+        }
+
+        .m1 { color: var(--emerald-light); }
+        .m2 { color: var(--cyan); }
+        .m3 { color: var(--amber-light); }
+
+        .security-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-top: 40px;
+        }
+
+        .security-card {
+            padding: 28px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .security-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-4px);
+        }
+
+        .sec-icon {
+            font-size: 1.8rem;
+            margin-bottom: 16px;
+        }
+
+        .security-card h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .security-card p {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        /* ========================================
+           CREDIBILITY
+           Carnegie: Give honest appreciation
+           ======================================== */
+        .cred-section {
+            background: var(--bg-mid);
+        }
+
+        .cred-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+            margin-top: 48px;
+        }
+
+        .cred-card {
+            padding: 28px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            text-align: center;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .cred-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-4px);
+        }
+
+        .cred-number {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+        }
+
+        .cred-label {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-top: 8px;
+        }
+
+        .cred-desc {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-top: 6px;
+            line-height: 1.6;
+        }
+
+        /* ========================================
+           CTA
+           Carnegie: Make them happy about doing it
+           ======================================== */
+        .cta-section {
+            background: var(--bg-deep);
+            text-align: center;
+            position: relative;
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: -200px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.06), transparent 60%);
+            pointer-events: none;
+        }
+
+        .cta-tagline {
+            font-size: 1.15rem;
+            color: var(--text-secondary);
+            line-height: 2;
+            max-width: 650px;
+            margin: 0 auto 40px;
+        }
+
+        .cta-tagline strong {
+            color: var(--emerald-light);
+        }
+
+        .btn-giant {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 22px 56px;
+            background: var(--gradient-main);
+            color: var(--bg-deep);
+            border: none;
+            border-radius: 14px;
+            font-family: var(--font);
+            font-size: 1.3rem;
+            font-weight: 800;
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
+            animation: breathe 3s infinite;
+        }
+
+        .btn-giant:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 50px rgba(16, 185, 129, 0.4);
+        }
+
+        .cta-install {
+            margin-top: 32px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            direction: ltr;
+        }
+
+        .cta-install .dollar {
+            color: var(--emerald-light);
+            font-weight: 700;
+        }
+
+        .cta-fine-print {
+            margin-top: 28px;
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 2;
+        }
+
+        .cta-fine-print a {
+            color: var(--emerald-light);
+            text-decoration: none;
+        }
+
+        .cta-fine-print a:hover {
+            text-decoration: underline;
+        }
+
+        /* ========================================
+           FOOTER
+           ======================================== */
+        footer {
+            padding: 48px 0;
+            text-align: center;
+            border-top: 1px solid var(--border);
+            background: var(--bg-deep);
+        }
+
+        .footer-brand {
+            font-size: 1.3rem;
+            font-weight: 800;
+            background: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        footer p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.8;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 28px;
+            justify-content: center;
+            list-style: none;
+            margin-top: 16px;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover { color: var(--emerald-light); }
+
+        /* ========================================
+           RESPONSIVE
+           ======================================== */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+
+            .hero-stats { gap: 28px; }
+
+            .journey-timeline { padding-right: 24px; }
+            .journey-timeline::before { right: 4px; }
+            .journey-item::before { right: -25px; width: 10px; height: 10px; }
+            .journey-item:nth-child(6)::before { right: -26px; width: 14px; height: 14px; }
+
+            .security-mantra { gap: 12px; font-size: 1.4rem; }
+
+            .btn-giant { padding: 18px 36px; font-size: 1.1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================
+         NAVIGATION
+         ============================================ -->
+    <nav>
+        <div class="container">
+            <div class="nav-brand">آدم بريزم</div>
+            <ul class="nav-links">
+                <li><a href="#journey">الرحلة</a></li>
+                <li><a href="#pain">ليه آدم؟</a></li>
+                <li><a href="#promise">البروتوكول</a></li>
+                <li><a href="#how">إزاي؟</a></li>
+                <li><a href="#compare">المقارنة</a></li>
+                <li><a href="#security">السيادة</a></li>
+                <li><a href="https://github.com/othmastar/adam-prism" target="_blank" class="nav-cta">حمّل من GitHub</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- ============================================
+         HERO SECTION
+         Carnegie Principle #3: Arouse an eager want
+         Carnegie Principle #5: Smile — warmth from the first word
+         ============================================ -->
+    <section class="hero" id="hero">
+        <div class="container">
+            <div class="hero-badge">
+                <span class="dot"></span>
+                مفتوح المصدر — Apache 2.0 — بُني على تجربة 6 مشاريع حقيقية
+            </div>
+
+            <h1>
+                <span class="gradient-text">آدم بريزم</span>
+                <br>
+                البروتوكول اللي ولد من النار
+            </h1>
+
+            <p class="subtitle">
+                ستة مشاريع في قطاعات حرجة. سكادا بترول، بورصة أدوية، توأم خطوط أنابيب، توأم محامي رقمي.
+                <strong>كل واحدة علّمتني إيه اللي بيكسر الإطار — وإيه اللي بيخليه يفضل صاحي نص الليل.</strong>
+                آدم بريزم مش فكرة أكاديمية — ده البروتوكول اللي كنت محتاجه في كل مشروع ومالقتهوش.
+            </p>
+
+            <div class="hero-actions">
+                <a href="https://github.com/othmastar/adam-prism" target="_blank" class="btn-primary">
+                    <span>⬇</span>
+                    حمّل دلوقتي — مجاني للأبد
+                </a>
+                <a href="#journey" class="btn-secondary">
+                    <span>←</span>
+                    اقري الرحلة الأول
+                </a>
+            </div>
+
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <div class="number">6</div>
+                    <div class="label">مشاريع حقيقية</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="number">12</div>
+                    <div class="label">طبقة وعي</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="number">259+</div>
+                    <div class="label">اختبار ناجح</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="number">25+</div>
+                    <div class="label">قناة اتصال</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="number">$0</div>
+                    <div class="label">تكلفة التشغيل</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+         THE JOURNEY — Carnegie's Storytelling
+         Carnegie Principle #4: Be genuinely interested in others
+         Carnegie Principle #6: Remember that a person's name is the sweetest sound
+         Carnegie Principle #9: Make the other person feel important
+         ============================================ -->
+    <section class="journey-section" id="journey">
+        <div class="container">
+            <div class="section-label">الرحلة — من الواقع للبروتوكول</div>
+
+            <div class="journey-intro">
+                <h2 class="section-title animate-in">
+                    أنت كمطور بتتعلم<br>من التجربة مش من الكتب
+                </h2>
+                <p class="section-desc animate-in">
+                    أنا مش جاي أقولك "اعمل كده" — أنا جاي أحكيلك إيه اللي عملته وإيه اللي اتكسر وإيه اللي اتعلمته.
+                    لأنك إنت كمان بتتعلم لوحدك. بدون كورس. بدون حد يمسك إيدك. وده بالظبط اللي بيخليك تفهم — لما تعاني وتلاقي الحل بنفسك.
+                </p>
+            </div>
+
+            <div class="journey-timeline">
+                <!-- Project 1: SCADA Petroleum -->
+                <div class="journey-item animate-in">
+                    <div class="journey-number">المشروع الأول</div>
+                    <h3>سكادا بترول بنظام RAJ</h3>
+                    <p>
+                        أول مشروع حقيقي في قطاع حرج. نظام مراقبة وتحكم صناعي لشبكة بترول.
+                        ده المكان اللي فهمت فيه إن الأنظمة الحقيقية لازم تفضل صاحية 24/7 — مش بس تشتغل على جهاز التطوير.
+                        أول درس: لو النظام بيطفي، المشكلة مش في الكود — في التصميم.
+                    </p>
+                    <div class="journey-metrics">
+                        <span class="journey-metric">قطاع حرج</span>
+                        <span class="journey-metric amber">24/7 تشغيل</span>
+                        <span class="journey-metric">نظام RAJ</span>
+                    </div>
+                </div>
+
+                <!-- Project 2: Pharmaceutical Exchange -->
+                <div class="journey-item animate-in">
+                    <div class="journey-number">المشروع الثاني</div>
+                    <h3>نظام بورصة أدوية — 12,000 رسالة يومياً</h3>
+                    <p>
+                        نظام بيتعامل مع 12,000 رسالة يومياً من جروبات عرض وطلب على الواتساب،
+                        و40 شيت إكسيل كل واحد فيهم 400 صنف بتحديث سعر يومي.
+                        العميل مكنش يدفع جنيه واحد لميتا — وعملتله سيستم كامل يعالج الكلام ده.
+                        استخدمت SQL للكاش عشان تفلتر التكرارات، وRedis لتنظيم الدخول،
+                        ثم التوجيه لـ PostgreSQL الدائمة، وربطها بشاشات عرض Metabase.
+                        وخليت LLM يتحكم فيها كله — ياخد بيانات العميل ويبعتله تنبيهات
+                        لو صنف عاوزه أو عاوز يبيعه اتوفر أو اتطلب. و20 KPI شغالين حقيقي.
+                    </p>
+                    <div class="journey-metrics">
+                        <span class="journey-metric">12K رسالة/يوم</span>
+                        <span class="journey-metric amber">40 شيت × 400 صنف</span>
+                        <span class="journey-metric cyan">Redis + PostgreSQL</span>
+                        <span class="journey-metric violet">LLM-controlled</span>
+                        <span class="journey-metric">20 KPI</span>
+                        <span class="journey-metric amber">$0 لميتا</span>
+                    </div>
+                </div>
+
+                <!-- Project 3: Digital Twin Pipeline -->
+                <div class="journey-item animate-in">
+                    <div class="journey-number">المشروع الثالث</div>
+                    <h3>التوأم الرقمي لشركة خطوط أنابيب بترول</h3>
+                    <p>
+                        نفس المقياس — بس أضخم. نظام بيستحمل لحد 100,000 مدخل يومي على سكيل 300 غرفة بلف (Valve Room).
+                        هنا فهمت إن الأداء مش ترف — ده فرق بين نظام شغال ونظام بيموت تحت الضغط.
+                        لما جهازك بيستقبل 100 ألف طلب في اليوم، إما البنية بتتحمل أو بتطفي.
+                        وده اللي علّمني إن كل مكون لازم يكون قابل للعزل — عشان لما حاجة تتعب، النظام يفضل شغال.
+                    </p>
+                    <div class="journey-metrics">
+                        <span class="journey-metric">100K مدخل/يوم</span>
+                        <span class="journey-metric amber">300 غرفة بلف</span>
+                        <span class="journey-metric cyan">Digital Twin</span>
+                        <span class="journey-metric violet">Fault Isolation</span>
+                    </div>
+                </div>
+
+                <!-- Project 4: Switched to Linux -->
+                <div class="journey-item animate-in">
+                    <div class="journey-number">المحطة الرابعة</div>
+                    <h3>التحول للينكس — السيادة تبدأ من نظام التشغيل</h3>
+                    <p>
+                        بعد ما شوفنا إيه اللي بيحصل لما بياناتك على سيرفرات مش ملكك، التحول للينكس كان قرار طبيعي.
+                        السيادة الرقمية مش بس في الكود — في النظام كله. لما تتحكم في كل طبقة، من الكيرنل للتطبيق،
+                        تبقى فاهم إيه اللي بيحصل فعلاً. وده اللي خلى آدم بريزم يشتغل 100% محلي من التصميم الأول.
+                    </p>
+                    <div class="journey-metrics">
+                        <span class="journey-metric cyan">Linux</span>
+                        <span class="journey-metric">Full Stack Control</span>
+                        <span class="journey-metric amber">Digital Sovereignty</span>
+                    </div>
+                </div>
+
+                <!-- Project 5: Digital Twin Lawyer -->
+                <div class="journey-item animate-in">
+                    <div class="journey-number">المشروع الخامس</div>
+                    <h3>التوأم الرقمي للمحامي الخبير بالقانون</h3>
+                    <p>
+                        محامي رقمي خبير بالقانون، مربوط بذاكرة متجهة وSFT LLM، بواجهة أسطورية.
+                        هنا اتعلمت إيه معنى "ذاكرة حقيقية" — مش بس تسجيل محادثات، ده فهم سياق واسترجاع لحظي
+                        واستمرارية. لما العميل يرجع بعد أسبوع، النظام لازم يفتكر هو مين وإيه قضيته وإيه اللي اتقال آخر مرة.
+                        بدون ذاكرة متجهة، ده مستحيل. وده اللي خلى آدم بريزم يدمج الذاكرة من أول يوم.
+                    </p>
+                    <div class="journey-metrics">
+                        <span class="journey-metric cyan">Vector Memory</span>
+                        <span class="journey-metric violet">SFT LLM</span>
+                        <span class="journey-metric">Expert Legal AI</span>
+                        <span class="journey-metric amber">Contextual Recall</span>
+                    </div>
+                </div>
+
+                <!-- Project 6: Adam Prism -->
+                <div class="journey-item animate-in">
+                    <div class="journey-number">المشروع السادس — آدم بريزم</div>
+                    <h3>البروتوكول اللي كنت محتاجه في كل مشروع ومالقتهوش</h3>
+                    <p>
+                        بعد 5 مشاريع، كل واحدة علمتني حاجة مختلفة:
+                        أن النظام لازم يفضل صاحي (سكادا)، أن البيانات الضخمة محتاجة كاش وفلترة (بورصة الأدوية)،
+                        أن العزل بيحمي النظام كله (التوأم)، أن السيادة مش اختيار (الينكس)،
+                        أن الذاكرة مش رفاهية (المحامي). آدم بريزم مش مشروع سادس عشوائي —
+                        ده تجميع لكل درس اتعلمته في بروتوكول واحد مفتوح المصدر.
+                        ودربته على 15 موديل ولازلنا مكملين.
+                    </p>
+                    <div class="journey-metrics">
+                        <span class="journey-metric">15 موديل تدريب</span>
+                        <span class="journey-metric cyan">259+ اختبار</span>
+                        <span class="journey-metric amber">12B Gemma 4</span>
+                        <span class="journey-metric violet">QAT قادمة</span>
+                        <span class="journey-metric">Apache 2.0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Carnegie: The lesson that connects to the reader -->
+            <div class="journey-lesson animate-in">
+                <h3>الدرس اللي بيوصلني بيك</h3>
+                <p>
+                    أنت كمان بتتعلم لوحدك. بدون كورس. بدون حد يمسك إيدك.
+                    وكل مشروع بتعمله بيزودك خبرة مش موجودة في أي كتاب.
+                    آدم بريزم اتعمل من الشخص اللي بيعاني نفس معاناتك —
+                    يلاقي الأطر ناقصة، يربط الحاجات يدوي، يصلح الأخطاء في نص الليل.
+                    مش محتاج حد يقولك إن الأطر الحالية فيها مشاكل — إنت عايشها كل يوم.
+                    <strong style="color: var(--emerald-light);">آدم بريزم اتعمل عشان ماتعانيش تاني من نفس المشاكل.</strong>
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+         PAIN POINTS
+         Carnegie Principle #1: Don't criticize — empathize
+         Carnegie Principle #7: Get them saying YES
+         Carnegie Principle #10: Appeal to noble motives
+         ============================================ -->
+    <section class="pain-section" id="pain">
+        <div class="container">
+            <div class="section-label amber">الواقع اللي عارفه كويس</div>
+            <h2 class="section-title animate-in">
+                تعبت من الأطر اللي بتتعطل نص الليل؟
+            </h2>
+            <p class="section-desc animate-in">
+                إنت مش محتاج حد يقولك إن الأطر الحالية فيها مشاكل — إنت عايشها كل يوم.
+                أنا كمان عشتها. في كل مشروع من الستة. الكود اللي بيتكسر، الذاكرة اللي بتتمسح،
+                والأدوات اللي لازم تربطها يدوي كل مرة. ده واقع مرفوض — وآدم بريزم اتعمل عشان يغيره.
+            </p>
+
+            <div class="pain-grid">
+                <div class="pain-card animate-in">
+                    <div class="pain-icon">🔥</div>
+                    <h3>أنت بتبني على رمال</h3>
+                    <p>أطر بدون ذاكرة متجهة، بدون بوابات أخلاقية، بدون بروتوكول موحد. كل سيرفر جديد = صفر من الأول. أنا عشت ده في مشروع المحامي — كل مرة أعيد ربط الذاكرة من الصفر.</p>
+                </div>
+                <div class="pain-card animate-in">
+                    <div class="pain-icon">🔒</div>
+                    <h3>مقفول على سيرفرات الغير</h3>
+                    <p>بياناتك على سحابة حد تاني. موديل مش ملكك. API يغلى كل شهر. ولا يوم كانت السيادة لك. التحول للينكس علمني إن السيادة مش اختيار — ضرورة.</p>
+                </div>
+                <div class="pain-card animate-in">
+                    <div class="pain-icon">🧩</div>
+                    <h3>كل حاجة لوحدها</h3>
+                    <p>ذاكرة في مكان، أخلاق في مكان، أدوات في عشر أماكن. في بورصة الأدوية قضيت أسابيع أربط Redis وPostgreSQL وMetabase — حاجة كان المفروض تشتغل من أول يوم.</p>
+                </div>
+                <div class="pain-card animate-in">
+                    <div class="pain-icon">💔</div>
+                    <h3>بتتعطل تحت الضغط</h3>
+                    <p>شغال على جهازك؟ تمام. على سيرفر؟ انهيار. لما التوأم الرقمي وصل 100 ألف مدخل يومي، عرفت إن Agent حقيقي لازم يفضل صاحي — مش يخرج بعد أول exception.</p>
+                </div>
+                <div class="pain-card animate-in">
+                    <div class="pain-icon">🔇</div>
+                    <h3>صامت ومقطوع</h3>
+                    <p>واتساب هنا، تليجرام هناك، ديسكورد في حتة تالتة. في بورصة الأدوية كنت مستقبل 12 ألف رسالة من الواتساب بس — تخيل لو كل قناة محتاجة إعداد لوحدها.</p>
+                </div>
+                <div class="pain-card animate-in">
+                    <div class="pain-icon">🧪</div>
+                    <h3>بلا ضمان حقيقي</h3>
+                    <p>مفيش اختبارات تكسر الكود عن قصد. مفيش فحص تلقائي. مفيش إصلاح ذاتي. أنا دورت على موديلز عملاقة تكسر آدم بريزم — وفضل صامد. 259+ اختبار ناجح.</p>
+                </div>
+            </div>
+
+            <p class="pain-yes animate-in">
+                لو قلت "<span class="yes-count">أيوا</span>" لأي حاجة من دول — إنت في المكان الصح.
+                <br>آدم بريزم اتعمل ليك — لأن صانعه عانى من نفس المشاكل.
+            </p>
+        </div>
+    </section>
+
+    <!-- ============================================
+         THE PROMISE
+         Carnegie Principle #3: Arouse an eager want
+         Carnegie Principle #8: Dramatize your ideas
+         Carnegie Principle #2: Give honest appreciation
+         ============================================ -->
+    <section class="promise-section" id="promise">
+        <div class="container">
+            <div class="section-label">البروتوكول المتكامل</div>
+            <h2 class="section-title animate-in">
+                بروتوكول متكامل ومدمج<br>بضغطة زر
+            </h2>
+            <p class="section-desc animate-in">
+                إنت كمطور غاص في الطبقات لو حابب — لكننا أسسنا إطار متكامل مفتوح المصدر يشتغل من لحظة التثبيت.
+                كل الأدوات والذاكرة المتجهة مدمجة. مفيش حاجة لازم تربطها يدوي.
+                ده اللي كنت محتاجه في كل مشروع من الستة — ولقتهوش.
+            </p>
+
+            <div class="promise-stats">
+                <div class="promise-stat-block animate-in">
+                    <div class="big-number">12</div>
+                    <div class="stat-title">طبقة وعي</div>
+                    <div class="stat-desc">من الإدراك الحسي للقرار الأخلاقي — كود حقيقي مش تسويق</div>
+                </div>
+                <div class="promise-stat-block animate-in">
+                    <div class="big-number">4</div>
+                    <div class="stat-title">قوانين أخلاقية</div>
+                    <div class="stat-desc">بوابة أخلاقية لا تُخترق — تحميك وتحمي المستخدم</div>
+                </div>
+                <div class="promise-stat-block animate-in">
+                    <div class="big-number">25+</div>
+                    <div class="stat-title">قناة اتصال</div>
+                    <div class="stat-desc">واتساب، تليجرام، ديسكورد — كلهم من مكان واحد بضغطة زر</div>
+                </div>
+                <div class="promise-stat-block animate-in">
+                    <div class="big-number">&infin;</div>
+                    <div class="stat-title">أدوات عبر MCP</div>
+                    <div class="stat-desc">آلاف الأدوات القياسية ببروتوكول موحد</div>
+                </div>
+            </div>
+
+            <div class="promise-features">
+                <div class="promise-feature animate-in">
+                    <div class="check">✓</div>
+                    <div class="feat-text">
+                        <strong>ذاكرة متجهة + SQLite مزدوجة</strong>
+                        <span>ذاكرة دائمة — محادثاتك، سياقك، تفضيلاتك — محفوظة ومسترجعة لحظياً. مثل ما كنت محتاجه في مشروع المحامي — بس أقوى.</span>
+                    </div>
+                </div>
+                <div class="promise-feature animate-in">
+                    <div class="check">✓</div>
+                    <div class="feat-text">
+                        <strong>God Orchestrator — موزع ذكي</strong>
+                        <span>Event Bus + Task Queue + Intelligent Routing + Health Monitoring. النظام بيفضل صاحي زي السكادا — لأنه اتعلم من نفس المبدأ.</span>
+                    </div>
+                </div>
+                <div class="promise-feature animate-in">
+                    <div class="check">✓</div>
+                    <div class="feat-text">
+                        <strong>Multi-provider LLM</strong>
+                        <span>آدم بريزم بروتوكول مش موديل. استدعي Ollama محلي، OpenAI، Anthropic — من السحابة أو محلياً. إنت اللي تختار.</span>
+                    </div>
+                </div>
+                <div class="promise-feature animate-in">
+                    <div class="check">✓</div>
+                    <div class="feat-text">
+                        <strong>فرقة Subagents</strong>
+                        <span>وكلاء فرعيين يشتغلوا مع بعض — كل واحد متخصص في مهمة. زي الـ Redis وPostgreSQL شغالين مع بعض في بورصة الأدوية.</span>
+                    </div>
+                </div>
+                <div class="promise-feature animate-in">
+                    <div class="check">✓</div>
+                    <div class="feat-text">
+                        <strong>فحص وإصلاح تلقائي</strong>
+                        <span>النظام بيكتشف الأخطاء ويصلحها لوحده — بدون تدخل منك. لأن في السكادا مفيش حد يصلح حاجة الساعة 3 الفجر.</span>
+                    </div>
+                </div>
+                <div class="promise-feature animate-in">
+                    <div class="check">✓</div>
+                    <div class="feat-text">
+                        <strong>تخصيص فائق — عزل الخدمات</strong>
+                        <span>عزل كل خدمة مش محتاجها. خلي النظام خفيف ومُركّز — اللي ينفعك بس. مثل ما عملت في التوأم — كل مكون مستقل.</span>
+                    </div>
+                </div>
+                <div class="promise-feature animate-in">
+                    <div class="check">✓</div>
+                    <div class="feat-text">
+                        <strong>امتداد VS Code مدمج</strong>
+                        <span>عدّل أي حاجة بكل سلاسة — بدون كتابة سطر كود. المشروع كله متاح ومتكامل داخل VS Code.</span>
+                    </div>
+                </div>
+                <div class="promise-feature animate-in">
+                    <div class="check">✓</div>
+                    <div class="feat-text">
+                        <strong>تطوير وإصلاح بسرعة خرافية</strong>
+                        <span>بمساعدة أذكى موديلات العالم بتكلفة صفر دولار — ويمكنك مراجعة الكوميتس وحجم التطور الهائل الجاري.</span>
+                    </div>
+                </div>
+                <div class="promise-feature animate-in">
+                    <div class="check">✓</div>
+                    <div class="feat-text">
+                        <strong>ديسكتوب + موبايل</strong>
+                        <span>تطبيق Electron 33 + React 19 للديسكتوب وFlutter + Riverpod للموبايل — قريباً على كل الأجهزة.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+         HOW IT WORKS
+         Carnegie Principle #8: Talk in terms of their interests
+         ============================================ -->
+    <section class="how-section" id="how">
+        <div class="container">
+            <div class="section-label">ابدأ في 3 دقائق</div>
+            <h2 class="section-title animate-in">
+                من الصفر للوعي<br>في 3 خطوات
+            </h2>
+            <p class="section-desc animate-in">
+                مفيش إعداد معقد. مفيش ملفات كونفيج عشوائية. ثبّت، شغّل، اتكلم — وخلاص.
+                أنا تعبت من الإعداد الطويل في كل مشروع — فخليت آدم بريزم يشتغل فوراً.
+            </p>
+
+            <div class="how-steps">
+                <div class="how-step animate-in">
+                    <div class="step-number">
+                        <div class="step-number-inner">
+                            <span class="step-number-text">1</span>
+                        </div>
+                    </div>
+                    <h3>ثبّت</h3>
+                    <p>أمر واحد وبس — آدم بريزم على جهازك</p>
+                    <div class="code-block">
+                        <span class="prompt">$</span> <span class="cmd">pip install</span> adam-prism<br>
+                        <span class="prompt">$</span> <span class="cmd">git clone</span> https://github.com/othmastar/adam-prism<br>
+                        <span class="prompt">$</span> <span class="cmd">cd</span> adam-prism <span class="cmd">&amp;&amp;</span> <span class="cmd">pip install</span> -e .
+                    </div>
+                </div>
+                <div class="how-step animate-in">
+                    <div class="step-number">
+                        <div class="step-number-inner">
+                            <span class="step-number-text">2</span>
+                        </div>
+                    </div>
+                    <h3>شغّل</h3>
+                    <p>سيرفر محلي في ثانية — أو Docker للستاك الكامل</p>
+                    <div class="code-block">
+                        <span class="prompt">$</span> <span class="cmd">python</span> main.py --port 8001<br>
+                        <span class="comment"># أو الستاك الكامل:</span><br>
+                        <span class="prompt">$</span> <span class="cmd">cd</span> deploy <span class="cmd">&amp;&amp;</span> <span class="cmd">docker compose up</span> -d
+                    </div>
+                </div>
+                <div class="how-step animate-in">
+                    <div class="step-number">
+                        <div class="step-number-inner">
+                            <span class="step-number-text">3</span>
+                        </div>
+                    </div>
+                    <h3>اتكلم</h3>
+                    <p>ربط أي وسيلة اتصال بضغطة زر — من صفحة الضبط</p>
+                    <div class="code-block">
+                        <span class="comment"># افتح صفحة الضبط في المتصفح</span><br>
+                        <span class="comment"># وربط واتساب/تليجرام/ديسكورد</span><br>
+                        <span class="comment"># بضغطة زر واحدة ✦</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 48px;">
+                <p class="animate-in" style="color: var(--text-secondary); font-size: 0.95rem; max-width: 600px; margin: 0 auto; line-height: 2;">
+                    <strong style="color: var(--emerald-light);">مدمج كمان:</strong> امتداد VS Code لتعديل أي حاجة بكل سلاسة — بدون كتابة سطر كود.
+                    جيما 4 (12B مكمم) هو الموديل الأساسي المرشح للتشغيل — ونسخة QAT أدق وأصغر قادمة.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+         COMPETITOR COMPARISON
+         Carnegie Principle #1: Don't criticize — begin with praise
+         Carnegie Principle #11: Show respect for the other person's opinions
+         ============================================ -->
+    <section class="compare-section" id="compare">
+        <div class="container">
+            <div class="section-label">المقارنة الشريفة</div>
+            <h2 class="section-title animate-in">
+                إنت عملت حاجات عظيمة<br>بأطر كويسة — بس تستاهل أكتر
+            </h2>
+
+            <div class="compare-praise animate-in">
+                <p>
+                    Claude Code Desktop و Hermes Desktop و OpenClaw — أطر عملها ممتاز وعملت حاجة عظيمة للمجتمع.
+                    Claude Code غيّر طريقة تفاعل المطورين مع AI. Hermes جاب تجربة ديسكتوب حقيقية.
+                    احترامنا لهم كامل. بس آدم بريزم بروتوكول مختلف: متكامل، واعي، محلي، ومبني على تجربة حقيقية في قطاعات حرجة.
+                </p>
+            </div>
+
+            <div class="compare-table-wrap animate-in">
+                <table class="compare-table">
+                    <thead>
+                        <tr>
+                            <th>الميزة</th>
+                            <th>Claude Code</th>
+                            <th>Hermes</th>
+                            <th>OpenClaw</th>
+                            <th class="adam-col">آدم بريزم</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>ذاكرة متجهة مدمجة</td>
+                            <td><span class="no-mark">JSONL فقط</span></td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td class="adam-col"><span class="yes-mark">✓ Qdrant + SQLite</span></td>
+                        </tr>
+                        <tr>
+                            <td>بوابة أخلاقية</td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td class="adam-col"><span class="yes-mark">✓ 4 قوانين</span></td>
+                        </tr>
+                        <tr>
+                            <td>طبقات وعي</td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td class="adam-col"><span class="yes-mark">✓ 12 طبقة</span></td>
+                        </tr>
+                        <tr>
+                            <td>قنوات اتصال مدمجة</td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td><span class="partial-mark">محدودة</span></td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td class="adam-col"><span class="yes-mark">✓ 25+</span></td>
+                        </tr>
+                        <tr>
+                            <td>MCP مدمج</td>
+                            <td><span class="partial-mark">جزئي</span></td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td class="adam-col"><span class="yes-mark">✓ آلاف الأدوات</span></td>
+                        </tr>
+                        <tr>
+                            <td>فحص وإصلاح تلقائي</td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td class="adam-col"><span class="yes-mark">✓ ذاتي</span></td>
+                        </tr>
+                        <tr>
+                            <td>شتغل 100% محلي</td>
+                            <td><span class="no-mark">سحابي</span></td>
+                            <td><span class="partial-mark">جزئي</span></td>
+                            <td><span class="partial-mark">جزئي</span></td>
+                            <td class="adam-col"><span class="yes-mark">✓ سيادة كاملة</span></td>
+                        </tr>
+                        <tr>
+                            <td>عزل الإنترنت الكامل</td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td class="adam-col"><span class="yes-mark">✓ ممكن</span></td>
+                        </tr>
+                        <tr>
+                            <td>دعم اللغة العربية</td>
+                            <td><span class="partial-mark">أساسي</span></td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td class="adam-col"><span class="yes-mark">✓ كامل</span></td>
+                        </tr>
+                        <tr>
+                            <td>تكلفة التشغيل</td>
+                            <td>$20/شهر+</td>
+                            <td>API $</td>
+                            <td>API $</td>
+                            <td class="adam-col"><span class="yes-mark">$0 محلي</span></td>
+                        </tr>
+                        <tr>
+                            <td>اختبارات شاملة</td>
+                            <td><span class="no-mark">محدودة</span></td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td class="adam-col"><span class="yes-mark">✓ 259+</span></td>
+                        </tr>
+                        <tr>
+                            <td>مفتوح المصدر بالكامل</td>
+                            <td><span class="warn-mark">مغلق</span></td>
+                            <td><span class="partial-mark">3 repos</span></td>
+                            <td><span class="partial-mark">جزئي</span></td>
+                            <td class="adam-col"><span class="yes-mark">✓ Apache 2.0</span></td>
+                        </tr>
+                        <tr>
+                            <td>تجربة من قطاعات حرجة</td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td><span class="no-mark">✕</span></td>
+                            <td class="adam-col"><span class="yes-mark">✓ 6 مشاريع</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+         SECURITY & SOVEREIGNTY
+         Carnegie Principle #12: Give a fine reputation to live up to
+         ============================================ -->
+    <section class="security-section" id="security">
+        <div class="container">
+            <div class="section-label">السيادة الرقمية</div>
+
+            <h2 class="section-title animate-in">
+                أنت تستاهل أدوات<br>تحترم ذكاءك
+            </h2>
+
+            <div class="security-mantra animate-in">
+                <span class="m1">بياناتك.</span>
+                <span class="m2">سيرفرك.</span>
+                <span class="m3">سيادتك.</span>
+            </div>
+
+            <div class="security-grid">
+                <div class="security-card animate-in">
+                    <div class="sec-icon">🛡️</div>
+                    <h3>عزل الإنترنت الكامل</h3>
+                    <p>تقدر تعزل اتصال الإنترنت تماماً. آدم يشتغل من غير سحابة — لأن بياناتك مش لازم تشوفها إلا إنت. ده اللي اتعلمته من التحول للينكس.</p>
+                </div>
+                <div class="security-card animate-in">
+                    <div class="sec-icon">🔐</div>
+                    <h3>طبقات تشفير إضافية</h3>
+                    <p>تقدر تضيف طبقات تشفير إضافية فوق الأساس. أمانك بين إيديك — مش بين إيدي حد تاني. ونحن ندلك على الطرق المحنية اللي تمكنك من فعل ذلك بنفسك.</p>
+                </div>
+                <div class="security-card animate-in">
+                    <div class="sec-icon">🏠</div>
+                    <h3>100% محلي — $0 تكلفة</h3>
+                    <p>مفيش بيانات بتطلع بره جهازك. مفيش API بتتصل بسيرفر غريب. سيادة رقمية حقيقية — مش شعار تسويقي. زي ما عملت في بورصة الأدوية: العميل مادفعش ولا جنيه لميتا.</p>
+                </div>
+                <div class="security-card animate-in">
+                    <div class="sec-icon">⚖️</div>
+                    <h3>4 قوانين أخلاقية</h3>
+                    <p>بوابة أخلاقية مدمجة لا تُخترق — تحمي المستخدم وتحميك. AI واعي = AI مسؤول. لو القانون الأخلاقي مش موجود، النظام بيشتغل من غير ضمير.</p>
+                </div>
+                <div class="security-card animate-in">
+                    <div class="sec-icon">✂️</div>
+                    <h3>تخصيص فائق</h3>
+                    <p>عزل كل خدمة مش محتاجها. خلي النظام خفيف ومُركّز — بس اللي ينفعك. نفس المبدأ اللي اتعلمته في التوأم: كل مكون مستقل، لو حاجة اتعطلت، الباقي يفضل شغال.</p>
+                </div>
+                <div class="security-card animate-in">
+                    <div class="sec-icon">🧪</div>
+                    <h3>10 ثغرات أمنية اتصححت</h3>
+                    <p>مفتاح .env افتراضي، تجاوز python_exec عبر class hierarchy، SSRF، CORS wildcard — كلها اتصححت. الكود اتعمل عليه اختبارات من موديلز عملاقة بهدف إفشاله — وفضل صامد.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+         CREDIBILITY NUMBERS
+         Carnegie Principle #2: Give honest appreciation
+         Carnegie Principle #5: Smile — let the numbers speak warmly
+         ============================================ -->
+    <section class="cred-section" id="credibility">
+        <div class="container">
+            <div class="section-label">أرقام من الواقع</div>
+            <h2 class="section-title animate-in">
+                مش أرقام تسويقية —<br>أرقام من مشاريع حقيقية
+            </h2>
+            <p class="section-desc animate-in">
+                كل رقم هنا جاي من تجربة فعلية في قطاع حرج. مش تخمين — ده اللي اشتغلنا بيه فعلاً.
+            </p>
+
+            <div class="cred-grid">
+                <div class="cred-card animate-in">
+                    <div class="cred-number">12K</div>
+                    <div class="cred-label">رسالة/يوم</div>
+                    <div class="cred-desc">بورصة الأدوية — معالجة وتفلتر لحظية</div>
+                </div>
+                <div class="cred-card animate-in">
+                    <div class="cred-number">100K</div>
+                    <div class="cred-label">مدخل/يوم</div>
+                    <div class="cred-desc">التوأم الرقمي — 300 غرفة بلف</div>
+                </div>
+                <div class="cred-card animate-in">
+                    <div class="cred-number">16K</div>
+                    <div class="cred-label">صنف يومي</div>
+                    <div class="cred-desc">40 شيت × 400 صنف — تحديث سعر</div>
+                </div>
+                <div class="cred-card animate-in">
+                    <div class="cred-number">259+</div>
+                    <div class="cred-label">اختبار ناجح</div>
+                    <div class="cred-desc">اختبارات مصممة لإفشال الكود</div>
+                </div>
+                <div class="cred-card animate-in">
+                    <div class="cred-number">15</div>
+                    <div class="cred-label">موديل تدريب</div>
+                    <div class="cred-desc">أذكى موديلات العالم — بتكلفة $0</div>
+                </div>
+                <div class="cred-card animate-in">
+                    <div class="cred-number">12B</div>
+                    <div class="cred-label">مكمم Gemma 4</div>
+                    <div class="cred-desc">الموديل الأساسي — QAT قادمة</div>
+                </div>
+                <div class="cred-card animate-in">
+                    <div class="cred-number">10</div>
+                    <div class="cred-label">ثغرات مُصلحة</div>
+                    <div class="cred-desc">2 حرجة + 3 عالية + 5 متوسطة</div>
+                </div>
+                <div class="cred-card animate-in">
+                    <div class="cred-number">$0</div>
+                    <div class="cred-label">تكلفة التشغيل</div>
+                    <div class="cred-desc">سيادة كاملة — محلي 100%</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+         CALL TO ACTION
+         Carnegie Principle #3: Arouse an eager want
+         Carnegie Principle #12: Make the other person happy about doing what you suggest
+         ============================================ -->
+    <section class="cta-section" id="cta">
+        <div class="container">
+            <div class="section-label">الخطوة التالية</div>
+            <h2 class="section-title animate-in">
+                حمّل دلوقتي.<br>
+                مجاني. مفتوح المصدر. للأبد.
+            </h2>
+            <p class="cta-tagline animate-in">
+                للحريه ثمن — ولها مذاق.
+                <br>
+                إنت مش بس حمّلت أداة — إنت انضميت لحركة <strong>AI عربي واعي</strong>.
+                <br>
+                بروتوكول مش ملك حد. <strong>ملكك إنت.</strong>
+                <br>
+                بُني على تجربة 6 مشاريع في قطاعات حرجة — مش في معمل أكاديمي.
+            </p>
+
+            <div class="cta-buttons animate-in">
+                <a href="https://github.com/othmastar/adam-prism" target="_blank" class="btn-giant">
+                    <span>⬇</span>
+                    حمّل آدم بريزم — مجاني للأبد
+                </a>
+            </div>
+
+            <div class="cta-install animate-in">
+                <span class="dollar">$</span> pip install adam-prism && git clone https://github.com/othmastar/adam-prism && cd adam-prism && pip install -e . && python main.py --port 8001
+            </div>
+
+            <p class="cta-fine-print animate-in">
+                Apache 2.0 License — استخدمه، عدّله، وزّعه بحرية.
+                <br>
+                بُني بـ ❤️ في مصر بواسطة <a href="https://github.com/othmastar" target="_blank">محمد عثمان</a> — مطور تعلم لوحده وبنى 6 مشاريع حقيقية بدون كورس.
+                <br>
+                جيما 4 (12B مكمم) هو الموديل الأساسي — ونسخة أدق وأصغر QAT قادمة قريباً.
+                <br>
+                للحريه ثمن ولها مذاق.
+            </p>
+        </div>
+    </section>
+
+    <!-- ============================================
+         FOOTER
+         ============================================ -->
+    <footer>
+        <div class="container">
+            <div class="footer-brand">آدم بريزم</div>
+            <p>البروتوكول اللي ولد من النار — بروتوكول الذكاء الاصطناعي المصري المفتوح</p>
+            <ul class="footer-links">
+                <li><a href="https://github.com/othmastar/adam-prism" target="_blank">GitHub</a></li>
+                <li><a href="https://github.com/othmastar/adam-prism/blob/main/LICENSE" target="_blank">الرخصة</a></li>
+                <li><a href="https://github.com/othmastar/adam-prism/issues" target="_blank">الإبلاغ عن مشكلة</a></li>
+            </ul>
+            <p style="margin-top: 16px;">© 2025 محمد عثمان — Apache 2.0</p>
+        </div>
+    </footer>
+
+    <!-- ============================================
+         SCROLL ANIMATION SCRIPT
+         ============================================ -->
+    <script>
+        // Intersection Observer for scroll animations
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px 0px -60px 0px',
+            threshold: 0.08
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.animate-in').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Smooth scroll for nav links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

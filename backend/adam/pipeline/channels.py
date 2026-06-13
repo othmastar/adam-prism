@@ -160,7 +160,7 @@ class TelegramChannel:
                         }
                     )
             except Exception as e:
-                logger.error(f"فشل إرسال رسالة Telegram: {e}")
+                logger.error(f"تعذر إرسال رسالة Telegram: {e}")
 
     def stop(self):
         """إيقاف الاستماع"""

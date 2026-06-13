@@ -131,7 +131,7 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
                         "cycle": self.cycle_count
                     }
         except Exception as e:
-            logger.warning(f"فحص الأمان فشل: {e}")
+            logger.warning(f"فحص الأمان تعذر: {e}")
             return {"_error": f"security:{e}"}
         await self._emit_step("فحص الأمان", "done")
 
@@ -155,7 +155,7 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
             intent = self._quick_classify_intent(user_message)
             self.active_mode = intent.get("mode", "communicator")
         except Exception as e:
-            logger.warning(f"تحليل القصد فشل: {e}")
+            logger.warning(f"تحليل القصد تعذر: {e}")
             errors.append(f"intent:{e}")
             intent = {"mode": "communicator", "intent_type": "general", "confidence": 1.0, "topics": []}
             self.active_mode = "communicator"
@@ -166,7 +166,7 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
         try:
             enriched_context = await self._build_context(user_message, intent)
         except Exception as e:
-            logger.warning(f"بناء السياق فشل: {e}")
+            logger.warning(f"بناء السياق تعذر: {e}")
             errors.append(f"context:{e}")
             enriched_context = {"intent": intent, "mode": self.active_mode, "cycle": self.cycle_count}
         self.metrics.timing("chat.build_context", (time.time() - ctx_start) * 1000)
@@ -186,7 +186,7 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
                 logger.warning("بحث المعرفة timed out")
                 errors.append("knowledge:timeout")
             except Exception as e:
-                logger.warning(f"بحث المعرفة فشل: {e}")
+                logger.warning(f"بحث المعرفة تعذر: {e}")
                 errors.append(f"knowledge:{e}")
         self.metrics.timing("chat.knowledge_search", (time.time() - ks_start) * 1000)
         await self._emit_step("البحث في الذاكرة", "done", {"results": len(relevant_knowledge)})
@@ -259,7 +259,7 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
             errors.append("generation:timeout")
             response_text = ""
         except Exception as e:
-            logger.error(f"التوليد فشل: {e}")
+            logger.error(f"التوليد تعذر: {e}")
             errors.append(f"generation:{e}")
             response_text = ""
 
@@ -375,7 +375,7 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
         self.metrics.timing("chat.cycle.total", cycle_duration * 1000)
 
         await self._emit_step("التسجيل والحفظ", "running")
-        if self.max_history > 0:
+        if response_text != fallback_response and self.max_history > 0:
             self.conversation_history.append({"role": "user", "content": user_message, "timestamp": datetime.now().isoformat()})
             self.conversation_history.append({"role": "assistant", "content": response_text, "timestamp": datetime.now().isoformat()})
             self._trim_conversation_history(self.max_history)
@@ -389,7 +389,7 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
                     "timestamp": datetime.now().isoformat()
                 })
             except Exception as e:
-                logger.warning(f"فشل حفظ في الدفتر: {e}")
+                logger.warning(f"تعذر حفظ في الدفتر: {e}")
 
         if self.knowledge:
             try:
@@ -398,7 +398,7 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
                     metadata={"mode": self.active_mode, "cycle": self.cycle_count, "intent": intent}
                 )
             except Exception as e:
-                logger.warning(f"فشل حفظ في Qdrant: {e}")
+                logger.warning(f"تعذر حفظ في Qdrant: {e}")
         await self._emit_step("التسجيل والحفظ", "done")
 
         _bg_task(self._extract_and_save_lessons(user_message, response_text, intent))
