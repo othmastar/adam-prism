@@ -434,8 +434,8 @@ class ModelSwapper:
                 try:
                     await current["unload_fn"]()
                     current["loaded"] = False
-                    except Exception as e:
-                        logger.error(f"تعذر تفريغ {self._current_model}: {e}")
+                except Exception as e:
+                    logger.error(f"تعذر تفريغ {self._current_model}: {e}")
             self._current_model = None
             logger.info("ModelSwapper: VRAM فارغ")
 
