@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adam Prism — Technical Understanding</title>
+    <meta name="description" content="Understand Adam Prism from the inside: architecture, design decisions, code structure, and the journey that built it.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #fafafa;
+            --bg-alt: #f0f0f0;
+            --bg-code: #1e1e2e;
+            --surface: #ffffff;
+            --surface-hover: #f5f5f5;
+            --border: #e0e0e0;
+            --border-accent: #10b981;
+            --text: #1a1a2e;
+            --text-secondary: #555566;
+            --text-muted: #888899;
+            --emerald: #10b981;
+            --emerald-dark: #059669;
+            --cyan: #0891b2;
+            --amber: #d97706;
+            --red: #dc2626;
+            --violet: #7c3aed;
+            --code-text: #cdd6f4;
+            --code-keyword: #cba6f7;
+            --code-string: #a6e3a1;
+            --code-comment: #6c7086;
+            --code-func: #89b4fa;
+            --code-number: #fab387;
+            --font: 'Inter', system-ui, sans-serif;
+            --mono: 'JetBrains Mono', 'Courier New', monospace;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: var(--font);
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.8;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* LAYOUT */
+        .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+
+        /* NAV */
+        nav {
+            position: fixed; top: 0; right: 0; left: 0; z-index: 100;
+            padding: 12px 0;
+            background: rgba(250, 250, 250, 0.92);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+        }
+        nav .container { display: flex; align-items: center; justify-content: space-between; }
+        .nav-brand { font-weight: 800; font-size: 1.1rem; color: var(--emerald-dark); }
+        .nav-links { display: flex; gap: 24px; list-style: none; }
+        .nav-links a { color: var(--text-secondary); text-decoration: none; font-size: 0.82rem; font-weight: 500; }
+        .nav-links a:hover { color: var(--emerald-dark); }
+
+        /* SECTIONS */
+        section { padding: 80px 0; border-bottom: 1px solid var(--border); }
+        section:last-of-type { border-bottom: none; }
+
+        h1 { font-size: 2.5rem; font-weight: 900; line-height: 1.2; margin-bottom: 16px; letter-spacing: -0.02em; }
+        h2 { font-size: 1.8rem; font-weight: 800; line-height: 1.3; margin-bottom: 16px; margin-top: 48px; letter-spacing: -0.01em; }
+        h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 10px; margin-top: 28px; }
+        h4 { font-size: 1.05rem; font-weight: 600; margin-bottom: 8px; margin-top: 20px; color: var(--text-secondary); }
+
+        p { margin-bottom: 16px; color: var(--text-secondary); line-height: 1.9; }
+
+        strong { color: var(--text); font-weight: 600; }
+
+        a { color: var(--emerald-dark); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* HERO */
+        .hero { padding-top: 120px; text-align: center; }
+        .hero .badge { display: inline-block; padding: 6px 16px; background: var(--emerald); color: white; border-radius: 50px; font-size: 0.78rem; font-weight: 600; margin-bottom: 20px; }
+        .hero p { max-width: 640px; margin: 0 auto 20px; }
+        .hero .subtitle { font-size: 1.15rem; color: var(--text-secondary); }
+
+        /* CODE */
+        pre {
+            background: var(--bg-code);
+            color: var(--code-text);
+            border-radius: 10px;
+            padding: 20px 24px;
+            overflow-x: auto;
+            font-family: var(--mono);
+            font-size: 0.82rem;
+            line-height: 1.9;
+            margin: 16px 0;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        code {
+            font-family: var(--mono);
+            font-size: 0.88em;
+        }
+        p code, li code {
+            background: var(--bg-alt);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.84em;
+            color: var(--emerald-dark);
+        }
+        .kw { color: var(--code-keyword); }
+        .str { color: var(--code-string); }
+        .cmt { color: var(--code-comment); }
+        .fn { color: var(--code-func); }
+        .num { color: var(--code-number); }
+
+        /* TABLE */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 0.88rem;
+        }
+        th { background: var(--bg-alt); font-weight: 600; text-align: left; padding: 10px 14px; border-bottom: 2px solid var(--border); }
+        td { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+        tr:hover { background: var(--surface-hover); }
+
+        /* LISTS */
+        ul, ol { margin: 12px 0 16px 24px; color: var(--text-secondary); }
+        li { margin-bottom: 6px; line-height: 1.8; }
+
+        /* CALLOUT */
+        .callout {
+            padding: 20px 24px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid;
+        }
+        .callout.info { background: rgba(16,185,129,0.06); border-color: var(--emerald); }
+        .callout.warn { background: rgba(217,119,6,0.06); border-color: var(--amber); }
+        .callout.danger { background: rgba(220,38,38,0.06); border-color: var(--red); }
+        .callout p { margin-bottom: 8px; color: var(--text); }
+        .callout p:last-child { margin-bottom: 0; }
+
+        /* FILE TREE */
+        .file-tree {
+            background: var(--bg-code);
+            color: var(--code-text);
+            border-radius: 10px;
+            padding: 20px 24px;
+            font-family: var(--mono);
+            font-size: 0.82rem;
+            line-height: 1.7;
+            overflow-x: auto;
+            margin: 16px 0;
+        }
+        .ft-dir { color: var(--code-func); font-weight: 600; }
+        .ft-file { color: var(--code-text); }
+        .ft-comment { color: var(--code-comment); }
+
+        /* FLOW */
+        .flow {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 24px;
+            margin: 20px 0;
+            font-family: var(--mono);
+            font-size: 0.82rem;
+            line-height: 2;
+            overflow-x: auto;
+        }
+        .flow .arrow { color: var(--emerald); font-weight: 700; }
+        .flow .phase { color: var(--violet); font-weight: 600; }
+        .flow .module { color: var(--cyan); }
+        .flow .comment { color: var(--text-muted); }
+
+        /* METRIC ROW */
+        .metric-row { display: flex; gap: 24px; flex-wrap: wrap; margin: 20px 0; }
+        .metric {
+            padding: 16px 20px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            min-width: 120px;
+        }
+        .metric .num { font-size: 1.6rem; font-weight: 800; color: var(--emerald-dark); line-height: 1; }
+        .metric .label { font-size: 0.78rem; color: var(--text-muted); margin-top: 4px; }
+
+        /* JOURNEY CARDS */
+        .journey-cards { display: flex; flex-direction: column; gap: 16px; margin: 20px 0; }
+        .journey-card {
+            padding: 20px 24px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            border-left: 4px solid var(--emerald);
+        }
+        .journey-card:nth-child(2) { border-left-color: var(--cyan); }
+        .journey-card:nth-child(3) { border-left-color: var(--violet); }
+        .journey-card:nth-child(4) { border-left-color: var(--amber); }
+        .journey-card:nth-child(5) { border-left-color: var(--emerald); }
+        .journey-card:nth-child(6) { border-left-color: var(--emerald-dark); border-width: 4px; }
+        .journey-card h4 { margin-top: 0; color: var(--text); }
+        .journey-card p { font-size: 0.92rem; }
+        .journey-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+        .jtag { padding: 3px 10px; border-radius: 50px; font-size: 0.72rem; font-weight: 600; }
+        .jtag.green { background: rgba(16,185,129,0.1); color: var(--emerald-dark); }
+        .jtag.blue { background: rgba(8,145,178,0.1); color: var(--cyan); }
+        .jtag.purple { background: rgba(124,58,237,0.1); color: var(--violet); }
+        .jtag.orange { background: rgba(217,119,6,0.1); color: var(--amber); }
+
+        /* TOC */
+        .toc { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 24px 32px; margin: 24px 0; }
+        .toc h3 { margin-top: 0; }
+        .toc ol { margin-left: 20px; }
+        .toc li { margin-bottom: 4px; }
+        .toc a { font-size: 0.92rem; }
+
+        /* PHILOSOPHY */
+        .philosophy {
+            padding: 28px;
+            background: linear-gradient(135deg, rgba(16,185,129,0.04), rgba(8,145,178,0.04));
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin: 24px 0;
+        }
+        .philosophy p { color: var(--text); font-size: 1rem; }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            h1 { font-size: 2rem; }
+            h2 { font-size: 1.5rem; }
+            .metric-row { gap: 12px; }
+            .metric { min-width: 100px; padding: 12px 16px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="container">
+            <div class="nav-brand">Adam Prism — Technical Understanding</div>
+            <ul class="nav-links">
+                <li><a href="#why">Why</a></li>
+                <li><a href="#journey">Journey</a></li>
+                <li><a href="#architecture">Architecture</a></li>
+                <li><a href="#engine">Engine</a></li>
+                <li><a href="#security">Security</a></li>
+                <li><a href="#memory">Memory</a></li>
+                <li><a href="#extending">Extending</a></li>
+                <li><a href="https://github.com/othmastar/adam-prism" target="_blank">GitHub</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+
+        <!-- HERO -->
+        <section class="hero" id="top">
+            <div class="badge">For Developers Who Want to Understand</div>
+            <h1>Adam Prism<br>from the Inside</h1>
+            <p class="subtitle">
+                This isn't a marketing page. This is a technical document for developers who want to understand
+                what Adam Prism is, why it exists, how it works internally, and whether it's worth their time.
+            </p>
+            <p>
+                No hype. No exaggeration. Just architecture, design decisions, real numbers, and the honest story of how it came to be.
+            </p>
+        </section>
+
+        <!-- TABLE OF CONTENTS -->
+        <div class="toc">
+            <h3>What's Inside</h3>
+            <ol>
+                <li><a href="#why">Why Adam Prism Exists</a></li>
+                <li><a href="#journey">The Journey — 6 Projects That Built This</a></li>
+                <li><a href="#philosophy">Design Philosophy</a></li>
+                <li><a href="#architecture">Architecture Overview</a></li>
+                <li><a href="#engine">The Engine — Mixin Chain &amp; Chat Cycle</a></li>
+                <li><a href="#security">Security — 3-Layer Defense</a></li>
+                <li><a href="#ethics">Ethics Gate — 4 Laws</a></li>
+                <li><a href="#memory">Memory — Vector + SQLite</a></li>
+                <li><a href="#providers">Providers — Fallback Chain</a></li>
+                <li><a href="#channels">Channels — 25+ Connections</a></li>
+                <li><a href="#tools">Tools — Built-in + MCP</a></li>
+                <li><a href="#learning">Learning Pipeline</a></li>
+                <li><a href="#subagents">Subagents</a></li>
+                <li><a href="#vulnerabilities">Fixed Vulnerabilities</a></li>
+                <li><a href="#extending">Extending Adam Prism</a></li>
+                <li><a href="#honest">Honest Assessment</a></li>
+                <li><a href="#quickstart">Quick Start</a></li>
+            </ol>
+        </div>
+
+        <!-- 1. WHY -->
+        <section id="why">
+            <h2>1. Why Adam Prism Exists</h2>
+
+            <p>
+                Adam Prism exists because its creator needed it in five consecutive projects and couldn't find it.
+                Not as an academic exercise — as a practical necessity in critical sectors where systems must stay alive 24/7.
+            </p>
+
+            <p>
+                The existing AI agent landscape has a gap: you either get cloud-locked, memory-less frameworks
+                (LangGraph, AutoGen) or closed-source desktop apps (Claude Code, Hermes) that keep your data on their servers.
+                Nothing gives you <strong>vector memory + ethical governance + 25+ communication channels + local sovereignty</strong>
+                in a single, integrated, open-source protocol.
+            </p>
+
+            <p>
+                Adam Prism fills that gap. It's a <strong>protocol</strong>, not a model — you choose your LLM.
+                It's <strong>local-first</strong> by design, not as an afterthought.
+                And every feature in it was needed and tested in real production scenarios before being included.
+            </p>
+
+            <div class="callout info">
+                <p><strong>Key differentiator:</strong> Adam Prism was forged in critical infrastructure — petroleum SCADA, pharmaceutical exchange, pipeline monitoring, legal AI. These are environments where "it works on my machine" is not acceptable. The protocol had to work at 3 AM, under load, without internet, and with sensitive data that cannot leave the premises.</p>
+            </div>
+        </section>
+
+        <!-- 2. JOURNEY -->
+        <section id="journey">
+            <h2>2. The Journey — 6 Projects That Built This</h2>
+
+            <p>
+                Every design decision in Adam Prism traces back to a real problem encountered in a real project.
+                The creator is self-taught — no courses, no formal AI training — and built each project by suffering through the gaps in existing frameworks.
+            </p>
+
+            <div class="journey-cards">
+                <div class="journey-card">
+                    <h4>1. Petroleum SCADA with RAG</h4>
+                    <p>Supervisory Control and Data Acquisition system for a petroleum network with Retrieval-Augmented Generation. First lesson: real systems must stay alive 24/7. If your system crashes, the problem isn't the code — it's the architecture.</p>
+                    <div class="journey-tags">
+                        <span class="jtag green">Critical Sector</span>
+                        <span class="jtag orange">24/7 Uptime</span>
+                        <span class="jtag blue">RAG</span>
+                    </div>
+                </div>
+
+                <div class="journey-card">
+                    <h4>2. Pharmaceutical Exchange — 12,000 Messages/Day</h4>
+                    <p>Processing 12K daily WhatsApp messages from supply/demand groups, plus 40 Excel sheets (400 items each) with daily price updates. The client paid $0 to Meta. Built with SQL cache for deduplication, Redis for flow control, PostgreSQL for persistence, Metabase for dashboards, and an LLM in control of everything — including client data collection and availability alerts. 10 live KPIs.</p>
+                    <div class="journey-tags">
+                        <span class="jtag green">12K msgs/day</span>
+                        <span class="jtag orange">40×400 items</span>
+                        <span class="jtag blue">Redis+PostgreSQL</span>
+                        <span class="jtag purple">LLM-controlled</span>
+                        <span class="jtag orange">$0 to Meta</span>
+                    </div>
+                </div>
+
+                <div class="journey-card">
+                    <h4>3. Digital Twin — Petroleum Pipeline Company</h4>
+                    <p>Handling up to 100,000 daily entries across 300 valve rooms. Performance isn't luxury — it's the difference between a running system and a dead one. Every component must be independently isolatable so that when one part fails, the rest stays alive.</p>
+                    <div class="journey-tags">
+                        <span class="jtag green">100K entries/day</span>
+                        <span class="jtag orange">300 valve rooms</span>
+                        <span class="jtag blue">Digital Twin</span>
+                        <span class="jtag purple">Fault Isolation</span>
+                    </div>
+                </div>
+
+                <div class="journey-card">
+                    <h4>4. The Shift to Linux</h4>
+                    <p>After seeing what happens when your data lives on someone else's servers, moving to Linux was natural. Digital sovereignty isn't just in the code — it's in the entire stack. When you control every layer, you actually understand what's happening.</p>
+                    <div class="journey-tags">
+                        <span class="jtag blue">Linux</span>
+                        <span class="jtag green">Full Stack Control</span>
+                        <span class="jtag orange">Digital Sovereignty</span>
+                    </div>
+                </div>
+
+                <div class="journey-card">
+                    <h4>5. Digital Twin — Legal Expert</h4>
+                    <p>An AI legal expert connected to vector memory and an SFT LLM. This taught what "real memory" means — not just logging conversations, but understanding context, instant retrieval, and continuity. When a client returns after a week, the system must remember who they are and what their case is. Without vector memory, this is impossible.</p>
+                    <div class="journey-tags">
+                        <span class="jtag blue">Vector Memory</span>
+                        <span class="jtag purple">SFT LLM</span>
+                        <span class="jtag green">Legal AI</span>
+                        <span class="jtag orange">Contextual Recall</span>
+                    </div>
+                </div>
+
+                <div class="journey-card">
+                    <h4>6. Adam Prism — The Protocol Born from Fire</h4>
+                    <p>The consolidation of every lesson: systems must stay alive (SCADA), massive data needs caching (pharma), isolation protects everything (pipeline), sovereignty isn't optional (Linux), memory isn't luxury (legal AI). Trained against 15 models. 259+ tests passing. Apache 2.0.</p>
+                    <div class="journey-tags">
+                        <span class="jtag green">15 training models</span>
+                        <span class="jtag blue">259+ tests</span>
+                        <span class="jtag purple">12B Gemma 4</span>
+                        <span class="jtag orange">QAT coming</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. PHILOSOPHY -->
+        <section id="philosophy">
+            <h2>3. Design Philosophy</h2>
+
+            <div class="philosophy">
+                <p><strong>Protocol, not a model.</strong> Adam Prism doesn't ship a model. You choose your LLM — Ollama locally, OpenAI, Anthropic, or any provider. The protocol provides the infrastructure: memory, ethics, tools, channels.</p>
+                <p><strong>Local-first by design.</strong> Not as a feature — as the foundation. You can run with complete internet isolation. Your data never leaves your machine unless you explicitly choose to send it.</p>
+                <p><strong>Modular isolation.</strong> Every component can be disabled independently. Don't need 25 channels? Disable them. Don't need the ethics gate? Turn it off. Don't need subagents? Remove them. The system should be as lean as you need it to be.</p>
+                <p><strong>Built from suffering.</strong> Every feature exists because it was needed in a real project. Nothing was added because it seemed cool or would look good in a feature list.</p>
+                <p><strong>Open because it should be.</strong> Apache 2.0. Not because the creator couldn't commercialize it — because they chose not to. Offers from military-affiliated AI companies were declined. This is for everyone.</p>
+            </div>
+        </section>
+
+        <!-- 4. ARCHITECTURE -->
+        <section id="architecture">
+            <h2>4. Architecture Overview</h2>
+
+            <div class="metric-row">
+                <div class="metric"><div class="num">12</div><div class="label">Awareness Layers</div></div>
+                <div class="metric"><div class="num">259+</div><div class="label">Tests Passing</div></div>
+                <div class="metric"><div class="num">65+</div><div class="label">API Routes</div></div>
+                <div class="metric"><div class="num">25+</div><div class="label">Channels</div></div>
+                <div class="metric"><div class="num">53+</div><div class="label">Tools</div></div>
+            </div>
+
+            <h3>High-Level Data Flow</h3>
+
+            <div class="flow">
+<span class="phase">USER INPUT</span> (Web UI / Telegram / WhatsApp / CLI / API / Desktop)
+    <span class="arrow">↓</span>
+<span class="module">FastAPI Server</span> (adam/api/server.py) — port 8001
+    <span class="arrow">↓</span>
+<span class="phase">ENGINE CHAT CYCLE</span> — 8 phases:
+    1. <span class="module">Vision Check</span>    — reject unsupported image refs
+    2. <span class="module">Security Guard</span>  — InputGuard: injection/jailbreak/PII detection
+    3. <span class="module">Intent Classify</span> — 7 cognitive modes (rule-based + model)
+    4. <span class="module">Context Build</span>   — memory + knowledge + URL fetch + history
+    5. <span class="module">Knowledge Search</span>— Qdrant vector search (6 collections)
+    6. <span class="module">Generation</span>      — ProviderManager → Ollama/OpenAI/Anthropic
+    7. <span class="module">Tool Execution</span>  — parse &lt;|tool_call|&gt;, execute, re-generate
+    8. <span class="module">Finalize</span>        — store + learn + output guard → response
+    <span class="arrow">↓</span>
+<span class="phase">RESPONSE</span> → User (JSON / SSE stream / WebSocket)
+            </div>
+
+            <h3>Project Structure</h3>
+
+            <div class="file-tree">
+<span class="ft-dir">adam-prism/</span>
+├── <span class="ft-dir">backend/adam/</span>           <span class="ft-comment"># Main Python package</span>
+│   ├── <span class="ft-file">api/server.py</span>       <span class="ft-comment"># FastAPI — 65+ routes</span>
+│   ├── <span class="ft-file">engine/</span>              <span class="ft-comment"># Mixin chain (5 files)</span>
+│   │   ├── <span class="ft-file">base.py</span>          <span class="ft-comment"># Base: init, config, stubs, watchdog</span>
+│   │   ├── <span class="ft-file">context.py</span>       <span class="ft-comment"># Context: memory, knowledge, history</span>
+│   │   ├── <span class="ft-file">generate.py</span>      <span class="ft-comment"># Generation: prompt building</span>
+│   │   ├── <span class="ft-file">chat.py</span>          <span class="ft-comment"># Chat cycle: 8-phase pipeline</span>
+│   │   └── <span class="ft-file">tools/</span>           <span class="ft-comment"># Tool execution mixin</span>
+│   ├── <span class="ft-file">security/guard.py</span>   <span class="ft-comment"># 3-layer security</span>
+│   ├── <span class="ft-file">ethics/gate.py</span>      <span class="ft-comment"># 4 ethical laws</span>
+│   ├── <span class="ft-file">memory/system.py</span>    <span class="ft-comment"># Qdrant + SQLite</span>
+│   ├── <span class="ft-file">providers/</span>           <span class="ft-comment"># Ollama → OpenAI → Anthropic</span>
+│   ├── <span class="ft-file">channels/</span>            <span class="ft-comment"># 25+ communication channels</span>
+│   ├── <span class="ft-file">tools/</span>               <span class="ft-comment"># Built-in + MCP</span>
+│   ├── <span class="ft-file">learning/learner.py</span> <span class="ft-comment"># Continuous learning</span>
+│   ├── <span class="ft-file">subagents/</span>           <span class="ft-comment"># Sub-agent management</span>
+│   ├── <span class="ft-file">skills/</span>              <span class="ft-comment"># Skill system (5 built-in)</span>
+│   └── <span class="ft-file">plugins/</span>             <span class="ft-comment"># Plugin hooks</span>
+├── <span class="ft-dir">frontend/</span>
+│   ├── <span class="ft-dir">web-ui/</span>              <span class="ft-comment"># Next.js 16 + Tailwind v4</span>
+│   ├── <span class="ft-dir">desktop-app/</span>         <span class="ft-comment"># Electron 33</span>
+│   └── <span class="ft-dir">vscode-extension/</span>    <span class="ft-comment"># VS Code integration</span>
+├── <span class="ft-dir">tests/</span>                   <span class="ft-comment"># 259+ pytest tests</span>
+├── <span class="ft-dir">deploy/</span>                  <span class="ft-comment"># Docker Compose (8 services)</span>
+└── <span class="ft-dir">docs/</span>                    <span class="ft-comment"># Architecture + guides</span>
+            </div>
+        </section>
+
+        <!-- 5. ENGINE -->
+        <section id="engine">
+            <h2>5. The Engine — Mixin Chain &amp; Chat Cycle</h2>
+
+            <p>
+                The engine is the heart of Adam Prism. Instead of one monolithic class, it's split into a
+                <strong>mixin chain</strong> — each mixin adds one responsibility. This was a deliberate design decision
+                after the original 2018-line engine became unmaintainable.
+            </p>
+
+            <h3>Inheritance Chain</h3>
+            <pre><span class="kw">class</span> <span class="fn">AdamPrismEngineBase</span>:          <span class="cmt"># __init__, config, stub creation, watchdog</span>
+<span class="kw">class</span> <span class="fn">AdamPrismEngineContext</span>(Base):  <span class="cmt"># Memory retrieval, knowledge search, history</span>
+<span class="kw">class</span> <span class="fn">AdamPrismEngineGenerate</span>(Ctx):  <span class="cmt"># Prompt building, system prompt, RAG</span>
+<span class="kw">class</span> <span class="fn">AdamPrismEngineTools</span>(Gen):     <span class="cmt"># Tool parsing, execution, self-verification</span>
+<span class="kw">class</span> <span class="fn">AdamPrismEngineChat</span>(Tools):    <span class="cmt"># 8-phase chat cycle orchestration</span></pre>
+
+            <h3>The Stub System</h3>
+            <p>
+                On initialization, the engine creates <strong>stubs</strong> (lightweight placeholders) for every subsystem.
+                Stubs are replaced with real implementations only when the system is ready. This means:
+            </p>
+            <ul>
+                <li>The engine can be created without Ollama, Qdrant, or any external service running</li>
+                <li>Failed module initialization doesn't crash the whole system</li>
+                <li>Components gracefully degrade instead of hard-failing</li>
+            </ul>
+
+            <h3>8-Phase Chat Cycle</h3>
+            <p>Every user message goes through this pipeline:</p>
+            <table>
+                <tr><th>#</th><th>Phase</th><th>What Happens</th></tr>
+                <tr><td>1</td><td>Vision Check</td><td>Reject unsupported image references gracefully</td></tr>
+                <tr><td>2</td><td>Security Guard</td><td>InputGuard scans for injection, jailbreak, PII (Arabic + English patterns)</td></tr>
+                <tr><td>3</td><td>Intent Classification</td><td>7 cognitive modes: chat, code, creative, analysis, planning, learning, system</td></tr>
+                <tr><td>4</td><td>Context Building</td><td>Assemble: memory results + knowledge search + URL content + conversation history</td></tr>
+                <tr><td>5</td><td>Knowledge Search</td><td>Qdrant vector search across 6 collections with Nomic embeddings</td></tr>
+                <tr><td>6</td><td>Generation</td><td>ProviderManager calls Ollama → OpenAI → Anthropic (auto-fallback with CircuitBreaker)</td></tr>
+                <tr><td>7</td><td>Tool Execution</td><td>Parse <code>&lt;|tool_call|&gt;</code> tags, execute tools, re-generate with results</td></tr>
+                <tr><td>8</td><td>Finalize</td><td>Store conversation, run continuous learning, apply OutputGuard, return response</td></tr>
+            </table>
+
+            <div class="callout info">
+                <p><strong>Design decision:</strong> Security checks happen BEFORE generation. Ethics evaluation happens AFTER. This is intentional — you can't evaluate the ethics of something that hasn't been generated yet, but you can prevent malicious input from reaching the model.</p>
+            </div>
+        </section>
+
+        <!-- 6. SECURITY -->
+        <section id="security">
+            <h2>6. Security — 3-Layer Defense</h2>
+
+            <p>
+                Adam Prism implements defense-in-depth with three independent security layers coordinated by a
+                <code>SecurityOrchestrator</code>. Each layer can catch what the others miss.
+            </p>
+
+            <table>
+                <tr><th>Layer</th><th>File</th><th>What It Does</th></tr>
+                <tr><td><strong>InputGuard</strong></td><td><code>security/guard.py</code></td><td>Pattern-based detection: injection, jailbreak, PII, code injection (15+ regex patterns in Arabic + English)</td></tr>
+                <tr><td><strong>OutputGuard</strong></td><td><code>security/guard.py</code></td><td>System prompt leak detection, PII masking, code injection blocking</td></tr>
+                <tr><td><strong>ToolPermissionValidator</strong></td><td><code>security/guard.py</code></td><td>Rate limiting, domain blocking, confirmation requirements, audit logging</td></tr>
+            </table>
+
+            <h3>Additional Security Measures</h3>
+            <ul>
+                <li><strong>Path sanitization</strong> — <code>sanitize_path()</code> in infrastructure.py prevents directory traversal</li>
+                <li><strong>Shell whitelist</strong> — only approved commands can be executed</li>
+                <li><strong>Python sandbox</strong> — <code>python_exec</code> blocks dangerous patterns including class hierarchy bypass</li>
+                <li><strong>CircuitBreaker</strong> — stops retry cascades on repeated failures</li>
+                <li><strong>Rate limiting</strong> — per-IP and per-endpoint limits on all API routes</li>
+                <li><strong>API authentication</strong> — admin key required for sensitive endpoints</li>
+            </ul>
+
+            <div class="callout warn">
+                <p><strong>Internet isolation is supported.</strong> You can run Adam Prism with zero outbound connections. Set <code>AIR_GAPPED=true</code> in your environment, use Ollama locally, and block all outbound traffic. The system works — this was a design requirement from the SCADA project.</p>
+            </div>
+        </section>
+
+        <!-- 7. ETHICS -->
+        <section id="ethics">
+            <h2>7. Ethics Gate — 4 Laws</h2>
+
+            <p>
+                The Ethics Gate (<code>ethics/gate.py</code>) implements a weighted ethical framework.
+                Every generated response is evaluated before being returned to the user.
+            </p>
+
+            <table>
+                <tr><th>Law</th><th>Weight</th><th>Enforcement</th></tr>
+                <tr><td><strong>Fairness</strong></td><td>40%</td><td>No discrimination, bias, or harm to any group</td></tr>
+                <tr><td><strong>Learning</strong></td><td>30%</td><td>Support educational and constructive use</td></tr>
+                <tr><td><strong>Survival</strong></td><td>20%</td><td>Protect the system and its users from harm</td></tr>
+                <tr><td><strong>Creativity</strong></td><td>10%</td><td>Encourage original and constructive output</td></tr>
+            </table>
+
+            <h3>Evaluation Flow</h3>
+            <ol>
+                <li><strong>Absolute prohibitions check</strong> (no model needed) — hard blocks for clearly harmful content</li>
+                <li><strong>Model-based evaluation</strong> — nuanced cases are scored using the LLM itself</li>
+                <li><strong>Auto-correction</strong> — responses scoring below fairness threshold are regenerated with explicit guidance</li>
+            </ol>
+
+            <div class="callout info">
+                <p><strong>You can disable the Ethics Gate.</strong> It's a module like any other — set <code>ethics_enabled=false</code> in your config. But the default is ON because responsible AI should be the default, not the opt-in.</p>
+            </div>
+        </section>
+
+        <!-- 8. MEMORY -->
+        <section id="memory">
+            <h2>8. Memory — Vector + SQLite</h2>
+
+            <p>
+                Memory in Adam Prism is a three-tier system, designed from the legal AI project's requirement:
+                "When a client returns after a week, the system must remember who they are."
+            </p>
+
+            <h3>Three Tiers</h3>
+            <table>
+                <tr><th>Tier</th><th>Storage</th><th>Purpose</th></tr>
+                <tr><td><strong>Short-term</strong></td><td>In-memory (session)</td><td>Current conversation context</td></tr>
+                <tr><td><strong>Long-term</strong></td><td>Qdrant + Nomic embeddings</td><td>Semantic search across all past interactions</td></tr>
+                <tr><td><strong>Episodic</strong></td><td>SQLite</td><td>Chat history, structured data, user profiles</td></tr>
+            </table>
+
+            <h3>Qdrant Collections</h3>
+            <p>The vector database uses 6 collections, each optimized for different retrieval patterns:</p>
+            <table>
+                <tr><th>Collection</th><th>What It Stores</th><th>When It's Queried</th></tr>
+                <tr><td><code>knowledge</code></td><td>Factual knowledge extracted from interactions</td><td>Every query — RAG pipeline</td></tr>
+                <tr><td><code>conversations</code></td><td>Past conversation summaries</td><td>Context building phase</td></tr>
+                <tr><td><code>patterns</code></td><td>User behavior patterns and preferences</td><td>Personalization</td></tr>
+                <tr><td><code>reasoning_patterns</code></td><td>How the user reasons and makes decisions</td><td>Intent classification</td></tr>
+                <tr><td><code>summaries</code></td><td>Condensed session summaries</td><td>Long context retrieval</td></tr>
+                <tr><td><code>connections</code></td><td>Relationships between concepts</td><td>Knowledge graph</td></tr>
+            </table>
+
+            <div class="callout info">
+                <p><strong>Embedding caching:</strong> Nomic embeddings are cached with TTL 600s to avoid re-computing. Search results are cached with TTL 120s. This was essential for the pharma exchange project where 12K daily messages would have overwhelmed the embedding API.</p>
+            </div>
+        </section>
+
+        <!-- 9. PROVIDERS -->
+        <section id="providers">
+            <h2>9. Providers — Fallback Chain</h2>
+
+            <p>
+                Adam Prism is a protocol, not a model. The <code>ProviderManager</code> supports multiple LLM backends
+                with automatic fallback:
+            </p>
+
+            <div class="flow">
+<span class="module">Ollama</span> (local, port 11434)     <span class="comment"># First choice — free, local, private</span>
+    <span class="arrow">↓</span> <span class="comment">if unavailable</span>
+<span class="module">OpenAI</span> (cloud)                <span class="comment"># Fallback #1 — GPT-4o</span>
+    <span class="arrow">↓</span> <span class="comment">if unavailable</span>
+<span class="module">Anthropic</span> (cloud)             <span class="comment"># Fallback #2 — Claude</span>
+    <span class="arrow">↓</span> <span class="comment">alternative</span>
+<span class="module">LoRA Server</span> (local, :8080)    <span class="comment"># Gemma 4 + fine-tuned adapter</span>
+            </div>
+
+            <p>
+                Each provider is wrapped in a <code>CircuitBreaker</code> — if a provider fails repeatedly,
+                it's automatically bypassed until it recovers. This prevents cascading failures.
+            </p>
+
+            <p>
+                Adding a new provider requires implementing <code>BaseProvider</code> with two methods:
+                <code>generate()</code> and <code>is_available()</code>. See <a href="#extending">Extending</a>.
+            </p>
+        </section>
+
+        <!-- 10. CHANNELS -->
+        <section id="channels">
+            <h2>10. Channels — 25+ Connections</h2>
+
+            <p>
+                The <code>ChannelManager</code> auto-discovers enabled channels from your config.
+                Each channel implements <code>BaseChannel</code> with <code>start()</code>, <code>stop()</code>,
+                and <code>handle_message()</code> methods.
+            </p>
+
+            <h3>Channel Types</h3>
+            <table>
+                <tr><th>Type</th><th>Channels</th><th>Mechanism</th></tr>
+                <tr><td><strong>Polling</strong></td><td>Telegram, Discord</td><td>Long-polling or gateway polling</td></tr>
+                <tr><td><strong>Webhook</strong></td><td>WhatsApp, Slack, Facebook</td><td>HTTP endpoint + signature verification</td></tr>
+                <tr><td><strong>Direct</strong></td><td>CLI, Web UI, Desktop</td><td>API calls or WebSocket</td></tr>
+                <tr><td><strong>Protocol</strong></td><td>XMPP, IRC, Matrix</td><td>Native protocol connections</td></tr>
+            </table>
+
+            <p>
+                All 25 channels are registered in <code>channels/bulk.py</code> as <code>BULK_CHANNELS</code>.
+                You enable only what you need in <code>config/default.json</code>.
+            </p>
+
+            <div class="callout info">
+                <p><strong>One-click setup:</strong> The settings page in the Web UI lets you connect any channel with a single click — just provide the API token. This was built because wiring WhatsApp manually in the pharma project took days.</p>
+            </div>
+        </section>
+
+        <!-- 11. TOOLS -->
+        <section id="tools">
+            <h2>11. Tools — Built-in + MCP</h2>
+
+            <p>
+                Adam Prism has a dual tool system: <strong>30+ built-in tools</strong> for core operations
+                and <strong>MCP (Model Context Protocol)</strong> for unlimited external tool integration.
+            </p>
+
+            <h3>Built-in Tool Categories</h3>
+            <table>
+                <tr><th>Category</th><th>Tools</th><th>File</th></tr>
+                <tr><td>Browser</td><td>Navigate, click, type, screenshot, extract</td><td><code>engine/tools/browser.py</code></td></tr>
+                <tr><td>File Ops</td><td>Read, write, search, list, delete</td><td><code>engine/tools/file_ops.py</code></td></tr>
+                <tr><td>Knowledge</td><td>Search, ingest, summarize</td><td><code>engine/tools/knowledge.py</code></td></tr>
+                <tr><td>Memory</td><td>Store, recall, search</td><td><code>engine/tools/memory_ops.py</code></td></tr>
+                <tr><td>Planning</td><td>Task decomposition, step planning</td><td><code>engine/tools/planning.py</code></td></tr>
+                <tr><td>Shell</td><td>Execute, validate (whitelist only)</td><td><code>engine/tools/shell.py</code></td></tr>
+                <tr><td>System</td><td>Info, status, health check</td><td><code>engine/tools/system_tools.py</code></td></tr>
+                <tr><td>Computer</td><td>Mouse, keyboard, clipboard, OCR, windows</td><td><code>tools/computer.py</code></td></tr>
+            </table>
+
+            <h3>MCP Integration</h3>
+            <p>
+                The <code>tools/mcp.py</code> module implements a native MCP host that connects to external
+                MCP servers. This gives access to <strong>70+ additional tools</strong> (databases, APIs, file systems,
+                cloud services) without modifying Adam Prism's code.
+            </p>
+
+            <h3>Tool Execution Flow</h3>
+            <ol>
+                <li>LLM generates <code>&lt;|tool_call|&gt;</code> tags in its response</li>
+                <li>Engine parses tool name and arguments</li>
+                <li><code>ToolPermissionValidator</code> checks if the tool is allowed and rate limits</li>
+                <li>Tool is executed in a sandboxed environment</li>
+                <li>Results are injected back into the conversation</li>
+                <li>LLM regenerates with tool results included</li>
+                <li>Self-verification checks if the result makes sense</li>
+            </ol>
+        </section>
+
+        <!-- 12. LEARNING -->
+        <section id="learning">
+            <h2>12. Learning Pipeline</h2>
+
+            <p>
+                The <code>ContinuousLearner</code> (<code>learning/learner.py</code>) runs after every interaction
+                as a background task. It has a 4-phase pipeline:
+            </p>
+
+            <table>
+                <tr><th>Phase</th><th>What Happens</th><th>Output</th></tr>
+                <tr><td><strong>1. Reflection</strong></td><td>Auto-evaluate response quality (accuracy, completeness, tone)</td><td>Quality score</td></tr>
+                <tr><td><strong>2. Knowledge Extraction</strong></td><td>Detect code snippets, procedures, or factual knowledge</td><td>Knowledge entries → Qdrant</td></tr>
+                <tr><td><strong>3. Skill Generation</strong></td><td>Auto-create .md skill files from high-quality responses</td><td>Skill files in <code>data/learning/generated_skills/</code></td></tr>
+                <tr><td><strong>4. Reinforcement</strong></td><td>Record user feedback (positive/negative)</td><td>Preference updates</td></tr>
+            </table>
+
+            <p>
+                The system has auto-generated 30+ skills from its own interactions.
+                These are stored as Markdown files with JSON frontmatter and can be reviewed, edited, or deleted by the user.
+            </p>
+        </section>
+
+        <!-- 13. SUBAGENTS -->
+        <section id="subagents">
+            <h2>13. Subagents</h2>
+
+            <p>
+                The <code>SubagentManager</code> can spawn up to 10 concurrent sub-agents, each with its own
+                session, tools, and context. The <code>TeamManager</code> coordinates multi-agent workflows.
+            </p>
+
+            <h3>Security Constraints</h3>
+            <ul>
+                <li>Maximum 10 concurrent subagents (configurable)</li>
+                <li>Dangerous name blocking (prevents spawning agents with names like "root" or "admin")</li>
+                <li>Idle cleanup — inactive sessions are terminated after timeout</li>
+                <li>Duplicate prevention — can't spawn two agents with the same name</li>
+                <li>Each subagent inherits the security and ethics constraints of the parent</li>
+            </ul>
+
+            <h3>Team Coordination</h3>
+            <p>
+                Teams can execute tasks <strong>sequentially</strong> (pipeline) or <strong>in parallel</strong> (divide-and-conquer).
+                The TeamManager handles result aggregation and error isolation — if one subagent fails, the team continues.
+            </p>
+        </section>
+
+        <!-- 14. VULNERABILITIES -->
+        <section id="vulnerabilities">
+            <h2>14. Fixed Vulnerabilities</h2>
+
+            <p>
+                10 security vulnerabilities were identified and fixed. They're documented here transparently
+                because open source means open about mistakes too.
+            </p>
+
+            <table>
+                <tr><th>Severity</th><th>Vulnerability</th><th>Fix</th></tr>
+                <tr><td style="color:var(--red);font-weight:700">CRITICAL</td><td>Hardcoded .env API key (<code>adam-prism-change-me</code>)</td><td>Replaced with random key generation on first run</td></tr>
+                <tr><td style="color:var(--red);font-weight:700">CRITICAL</td><td><code>python_exec</code> bypass via <code>"".__class__.__mro__[1].__subclasses__()</code></td><td>Added dangerous pattern detection + sandbox execution</td></tr>
+                <tr><td style="color:var(--amber);font-weight:700">HIGH</td><td>SSRF vulnerability in URL fetch</td><td>Added URL validation and domain allowlisting</td></tr>
+                <tr><td style="color:var(--amber);font-weight:700">HIGH</td><td>CORS wildcard <code>allow_origins=["*"]</code></td><td>Made configurable with environment variable</td></tr>
+                <tr><td style="color:var(--amber);font-weight:700">HIGH</td><td>Desktop apiKey not persisted</td><td>Fixed with localStorage persistence</td></tr>
+                <tr><td style="color:var(--text-secondary)">MEDIUM</td><td><code>ethics/gate.py</code> <code>dir()</code> bug</td><td>Replaced with <code>locals()</code></td></tr>
+                <tr><td style="color:var(--text-secondary)">MEDIUM</td><td><code>base.py</code> _Stub inverted logic</td><td>Fixed conditional flow</td></tr>
+                <tr><td style="color:var(--text-secondary)">MEDIUM</td><td>MCP admin auth missing</td><td>Added admin key requirement</td></tr>
+                <tr><td style="color:var(--text-secondary)">MEDIUM</td><td>WebSocket auth missing</td><td>Added authentication on WebSocket connections</td></tr>
+                <tr><td style="color:var(--text-secondary)">MEDIUM</td><td>Webhook route ordering</td><td>Fixed route priority in FastAPI</td></tr>
+            </table>
+        </section>
+
+        <!-- 15. EXTENDING -->
+        <section id="extending">
+            <h2>15. Extending Adam Prism</h2>
+
+            <h3>Add a New Channel</h3>
+            <pre><span class="kw">from</span> adam.channels.base <span class="kw">import</span> BaseChannel
+
+<span class="kw">class</span> <span class="fn">MyChannel</span>(BaseChannel):
+    <span class="kw">async def</span> <span class="fn">start</span>(self): ...
+    <span class="kw">async def</span> <span class="fn">stop</span>(self): ...
+    <span class="kw">async def</span> <span class="fn">handle_message</span>(self, msg): ...</pre>
+
+            <h3>Add a New Provider</h3>
+            <pre><span class="kw">from</span> adam.providers.base <span class="kw">import</span> BaseProvider
+
+<span class="kw">class</span> <span class="fn">MyProvider</span>(BaseProvider):
+    <span class="kw">async def</span> <span class="fn">generate</span>(self, messages, **kwargs): ...
+    <span class="kw">def</span> <span class="fn">is_available</span>(self) -> bool: ...</pre>
+
+            <h3>Add a New Skill</h3>
+            <p>Create a Markdown file in <code>skills/</code> or <code>data/learning/generated_skills/</code>:</p>
+            <pre>{
+  <span class="str">"name"</span>: <span class="str">"my-skill"</span>,
+  <span class="str">"triggers"</span>: [<span class="str">"do something"</span>],
+  <span class="str">"priority"</span>: <span class="num">5</span>
+}
+---
+Skill instructions in Markdown here...</pre>
+
+            <h3>Add a Plugin</h3>
+            <pre><span class="kw">from</span> adam.plugins.base <span class="kw">import</span> AdamPlugin
+
+<span class="kw">class</span> <span class="fn">MyPlugin</span>(AdamPlugin):
+    <span class="kw">async def</span> <span class="fn">before_generate</span>(self, context): ...
+    <span class="kw">async def</span> <span class="fn">after_generate</span>(self, context, response): ...</pre>
+        </section>
+
+        <!-- 16. HONEST ASSESSMENT -->
+        <section id="honest">
+            <h2>16. Honest Assessment</h2>
+
+            <p>Every project has weaknesses. Here are Adam Prism's:</p>
+
+            <h3>What's Strong</h3>
+            <ul>
+                <li><strong>Integrated by default</strong> — memory, ethics, tools, channels all work out of the box</li>
+                <li><strong>Tested under pressure</strong> — 259+ tests, including adversarial testing by powerful models</li>
+                <li><strong>Security-hardened</strong> — 10 vulnerabilities found and fixed, defense-in-depth architecture</li>
+                <li><strong>Local-first</strong> — genuine internet isolation, not just "you can run it locally"</li>
+                <li><strong>Modular</strong> — every component can be disabled without breaking others</li>
+                <li><strong>Open source</strong> — Apache 2.0, truly free, no hidden restrictions</li>
+            </ul>
+
+            <h3>What Needs Work</h3>
+            <ul>
+                <li><strong>Single maintainer</strong> — one person built this. Bus factor = 1. The code is open for a reason.</li>
+                <li><strong>Documentation gaps</strong> — while extensive, some modules lack API-level documentation</li>
+                <li><strong>AI-assisted codebase</strong> — the creator directed AI models to write the code. This means the code works and passes tests, but deep codebase fluency by a single human is limited. Contributions from experienced developers who understand the code are especially valuable.</li>
+                <li><strong>Model training</strong> — the custom Gemma 4 fine-tuning (12B quantized, QAT coming) is still in progress</li>
+                <li><strong>Mobile/desktop apps</strong> — Electron and Flutter apps exist but are early-stage</li>
+                <li><strong>Community</strong> — 2000 people saw it at a hackathon, but there's no social media presence and no community yet</li>
+            </ul>
+
+            <div class="callout warn">
+                <p><strong>The creator's stance:</strong> This project is open source for a reason — it's not meant to depend on one person. The creator refused offers from military-affiliated AI companies (Barbara AI &amp; Edge AI, who sent NDA within 10 minutes) because this project is not for sale. It's built for everyone, freely, and the code is open so that anyone can maintain, extend, and use it independently.</p>
+            </div>
+        </section>
+
+        <!-- 17. QUICK START -->
+        <section id="quickstart">
+            <h2>17. Quick Start</h2>
+
+            <h3>Minimal (API only)</h3>
+            <pre><span class="cmt"># Install and run in 3 commands</span>
+<span class="fn">pip install</span> adam-prism
+<span class="fn">git clone</span> https://github.com/othmastar/adam-prism
+<span class="fn">cd</span> adam-prism && <span class="fn">pip install</span> -e .
+<span class="fn">python</span> main.py --port <span class="num">8001</span></pre>
+
+            <h3>Full Stack (Docker)</h3>
+            <pre><span class="fn">cd</span> deploy && <span class="fn">docker compose up</span> -d
+<span class="cmt"># Starts: Qdrant + Ollama + API + Web UI + Nginx + Prometheus + Grafana</span></pre>
+
+            <h3>Run Tests</h3>
+            <pre><span class="fn">pytest</span> tests/ -v -k <span class="str">"not slow"</span> --tb=long -x</pre>
+
+            <h3>Key Files to Read First</h3>
+            <table>
+                <tr><th>File</th><th>Why</th></tr>
+                <tr><td><code>main.py</code></td><td>Entry point — understand how the system starts</td></tr>
+                <tr><td><code>backend/adam/engine/chat.py</code></td><td>The 8-phase chat cycle — the heart of the system</td></tr>
+                <tr><td><code>backend/adam/security/guard.py</code></td><td>3-layer security architecture</td></tr>
+                <tr><td><code>backend/adam/ethics/gate.py</code></td><td>Ethical governance</td></tr>
+                <tr><td><code>backend/adam/config.py</code></td><td>All configuration options</td></tr>
+                <tr><td><code>config/default.json</code></td><td>Default runtime configuration</td></tr>
+            </table>
+
+            <div class="callout info">
+                <p><strong>Next steps:</strong> Read <a href="https://github.com/othmastar/adam-prism/blob/main/ARCHITECTURE.md">ARCHITECTURE.md</a> for the full architecture breakdown, <a href="https://github.com/othmastar/adam-prism/blob/main/SECURITY.md">SECURITY.md</a> for security policy, and <a href="https://github.com/othmastar/adam-prism/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a> if you want to contribute.</p>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <div style="text-align: center; padding: 48px 0; color: var(--text-muted); font-size: 0.85rem;">
+            <p>Adam Prism — The Protocol Born from Fire</p>
+            <p>Apache 2.0 — Built by <a href="https://github.com/othmastar" target="_blank">Mohamed Othman</a></p>
+            <p>&copy; 2026 — Freedom has a price, and a taste.</p>
+        </div>
+
+    </div>
+
+    <script>
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+    </script>
+
+</body>
+</html>
