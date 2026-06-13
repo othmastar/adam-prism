@@ -59,27 +59,22 @@ class TestProviderInit:
 class TestIndividualProviders:
     @pytest.mark.asyncio
     async def test_ollama_chat(self):
-        p = OllamaProvider({"ollama_base": "http://test:11434"})
-        with patch("httpx.AsyncClient") as mock:
-            instance = mock.return_value.__aenter__.return_value
-            mock_resp = MagicMock()
-            mock_resp.json.return_value = {"message": {"content": "hello"}}
-            mock_resp.raise_for_status = lambda: None
-            instance.post = AsyncMock(return_value=mock_resp)
-            result = await p.chat([{"role": "user", "content": "hi"}])
-            assert result == "hello"
+        p = OllamaProvider({"ollama_base": "http://ollama-test:11434"})
+        mock_resp = MagicMock()
+        mock_resp.json.return_value = {"message": {"content": "hello"}}
+        mock_resp.raise_for_status = lambda: None
+        p._client.post = AsyncMock(return_value=mock_resp)
+        result = await p.chat([{"role": "user", "content": "hi"}])
+        assert result == "hello"
 
     @pytest.mark.asyncio
     async def test_ollama_stream(self):
-        p = OllamaProvider({"ollama_base": "http://test:11434"})
-        # Just verify no exception when httpx raises
-        with patch("httpx.AsyncClient") as mock:
-            instance = mock.return_value.__aenter__.return_value
-            instance.stream = AsyncMock(side_effect=Exception("stream error"))
-            chunks = []
-            with pytest.raises(Exception):
-                async for chunk in p.chat_stream([{"role": "user", "content": "hi"}]):
-                    chunks.append(chunk)
+        p = OllamaProvider({"ollama_base": "http://ollama-test:11434"})
+        p._client.stream = AsyncMock(side_effect=Exception("stream error"))
+        chunks = []
+        with pytest.raises(Exception):
+            async for chunk in p.chat_stream([{"role": "user", "content": "hi"}]):
+                chunks.append(chunk)
 
     @pytest.mark.asyncio
     async def test_openai_chat_no_key(self):

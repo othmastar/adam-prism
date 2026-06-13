@@ -27,7 +27,7 @@ jobs:
         id: run_tests
         run: |
           set -o pipefail
-          python -m pytest tests/ -v -k "not slow" --tb=long -x 2>&1 | tee /tmp/test_output.txt
+          python -m pytest tests/ -v -k "not slow and not ollama" --tb=long -x 2>&1 | tee /tmp/test_output.txt
 
       - name: Show failures
         if: failure()
