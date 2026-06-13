@@ -1,9 +1,48 @@
 import { NextRequest, NextResponse } from "next/server";
 
+const VISION_MODELS = ["llava", "gemma3-vision", "bakllava", "moondream", "llama3.2-vision", "minicpm-v"];
+const IMAGE_EXTS = [".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp"];
+
+function hasImageRef(messages: any[]): boolean {
+  for (const msg of messages) {
+    const content = (msg.content || "").trim();
+    // strip quotes around filenames
+    const cleaned = content.replace(/^["'\s]+|["'\s]+$/g, "");
+    if (IMAGE_EXTS.some(ext => cleaned.toLowerCase().endsWith(ext))) return true;
+  }
+  return false;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { messages, model, temperature, top_p, top_k, stream, ollamaUrl, systemPrompt } = body;
+
+    const modelName = model || "gemma4:e4b";
+    const isVisionModel = VISION_MODELS.some(vm => modelName.toLowerCase().includes(vm));
+
+    // Block image references if model doesn't support vision
+    if (hasImageRef(messages) && !isVisionModel) {
+      const warning = "⚠️ هذا الموديل النصي لا يدعم معالجة الصور. لاستخدام الصور، غيّر الموديل إلى multimodal مثل llava أو gemma3-vision.";
+      if (stream) {
+        const encoder = new TextEncoder();
+        const chunks = [
+          encoder.encode(`{"message":{"role":"assistant","content":""}}\n`),
+          encoder.encode(`{"message":{"role":"assistant","content":"${warning}"}}\n`),
+          encoder.encode(`{"done":true}\n`),
+        ];
+        const streamContent = new ReadableStream({
+          start(controller) {
+            chunks.forEach(c => controller.enqueue(c));
+            controller.close();
+          },
+        });
+        return new Response(streamContent, {
+          headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-cache" },
+        });
+      }
+      return NextResponse.json({ message: { role: "assistant", content: warning }, done: true });
+    }
 
     const baseUrl = ollamaUrl || "http://localhost:11434";
     
