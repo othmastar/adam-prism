@@ -260,7 +260,7 @@ def sanitize_path(path: str) -> Optional[str]:
 
     try:
         resolved = str(Path(path).resolve())
-    except Exception:
+    except (OSError, RuntimeError):
         return None
 
     # [C6] Check allowed paths — must start with an allowed prefix

@@ -64,7 +64,7 @@ def _validate_url(url: str) -> Dict:
 
     try:
         parsed = urlparse(url)
-    except Exception:
+    except (ValueError, TypeError):
         return {"valid": False, "error": f"URL غير صالح: {url}"}
 
     # التحقق من البروتوكول
@@ -108,7 +108,7 @@ class FileOpsMixin:
                     usage = subprocess.check_output(["df", "-h", path]).decode().split("\n")[1].split()
                     disk_data[path] = {"size": usage[1], "used": usage[2], "available": usage[3], "used_pct": usage[4]}
             return {"success": True, "disks": disk_data}
-        except Exception as e:
+        except (subprocess.CalledProcessError, OSError) as e:
             return {"success": False, "error": str(e)}
 
     async def _tool_file(self, tool_name: str, params: Dict) -> Dict:
@@ -179,5 +179,5 @@ class FileOpsMixin:
                         "preview": r.text[:200] if "text" in r.headers.get("content-type", "") else "(binary)"}
         except httpx.TimeoutException:
             return {"success": False, "error": "التحميل تجاوز الـ 15 ثانية"}
-        except Exception as e:
+        except (httpx.RequestError, httpx.HTTPStatusError, OSError) as e:
             return {"success": False, "error": str(e)}

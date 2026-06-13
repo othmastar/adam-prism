@@ -5,11 +5,54 @@ Adam Prism — Browser Automation (Eyes)
 """
 
 import os
+import ipaddress
 import logging
 import asyncio
 from typing import Optional, Dict, Any
+from urllib.parse import urlparse
 
 logger = logging.getLogger("adam_prism.eyes")
+
+
+def _is_private_ip(hostname: str) -> bool:
+    """فحص هل الـ hostname يرجع لعنوان IP خاص أو داخلي (SSRF protection)"""
+    try:
+        ip = ipaddress.ip_address(hostname)
+        return (
+            ip.is_private or ip.is_loopback or ip.is_link_local
+            or ip.is_reserved or ip.is_multicast or ip.is_unspecified
+        )
+    except ValueError:
+        pass
+    localhost_names = {
+        "localhost", "localhost.localdomain",
+        "127.0.0.1", "0.0.0.0", "::1",
+        "host.docker.internal", "host.internal",
+    }
+    if hostname.lower() in localhost_names:
+        return True
+    internal_suffixes = (".local", ".internal", ".localhost", ".docker", ".container")
+    if any(hostname.lower().endswith(s) for s in internal_suffixes):
+        return True
+    return False
+
+
+def _validate_url(url: str) -> Dict:
+    """التحقق من صحة وأمان URL — منع SSRF"""
+    if not url:
+        return {"valid": False, "error": "مفيش URL"}
+    try:
+        parsed = urlparse(url)
+    except Exception:
+        return {"valid": False, "error": f"URL غير صالح: {url}"}
+    if parsed.scheme not in ("http", "https"):
+        return {"valid": False, "error": f"بروتوكول غير مسموح: {parsed.scheme}"}
+    hostname = parsed.hostname
+    if not hostname:
+        return {"valid": False, "error": "URL بدون hostname"}
+    if _is_private_ip(hostname):
+        return {"valid": False, "error": f"SSRF محظور: عنوان داخلي ({hostname})"}
+    return {"valid": True}
 
 
 class Browser:
@@ -86,6 +129,9 @@ class Browser:
     async def open(self, url: str) -> Dict:
         if not self._healthy:
             return {"success": False, "error": "Browser not initialized"}
+        validation = _validate_url(url)
+        if not validation["valid"]:
+            return {"success": False, "error": validation["error"]}
         try:
             await self._page.goto(url, timeout=30000, wait_until="domcontentloaded")
             title = await self._page.title()
@@ -96,6 +142,9 @@ class Browser:
     async def fetch(self, url: str) -> Dict:
         if not self._healthy:
             return {"success": False, "error": "Browser not initialized"}
+        validation = _validate_url(url)
+        if not validation["valid"]:
+            return {"success": False, "error": validation["error"]}
         try:
             await self._page.goto(url, timeout=30000, wait_until="domcontentloaded")
             text = await self._page.inner_text("body")

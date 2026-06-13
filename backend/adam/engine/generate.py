@@ -41,7 +41,10 @@ class AdamPrismEngineGenerate(AdamPrismEngineContext):
             result = await self._call_ollama(prompt, system="أنت مصنف ذكي. أجب بـ JSON فقط.")
             parsed = json.loads(result.strip().replace("```json", "").replace("```", ""))
             return parsed
-        except (json.JSONDecodeError, Exception) as e:
+        except json.JSONDecodeError:
+            logger.warning("تعذر تصنيف القصد — رد مش JSON")
+            return {"mode": "teacher", "intent_type": "general", "confidence": 0.5, "topics": []}
+        except Exception as e:
             logger.warning(f"تعذر تصنيف القصد: {e}")
             return {"mode": "teacher", "intent_type": "general", "confidence": 0.5, "topics": []}
 

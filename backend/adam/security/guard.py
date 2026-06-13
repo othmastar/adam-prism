@@ -13,6 +13,7 @@ from collections import deque
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import Dict, Any, List, Optional, Set, Tuple
+from urllib.parse import urlparse
 
 logger = logging.getLogger("adam_prism.security.guard")
 
@@ -336,11 +337,17 @@ class ToolPermissionValidator:
                 confidence=1.0,
             )
 
-        # 3. فحص URL إن وجد
+        # 3. فحص URL إن وجد — استخدام urlparse لمنع bypass بحرف جر
         if "url" in params:
             url = params["url"]
+            try:
+                parsed = urlparse(url)
+                hostname = parsed.hostname or parsed.netloc
+            except (ValueError, AttributeError):
+                hostname = url
             for blocked in perm.blocked_domains:
-                if blocked in url:
+                # مطابقة دقيقة: اسم النطاق نفسه أو نطاق فرعي
+                if hostname == blocked or hostname.endswith("." + blocked):
                     self._audit(tool_name, params, False, f"Blocked domain: {blocked}")
                     return SecurityVerdict(
                         action=SecurityAction.BLOCK,
