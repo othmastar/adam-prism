@@ -301,6 +301,8 @@ cd deploy && docker compose up -d
 ```
 **Qdrant + Ollama + API + Web UI + Prometheus + Grafana — all in one command.**
 
+> 💡 **Windows users:** Install [Docker Desktop](https://www.docker.com/products/docker-desktop/) and use `docker compose up -d` from PowerShell or CMD inside the `deploy/` folder — same command, zero changes needed.
+
 ### Method 4: VS Code
 The extension is built into the project — edit anything seamlessly without writing a single line of code.
 
