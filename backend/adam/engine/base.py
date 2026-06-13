@@ -22,6 +22,11 @@ from typing import Any
 
 from adam.core.learning import PreferenceLearner
 from adam.core.permissions import PermissionState
+from adam.memory.hot_memory import HotMemory
+from adam.memory.session_search import SessionSearch
+from adam.memory.unified import UnifiedMemoryManager
+from adam.skills.curator import SkillCurator
+from adam.learning.closed_loop import ClosedLearningLoop
 from adam.infrastructure import (
     CircuitBreaker,
     MetricsCollector,
@@ -250,6 +255,46 @@ class AdamPrismEngineBase:
         except Exception:
             logger.exception("⚠️ ContinuousLearner init failed:")
             self.continuous_learner = None
+
+        # === Iron Memory: 4 طبقات ذاكرة + حلقة تعلم مغلقة ===
+        try:
+            self.hot_memory = HotMemory(config=self.config.get("hot_memory", {}))
+            logger.info("✅ Hot Memory (MEMORY.md/USER.md) initialized")
+        except Exception:
+            logger.exception("⚠️ Hot Memory init failed:")
+
+        try:
+            self.session_search = SessionSearch(config=self.config.get("session_search", {}))
+            logger.info("✅ Session Search (FTS5) initialized")
+        except Exception:
+            logger.exception("⚠️ Session Search init failed:")
+
+        try:
+            self.unified_memory = UnifiedMemoryManager(
+                config=self.config.get("unified_memory", {}),
+                vector_memory=self.memory,
+                skill_manager=None,
+            )
+            logger.info("✅ Unified Memory Manager (4 layers) initialized")
+        except Exception:
+            logger.exception("⚠️ Unified Memory init failed:")
+
+        try:
+            self.skill_curator = SkillCurator(config=self.config.get("skill_curator", {}))
+            logger.info("✅ Skill Curator (lifecycle management) initialized")
+        except Exception:
+            logger.exception("⚠️ Skill Curator init failed:")
+
+        try:
+            self.closed_loop = ClosedLearningLoop(
+                unified_memory=self.unified_memory,
+                skill_manager=None,
+                curator=self.skill_curator,
+                config=self.config.get("closed_loop", {}),
+            )
+            logger.info("✅ Closed Learning Loop initialized")
+        except Exception:
+            logger.exception("⚠️ Closed Learning Loop init failed:")
 
     def attach(self, module_name: str, module_instance: Any):
         """حقن موديول في المحرك"""

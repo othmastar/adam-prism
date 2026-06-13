@@ -78,7 +78,7 @@ class AdamPrismEngineUtils(AdamPrismEngineBase):
             if result is None:
                 return {"allowed": True, "reason": "no_security_module"}
             return result
-        except TimeoutError:
+        except asyncio.TimeoutError:
             # [M2] Fail-closed: timeout must deny, not allow
             return {"allowed": False, "reason": "security_check_timeout"}
         except Exception as e:

@@ -402,6 +402,35 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
                 )
             )
 
+        # === حلقة التعلم المغلقة (Closed Learning Loop) ===
+        if hasattr(self, 'closed_loop') and self.closed_loop:
+            _bg_task(
+                self.closed_loop.process_interaction(
+                    user_message, response_text,
+                    {
+                        "mode": self.active_mode,
+                        "cycle": self.cycle_count,
+                        "tool_records": tool_records,
+                        "tool_calls_made": tool_calls_made,
+                        "message_preview": user_message[:100],
+                    }
+                )
+            )
+
+        # === تخزين في Session Search (FTS5) ===
+        if hasattr(self, 'session_search') and self.session_search:
+            try:
+                self.session_search.add_message(
+                    self.session_id, "user", user_message,
+                    metadata={"mode": self.active_mode, "cycle": self.cycle_count}
+                )
+                self.session_search.add_message(
+                    self.session_id, "assistant", response_text,
+                    metadata={"mode": self.active_mode, "cycle": self.cycle_count}
+                )
+            except Exception:
+                logger.exception("تعذر حفظ في Session Search:")
+
         if self.trace_recorder:
             has_tool_errors = any(t.get("error") for t in tool_records)
             outcome = "success"
