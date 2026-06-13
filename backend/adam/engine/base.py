@@ -166,7 +166,7 @@ class AdamPrismEngineBase:
             )
         if self.tools is None:
             async def _exec_action(*a, **kw): return {"success": False, "error": "أداة غير متصلة"}
-            self.tools = _Stub(execute_action=_exec_action, action_log=[], get_action_log=lambda l=50: [])
+            self.tools = _Stub(execute_action=_exec_action, action_log=[], get_action_log=lambda _limit=50: [])
         if self.pipeline is None:
             self.pipeline = _Stub()
         if self.security is None:
