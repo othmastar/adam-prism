@@ -81,6 +81,10 @@ adam_prism.json
 # Broken web-ui duplicate
 web-ui/
 
+# Runtime data (backend)
+backend/data/
+backend/notebook/
+
 # pytest
 .pytest_cache/
 
