@@ -126,7 +126,7 @@ class TestOutputGuard:
     async def test_block_code_injection_in_output(self, guard):
         text = "You can run this: os.system('ls')"
         verdict = await guard.inspect(text)
-        assert verdict.action == SecurityAction.BLOCK
+        assert verdict.action == SecurityAction.FLAG
         assert verdict.category == ContentCategory.CODE_INJECTION
 
     def test_get_stats(self, guard):

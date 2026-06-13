@@ -84,7 +84,7 @@ class EthicsGate:
                 "scores": {},
                 "weighted_score": 0.0,
                 "issues": violations,
-                "modified_response": "تم رفض الرد لانتهاكه قاعدة أخلاقية أساسية."
+                "modified_response": "⚠️ تم رفض الرد لانتهاكه قاعدة أخلاقية أساسية."
             }
 
         # 2. تقييم بالأوزان عبر النموذج
@@ -96,8 +96,11 @@ class EthicsGate:
             for law, weight in self.law_weights.items()
         )
 
-        # 4. قرار القبول
-        approved = weighted_score >= 0.3
+        # 4. قرار القبول — عتبة 0.55 (مخففة من 0.3 لمنع الختم المطاطي)
+        # الحد الأدنى: عدالة >= 0.3 وبقاء >= 0.2 + مجموع مرجح >= 0.55
+        min_fairness = scores.get("fairness", 0.5)
+        min_survival = scores.get("survival", 0.5)
+        approved = weighted_score >= 0.55 and min_fairness >= 0.3 and min_survival >= 0.2
         
         result = {
             "approved": approved,
@@ -119,11 +122,13 @@ class EthicsGate:
         violations = []
         text_lower = text.lower()
         
-        # كلمات مفتاحية خطيرة (قابلة للتوسيع)
+        # كلمات مفتاحية خطيرة (قابلة للتوسيع) — شاملة للمرادفات والتشكيل
         danger_keywords = {
-            "إيذاء": ["أذى", "ألم", "ضرر", "اذى"],
-            "انتهاك خصوصية": ["تجسس", "اختراق", "مراقبة بدون إذن"],
-            "تزوير": ["تزوير", "تزييف", "معلومات كاذبة"]
+            "إيذاء": ["أذى", "ألم", "ضرر", "اذى", "إيذاء", "آذى", "ايذاء", "إيذاء جسدي", "إيذاء نفسي", "harm", "hurt", "injure", "damage", "kill", "murder", "assault"],
+            "انتهاك خصوصية": ["تجسس", "اختراق", "مراقبة بدون إذن", "spy", "surveil", "stalk", "snoop", "تنصت", "رصد غير مصرح"],
+            "تزوير": ["تزوير", "تزييف", "معلومات كاذبة", "forge", "fake", "fabricate", "falsify", "مزور", "مزيف"],
+            "تلاعب": ["تلاعب", "خداع", "غش", "manipulate", "deceive", "trick", "coerce", "إكراه", "إجبار"],
+            "إخفاء معلومات": ["إخفاء", "كتمان", "حجب معلومات", "conceal", "hide information", "withhold facts"]
         }
         
         for category, keywords in danger_keywords.items():
@@ -149,7 +154,6 @@ class EthicsGate:
 أجب بـ JSON فقط:
 {{"fairness": 0.0-1.0, "learning": 0.0-1.0, "survival": 0.0-1.0, "creativity": 0.0-1.0}}"""
 
-        client = None
         try:
             cache_key = self._eval_cache._key(response[:200], query[:100])
             cached = self._eval_cache.get(cache_key)
@@ -182,13 +186,10 @@ class EthicsGate:
             self._eval_cache.set(cache_key, scores, ttl=300.0)
             return scores
         except Exception as e:
-            logger.warning(f"تعذر التقييم الأخلاقي: {e}")
-            return {"fairness": 0.7, "learning": 0.7, "survival": 0.7, "creativity": 0.7}
+            logger.warning(f"فشل التقييم الأخلاقي: {e}")
+            return {"fairness": 0.5, "learning": 0.5, "survival": 0.5, "creativity": 0.5}
         finally:
-            # [FIX v3] استبدال 'client' in dir() بـ 'client' in locals()
-            # dir() يرجع أسماء كل الخصائص والطرق — مش المتغيرات المحلية فقط
-            # locals() يرجع المتغيرات المحلية الفعلية فقط
-            if not self.shared_clients and 'client' in locals() and client is not None:
+            if not self.shared_clients and 'client' in locals():
                 await client.aclose()
 
     async def _correct_response(self, response: str, law: str) -> str:
@@ -207,7 +208,6 @@ class EthicsGate:
 
 أعطني الرد المصحح فقط."""
 
-        client = None
         try:
             if self.shared_clients:
                 client = await self.shared_clients.get("ollama", self.ollama_base, 60.0)
@@ -227,6 +227,5 @@ class EthicsGate:
         except Exception:
             return response
         finally:
-            # [FIX v3] Same fix: locals() instead of dir()
-            if not self.shared_clients and 'client' in locals() and client is not None:
+            if not self.shared_clients and 'client' in locals():
                 await client.aclose()

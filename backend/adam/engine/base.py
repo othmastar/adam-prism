@@ -127,20 +127,22 @@ class AdamPrismEngineBase:
         class _Stub:
             def __init__(self, **methods):
                 self._methods = methods
+                self._last_unresolved = None
             def __getattr__(self, name):
                 if name in self._methods:
                     return self._methods[name]
-                # [FIX v2] Logic was inverted!
-                # Old code: return _async_noop if name.startswith(('_',)) else _sync_noop
-                # This is wrong because names starting with _ are usually internal sync methods
-                # while regular names are likely async methods called with await
-                # Correct: return _async_noop for names NOT starting with _
-                # because those are the public async API methods
-                async def _async_noop(*a, **kw): return None
-                def _sync_noop(*a, **kw): return None
-                # Names NOT starting with _ are likely async API methods
-                # Names starting with _ are internal sync attributes
-                return _sync_noop if name.startswith('_') else _async_noop
+                logger.warning(
+                    f"_Stub: استدعاء سمة غير معرّفة '{name}' — "
+                    f"الموديول لم يُهيأ بعد أو فشل في التحميل"
+                )
+                self._last_unresolved = name
+                async def _async_noop(*a, **kw):
+                    logger.debug(f"_Stub.{name}() تم الاستدعاء بصمت — يعيد None")
+                    return None
+                def _sync_noop(*a, **kw):
+                    logger.debug(f"_Stub.{name}() تم الاستدعاء بصمت — يعيد None")
+                    return None
+                return _async_noop if name.startswith(('_',)) else _sync_noop
 
         async def _async_noop(*a, **kw): return None
         def _sync_noop(*a, **kw): return None
@@ -151,7 +153,8 @@ class AdamPrismEngineBase:
             async def _search(q, **kw): return []
             self.memory = _Stub(retrieve=_retrieve, search=_search)
         if self.ethics is None:
-            self.ethics = _Stub()
+            async def _evaluate(*a, **kw): return {"approved": True, "scores": {}, "weighted_score": 1.0, "issues": []}
+            self.ethics = _Stub(evaluate=_evaluate)
         if self.notebook is None:
             async def _load_profile(): return {}
             self.notebook = _Stub(
