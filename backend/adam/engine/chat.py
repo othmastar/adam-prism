@@ -91,13 +91,18 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
 
     async def _chat_check_vision(self, user_message: str) -> dict | None:
         """فحص ذكي — يكتشف امتدادات الصور مع فحص نوع الموديل الفعلي"""
+        import re
         VISION_EXTENSIONS = (".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp")
+        # strip quotes and punctuation around filenames
+        clean_words = [w.strip('"\'()[]<>') for w in user_message.split()]
         has_image_ref = any(
-            w.lower().endswith(VISION_EXTENSIONS) for w in user_message.split()
+            w.lower().endswith(VISION_EXTENSIONS) for w in clean_words
         )
+        if not has_image_ref:
+            has_image_ref = bool(re.search(r'\.(png|jpg|jpeg|gif|bmp|webp)(\s|$|"|\')', user_message.lower()))
         model_supports_vision = (
-            hasattr(self, 'provider') and
-            hasattr(self.provider, 'current') and
+            hasattr(self, 'provider') and self.provider is not None and
+            hasattr(self.provider, 'current') and self.provider.current is not None and
             getattr(self.provider.current, 'supports_vision', False)
         )
         if has_image_ref and not model_supports_vision:
