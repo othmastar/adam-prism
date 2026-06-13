@@ -38,7 +38,7 @@ class PreferenceLearner:
                 with open(PREFERENCES_PATH, "r", encoding="utf-8") as f:
                     return json.load(f)
         except Exception as e:
-            logger.warning(f"فشل تحميل التفضيلات: {e}")
+            logger.warning(f"تعذر تحميل التفضيلات: {e}")
         return {}
 
     def _save_preferences(self):
@@ -47,7 +47,7 @@ class PreferenceLearner:
             with open(PREFERENCES_PATH, "w", encoding="utf-8") as f:
                 json.dump(self.preferences, f, ensure_ascii=False, indent=2)
         except Exception as e:
-            logger.warning(f"فشل حفظ التفضيلات: {e}")
+            logger.warning(f"تعذر حفظ التفضيلات: {e}")
 
     def _load_history(self) -> List:
         try:
@@ -63,7 +63,7 @@ class PreferenceLearner:
             with open(HISTORY_PATH, "w", encoding="utf-8") as f:
                 json.dump(self.history[-500:], f, ensure_ascii=False, indent=2)
         except Exception as e:
-            logger.warning(f"فشل حفظ التاريخ: {e}")
+            logger.warning(f"تعذر حفظ التاريخ: {e}")
 
     # ─── التسجيل ─────────────────────────────────
 

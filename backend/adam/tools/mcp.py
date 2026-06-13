@@ -83,7 +83,7 @@ class MCPConnection:
             self._connected = True
             logger.info(f"MCP '{self.name}' متصل — {len(self.tools)} أداة: {[t.name for t in self.tools]}")
         except Exception as e:
-            logger.warning(f"MCP '{self.name}' فشل الاتصال: {e}")
+            logger.warning(f"MCP '{self.name}' تعذر الاتصال: {e}")
             await self._cleanup()
             raise
 

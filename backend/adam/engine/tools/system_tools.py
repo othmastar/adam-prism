@@ -128,9 +128,9 @@ class SystemToolsMixin:
                 shot = f"/tmp/adam_ocr_{uuid.uuid4().hex[:8]}.png"
                 r1 = subprocess.run(["import", "-window", "root", shot], capture_output=True, text=True, timeout=10, env=_env)
                 if r1.returncode != 0:
-                    return {"success": False, "error": f"فشل التصوير: {r1.stderr.strip()}"}
+                    return {"success": False, "error": f"تعذر التصوير: {r1.stderr.strip()}"}
                 if not os.path.exists(shot):
-                    return {"success": False, "error": "فشل التصوير: ملف مش موجود"}
+                    return {"success": False, "error": "تعذر التصوير: ملف مش موجود"}
                 r2 = subprocess.run(["tesseract", shot, "stdout", "-l", "ara+eng"],
                                    capture_output=True, text=True, timeout=30)
                 os.remove(shot)

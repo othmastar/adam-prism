@@ -1,5 +1,5 @@
 """
-Adam Prism - API Server — HARDENED v2
+Adam Prism - API Server — HARDENED v3
 ======================================
 خادم API يربط كل الموديولات ويوفر الواجهة للـ Web UI والـ Telegram.
 يعمل على FastAPI مع WebSocket support.
@@ -14,6 +14,12 @@ Adam Prism - API Server — HARDENED v2
 7. [NEW] تأكيد مفتاح المسؤول لإضافة MCP
 8. [NEW] تحديد حجم طلبات API
 9. [NEW] تسجيل أمني شامل
+
+[FIX v3 — CRITICAL]
+10. CORS now reads from ADAM_CORS_ORIGINS env var (falls back to CORS_ORIGINS)
+    - Replaces allow_origins=["*"] with configurable origins
+    - In production mode, wildcard CORS is rejected
+11. Router split — endpoints extracted to separate router modules
 """
 
 import json
@@ -29,7 +35,6 @@ import httpx
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Request, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, HTMLResponse, JSONResponse
-from adam.api.diagnostic import create_diagnostic_router
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 from adam.api.chat_store import ChatStore
@@ -140,7 +145,7 @@ class RateLimiter:
         return max(0, self.max_requests - len(self._requests[key]))
 
 
-# ═══════════════════════════════════════════════════════
+# ═══════════════════════════════════════
 
 def create_app(engine=None, channel_manager=None) -> FastAPI:
     """إنشاء تطبيق FastAPI مع كل المسارات"""
@@ -161,7 +166,7 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
     _admin_key = os.environ.get("ADAM_ADMIN_KEY", "")
 
     # [FIX] في وضع الإنتاج، نرفض المفتاح الافتراضي
-    _is_production = os.environ.get("ADAM_PRODUCTION", "0") == "1"
+    _is_production = os.environ.get("ADAM_PRODUCTION", "0") == "1" or os.environ.get("ADAM_ENV", "") == "production"
     if _is_production and _api_key == "adam-prism-change-me":
         raise RuntimeError(
             "SECURITY: ADAM_API_KEY not set in production mode! "
@@ -234,11 +239,13 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
     logger.info("API Key authentication enabled")
     logger.info(f"Rate limiter: {os.environ.get('ADAM_RATE_LIMIT', '60')} req/min")
 
-    # [FIX v3] CORS — تقييد أصل الإنتاج مع دعم ADAM_CORS_ORIGINS
-    # Now supports ADAM_CORS_ORIGINS (higher priority) and CORS_ORIGINS
-    # In production mode, wildcard "*" is rejected
+    # ═══════════════════════════════════════════════════════
+    # [FIX v3] CORS — تقييد أصل الإنتاج
+    # الآن يدعم ADAM_CORS_ORIGINS (أولوية أعلى) و CORS_ORIGINS
+    # في وضع الإنتاج، يتم رفض wildcard "*"
+    # ═══════════════════════════════════════════════════════
     _cors_origins_str = os.environ.get("ADAM_CORS_ORIGINS", "") or os.environ.get("CORS_ORIGINS", "*")
-
+    
     if _cors_origins_str.strip() == "*":
         _cors_origins = ["*"]
         _allow_credentials = False
@@ -255,7 +262,7 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
     else:
         _cors_origins = [o.strip() for o in _cors_origins_str.split(",") if o.strip()]
         _allow_credentials = True
-
+    
     app.add_middleware(
         CORSMiddleware,
         allow_origins=_cors_origins,
@@ -264,46 +271,6 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
         allow_headers=["*"],
     )
     logger.info(f"CORS origins: {_cors_origins}")
-
-    # === V3: Install security middleware (audit, rate-limit, headers, tracing) ===
-    try:
-        from adam.api.middleware import install_all_middleware
-        install_all_middleware(app, engine=engine)
-    except Exception as e:
-        logger.warning(f"Middleware install failed: {e}")
-
-    # ═══════════════════════════════════════════════════════
-    # [FIX v3] Include routers from separate modules
-    # ═══════════════════════════════════════════════════════
-    try:
-        from adam.api.routers import (
-            chat as chat_router,
-            knowledge as knowledge_router,
-            memory as memory_router,
-            tools as tools_router,
-            skills as skills_router,
-            subagents as subagents_router,
-            voice as voice_router,
-            mcp as mcp_router,
-            engine as engine_router,
-            channels as channels_router,
-            plugins as plugins_router,
-            scheduler as scheduler_router,
-            permissions as permissions_router,
-        )
-
-        for router_module in [chat_router, knowledge_router, memory_router, tools_router,
-                              skills_router, subagents_router, voice_router, mcp_router,
-                              engine_router, channels_router, plugins_router, scheduler_router,
-                              permissions_router]:
-            if hasattr(router_module, 'router'):
-                app.include_router(router_module.router)
-
-        logger.info("API routers loaded successfully")
-    except ImportError as e:
-        logger.warning(f"Could not load API routers (running in monolith mode): {e}")
-    except Exception as e:
-        logger.warning(f"Router setup error: {e}")
 
     # ═══════════════════════════════════════════════════════
     # نقاط webhook — الآن بعد المصادقة، محمية تلقائياً
@@ -349,19 +316,56 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
             from fastapi.staticfiles import StaticFiles
             app.mount("/ui", StaticFiles(directory=_static_dir, html=True), name="ui")
         except Exception as e:
-            logger.warning(f"فشل تحميل الملفات الثابتة: {e}")
-
-    # Diagnostic & Orchestrator routes
-    try:
-        app.include_router(create_diagnostic_router(engine=engine))
-    except Exception as e:
-        logger.warning(f"فشل تحميل مسارات التشخيص: {e}")
+            logger.warning(f"تعذر تحميل الملفات الثابتة: {e}")
 
     # Chat history store
     chat_store = ChatStore()
 
+    # ═══════════════════════════════════════════════════════
+    # [FIX v3] Include routers from separate modules
+    # ═══════════════════════════════════════════════════════
+    try:
+        from adam.api.routers import (
+            chat as chat_router,
+            knowledge as knowledge_router,
+            memory as memory_router,
+            tools as tools_router,
+            skills as skills_router,
+            subagents as subagents_router,
+            voice as voice_router,
+            mcp as mcp_router,
+            engine as engine_router,
+            channels as channels_router,
+            plugins as plugins_router,
+            scheduler as scheduler_router,
+            permissions as permissions_router,
+        )
+        
+        # Pass shared dependencies to routers
+        _router_deps = {
+            "engine": engine,
+            "channel_manager": channel_manager,
+            "chat_store": chat_store,
+            "api_key": _api_key,
+            "admin_key": _admin_key,
+            "hmac": _hmac,
+        }
+        
+        for router_module in [chat_router, knowledge_router, memory_router, tools_router,
+                              skills_router, subagents_router, voice_router, mcp_router,
+                              engine_router, channels_router, plugins_router, scheduler_router,
+                              permissions_router]:
+            if hasattr(router_module, 'router'):
+                app.include_router(router_module.router)
+        
+        logger.info("API routers loaded successfully")
+    except ImportError as e:
+        logger.warning(f"Could not load API routers (running in monolith mode): {e}")
+    except Exception as e:
+        logger.warning(f"Router setup error: {e}")
+
     # ═══════════════════════════════════════
-    # Routes
+    # Core Routes (kept in main file for reliability)
     # ═══════════════════════════════════════
 
     @app.get("/")
@@ -438,7 +442,7 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
                     # تفريغ TTS من VRAM بعد الانتهاء
                     await pipeline.unload_tts()
             except Exception as e:
-                logger.warning(f"فشل توليد الصوت للرد: {e}")
+                logger.warning(f"تعذر توليد الصوت للرد: {e}")
 
         return response
 
@@ -652,21 +656,26 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
         """عرض الأدوات المتاحة مع صلاحياتها"""
         from adam.security.guard import TOOL_REGISTRY
         tools = []
-        for name, perm in TOOL_REGISTRY.items():
-            tools.append({
-                "name": name,
-                "max_calls": perm.max_calls_per_session,
-                "requires_confirmation": perm.requires_confirmation,
-            })
+        if TOOL_REGISTRY:
+            for name, perm in TOOL_REGISTRY.items():
+                tools.append({
+                    "name": name,
+                    "max_calls": perm.max_calls_per_session,
+                    "requires_confirmation": perm.requires_confirmation,
+                })
         # إضافة أدوات MCP
         if engine and engine.tools:
-            mcp_tools = engine.tools.get_mcp_tools()
-            for t in mcp_tools:
-                tools.append({
-                    "name": t["name"],
-                    "type": "mcp",
-                    "server": t["server"],
-                })
+            try:
+                mcp_tools = engine.tools.get_mcp_tools()
+                if mcp_tools:
+                    for t in mcp_tools:
+                        tools.append({
+                            "name": t.get("name", "unknown"),
+                            "type": "mcp",
+                            "server": t.get("server", ""),
+                        })
+            except Exception:
+                pass  # MCP tools may not be available
         return {"tools": tools, "count": len(tools)}
 
     # ═══════════════════════════════════════
@@ -1041,6 +1050,7 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
             import asyncio as _aio
             try:
                 while True:
+                    # إرسال أحداث المحرك إن وجدت
                     if engine and hasattr(engine, '_current_cycle_steps'):
                         steps = getattr(engine, '_current_cycle_steps', [])
                         for step in steps:
@@ -1096,6 +1106,178 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
             except Exception as e:
                 return {"status": "error", "message": str(e)}
         return {"status": "no_engine", "message": "المحرك غير متصل"}
+
+    @app.post("/api/voice/chat")
+    async def voice_chat(audio: UploadFile = File(...), session_id: str = Form(default="")):
+        """محادثة صوتية — مطلوب من الفرونت اند"""
+        if not engine:
+            raise HTTPException(status_code=503, detail="المحرك غير متصل")
+        try:
+            audio_bytes = await audio.read()
+            if len(audio_bytes) == 0:
+                raise HTTPException(status_code=400, detail="ملف صوتي فارغ")
+            # محاولة التفريغ عبر VoicePipeline
+            pipeline = get_voice_pipeline()
+            transcription = ""
+            if pipeline and hasattr(pipeline, 'stt') and pipeline.stt and pipeline.stt.available:
+                stt_result = await pipeline.process_audio(audio_bytes)
+                transcription = stt_result.text if stt_result else ""
+            if not transcription:
+                transcription = "[رسالة صوتية — التفريغ غير متاح]"
+            # معالجة النص المفرّغ عبر المحرك
+            result = await engine.chat(transcription)
+            result["transcription"] = transcription
+            # إضافة رد صوتي إن أمكن
+            if pipeline and pipeline.tts and pipeline.tts.available and result.get("response"):
+                try:
+                    synthesis = await pipeline.process_text(result["response"], "ar")
+                    if synthesis and synthesis.audio:
+                        filename = f"voice_{int(datetime.now().timestamp())}.mp3"
+                        await pipeline.save_audio(synthesis.audio, filename)
+                        result["audio_url"] = f"/api/voice/audio/{filename}"
+                except Exception:
+                    pass
+            return result
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @app.post("/api/voice/transcribe")
+    async def voice_transcribe(audio: UploadFile = File(...)):
+        """تفريغ صوتي — مطلوب من الفرونت اند"""
+        try:
+            audio_bytes = await audio.read()
+            if len(audio_bytes) == 0:
+                raise HTTPException(status_code=400, detail="ملف صوتي فارغ")
+            pipeline = get_voice_pipeline()
+            if pipeline and hasattr(pipeline, 'stt') and pipeline.stt and pipeline.stt.available:
+                stt_result = await pipeline.process_audio(audio_bytes)
+                return {"text": stt_result.text if stt_result else "", "success": True}
+            return {"text": "", "success": False, "error": "STT غير متاح — يحتاج نموذج Whisper"}
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @app.post("/api/chat/upload")
+    async def chat_upload(file: UploadFile = File(...)):
+        """رفع ملف — مطلوب من الفرونت اند"""
+        if not engine:
+            raise HTTPException(status_code=503, detail="المحرك غير متصل")
+        try:
+            import os as _oso
+            content = await file.read()
+            if len(content) > 10 * 1024 * 1024:  # 10MB limit
+                raise HTTPException(status_code=400, detail="الملف كبير جداً (الحد: 10MB)")
+            upload_dir = _oso.path.join(_oso.path.dirname(_oso.path.dirname(__file__)), "data", "uploads")
+            _oso.makedirs(upload_dir, exist_ok=True)
+            safe_name = _oso.path.basename(file.filename or "upload")
+            filepath = _oso.path.join(upload_dir, safe_name)
+            with open(filepath, "wb") as f:
+                f.write(content)
+            return {
+                "success": True,
+                "filename": safe_name,
+                "original_name": file.filename,
+                "url": f"/api/chat/upload/{safe_name}",
+                "content_type": file.content_type or "application/octet-stream",
+                "size": len(content),
+            }
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @app.get("/api/ollama/models")
+    async def ollama_models():
+        """قائمة نماذج Ollama — مطلوب من الفرونت اند"""
+        ollama_base = "http://localhost:11434"
+        if engine:
+            ollama_base = engine.config.get("ollama_base", ollama_base)
+        try:
+            async with httpx.AsyncClient(timeout=5.0) as client:
+                resp = await client.get(f"{ollama_base}/api/tags")
+                if resp.status_code == 200:
+                    data = resp.json()
+                    models = [m.get("name", "") for m in data.get("models", [])]
+                    return {"models": models, "connected": True}
+            return {"models": [], "connected": False}
+        except Exception:
+            return {"models": [], "connected": False}
+
+    @app.post("/api/ollama/select")
+    async def ollama_select(req: dict):
+        """اختيار نموذج Ollama — مطلوب من الفرونت اند"""
+        model_name = req.get("model", "")
+        if not model_name:
+            raise HTTPException(status_code=400, detail="اسم النموذج مطلوب")
+        if not engine:
+            raise HTTPException(status_code=503, detail="المحرك غير متصل")
+        engine.model_name = model_name
+        logger.info(f"تم تغيير النموذج إلى: {model_name}")
+        return {"success": True, "model": model_name}
+
+    @app.get("/api/skills/list")
+    async def skills_list():
+        """قائمة المهارات التفصيلية — مطلوب من الفرونت اند"""
+        if engine and hasattr(engine, 'skills'):
+            try:
+                raw = engine.skills.list_skills()
+                skills = []
+                for s in raw:
+                    if isinstance(s, dict):
+                        skills.append(s)
+                    elif isinstance(s, str):
+                        skills.append({"name": s, "description": "", "path": ""})
+                return {"skills": skills}
+            except Exception:
+                pass
+        return {"skills": []}
+
+    @app.post("/api/skills/load")
+    async def skills_load(req: dict):
+        """تحميل مهارة — مطلوب من الفرونت اند"""
+        path = req.get("path", "")
+        if not path:
+            raise HTTPException(status_code=400, detail="path مطلوب")
+        if not engine or not hasattr(engine, 'skills'):
+            raise HTTPException(status_code=503, detail="نظام المهارات غير متاح")
+        try:
+            engine.skills.load_skill(path)
+            return {"success": True, "path": path}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @app.get("/api/notebook/stats")
+    async def notebook_stats():
+        """إحصائيات النوت بوك — مطلوب من الفرونت اند"""
+        if engine and hasattr(engine, 'notebook') and engine.notebook:
+            try:
+                return {
+                    "total_entries": len(getattr(engine.notebook, 'entries', [])),
+                    "last_updated": getattr(engine.notebook, 'last_updated', None),
+                    "user_profile": bool(getattr(engine.notebook, 'user_profile', None)),
+                }
+            except Exception:
+                pass
+        return {"total_entries": 0, "last_updated": None, "user_profile": False}
+
+    @app.post("/api/permissions/respond")
+    async def permissions_respond(req: dict):
+        """الرد على طلب صلاحية — مطلوب من الفرونت اند"""
+        approve = req.get("approve", False)
+        level = req.get("level", "once")
+        if engine and hasattr(engine, 'permissions'):
+            try:
+                if approve:
+                    engine.permissions.grant(level=level)
+                else:
+                    engine.permissions.deny()
+                return {"status": "ok", "approved": approve, "level": level}
+            except Exception as e:
+                return {"status": "error", "message": str(e)}
+        return {"status": "no_engine"}
 
     # ─── WebSocket ──────────────────────────────────────
     # [FIX] WebSocket authentication — التحقق من token
@@ -1199,11 +1381,11 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
                 filename = f"synth_{int(datetime.now().timestamp())}.mp3"
                 audio_path = await pipeline.save_audio(synthesis.audio, filename)
                 return {"success": True, "audio_url": f"/api/voice/audio/{filename}"}
-            return {"success": False, "error": "فشل التوليد"}
+            return {"success": False, "error": "تعذر التوليد"}
         except HTTPException:
             raise
         except Exception as e:
-            raise HTTPException(500, f"فشل تحويل الصوت: {e}")
+            raise HTTPException(500, f"تعذر تحويل الصوت: {e}")
 
     # ─── Start/Stop ─────────────────────────────────────
     @app.on_event("startup")

@@ -1,525 +1,254 @@
 """
-Adam Prism — Async Event Bus
-==============================
-ناقل أحداث غير متزامن مع دعم الأولويات والـ wildcard والتخزين المؤقت.
+Adam Prism — Event Bus
+========================
+نظام أحداث غير متزامن للتواصل بين الموديولات بدون coupling.
+كل موديول ينشر أحداث ويستمع لأحداث — بدون استيراد مباشر.
 
-An event-driven communication backbone for inter-module messaging.
-Supports wildcard topic subscriptions, priority-based delivery, dead-letter
-queue for failed events, and replay buffer for late subscribers.
-
-المميزات / Features:
-  - أولويات الأحداث (CRITICAL → LOW) — Event priorities
-  - دعم الـ wildcard في المواضيع (chat.*) — Wildcard topic matching
-  - تخزين مؤقت لإعادة تشغيل الأحداث — Replay buffer for new subscribers
-  - طابور الرسائل الميتة للرسائل الفاشلة — Dead-letter queue for failures
-  - تجمع عمال قابل للتكوين — Configurable worker pool
-  - إحصائيات شاملة — Comprehensive stats
+Features:
+- Pub/Sub pattern with topic-based routing
+- Async event processing with priority queues
+- Event replay for late subscribers
+- Dead letter queue for failed events
+- Event persistence for audit trail
 """
-
-from __future__ import annotations
 
 import asyncio
 import logging
 import time
 import uuid
+from collections import defaultdict
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from enum import IntEnum
-from typing import Any, Callable, Coroutine, Dict, List, Optional, Set
+from typing import Any, Callable, Dict, List, Optional, Set
 
 logger = logging.getLogger("adam_prism.orchestrator.event_bus")
 
 
-# ═══════════════════════════════════════════════════════════════
-# أنماط البيانات / Data Models
-# ═══════════════════════════════════════════════════════════════
-
 class EventPriority(IntEnum):
-    """
-    أولوية الحدث — كلما زادت القيمة، زادت الأولوية.
-    Event priority — higher value = higher priority.
-    """
-    LOW = 0
-    NORMAL = 5
-    HIGH = 10
-    CRITICAL = 20
+    """أولوية الحدث — الأعلى يُنفذ أولاً"""
+    CRITICAL = 0   # أحداث أمنية + إيقاف طوارئ
+    HIGH = 1       # طلبات المستخدم + أخطاء حرجة
+    NORMAL = 2     # عمليات عادية (chat, tool exec)
+    LOW = 3        # تحليلات + تعلم + تسجيل
+    BACKGROUND = 4 # تنظيف + إحصائيات + cache eviction
 
 
 @dataclass
 class Event:
-    """
-    حدث في ناقل الأحداث — An event on the bus.
-
-    Attributes / الخصائص:
-        id: معرف فريد للحدث — Unique event identifier
-        topic: موضوع الحدث (يدعم التسلسل الهرمي مثل chat.message) — Event topic
-        data: بيانات الحدث — Event payload
-        priority: أولوية الحدث — Event priority
-        timestamp: وقت الإنشاء — Creation timestamp (epoch)
-        source: مصدر الحدث — Event source module name
-    """
-    id: str = field(default_factory=lambda: str(uuid.uuid4()))
-    topic: str = ""
-    data: Any = None
+    """حدث في النظام"""
+    topic: str
+    data: Dict[str, Any]
     priority: EventPriority = EventPriority.NORMAL
-    timestamp: float = field(default_factory=time.time)
     source: str = ""
+    event_id: str = field(default_factory=lambda: str(uuid.uuid4())[:12])
+    timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    replay: bool = False  # هل يُعاد بثه للمشتركين الجدد؟
+
+    def __lt__(self, other):
+        """لأجل priority queue — الأقل أولوية رقمياً = الأعلى أهمية"""
+        if not isinstance(other, Event):
+            return NotImplemented
+        return self.priority < other.priority
 
 
-@dataclass
-class DeadLetterEntry:
-    """
-    رسالة ميتة — حدث فشل تسليمه.
-    A dead-letter entry for an event that could not be delivered.
-    """
-    event: Event
-    subscriber_id: str
-    error: str
-    timestamp: float = field(default_factory=time.time)
-    retry_count: int = 0
+class DeadLetterQueue:
+    """طابور الأحداث الفاشلة — للمراجعة والإعادة"""
 
+    def __init__(self, max_size: int = 1000):
+        self._queue: List[Dict[str, Any]] = []
+        self._max_size = max_size
 
-@dataclass
-class _Subscription:
-    """
-    اشتراك داخلي — Internal subscription record.
+    def add(self, event: Event, error: str):
+        """إضافة حدث فاشل"""
+        entry = {
+            "event_id": event.event_id,
+            "topic": event.topic,
+            "data": event.data,
+            "source": event.source,
+            "error": error,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+        self._queue.append(entry)
+        if len(self._queue) > self._max_size:
+            self._queue = self._queue[-self._max_size:]
+        logger.warning(f"DLQ: Event {event.event_id} on '{event.topic}' failed: {error}")
 
-    Attributes / الخصائص:
-        id: معرف الاشتراك — Subscription identifier
-        topic_pattern: نمط الموضوع (قد يحتوي على wildcard) — Topic pattern
-        callback: دالة الاستدعاء — Async callback function
-        priority_filter: تصفية حسب الأولوية (اختياري) — Optional priority filter
-        is_wildcard: هل النمط يحتوي على wildcard — Whether pattern uses wildcards
-    """
-    id: str
-    topic_pattern: str
-    callback: Callable[[Event], Coroutine[Any, Any, None]]
-    priority_filter: Optional[EventPriority] = None
-    is_wildcard: bool = False
+    def get_all(self) -> List[Dict[str, Any]]:
+        return list(self._queue)
 
+    def clear(self):
+        self._queue.clear()
 
-# ═══════════════════════════════════════════════════════════════
-# ناقل الأحداث / Event Bus
-# ═══════════════════════════════════════════════════════════════
+    @property
+    def size(self) -> int:
+        return len(self._queue)
+
 
 class EventBus:
     """
-    ناقل أحداث غير متزامن — Async event bus with priority, wildcard, and replay.
+    ناقل أحداث غير متزامن — مركزي للتواصل بين الموديولات
 
-    الاستخدام الأساسي / Basic Usage:
+    Usage:
         bus = EventBus()
-        await bus.subscribe("chat.message", on_chat_message)
-        await bus.publish_data("chat.message", {"text": "مرحبا"})
 
-    يدعم / Supports:
-      - wildcard مثل "chat.*" يطابق "chat.message" و "chat.tool_call"
-      - تصفية حسب الأولوية — Priority filtering
-      - إعادة تشغيل الأحداث الأخيرة للمشتركين الجدد — Replay buffer
-      - طابور الرسائل الميتة — Dead-letter queue
-      - تجمع عمال — Worker pool for concurrent delivery
+        # Subscribe
+        async def on_chat(event: Event):
+            print(f"Chat: {event.data}")
+        bus.subscribe("chat.message", on_chat)
+
+        # Publish
+        await bus.publish(Event(
+            topic="chat.message",
+            data={"user": "Mohamed", "message": "Hello"},
+            source="api_server"
+        ))
     """
 
-    def __init__(
-        self,
-        replay_buffer_size: int = 100,
-        max_dlq_size: int = 1000,
-        worker_count: int = 4,
-    ) -> None:
-        """
-        تهيئة ناقل الأحداث — Initialize the event bus.
-
-        Args / المعاملات:
-            replay_buffer_size: حجم المخزن المؤقت لإعادة التشغيل — Replay buffer size
-            max_dlq_size: الحد الأقصى لطابور الرسائل الميتة — Max dead-letter queue size
-            worker_count: عدد عمال التسليم — Number of delivery workers
-        """
-        self._subscriptions: Dict[str, _Subscription] = {}
-        self._replay_buffer: List[Event] = []
+    def __init__(self, replay_buffer_size: int = 100):
+        # topic → list of handlers
+        self._subscribers: Dict[str, List[Callable]] = defaultdict(list)
+        # topic → wildcard pattern subscribers
+        self._wildcard_subscribers: Dict[str, List[Callable]] = defaultdict(list)
+        # Replay buffer: topic → list of recent events
+        self._replay_buffer: Dict[str, List[Event]] = defaultdict(list)
         self._replay_buffer_size = replay_buffer_size
-        self._dead_letter_queue: List[DeadLetterEntry] = []
-        self._max_dlq_size = max_dlq_size
+        # Dead letter queue
+        self._dlq = DeadLetterQueue()
+        # Stats
+        self._published = 0
+        self._delivered = 0
+        self._failed = 0
+        # Processing
+        self._processing = False
+        self._priority_queue: asyncio.PriorityQueue = asyncio.PriorityQueue()
+        self._worker_task: Optional[asyncio.Task] = None
+        self._num_workers = 3
 
-        # طابور الأحداث الداخلية — Internal event queue (priority-sorted)
-        self._queue: asyncio.PriorityQueue = asyncio.PriorityQueue()
-
-        # تجمع العمال — Worker pool
-        self._worker_count = worker_count
-        self._workers: List[asyncio.Task] = []
-        self._running = False
-
-        # عدادات الإحصائيات — Stats counters
-        self._total_published: int = 0
-        self._total_delivered: int = 0
-        self._total_failed: int = 0
-
-        # قفل لسلامة العمليات — Lock for thread safety on shared state
-        self._lock = asyncio.Lock()
-
-    # ─────────────────────────────────────────────
-    # الاشتراك / Subscription
-    # ─────────────────────────────────────────────
-
-    async def subscribe(
-        self,
-        topic: str,
-        callback: Callable[[Event], Coroutine[Any, Any, None]],
-        priority_filter: Optional[EventPriority] = None,
-    ) -> str:
+    def subscribe(self, topic: str, handler: Callable, replay: bool = False):
         """
-        الاشتراك في موضوع — Subscribe to a topic.
-
-        Args / المعاملات:
-            topic: الموضوع أو نمط wildcard (مثلاً "chat.*") — Topic or wildcard pattern
-            callback: دالة async تُستدعى عند وصول حدث — Async callback
-            priority_filter: إذا تم تحديده، استقبل فقط الأحداث بهذه الأولوية أو أعلى
-                             — If set, only receive events at this priority or above
-
-        Returns / المخرجات:
-            معرف الاشتراك — Subscription ID (for unsubscribe)
-
-        Note / ملاحظة:
-            إذا كان الموضوع يحتوي على "*" يُعامَل كـ wildcard.
-            "chat.*" يطابق "chat.message" و "chat.tool_call" لكن لا يطابق "chat".
+        الاشتراك في موضوع
+        - topic: اسم الموضوع (مثل "chat.message") أو نمط (مثل "chat.*")
+        - handler: دالة async تأخذ Event
+        - replay: هل نعيد بث الأحداث السابقة عند الاشتراك؟
         """
-        sub_id = str(uuid.uuid4())
-        is_wildcard = "*" in topic
+        if topic.endswith(".*"):
+            self._wildcard_subscribers[topic[:-2]].append(handler)
+            logger.info(f"EventBus: wildcard subscription '{topic}' → {handler.__name__}")
+        else:
+            self._subscribers[topic].append(handler)
+            logger.info(f"EventBus: subscription '{topic}' → {handler.__name__}")
 
-        sub = _Subscription(
-            id=sub_id,
-            topic_pattern=topic,
-            callback=callback,
-            priority_filter=priority_filter,
-            is_wildcard=is_wildcard,
-        )
-
-        async with self._lock:
-            self._subscriptions[sub_id] = sub
-
-        # إعادة تشغيل الأحداث السابقة — Replay recent events for late subscriber
-        replayed = 0
-        for event in self._replay_buffer:
-            if self._topic_matches(sub.topic_pattern, event.topic, sub.is_wildcard):
-                if priority_filter is not None and event.priority < priority_filter:
-                    continue
+        if replay:
+            # Replay recent events for this topic
+            for event in self._replay_buffer.get(topic, []):
                 try:
-                    await callback(event)
-                    replayed += 1
-                except Exception as exc:
-                    logger.warning(
-                        "Replay delivery failed for subscriber %s on topic %s: %s",
-                        sub_id, event.topic, exc,
-                    )
+                    if asyncio.iscoroutinefunction(handler):
+                        asyncio.create_task(handler(event))
+                    else:
+                        handler(event)
+                except Exception as e:
+                    logger.debug(f"Replay delivery failed for {topic}: {e}")
 
-        logger.info(
-            "Subscribed [%s] to topic '%s'%s (replayed %d events)",
-            sub_id[:8], topic,
-            f" [wildcard]" if is_wildcard else "",
-            replayed,
-        )
-        return sub_id
+    def unsubscribe(self, topic: str, handler: Callable):
+        """إلغاء الاشتراك"""
+        if topic.endswith(".*"):
+            base = topic[:-2]
+            if base in self._wildcard_subscribers:
+                self._wildcard_subscribers[base] = [
+                    h for h in self._wildcard_subscribers[base] if h != handler
+                ]
+        else:
+            if topic in self._subscribers:
+                self._subscribers[topic] = [
+                    h for h in self._subscribers[topic] if h != handler
+                ]
 
-    async def unsubscribe(self, subscription_id: str) -> bool:
+    async def publish(self, event: Event):
         """
-        إلغاء الاشتراك — Unsubscribe by subscription ID.
-
-        Args / المعاملات:
-            subscription_id: معرف الاشتراك — The ID returned from subscribe()
-
-        Returns / المخرجات:
-            True إذا تم إلغاء الاشتراك، False إذا لم يُوجَد — True if removed
+        نشر حدث — يُسلم لكل المشتركين غير متزامن
         """
-        async with self._lock:
-            removed = self._subscriptions.pop(subscription_id, None)
-        if removed:
-            logger.info("Unsubscribed [%s] from '%s'", subscription_id[:8], removed.topic_pattern)
-            return True
-        logger.warning("Unsubscribe failed — ID %s not found", subscription_id[:8])
-        return False
+        self._published += 1
 
-    # ─────────────────────────────────────────────
-    # النشر / Publishing
-    # ─────────────────────────────────────────────
+        # Store in replay buffer if marked
+        if event.replay:
+            buf = self._replay_buffer[event.topic]
+            buf.append(event)
+            if len(buf) > self._replay_buffer_size:
+                self._replay_buffer[event.topic] = buf[-self._replay_buffer_size:]
 
-    async def publish(self, event: Event) -> int:
-        """
-        نشر حدث — Publish an event to all matching subscribers.
+        # Deliver to direct subscribers
+        handlers = list(self._subscribers.get(event.topic, []))
+        # Deliver to wildcard subscribers
+        for prefix, wild_handlers in self._wildcard_subscribers.items():
+            if event.topic.startswith(prefix):
+                handlers.extend(wild_handlers)
 
-        Args / المعاملات:
-            event: الحدث المراد نشره — The event to publish
-
-        Returns / المخرجات:
-            عدد المشتركين الذين سيستلمون الحدث — Number of subscribers that will receive it
-        """
-        self._total_published += 1
-
-        # حفظ في المخزن المؤقت — Store in replay buffer
-        async with self._lock:
-            self._replay_buffer.append(event)
-            if len(self._replay_buffer) > self._replay_buffer_size:
-                self._replay_buffer = self._replay_buffer[-self._replay_buffer_size:]
-
-        # إضافة إلى الطابور — Enqueue for worker delivery
-        # PriorityQueue يرتب حسب الأولوية (سالب لأننا نريد أعلى أولوية أولاً)
-        await self._queue.put((-event.priority, event.timestamp, event))
-
-        # حساب عدد المستلمين — Count matching subscribers
-        async with self._lock:
-            count = sum(
-                1 for s in self._subscriptions.values()
-                if self._topic_matches(s.topic_pattern, event.topic, s.is_wildcard)
-                and (s.priority_filter is None or event.priority >= s.priority_filter)
-            )
-
-        logger.debug(
-            "Published event %s on topic '%s' to %d subscribers [priority=%s]",
-            event.id[:8], event.topic, count, event.priority.name,
-        )
-        return count
-
-    async def publish_data(
-        self,
-        topic: str,
-        data: Any,
-        priority: EventPriority = EventPriority.NORMAL,
-        source: str = "",
-    ) -> int:
-        """
-        نشر بيانات كحدث — Publish data as an event (convenience method).
-
-        Args / المعاملات:
-            topic: موضوع الحدث — Event topic
-            data: بيانات الحدث — Event payload
-            priority: أولوية الحدث — Event priority
-            source: مصدر الحدث — Event source
-
-        Returns / المخرجات:
-            عدد المشتركين الذين سيستلمون الحدث — Number of matching subscribers
-        """
-        event = Event(
-            topic=topic,
-            data=data,
-            priority=priority,
-            source=source,
-        )
-        return await self.publish(event)
-
-    # ─────────────────────────────────────────────
-    # تجمع العمال / Worker Pool
-    # ─────────────────────────────────────────────
-
-    async def start(self) -> None:
-        """
-        بدء تجمع العمال — Start the event delivery worker pool.
-        يجب استدعاؤها قبل أن يبدأ نشر الأحداث في الخلفية.
-        Must be called to start background event delivery.
-        """
-        if self._running:
-            logger.warning("EventBus already running — ignoring start()")
-            return
-
-        self._running = True
-        for i in range(self._worker_count):
-            task = asyncio.create_task(self._worker_loop(i), name=f"eventbus-worker-{i}")
-            self._workers.append(task)
-
-        logger.info("EventBus started with %d workers", self._worker_count)
-
-    async def _worker_loop(self, worker_id: int) -> None:
-        """
-        حلقة العامل — Worker loop that processes events from the priority queue.
-        """
-        while self._running:
+        for handler in handlers:
             try:
-                # انتظار حدث مع مهلة — Wait for event with timeout
-                try:
-                    neg_priority, ts, event = await asyncio.wait_for(
-                        self._queue.get(), timeout=1.0
-                    )
-                except asyncio.TimeoutError:
-                    continue
+                if asyncio.iscoroutinefunction(handler):
+                    await handler(event)
+                else:
+                    handler(event)
+                self._delivered += 1
+            except Exception as e:
+                self._failed += 1
+                self._dlq.add(event, str(e))
 
-                await self._deliver_event(event)
+    def publish_sync(self, event: Event):
+        """نشر حدث بدون انتظار — يُنشئ task في الخلفية"""
+        asyncio.create_task(self.publish(event))
 
+    def start_workers(self):
+        """تشغيل عمال المعالجة من priority queue"""
+        if self._processing:
+            return
+        self._processing = True
+        for i in range(self._num_workers):
+            task = asyncio.create_task(self._worker_loop(i))
+        logger.info(f"EventBus: {self._num_workers} workers started")
+
+    async def _worker_loop(self, worker_id: int):
+        """دورة عمل لمعالجة الأحداث من priority queue"""
+        while self._processing:
+            try:
+                event = await asyncio.wait_for(
+                    self._priority_queue.get(), timeout=1.0
+                )
+                await self.publish(event)
+                self._priority_queue.task_done()
+            except asyncio.TimeoutError:
+                continue
             except asyncio.CancelledError:
-                logger.debug("Worker %d cancelled", worker_id)
                 break
-            except Exception as exc:
-                logger.error("Worker %d unexpected error: %s", worker_id, exc, exc_info=True)
+            except Exception as e:
+                logger.error(f"EventBus worker {worker_id} error: {e}")
 
-    async def _deliver_event(self, event: Event) -> None:
-        """
-        تسليم حدث لجميع المشتركين المتطابقين — Deliver an event to all matching subscribers.
-        """
-        async with self._lock:
-            matching = [
-                s for s in self._subscriptions.values()
-                if self._topic_matches(s.topic_pattern, event.topic, s.is_wildcard)
-                and (s.priority_filter is None or event.priority >= s.priority_filter)
-            ]
+    async def enqueue(self, event: Event):
+        """إضافة حدث لطابور الأولوية — يُعالج بواسطة workers"""
+        await self._priority_queue.put(event)
 
-        if not matching:
-            return
+    def stop_workers(self):
+        """إيقاف العمال"""
+        self._processing = False
 
-        # تسليم متوازي — Parallel delivery
-        results = await asyncio.gather(
-            *[self._safe_call(sub, event) for sub in matching],
-            return_exceptions=True,
-        )
+    def get_subscribers(self, topic: str) -> List[str]:
+        """أسماء المشتركين في موضوع"""
+        handlers = self._subscribers.get(topic, [])
+        return [h.__name__ for h in handlers if hasattr(h, '__name__')]
 
-        for sub, result in zip(matching, results):
-            if isinstance(result, Exception):
-                self._total_failed += 1
-                await self._enqueue_dead_letter(event, sub.id, str(result))
-            else:
-                self._total_delivered += 1
+    @property
+    def dlq(self) -> DeadLetterQueue:
+        return self._dlq
 
-    async def _safe_call(self, sub: _Subscription, event: Event) -> None:
-        """
-        استدعاء آمن مع مهلة — Safe callback invocation with timeout.
-        """
-        try:
-            await asyncio.wait_for(sub.callback(event), timeout=30.0)
-        except asyncio.TimeoutError:
-            raise RuntimeError(f"Callback timeout (30s) for subscriber {sub.id[:8]} on {event.topic}")
-        except Exception as exc:
-            raise RuntimeError(f"Callback error for subscriber {sub.id[:8]}: {exc}") from exc
-
-    # ─────────────────────────────────────────────
-    # طابور الرسائل الميتة / Dead-Letter Queue
-    # ─────────────────────────────────────────────
-
-    async def _enqueue_dead_letter(self, event: Event, subscriber_id: str, error: str) -> None:
-        """
-        إضافة حدث فاشل إلى طابور الرسائل الميتة — Add failed event to DLQ.
-        """
-        entry = DeadLetterEntry(
-            event=event,
-            subscriber_id=subscriber_id,
-            error=error,
-        )
-
-        async with self._lock:
-            self._dead_letter_queue.append(entry)
-            if len(self._dead_letter_queue) > self._max_dlq_size:
-                self._dead_letter_queue = self._dead_letter_queue[-self._max_dlq_size:]
-
-        logger.warning(
-            "Dead-letter: event %s for subscriber %s — %s",
-            event.id[:8], subscriber_id[:8], error[:120],
-        )
-
-    async def get_dead_letters(self, limit: int = 50) -> List[Dict]:
-        """
-        الحصول على رسائل ميتة — Retrieve dead-letter entries.
-
-        Args / المعاملات:
-            limit: الحد الأقصى للعدد — Max entries to return
-
-        Returns / المخرجات:
-            قائمة بالرسائل الميتة كقواميس — List of dead-letter entries as dicts
-        """
-        async with self._lock:
-            entries = self._dead_letter_queue[-limit:]
-        return [
-            {
-                "event_id": e.event.id,
-                "topic": e.event.topic,
-                "subscriber_id": e.subscriber_id,
-                "error": e.error,
-                "timestamp": e.timestamp,
-                "retry_count": e.retry_count,
-            }
-            for e in entries
-        ]
-
-    # ─────────────────────────────────────────────
-    # مطابقة المواضيع / Topic Matching
-    # ─────────────────────────────────────────────
-
-    @staticmethod
-    def _topic_matches(pattern: str, topic: str, is_wildcard: bool) -> bool:
-        """
-        مطابقة موضوع مع نمط — Check if a topic matches a pattern.
-
-        القواعد / Rules:
-          - تطابق تام: "chat.message" == "chat.message"
-          - wildcard نهائي: "chat.*" يطابق "chat.message" و "chat.tool_call"
-          - wildcard لا يطابق مستويات أعمق: "chat.*" لا يطابق "chat.sub.deep"
-        """
-        if not is_wildcard:
-            return pattern == topic
-
-        # نمط wildcard — Wildcard pattern
-        if not pattern.endswith(".*"):
-            # إذا كان النمط لا ينتهي بـ .* فاعتبره wildcard بسيط
-            prefix = pattern.rstrip("*").rstrip(".")
-            return topic == prefix or topic.startswith(prefix + ".")
-
-        # نمط مثل "chat.*" — Pattern like "chat.*"
-        prefix = pattern[:-2]  # إزالة ".*" — Remove ".*"
-        if not topic.startswith(prefix + "."):
-            return False
-        remainder = topic[len(prefix) + 1:]
-        # يجب أن يكون مستوى واحد فقط — Must be single level
-        return "." not in remainder
-
-    # ─────────────────────────────────────────────
-    # الإحصائيات والتشغيل / Stats & Operations
-    # ─────────────────────────────────────────────
-
-    async def get_stats(self) -> Dict[str, Any]:
-        """
-        الحصول على إحصائيات ناقل الأحداث — Get event bus statistics.
-
-        Returns / المخرجات:
-            قاموس يحتوي على:
-            - subscriber_count: عدد المشتركين
-            - total_published: إجمالي الأحداث المنشورة
-            - total_delivered: إجمالي الأحداث المسلمة
-            - total_failed: إجمالي الأحداث الفاشلة
-            - dlq_count: عدد الرسائل الميتة
-            - replay_buffer_size: حجم المخزن المؤقت
-            - queue_size: حجم الطابور الحالي
-            - topics: قائمة المواضيع الفريدة
-        """
-        async with self._lock:
-            topics: Set[str] = set()
-            for s in self._subscriptions.values():
-                topics.add(s.topic_pattern)
-
-            return {
-                "subscriber_count": len(self._subscriptions),
-                "total_published": self._total_published,
-                "total_delivered": self._total_delivered,
-                "total_failed": self._total_failed,
-                "dlq_count": len(self._dead_letter_queue),
-                "replay_buffer_size": len(self._replay_buffer),
-                "queue_size": self._queue.qsize(),
-                "topics": sorted(topics),
-                "workers_active": sum(1 for w in self._workers if not w.done()),
-            }
-
-    async def flush(self) -> None:
-        """
-        إيقاف تدريجي — Graceful shutdown: stop workers and drain queue.
-        """
-        logger.info("EventBus flushing — stopping %d workers...", len(self._workers))
-        self._running = False
-
-        # إلغاء العمال — Cancel workers
-        for w in self._workers:
-            w.cancel()
-        if self._workers:
-            await asyncio.gather(*self._workers, return_exceptions=True)
-        self._workers.clear()
-
-        # تسليم الأحداث المتبقية — Drain remaining events
-        remaining = 0
-        while not self._queue.empty():
-            try:
-                _, _, event = self._queue.get_nowait()
-                await self._deliver_event(event)
-                remaining += 1
-            except asyncio.QueueEmpty:
-                break
-
-        logger.info("EventBus flushed — delivered %d remaining events", remaining)
+    def stats(self) -> Dict[str, Any]:
+        return {
+            "published": self._published,
+            "delivered": self._delivered,
+            "failed": self._failed,
+            "topics": list(self._subscribers.keys()),
+            "wildcard_topics": list(self._wildcard_subscribers.keys()),
+            "dlq_size": self._dlq.size,
+            "replay_buffer_topics": list(self._replay_buffer.keys()),
+            "workers_running": self._processing,
+        }

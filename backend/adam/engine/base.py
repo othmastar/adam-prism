@@ -310,7 +310,7 @@ class AdamPrismEngineBase:
                             if action:
                                 logger.info(f"✅ {name}: {action}")
                             else:
-                                logger.error(f"❌ {name}: فشل الإصلاح")
+                                logger.error(f"❌ {name}: تعذر الإصلاح")
                     if self.eyes and hasattr(self.eyes, 'is_healthy'):
                         try:
                             healthy = await asyncio.wait_for(self.eyes.is_healthy(), timeout=10)

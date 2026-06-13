@@ -1,548 +1,337 @@
 """
-Adam Prism — Async Task Queue
-================================
-طابور مهام غير متزامن مع أولويات وإلغاء مكرر وتراجع أسّي.
+Adam Prism — Task Queue
+========================
+طابور مهام بسيط في الذاكرة مع أولويات وتتبع.
+بديل خفيف عن Redis/RabbitMQ — مناسب للاستخدام الفردي والخوادم الصغيرة.
 
-A priority-based task queue with deduplication, exponential backoff retry,
-concurrency limits, and automatic cleanup.
-
-المميزات / Features:
-  - أولويات المهام (CRITICAL → BACKGROUND) — Task priorities
-  - إلغاء المكرر — Deduplication (skip if same-named task is PENDING/RUNNING)
-  - تراجع أسّي عند الفشل — Exponential backoff on retry
-  - حد أقصى للمهام المتزامنة — Max concurrent tasks limit
-  - تنظيف تلقائي للمهام القديمة — Automatic cleanup of old tasks
-  - تجمع عمال — Worker pool for processing
-  - إحصائيات شاملة — Comprehensive statistics
+Features:
+- Priority-based task scheduling
+- Task deduplication by key
+- Retry with exponential backoff
+- Task result caching
+- Concurrency limits
 """
-
-from __future__ import annotations
 
 import asyncio
 import logging
 import time
 import uuid
+from collections import defaultdict
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from enum import IntEnum
-from typing import Any, Callable, Coroutine, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Set
 
 logger = logging.getLogger("adam_prism.orchestrator.task_queue")
 
 
-# ═══════════════════════════════════════════════════════════════
-# أنماط البيانات / Data Models
-# ═══════════════════════════════════════════════════════════════
-
 class TaskStatus(str):
-    """
-    حالة المهمة — Task status.
-    """
-    PENDING = "PENDING"
-    RUNNING = "RUNNING"
-    COMPLETED = "COMPLETED"
-    FAILED = "FAILED"
-    CANCELLED = "CANCELLED"
+    PENDING = "pending"
+    RUNNING = "running"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    CANCELLED = "cancelled"
+    RETRYING = "retrying"
 
 
 class TaskPriority(IntEnum):
-    """
-    أولوية المهمة — كلما زادت القيمة، زادت الأولوية.
-    Task priority — higher value = higher priority.
-    """
-    BACKGROUND = 0
-    LOW = 5
-    NORMAL = 10
-    HIGH = 15
-    CRITICAL = 20
+    CRITICAL = 0
+    HIGH = 1
+    NORMAL = 2
+    LOW = 3
 
 
 @dataclass
 class Task:
-    """
-    مهمة في الطابور — A task in the queue.
-
-    Attributes / الخصائص:
-        id: معرف فريد للمهمة — Unique task identifier
-        name: اسم المهمة (يُستخدم للإلغاء المكرر) — Task name (used for dedup)
-        func: الدالة المراد تنفيذها — Callable to execute
-        args: المعاملات الموضعية — Positional arguments
-        kwargs: المعاملات المسماة — Keyword arguments
-        priority: الأولوية — Task priority
-        status: الحالة الحالية — Current status
-        created_at: وقت الإنشاء — Creation timestamp
-        started_at: وقت بدء التنفيذ — Execution start timestamp
-        completed_at: وقت الانتهاء — Completion timestamp
-        result: النتيجة — Task result
-        error: رسالة الخطأ — Error message if failed
-        retries: عدد المحاولات — Current retry count
-        max_retries: الحد الأقصى للمحاولات — Max retry attempts
-    """
-    id: str = field(default_factory=lambda: str(uuid.uuid4()))
-    name: str = ""
-    func: Optional[Callable[..., Coroutine[Any, Any, Any]]] = None
-    args: List[Any] = field(default_factory=list)
+    """مهمة في الطابور"""
+    name: str
+    handler: Callable
+    args: tuple = ()
     kwargs: Dict[str, Any] = field(default_factory=dict)
     priority: TaskPriority = TaskPriority.NORMAL
+    task_id: str = field(default_factory=lambda: str(uuid.uuid4())[:10])
+    dedup_key: Optional[str] = None
+    max_retries: int = 2
+    retry_count: int = 0
     status: str = TaskStatus.PENDING
-    created_at: float = field(default_factory=time.time)
-    started_at: Optional[float] = None
-    completed_at: Optional[float] = None
     result: Any = None
     error: Optional[str] = None
-    retries: int = 0
-    max_retries: int = 3
+    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    started_at: Optional[str] = None
+    completed_at: Optional[str] = None
+    timeout: float = 300.0  # 5 minutes default
 
+    def __lt__(self, other):
+        if not isinstance(other, Task):
+            return NotImplemented
+        return self.priority < other.priority
 
-# ═══════════════════════════════════════════════════════════════
-# طابور المهام / Task Queue
-# ═══════════════════════════════════════════════════════════════
 
 class TaskQueue:
     """
-    طابور مهام غير متزامن مع أولويات — Async priority task queue.
+    طابور مهام غير متزامن مع إدارة كاملة
 
-    الاستخدام الأساسي / Basic Usage:
-        queue = TaskQueue(max_concurrent=5)
-        await queue.start()
-        task = await queue.enqueue("fetch_data", fetch_data_fn, args=[url])
-        await queue.stop()
+    Usage:
+        queue = TaskQueue(max_concurrent=3)
 
-    المميزات / Features:
-      - ترتيب حسب الأولوية — Priority-based dequeue
-      - إلغاء المكرر — Deduplication by task name
-      - تراجع أسّي — Exponential backoff retry
-      - حد التزامن — Max concurrent tasks limit
+        async def process_data(data):
+            return f"processed: {data}"
+
+        # Add task
+        task = await queue.enqueue(
+            name="process_data",
+            handler=process_data,
+            args=("hello",),
+            priority=TaskPriority.HIGH
+        )
+
+        # Wait for result
+        result = await queue.wait_for(task.task_id)
     """
 
-    def __init__(
-        self,
-        max_concurrent: int = 10,
-        worker_count: int = 3,
-        default_max_retries: int = 3,
-    ) -> None:
-        """
-        تهيئة طابور المهام — Initialize the task queue.
-
-        Args / المعاملات:
-            max_concurrent: الحد الأقصى للمهام المتزامنة — Max concurrent running tasks
-            worker_count: عدد العمال — Number of worker coroutines
-            default_max_retries: المحاولات الافتراضية — Default max retries per task
-        """
+    def __init__(self, max_concurrent: int = 3):
+        self._queue: asyncio.PriorityQueue = asyncio.PriorityQueue()
         self._tasks: Dict[str, Task] = {}
-        self._pending_queue: asyncio.PriorityQueue = asyncio.PriorityQueue()
+        self._dedup_keys: Set[str] = set()
         self._max_concurrent = max_concurrent
-        self._worker_count = worker_count
-        self._default_max_retries = default_max_retries
-        self._running = False
-        self._workers: List[asyncio.Task] = []
-
-        # عدّاد المهام المتزامنة — Concurrency counter
         self._running_count = 0
-        self._semaphore = asyncio.Semaphore(max_concurrent)
-
-        # إشعار بوجود مهام جديدة — Notification for new tasks
-        self._task_available = asyncio.Event()
-
-        # قفل لسلامة العمليات — Lock for shared state
+        self._worker_tasks: List[asyncio.Task] = []
+        self._running = False
+        self._results_cache: Dict[str, Any] = {}
+        self._results_ttl: Dict[str, float] = {}
         self._lock = asyncio.Lock()
+        # Stats
+        self._total_enqueued = 0
+        self._total_completed = 0
+        self._total_failed = 0
 
-    # ─────────────────────────────────────────────
-    # إدارة المهام / Task Management
-    # ─────────────────────────────────────────────
+    async def start(self, num_workers: int = None):
+        """تشغيل عمال الطابور"""
+        if self._running:
+            return
+        self._running = True
+        workers = num_workers or self._max_concurrent
+        for i in range(workers):
+            worker = asyncio.create_task(self._worker_loop(i))
+            self._worker_tasks.append(worker)
+        logger.info(f"TaskQueue: {workers} workers started")
+
+    async def stop(self):
+        """إيقاف الطابور"""
+        self._running = False
+        for task in self._worker_tasks:
+            task.cancel()
+        self._worker_tasks.clear()
+        logger.info("TaskQueue: stopped")
 
     async def enqueue(
         self,
         name: str,
-        func: Callable[..., Coroutine[Any, Any, Any]],
-        args: Optional[List[Any]] = None,
-        kwargs: Optional[Dict[str, Any]] = None,
+        handler: Callable,
+        args: tuple = (),
+        kwargs: Dict[str, Any] = None,
         priority: TaskPriority = TaskPriority.NORMAL,
-        max_retries: Optional[int] = None,
+        dedup_key: Optional[str] = None,
+        max_retries: int = 2,
+        timeout: float = 300.0,
     ) -> Task:
         """
-        إضافة مهمة إلى الطابور — Enqueue a new task.
-
-        Args / المعاملات:
-            name: اسم المهمة (يُستخدم للإلغاء المكرر) — Task name (dedup key)
-            func: الدالة async المراد تنفيذها — Async function to execute
-            args: المعاملات الموضعية — Positional arguments
-            kwargs: المعاملات المسماة — Keyword arguments
-            priority: الأولوية — Task priority
-            max_retries: الحد الأقصى للمحاولات — Max retry attempts (None = default)
-
-        Returns / المخرجات:
-            المهمة المنشأة — The created Task
-
-        Raises / الاستثناءات:
-            ValueError: إذا كانت هناك مهمة بنفس الاسم قيد التنفيذ أو الانتظار
-                        — If a task with the same name is already PENDING/RUNNING
+        إضافة مهمة للطابور
+        - dedup_key: لو موجود، لا يُضاف مهمة بنفس المفتاح مرتين
         """
-        # فحص الإلغاء المكرر — Deduplication check
         async with self._lock:
-            for existing in self._tasks.values():
-                if existing.name == name and existing.status in (
-                    TaskStatus.PENDING, TaskStatus.RUNNING
-                ):
-                    logger.info(
-                        "Dedup: task '%s' already %s (id=%s)",
-                        name, existing.status, existing.id[:8],
-                    )
-                    return existing
+            # Deduplication check
+            if dedup_key and dedup_key in self._dedup_keys:
+                # Find existing task
+                for t in self._tasks.values():
+                    if t.dedup_key == dedup_key and t.status in (TaskStatus.PENDING, TaskStatus.RUNNING, TaskStatus.RETRYING):
+                        logger.info(f"TaskQueue: dedup skip '{name}' (key={dedup_key})")
+                        return t
 
-        task = Task(
-            name=name,
-            func=func,
-            args=args or [],
-            kwargs=kwargs or {},
-            priority=priority,
-            max_retries=max_retries if max_retries is not None else self._default_max_retries,
-        )
+            task = Task(
+                name=name,
+                handler=handler,
+                args=args,
+                kwargs=kwargs or {},
+                priority=priority,
+                dedup_key=dedup_key,
+                max_retries=max_retries,
+                timeout=timeout,
+            )
+            self._tasks[task.task_id] = task
+            if dedup_key:
+                self._dedup_keys.add(dedup_key)
+            await self._queue.put(task)
+            self._total_enqueued += 1
+            logger.debug(f"TaskQueue: enqueued '{name}' (id={task.task_id}, priority={priority.name})")
+            return task
 
-        async with self._lock:
-            self._tasks[task.id] = task
-
-        # إضافة إلى طابور الأولوية — Enqueue with priority
-        # (سالب لأن PriorityQueue ترتب تصاعدياً ونريد أعلى أولوية أولاً)
-        await self._pending_queue.put((-priority, task.created_at, task.id))
-
-        # إيقاظ العمال — Wake up workers
-        self._task_available.set()
-
-        logger.info(
-            "Enqueued task '%s' [%s] priority=%s",
-            name, task.id[:8], priority.name,
-        )
-        return task
-
-    async def dequeue(self) -> Optional[Task]:
-        """
-        استخراج المهمة ذات الأولوية القصوى — Dequeue the highest-priority task.
-
-        Returns / المخرجات:
-            المهمة التالية أو None إذا كان الطابور فارغاً — Next task or None
-        """
-        try:
-            neg_priority, ts, task_id = self._pending_queue.get_nowait()
-        except asyncio.QueueEmpty:
-            return None
-
-        async with self._lock:
+    async def wait_for(self, task_id: str, timeout: float = 60.0) -> Any:
+        """انتظار نتيجة مهمة"""
+        deadline = time.time() + timeout
+        while time.time() < deadline:
             task = self._tasks.get(task_id)
-        if task is None or task.status != TaskStatus.PENDING:
-            return await self.dequeue()  # تجاهل المهام الملغاة — Skip cancelled
-
-        return task
-
-    async def mark_completed(self, task_id: str, result: Any = None) -> bool:
-        """
-        تحديد مهمة كمكتملة — Mark a task as completed.
-
-        Args / المعاملات:
-            task_id: معرف المهمة — Task ID
-            result: النتيجة — Task result
-
-        Returns / المخرجات:
-            True إذا تم التحديث، False إذا لم تُوجَد — True if updated
-        """
-        async with self._lock:
-            task = self._tasks.get(task_id)
-            if task is None:
-                return False
-            task.status = TaskStatus.COMPLETED
-            task.result = result
-            task.completed_at = time.time()
-
-        logger.info("Task '%s' [%s] completed", task.name, task_id[:8])
-        return True
-
-    async def mark_failed(self, task_id: str, error: str) -> bool:
-        """
-        تحديد مهمة كفاشلة — Mark a task as failed.
-
-        Args / المعاملات:
-            task_id: معرف المهمة — Task ID
-            error: رسالة الخطأ — Error message
-
-        Returns / المخرجات:
-            True إذا تم التحديث — True if updated
-        """
-        async with self._lock:
-            task = self._tasks.get(task_id)
-            if task is None:
-                return False
-            task.status = TaskStatus.FAILED
-            task.error = error
-            task.completed_at = time.time()
-
-        logger.warning("Task '%s' [%s] failed: %s", task.name, task_id[:8], error[:200])
-        return True
-
-    async def retry_task(self, task_id: str) -> bool:
-        """
-        إعادة محاولة مهمة فاشلة مع تراجع أسّي — Retry a failed task with exponential backoff.
-
-        Args / المعاملات:
-            task_id: معرف المهمة — Task ID
-
-        Returns / المخرجات:
-            True إذا تمت جدولة الإعادة، False إذا تعذّرت — True if retry scheduled
-        """
-        async with self._lock:
-            task = self._tasks.get(task_id)
-            if task is None:
-                return False
-            if task.status != TaskStatus.FAILED:
-                return False
-            if task.retries >= task.max_retries:
-                logger.warning(
-                    "Task '%s' [%s] exhausted retries (%d/%d)",
-                    task.name, task_id[:8], task.retries, task.max_retries,
-                )
-                return False
-
-        # تراجع أسّي: 2^retries ثانية — Exponential backoff: 2^retries seconds
-        backoff = min(2 ** task.retries, 60)  # حد أقصى 60 ثانية — Cap at 60s
-
-        async with self._lock:
-            task.retries += 1
-            task.status = TaskStatus.PENDING
-            task.error = None
-            task.completed_at = None
-            task.started_at = None
-
-        # انتظار التراجع — Wait for backoff
-        await asyncio.sleep(backoff)
-
-        # إعادة إضافة إلى الطابور — Re-enqueue
-        await self._pending_queue.put((-task.priority, time.time(), task.id))
-        self._task_available.set()
-
-        logger.info(
-            "Retrying task '%s' [%s] (attempt %d/%d, backoff=%ds)",
-            task.name, task_id[:8], task.retries, task.max_retries, backoff,
-        )
-        return True
+            if not task:
+                raise ValueError(f"Task {task_id} not found")
+            if task.status == TaskStatus.COMPLETED:
+                return task.result
+            if task.status == TaskStatus.FAILED:
+                raise RuntimeError(f"Task failed: {task.error}")
+            if task.status == TaskStatus.CANCELLED:
+                raise RuntimeError("Task was cancelled")
+            await asyncio.sleep(0.1)
+        raise TimeoutError(f"Task {task_id} did not complete in {timeout}s")
 
     async def cancel(self, task_id: str) -> bool:
-        """
-        إلغاء مهمة — Cancel a pending or running task.
-
-        Args / المعاملات:
-            task_id: معرف المهمة — Task ID
-
-        Returns / المخرجات:
-            True إذا تم الإلغاء — True if cancelled
-        """
-        async with self._lock:
-            task = self._tasks.get(task_id)
-            if task is None:
-                return False
-            if task.status not in (TaskStatus.PENDING, TaskStatus.RUNNING):
-                return False
+        """إلغاء مهمة"""
+        task = self._tasks.get(task_id)
+        if not task:
+            return False
+        if task.status in (TaskStatus.PENDING, TaskStatus.RETRYING):
             task.status = TaskStatus.CANCELLED
-            task.completed_at = time.time()
+            if task.dedup_key:
+                self._dedup_keys.discard(task.dedup_key)
+            return True
+        return False
 
-        logger.info("Task '%s' [%s] cancelled", task.name, task_id[:8])
-        return True
-
-    # ─────────────────────────────────────────────
-    # التنظيف / Cleanup
-    # ─────────────────────────────────────────────
-
-    async def cleanup(self, max_age_seconds: int = 3600) -> int:
-        """
-        إزالة المهام القديمة المكتملة أو الفاشلة — Remove old completed/failed tasks.
-
-        Args / المعاملات:
-            max_age_seconds: العمر الأقصى بالثواني — Max age in seconds
-
-        Returns / المخرجات:
-            عدد المهام المحذوفة — Number of tasks removed
-        """
-        cutoff = time.time() - max_age_seconds
-        removed = 0
-
-        async with self._lock:
-            to_remove = [
-                tid for tid, t in self._tasks.items()
-                if t.status in (TaskStatus.COMPLETED, TaskStatus.FAILED, TaskStatus.CANCELLED)
-                and t.completed_at is not None
-                and t.completed_at < cutoff
-            ]
-            for tid in to_remove:
-                del self._tasks[tid]
-                removed += 1
-
-        if removed:
-            logger.info("Cleaned up %d old tasks (max_age=%ds)", removed, max_age_seconds)
-        return removed
-
-    # ─────────────────────────────────────────────
-    # تجمع العمال / Worker Pool
-    # ─────────────────────────────────────────────
-
-    async def start(self) -> None:
-        """
-        بدء تجمع العمال — Start the task processing worker pool.
-        """
-        if self._running:
-            logger.warning("TaskQueue already running — ignoring start()")
-            return
-
-        self._running = True
-        for i in range(self._worker_count):
-            task = asyncio.create_task(self._worker_loop(i), name=f"taskqueue-worker-{i}")
-            self._workers.append(task)
-
-        logger.info("TaskQueue started with %d workers (max_concurrent=%d)", self._worker_count, self._max_concurrent)
-
-    async def _worker_loop(self, worker_id: int) -> None:
-        """
-        حلقة العامل — Worker loop that processes tasks from the queue.
-        """
+    async def _worker_loop(self, worker_id: int):
+        """دورة عمل لتنفيذ المهام"""
         while self._running:
             try:
-                # انتظار مهمة — Wait for a task
-                try:
-                    await asyncio.wait_for(self._task_available.wait(), timeout=1.0)
-                except asyncio.TimeoutError:
-                    continue
-
-                task = await self.dequeue()
-                if task is None:
-                    self._task_available.clear()
-                    continue
-
-                # التحقق من حد التزامن — Check concurrency limit
-                await self._semaphore.acquire()
-                try:
-                    async with self._lock:
-                        self._running_count += 1
-
-                    task.status = TaskStatus.RUNNING
-                    task.started_at = time.time()
-
-                    if task.func is None:
-                        raise ValueError(f"Task '{task.name}' has no function to execute")
-
-                    result = await asyncio.wait_for(
-                        task.func(*task.args, **task.kwargs),
-                        timeout=300.0,  # حد أقصى 5 دقائق — 5 min timeout
-                    )
-                    await self.mark_completed(task.id, result)
-
-                except asyncio.TimeoutError:
-                    await self.mark_failed(task.id, "Task timed out (300s)")
-                    # محاولة إعادة تلقائية — Auto-retry
-                    if task.retries < task.max_retries:
-                        await self.retry_task(task.id)
-
-                except asyncio.CancelledError:
-                    await self.cancel(task.id)
-                    break
-
-                except Exception as exc:
-                    await self.mark_failed(task.id, str(exc))
-                    # محاولة إعادة تلقائية — Auto-retry
-                    if task.retries < task.max_retries:
-                        await self.retry_task(task.id)
-
-                finally:
-                    async with self._lock:
-                        self._running_count -= 1
-                    self._semaphore.release()
-
-                    # إيقاظ العمال الآخرين — Wake other workers
-                    self._task_available.set()
-
+                task = await asyncio.wait_for(self._queue.get(), timeout=1.0)
+            except asyncio.TimeoutError:
+                continue
             except asyncio.CancelledError:
                 break
-            except Exception as exc:
-                logger.error("Worker %d unexpected error: %s", worker_id, exc, exc_info=True)
 
-    # ─────────────────────────────────────────────
-    # الإحصائيات / Statistics
-    # ─────────────────────────────────────────────
+            if task.status == TaskStatus.CANCELLED:
+                self._queue.task_done()
+                continue
 
-    async def get_stats(self) -> Dict[str, Any]:
-        """
-        الحصول على إحصائيات الطابور — Get queue statistics.
+            # Concurrency check
+            if self._running_count >= self._max_concurrent:
+                # Re-enqueue
+                await self._queue.put(task)
+                await asyncio.sleep(0.5)
+                continue
 
-        Returns / المخرجات:
-            قاموس يحتوي على:
-            - total_tasks: إجمالي المهام
-            - pending: عدد المهام في الانتظار
-            - running: عدد المهام قيد التنفيذ
-            - completed: عدد المهام المكتملة
-            - failed: عدد المهام الفاشلة
-            - cancelled: عدد المهام الملغاة
-            - max_concurrent: الحد الأقصى للتزامن
-            - workers_active: عدد العمال النشطين
-        """
-        async with self._lock:
-            counts = {
-                "PENDING": 0, "RUNNING": 0, "COMPLETED": 0,
-                "FAILED": 0, "CANCELLED": 0,
-            }
-            for t in self._tasks.values():
-                counts[t.status] = counts.get(t.status, 0) + 1
+            self._running_count += 1
+            task.status = TaskStatus.RUNNING
+            task.started_at = datetime.now(timezone.utc).isoformat()
 
-            return {
-                "total_tasks": len(self._tasks),
-                "pending": counts["PENDING"],
-                "running": counts["RUNNING"],
-                "completed": counts["COMPLETED"],
-                "failed": counts["FAILED"],
-                "cancelled": counts["CANCELLED"],
-                "max_concurrent": self._max_concurrent,
-                "workers_active": sum(1 for w in self._workers if not w.done()),
-                "queue_size": self._pending_queue.qsize(),
-            }
+            try:
+                result = await asyncio.wait_for(
+                    task.handler(*task.args, **task.kwargs),
+                    timeout=task.timeout,
+                )
+                task.result = result
+                task.status = TaskStatus.COMPLETED
+                task.completed_at = datetime.now(timezone.utc).isoformat()
+                self._total_completed += 1
+                # Cache result
+                self._results_cache[task.task_id] = result
+                self._results_ttl[task.task_id] = time.time() + 300  # 5 min cache
+            except asyncio.TimeoutError:
+                task.error = f"Task timed out after {task.timeout}s"
+                await self._handle_failure(task)
+            except asyncio.CancelledError:
+                task.status = TaskStatus.CANCELLED
+            except Exception as e:
+                task.error = str(e)
+                await self._handle_failure(task)
+            finally:
+                self._running_count -= 1
+                self._queue.task_done()
+                if task.dedup_key and task.status in (TaskStatus.COMPLETED, TaskStatus.FAILED, TaskStatus.CANCELLED):
+                    self._dedup_keys.discard(task.dedup_key)
 
-    async def get_task(self, task_id: str) -> Optional[Dict]:
-        """
-        الحصول على تفاصيل مهمة — Get task details as dict.
+    async def _handle_failure(self, task: Task):
+        """معالجة تعذر المهمة — إعادة محاولة أو وضع فاشل"""
+        if task.retry_count < task.max_retries:
+            task.retry_count += 1
+            task.status = TaskStatus.RETRYING
+            delay = min(0.5 * (2 ** task.retry_count), 30.0)
+            logger.warning(
+                f"TaskQueue: retry '{task.name}' (attempt {task.retry_count}/{task.max_retries}) in {delay:.1f}s"
+            )
+            await asyncio.sleep(delay)
+            await self._queue.put(task)
+        else:
+            task.status = TaskStatus.FAILED
+            task.completed_at = datetime.now(timezone.utc).isoformat()
+            self._total_failed += 1
+            logger.error(f"TaskQueue: '{task.name}' failed permanently: {task.error}")
 
-        Args / المعاملات:
-            task_id: معرف المهمة — Task ID
-
-        Returns / المخرجات:
-            قاموس تفاصيل المهمة أو None — Task details dict or None
-        """
-        async with self._lock:
-            task = self._tasks.get(task_id)
-        if task is None:
+    def get_task(self, task_id: str) -> Optional[Dict[str, Any]]:
+        """معلومات مهمة"""
+        task = self._tasks.get(task_id)
+        if not task:
             return None
         return {
-            "id": task.id,
+            "task_id": task.task_id,
             "name": task.name,
-            "priority": task.priority.name,
             "status": task.status,
+            "priority": task.priority.name,
+            "retry_count": task.retry_count,
+            "error": task.error,
             "created_at": task.created_at,
             "started_at": task.started_at,
             "completed_at": task.completed_at,
-            "result": str(task.result)[:500] if task.result is not None else None,
-            "error": task.error,
-            "retries": task.retries,
-            "max_retries": task.max_retries,
         }
 
-    # ─────────────────────────────────────────────
-    # الإيقاف / Shutdown
-    # ─────────────────────────────────────────────
+    def list_tasks(self, status: Optional[str] = None, limit: int = 50) -> List[Dict[str, Any]]:
+        """قائمة المهام"""
+        tasks = list(self._tasks.values())
+        if status:
+            tasks = [t for t in tasks if t.status == status]
+        tasks.sort(key=lambda t: t.created_at, reverse=True)
+        return [
+            {
+                "task_id": t.task_id,
+                "name": t.name,
+                "status": t.status,
+                "priority": t.priority.name,
+                "created_at": t.created_at,
+            }
+            for t in tasks[:limit]
+        ]
 
-    async def stop(self) -> None:
-        """
-        إيقاف تدريجي — Graceful shutdown: cancel workers and wait.
-        """
-        logger.info("TaskQueue stopping — %d workers...", len(self._workers))
-        self._running = False
-        self._task_available.set()  # إيقاظ العمال للإلغاء — Wake workers for cancellation
+    def cleanup(self, max_age_hours: int = 24):
+        """تنظيف المهام القديمة"""
+        now = datetime.now(timezone.utc)
+        cutoff = now.timestamp() - (max_age_hours * 3600)
+        to_remove = []
+        for task_id, task in self._tasks.items():
+            if task.status in (TaskStatus.COMPLETED, TaskStatus.FAILED, TaskStatus.CANCELLED):
+                if task.completed_at:
+                    try:
+                        completed_ts = datetime.fromisoformat(task.completed_at).timestamp()
+                        if completed_ts < cutoff:
+                            to_remove.append(task_id)
+                    except (ValueError, TypeError):
+                        pass
+        for task_id in to_remove:
+            self._tasks.pop(task_id, None)
+            self._results_cache.pop(task_id, None)
+            self._results_ttl.pop(task_id, None)
+        # Clean expired result cache
+        now_ts = time.time()
+        expired = [k for k, v in self._results_ttl.items() if v < now_ts]
+        for k in expired:
+            self._results_cache.pop(k, None)
+            self._results_ttl.pop(k, None)
+        if to_remove or expired:
+            logger.info(f"TaskQueue: cleaned up {len(to_remove)} old tasks, {len(expired)} expired cache entries")
 
-        for w in self._workers:
-            w.cancel()
-        if self._workers:
-            await asyncio.gather(*self._workers, return_exceptions=True)
-        self._workers.clear()
-
-        logger.info("TaskQueue stopped")
+    def stats(self) -> Dict[str, Any]:
+        return {
+            "total_enqueued": self._total_enqueued,
+            "total_completed": self._total_completed,
+            "total_failed": self._total_failed,
+            "queue_size": self._queue.qsize(),
+            "running_count": self._running_count,
+            "max_concurrent": self._max_concurrent,
+            "tasks_tracked": len(self._tasks),
+            "dedup_keys_active": len(self._dedup_keys),
+            "results_cached": len(self._results_cache),
+        }

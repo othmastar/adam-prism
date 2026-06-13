@@ -1,6 +1,6 @@
 """
 Adam Prism — Master Orchestrator
-====================================
+================================
 المنسق المركزي الأعلى — يربط كل موديولات النظام وينسقها.
 هذا هو "العقل" الذي يربط الذاكرة + الأمان + الأخلاق + الأدوات + التعلم + الوكلاء الفرعيين.
 
@@ -17,7 +17,7 @@ Features:
 3. Health-Aware Load Balancing — توزيع مع مراعاة الصحة
 4. Adaptive Learning — تعلم من الأنماط لتحسين التوجيه
 5. Workflow Orchestration — سير عمل متعدد الخطوات
-6. Graceful Degradation — تدهور سلس عند فشل المكونات
+6. Graceful Degradation — تدهور سلس عند تعذر المكونات
 7. Circuit Breaker Integration — حماية من الأعطال المتتالية
 8. Event-Driven Architecture — بنية مبنية على الأحداث
 """
@@ -315,7 +315,7 @@ class MasterOrchestrator:
         self.event_bus.publish_sync(Event(
             topic="orchestrator.request_routed",
             data={"request_type": request_type.value, "plan": plan, "message_preview": message[:100]},
-            source="god_orchestrator",
+            source="master_orchestrator",
             priority=EventPriority.NORMAL,
         ))
 
@@ -363,7 +363,7 @@ class MasterOrchestrator:
                 "success": result is not None,
                 "errors": errors,
             },
-            source="god_orchestrator",
+            source="master_orchestrator",
             priority=EventPriority.LOW,
         ))
 
@@ -485,7 +485,7 @@ class MasterOrchestrator:
                     self.event_bus.publish_sync(Event(
                         topic="workflow.step_complete",
                         data={"workflow_id": workflow.workflow_id, "step": step.name, "success": True},
-                        source="god_orchestrator",
+                        source="master_orchestrator",
                         priority=EventPriority.NORMAL,
                     ))
                 except Exception as e:
@@ -559,7 +559,7 @@ class MasterOrchestrator:
                     self.event_bus.publish_sync(Event(
                         topic="module.health_change",
                         data={"module": attr, "old_health": old_health.value, "new_health": "offline"},
-                        source="god_orchestrator",
+                        source="master_orchestrator",
                         priority=EventPriority.HIGH,
                     ))
             else:
@@ -579,7 +579,7 @@ class MasterOrchestrator:
                         self.event_bus.publish_sync(Event(
                             topic="module.health_change",
                             data={"module": attr, "old_health": old_health.value, "new_health": new_health.value},
-                            source="god_orchestrator",
+                            source="master_orchestrator",
                             priority=EventPriority.HIGH,
                         ))
 
@@ -643,7 +643,7 @@ class MasterOrchestrator:
         self._routing_stats[key]["success"] += 1
 
     def _record_routing_failure(self, request_type: str, module: str):
-        """تسجيل فشل التوجيه"""
+        """تسجيل تعذر التوجيه"""
         key = f"{request_type}:{module}"
         self._routing_stats[key]["failure"] += 1
 

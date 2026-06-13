@@ -120,7 +120,7 @@ class MemorySystem:
             
         embedding = await self.embed(text)
         if not embedding:
-            logger.error("فشل في إنشاء embedding")
+            logger.error("تعذر في إنشاء embedding")
             return False
             
         coll_name = self.collections.get(collection, collection)

@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="ar" dir="auto">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>آدم — Desktop</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #1a1b26;
+  --surface: #24253a;
+  --surface2: #1e293b;
+  --text: #c9d1d9;
+  --text2: #6b7280;
+  --accent: #7c3aed;
+  --accent2: #312e81;
+  --border: #334155;
+  --success: #22c55e;
+  --error: #ef4444;
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  user-select: none;
+}
+
+/* ── Title Bar (Drag region) ─────────── */
+#titlebar {
+  -webkit-app-region: drag;
+  height: 38px;
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+#titlebar .logo {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--accent);
+  flex: 1;
+}
+#titlebar .status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text2);
+  -webkit-app-region: no-drag;
+}
+#titlebar .dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--error);
+}
+#titlebar .dot.online { background: var(--success); }
+#titlebar .actions {
+  display: flex;
+  gap: 4px;
+  -webkit-app-region: no-drag;
+}
+#titlebar .actions button {
+  background: none;
+  border: none;
+  color: var(--text2);
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#titlebar .actions button:hover { background: var(--surface2); color: var(--text); }
+#titlebar .actions .close:hover { background: var(--error); color: white; }
+
+/* ── Chat Messages ──────────────────── */
+#messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.msg {
+  max-width: 88%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-size: 13.5px;
+}
+.msg.user {
+  background: var(--accent2);
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
+}
+.msg.assistant {
+  background: var(--surface2);
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+  border: 1px solid var(--border);
+}
+.msg code {
+  background: rgba(0,0,0,0.4);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 12.5px;
+}
+.msg pre {
+  background: #0d1117;
+  padding: 10px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 6px 0;
+  font-size: 12.5px;
+}
+.msg pre code { background: none; padding: 0; }
+.typing {
+  color: var(--text2);
+  font-style: italic;
+  font-size: 12px;
+  align-self: flex-start;
+  padding: 8px 14px;
+}
+
+/* ── Input Area ─────────────────────── */
+#input-area {
+  padding: 12px 16px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+#input {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  padding: 10px 14px;
+  font-size: 13.5px;
+  outline: none;
+  resize: none;
+  font-family: inherit;
+  line-height: 1.4;
+  max-height: 120px;
+}
+#input:focus { border-color: var(--accent); }
+#send {
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 0 20px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: opacity .15s;
+}
+#send:hover { opacity: .85; }
+#send:disabled { opacity: .4; cursor: not-allowed; }
+
+/* ── Settings Panel ─────────────────── */
+#settings-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+}
+#settings-overlay.open { display: flex; }
+#settings {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  width: 340px;
+  max-width: 90vw;
+}
+#settings h2 { margin-bottom: 16px; font-size: 16px; }
+#settings label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 4px; }
+#settings input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  padding: 8px 12px;
+  font-size: 13px;
+  margin-bottom: 12px;
+  outline: none;
+}
+#settings input:focus { border-color: var(--accent); }
+#settings .buttons { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
+#settings .buttons button {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+}
+#settings .save { background: var(--accent); color: white; }
+#settings .cancel { background: var(--surface2); color: var(--text); }
+</style>
+</head>
+<body>
+
+<!-- Title Bar -->
+<div id="titlebar">
+  <div class="logo">◆ آدم</div>
+  <div class="status">
+    <span class="dot" id="statusDot"></span>
+    <span id="statusText">Disconnected</span>
+  </div>
+  <div class="actions">
+    <button onclick="window.adamAPI.minimizeWindow()">─</button>
+    <button class="close" onclick="window.adamAPI.closeWindow()">✕</button>
+  </div>
+</div>
+
+<!-- Messages -->
+<div id="messages">
+  <div class="msg assistant" style="opacity:.6">
+    👋 السلام عليكم! أنا آدم، عين الحارس.<br>
+    اكتب رسالتك و هتكلم معاك 🔮
+  </div>
+</div>
+
+<!-- Input -->
+<div id="input-area">
+  <textarea id="input" rows="1" placeholder="رسالتك لآدم..." dir="auto"></textarea>
+  <button id="send">↵</button>
+</div>
+
+<!-- Settings -->
+<div id="settings-overlay">
+  <div id="settings">
+    <h2>⚙️ الإعدادات</h2>
+    <label>API Endpoint</label>
+    <input id="settings-endpoint" type="text" placeholder="http://localhost:8000">
+    <label>API Key (optional)</label>
+    <input id="settings-apikey" type="password" placeholder="Leave empty if not needed">
+    <div class="buttons">
+      <button class="cancel" onclick="closeSettings()">إلغاء</button>
+      <button class="save" onclick="saveSettings()">حفظ</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── State ──────────────────────────────
+let endpoint = 'http://localhost:8000';
+let apiKey = '';
+let messages = [];
+let sending = false;
+
+// ── Init ───────────────────────────────
+// [FIX] Load apiKey from localStorage on startup
+const savedEndpoint = localStorage.getItem('adam-endpoint');
+const savedApiKey = localStorage.getItem('adam-apikey');
+if (savedEndpoint) endpoint = savedEndpoint;
+if (savedApiKey) apiKey = savedApiKey;
+
+window.adamAPI.getConfig().then(config => {
+  endpoint = config.endpoint || savedEndpoint || 'http://localhost:8000';
+  // [FIX] Also check localStorage for apiKey — it takes priority
+  const lsApiKey = localStorage.getItem('adam-apikey');
+  if (lsApiKey) apiKey = lsApiKey;
+  checkConnection();
+});
+
+window.adamAPI.onOpenSettings(() => openSettings());
+
+// ── DOM refs ───────────────────────────
+const msgEl = document.getElementById('messages');
+const input = document.getElementById('input');
+const sendBtn = document.getElementById('send');
+const statusDot = document.getElementById('statusDot');
+const statusText = document.getElementById('statusText');
+
+// ── Connection Check ───────────────────
+async function checkConnection() {
+  try {
+    const r = await fetch(endpoint + '/api/status');
+    if (r.ok) {
+      statusDot.className = 'dot online';
+      statusText.textContent = 'Online';
+      return true;
+    }
+  } catch {}
+  statusDot.className = 'dot';
+  statusText.textContent = 'Disconnected';
+  return false;
+}
+
+setInterval(checkConnection, 30000);
+
+// ── Chat ───────────────────────────────
+async function sendMessage() {
+  const text = input.value.trim();
+  if (!text || sending) return;
+
+  input.value = '';
+  input.style.height = 'auto';
+  sending = true;
+  sendBtn.disabled = true;
+
+  // User message
+  addMessage(text, 'user');
+
+  // Typing indicator
+  const typing = document.createElement('div');
+  typing.className = 'typing';
+  typing.textContent = 'آدم يكتب...';
+  msgEl.appendChild(typing);
+  msgEl.scrollTop = msgEl.scrollHeight;
+
+  try {
+    const r = await fetch(endpoint + '/api/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(apiKey ? { 'Authorization': 'Bearer ' + apiKey } : {}),
+      },
+      body: JSON.stringify({ message: text }),
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    typing.remove();
+    addMessage(data.response || '(empty response)', 'assistant');
+  } catch (err) {
+    typing.remove();
+    addMessage('⚠️ Connection error: ' + err.message, 'assistant');
+  }
+
+  sending = false;
+  sendBtn.disabled = false;
+  input.focus();
+}
+
+function addMessage(content, role) {
+  const div = document.createElement('div');
+  div.className = 'msg ' + role;
+  // Simple markdown-like rendering
+  div.innerHTML = formatMessage(content);
+  msgEl.appendChild(div);
+  msgEl.scrollTop = msgEl.scrollHeight;
+}
+
+function formatMessage(text) {
+  // Escape HTML
+  let s = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  // Code blocks
+  s = s.replace(/```(\w*)\n?([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
+  // Inline code
+  s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
+  // Bold
+  s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  // Newlines
+  s = s.replace(/\n/g, '<br>');
+  return s;
+}
+
+// ── Input Events ───────────────────────
+input.addEventListener('input', () => {
+  input.style.height = 'auto';
+  input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+});
+
+input.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+
+sendBtn.addEventListener('click', sendMessage);
+
+// ── Settings ───────────────────────────
+function openSettings() {
+  document.getElementById('settings-endpoint').value = endpoint;
+  document.getElementById('settings-apikey').value = apiKey;
+  document.getElementById('settings-overlay').classList.add('open');
+}
+
+function closeSettings() {
+  document.getElementById('settings-overlay').classList.remove('open');
+}
+
+async function saveSettings() {
+  endpoint = document.getElementById('settings-endpoint').value || 'http://localhost:8000';
+  apiKey = document.getElementById('settings-apikey').value;
+
+  // [FIX] Save apiKey to localStorage alongside endpoint
+  localStorage.setItem('adam-endpoint', endpoint);
+  localStorage.setItem('adam-apikey', apiKey);
+
+  // Also save via Electron IPC for the config file
+  await window.adamAPI.saveConfig({ endpoint });
+
+  closeSettings();
+  checkConnection();
+}
+
+// Close settings on overlay click
+document.getElementById('settings-overlay').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) closeSettings();
+});
+</script>
+</body>
+</html>

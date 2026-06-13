@@ -182,7 +182,7 @@ class EthicsGate:
             self._eval_cache.set(cache_key, scores, ttl=300.0)
             return scores
         except Exception as e:
-            logger.warning(f"فشل التقييم الأخلاقي: {e}")
+            logger.warning(f"تعذر التقييم الأخلاقي: {e}")
             return {"fairness": 0.7, "learning": 0.7, "survival": 0.7, "creativity": 0.7}
         finally:
             # [FIX v3] استبدال 'client' in dir() بـ 'client' in locals()

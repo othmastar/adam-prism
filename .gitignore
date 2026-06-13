@@ -52,7 +52,7 @@ checkpoints/
 
 # Adam memory (local)
 .adam_memory/
-models/
+/models/
 
 # Temp files
 temp/
@@ -87,3 +87,5 @@ web-ui/
 # Package build
 adam_prism.egg-info/
 unsloth_compiled_cache/
+apps/desktop/node_modules/
+apps/desktop/out/

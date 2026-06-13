@@ -4,7 +4,7 @@ Continuous Learner — بيتعلم من كل محادثة
 1. Reflection: يراجع الردود ويقيمها
 2. Knowledge: يستخرج معلومات جديدة
 3. Skills: يكتب مهارات من الحلول الناجحة
-4. Reinforcement: يتذكر إيه نجح وإيه فشل
+4. Reinforcement: يتذكر إيه نجح وإيه تعذر
 """
 
 import json

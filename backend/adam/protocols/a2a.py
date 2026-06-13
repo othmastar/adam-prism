@@ -206,7 +206,7 @@ class A2AServer:
             رد الوكيل المستهدف — Response from target agent
 
         Raises / الاستثناءات:
-            RuntimeError: إذا فشل الإرسال — If sending fails
+            RuntimeError: إذا تعذر الإرسال — If sending fails
         """
         if self._http_client is None:
             self._http_client = httpx.AsyncClient(timeout=timeout)
