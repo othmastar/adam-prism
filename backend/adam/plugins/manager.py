@@ -9,12 +9,11 @@ Adam Prism — Plugin Manager — HARDENED v2
 - Prevents path traversal and arbitrary code execution from untrusted dirs
 """
 
-import os
-import sys
 import importlib
 import inspect
 import logging
-from typing import Dict, Any, List, Optional, Type
+import os
+import sys
 
 from adam.plugins.base import AdamPlugin
 
@@ -47,15 +46,15 @@ def _validate_plugin_path(path: str) -> bool:
 class PluginManager:
     """مدير الإضافات — يكتشف، يحمل، يشغل hooks"""
 
-    def __init__(self, engine=None, plugin_dirs: List[str] = None):
+    def __init__(self, engine=None, plugin_dirs: list[str] | None = None):
         self.engine = engine
         self.plugin_dirs = plugin_dirs or []
-        self.plugins: Dict[str, AdamPlugin] = {}
-        self._hook_order: List[str] = []
+        self.plugins: dict[str, AdamPlugin] = {}
+        self._hook_order: list[str] = []
 
     # ─── Load / Unload ─────────────────────────────────
 
-    def discover(self, *directories: str) -> List[str]:
+    def discover(self, *directories: str) -> list[str]:
         """يبحث عن plugins في مجلدات معينة"""
         found = []
         for directory in directories:
@@ -90,7 +89,7 @@ class PluginManager:
         for path in entries:
             self._load_single(path)
 
-    def load_plugin(self, plugin_class: Type[AdamPlugin]):
+    def load_plugin(self, plugin_class: type[AdamPlugin]):
         """يحمل plugin من class مباشرة"""
         try:
             instance = plugin_class()
@@ -152,18 +151,17 @@ class PluginManager:
 
     # ─── Hooks ─────────────────────────────────────────
 
-    async def run_before_generate(self, message: str, context: Dict) -> tuple:
+    async def run_before_generate(self, message: str, context: dict) -> tuple:
         """يشغل hooks قبل التوليد. يرجع (message, context)"""
         for name in self._hook_order:
             plugin = self.plugins[name]
             try:
                 result = await plugin.before_generate(message, context)
-                if result is not None:
-                    if isinstance(result, dict):
-                        if "message" in result:
-                            message = result["message"]
-                        if "context" in result:
-                            context = result["context"]
+                if result is not None and isinstance(result, dict):
+                    if "message" in result:
+                        message = result["message"]
+                    if "context" in result:
+                        context = result["context"]
             except Exception as e:
                 logger.warning(f"⚠️ Plugin '{name}'.before_generate error: {e}")
         return message, context
@@ -180,7 +178,7 @@ class PluginManager:
                 logger.warning(f"⚠️ Plugin '{name}'.after_generate error: {e}")
         return response
 
-    async def run_before_tool(self, action: Dict) -> Optional[Dict]:
+    async def run_before_tool(self, action: dict) -> dict | None:
         """يشغل hooks قبل الأداة. يرجع None لو عايز يمنع التنفيذ"""
         for name in self._hook_order:
             plugin = self.plugins[name]
@@ -194,7 +192,7 @@ class PluginManager:
                 logger.warning(f"⚠️ Plugin '{name}'.before_tool error: {e}")
         return action
 
-    async def run_after_tool(self, action: Dict, result: Dict) -> Dict:
+    async def run_after_tool(self, action: dict, result: dict) -> dict:
         """يشغل hooks بعد الأداة"""
         for name in self._hook_order:
             plugin = self.plugins[name]
@@ -208,7 +206,7 @@ class PluginManager:
 
     # ─── Query ─────────────────────────────────────────
 
-    def list_plugins(self) -> List[Dict]:
+    def list_plugins(self) -> list[dict]:
         return [
             {
                 "name": name,
@@ -218,5 +216,5 @@ class PluginManager:
             for name, p in self.plugins.items()
         ]
 
-    def get_plugin(self, name: str) -> Optional[AdamPlugin]:
+    def get_plugin(self, name: str) -> AdamPlugin | None:
         return self.plugins.get(name)

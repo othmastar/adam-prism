@@ -10,12 +10,11 @@ Adam Prism — Permission Manager (Phase 1b)
 """
 
 import json
+import logging
 import os
 import time
-import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Optional
 
 logger = logging.getLogger("adam_prism.permissions")
 
@@ -105,7 +104,7 @@ def default_level(category: str) -> str:
 # [FIX H11] Map categories to risk levels
 def get_risk_level(category: str) -> str:
     """Map a permission category to a risk level string.
-    
+
     Risk levels: critical, high, medium, low
     """
     _RISK_MAP = {
@@ -139,8 +138,8 @@ class PermissionState:
 
     def __init__(self, session_id: str):
         self.session_id = session_id
-        self.granted: Dict[str, dict] = {}  # category → {level, expires}
-        self.pending_request: Optional[dict] = None
+        self.granted: dict[str, dict] = {}  # category → {level, expires}
+        self.pending_request: dict | None = None
 
     def is_auto(self, category: str) -> bool:
         return default_level(category) == "auto-allow"
@@ -154,7 +153,7 @@ class PermissionState:
             return False
         return True
 
-    def grant(self, category: str, level: str, duration: Optional[int] = None):
+    def grant(self, category: str, level: str, duration: int | None = None):
         expires = (time.time() + duration) if duration else None
         self.granted[category] = {"level": level, "expires": expires}
         self.pending_request = None
@@ -163,7 +162,7 @@ class PermissionState:
         self.granted.pop(category, None)
         self.pending_request = None
 
-    def needs_permission(self, category: str) -> Optional[str]:
+    def needs_permission(self, category: str) -> str | None:
         if self.is_auto(category):
             return None
         if self.is_granted(category):

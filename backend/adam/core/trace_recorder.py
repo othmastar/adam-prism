@@ -8,25 +8,30 @@ No I/O, no blocking, O(1) append. Zero impact on main pipeline.
 import logging
 from collections import deque
 from datetime import datetime
-from typing import Dict, List, Optional, Any
 
 logger = logging.getLogger("adam_prism.trace")
 
 
 class ConversationTrace:
     __slots__ = (
-        "query", "intent", "mode",
-        "tool_calls", "outcome",
-        "response_length", "tool_call_count",
-        "cycle", "duration_ms", "timestamp"
+        "cycle",
+        "duration_ms",
+        "intent",
+        "mode",
+        "outcome",
+        "query",
+        "response_length",
+        "timestamp",
+        "tool_call_count",
+        "tool_calls"
     )
 
     def __init__(
         self,
         query: str,
-        intent: Dict,
+        intent: dict,
         mode: str,
-        tool_calls: List[Dict],
+        tool_calls: list[dict],
         outcome: str,
         response_length: int,
         tool_call_count: int,
@@ -44,7 +49,7 @@ class ConversationTrace:
         self.duration_ms = duration_ms
         self.timestamp = datetime.now().isoformat()
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {s: getattr(self, s) for s in self.__slots__}
 
 
@@ -55,14 +60,14 @@ class TraceRecorder:
     def record(self, trace: ConversationTrace):
         self.traces.append(trace)
 
-    def get_recent(self, n: int = 10) -> List[Dict]:
+    def get_recent(self, n: int = 10) -> list[dict]:
         return [t.to_dict() for t in list(self.traces)[-n:]]
 
-    def get_traces_for_intent(self, intent_type: str, max_results: int = 3) -> List[Dict]:
+    def get_traces_for_intent(self, intent_type: str, max_results: int = 3) -> list[dict]:
         matching = [t for t in self.traces if t.intent.get("intent_type") == intent_type]
         return [t.to_dict() for t in matching[-max_results:]]
 
-    def get_patterns_for_query(self, query: str, intent_type: str, max_results: int = 3) -> List[str]:
+    def get_patterns_for_query(self, query: str, intent_type: str, max_results: int = 3) -> list[str]:
         traces = self.get_traces_for_intent(intent_type, max_results)
         patterns = []
         for t in traces:
@@ -78,7 +83,7 @@ class TraceRecorder:
                 )
         return patterns[:max_results]
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         total = len(self.traces)
         with_tools = sum(1 for t in self.traces if t.tool_call_count > 0)
         successful = sum(1 for t in self.traces if t.outcome == "success")

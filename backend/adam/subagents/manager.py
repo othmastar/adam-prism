@@ -11,10 +11,10 @@ Adam Prism — Subagent Manager — HARDENED v2
 5. [NEW] تنظيف تلقائي للوكلاء الخاملين
 """
 
-import os
 import logging
+import os
 import time
-from typing import Dict, Any, List, Optional
+from typing import Any
 
 from adam.subagents.session import SubagentSession
 
@@ -32,7 +32,7 @@ class SubagentManager:
 
     def __init__(self, engine=None):
         self.engine = engine
-        self._sessions: Dict[str, SubagentSession] = {}
+        self._sessions: dict[str, SubagentSession] = {}
         self._team_manager = None
 
     @property
@@ -43,7 +43,7 @@ class SubagentManager:
             self._team_manager = TeamManager(self.engine)
         return self._team_manager
 
-    def spawn(self, name: str, config: Dict[str, Any] = None) -> SubagentSession:
+    def spawn(self, name: str, config: dict[str, Any] | None = None) -> SubagentSession:
         """إنشاء وكيل فرعي جديد"""
 
         # التحقق من العدد الأقصى
@@ -71,7 +71,7 @@ class SubagentManager:
         logger.warning(f"Subagent spawned: '{name}' ({session.id}) — tools_enabled={session.tools_enabled}")
         return session
 
-    def get(self, session_id: str) -> Optional[SubagentSession]:
+    def get(self, session_id: str) -> SubagentSession | None:
         return self._sessions.get(session_id)
 
     def remove(self, session_id: str) -> bool:
@@ -81,7 +81,7 @@ class SubagentManager:
             return True
         return False
 
-    def list_sessions(self) -> List[Dict[str, Any]]:
+    def list_sessions(self) -> list[dict[str, Any]]:
         return [s.get_status() for s in self._sessions.values()]
 
     def remove_all(self):

@@ -6,9 +6,8 @@ Adam Prism — Knowledge Router
 [FIX v3] Router split — extracted from server.py for better maintainability
 """
 
-from typing import Dict, Optional
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Request
 from pydantic import BaseModel
 
 router = APIRouter(tags=["knowledge"])

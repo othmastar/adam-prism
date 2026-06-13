@@ -4,13 +4,12 @@ import json
 import os
 import uuid
 from datetime import datetime
-from typing import Dict
 
 
 class PlanningMixin:
     """Mixin: planning tool — todo list CRUD"""
 
-    async def _tool_planning(self, params: Dict) -> Dict:
+    async def _tool_planning(self, params: dict) -> dict:
         action = params.get("action", "list")
         todo_file = self.config.get("todo_file", os.path.expanduser("~/.local/share/adam/todo_list.json"))
         result = {"success": True, "action": action}

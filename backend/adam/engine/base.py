@@ -11,24 +11,24 @@ Base class: __init__, stubs, real modules init, watchdog, properties
   لأن الأسماء اللي تبدأ بـ _ عادة دوال داخلية (sync) والباقي async methods
 """
 
-import json
-import os
-import time
-import uuid
-import logging
 import asyncio
+import logging
+import os
+import uuid
 from collections import deque
+from collections.abc import Callable
 from datetime import datetime
-from typing import Optional, Dict, List, Any, Callable
+from typing import Any
 
-from adam.security.guard import SecurityOrchestrator, TOOL_REGISTRY
-from adam.core.permissions import PermissionState, classify_tool, default_level, log_permission, PERMISSION_CATEGORIES
 from adam.core.learning import PreferenceLearner
-from adam.memory import store as memory_store
+from adam.core.permissions import PermissionState
 from adam.infrastructure import (
-    SharedClients, TTLCache, MetricsCollector, sanitize_path,
-    CircuitBreaker, retry,
+    CircuitBreaker,
+    MetricsCollector,
+    SharedClients,
+    TTLCache,
 )
+from adam.security.guard import SecurityOrchestrator
 
 logger = logging.getLogger("adam_prism.core")
 
@@ -39,7 +39,7 @@ class AdamPrismEngineBase:
     Contains: __init__, stubs, real modules init, watchdog, properties.
     """
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         from adam.config import AdamConfig
         if isinstance(config, AdamConfig):
             self._adam_cfg = config
@@ -92,16 +92,16 @@ class AdamPrismEngineBase:
 
         # حالة النظام
         self.cycle_count = 0
-        self.conversation_history: List[Dict] = []
+        self.conversation_history: list[dict] = []
         self.max_history = config.get("max_conversation_history", 50)
         self.active_mode = "teacher"  # الوضع الافتراضي
         self._watchdog_task = None
         self._history_lock = asyncio.Lock()  # [M5] Thread-safe conversation history
 
         # نظام تتبع خطوات المعالجة
-        self._step_listeners: List[Callable] = []
+        self._step_listeners: list[Callable] = []
         self._pipeline_log: deque = deque(maxlen=200)  # [M7] Replaced list with deque to prevent truncation race
-        self._current_cycle_steps: List[Dict] = []
+        self._current_cycle_steps: list[dict] = []
 
         # الأوضاع المعرفية السبعة (7 Cognitive Modes)
         self.cognitive_modes = {
@@ -260,7 +260,7 @@ class AdamPrismEngineBase:
         """تسجيل مستمع لتحديثات خطوات المعالجة"""
         self._step_listeners.append(callback)
 
-    async def _emit_step(self, step: str, status: str, details: Optional[Dict] = None):
+    async def _emit_step(self, step: str, status: str, details: dict | None = None):
         """بث تحديث خطوة المعالجة لجميع المستمعين"""
         step_info = {
             "step": step,
@@ -280,7 +280,7 @@ class AdamPrismEngineBase:
             except Exception as e:
                 logger.warning(f"خطأ في مستمع الخطوات: {e}")
 
-    def get_pipeline_log(self, limit: int = 50) -> List[Dict]:
+    def get_pipeline_log(self, limit: int = 50) -> list[dict]:
         """آخر سجل لخطوات المعالجة"""
         return list(self._pipeline_log)[-limit:]  # [M7] deque → list for slicing
 
@@ -320,7 +320,7 @@ class AdamPrismEngineBase:
                             if not healthy:
                                 logger.warning("المتصفح غير سليم — إعادة تشغيل...")
                                 await self.eyes.restart()
-                        except asyncio.TimeoutError:
+                        except TimeoutError:
                             logger.warning("فحص المتصفح تجاوز الوقت — إعادة تشغيل...")
                             await self.eyes.restart()
                         except Exception as e:

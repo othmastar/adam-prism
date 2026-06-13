@@ -4,14 +4,13 @@ Adam Prism Engine Utils - الأدوات المساعدة
 Utility methods: classify, security, generate wrapper, heal, verify, call wrappers, status
 """
 
-import os
-import time
 import asyncio
 import logging
-import json
-import subprocess
+import time
 from datetime import datetime
-from typing import Optional, Dict, List, Any
+from typing import Any
+
+import httpx
 
 from adam.engine.base import AdamPrismEngineBase
 
@@ -23,7 +22,7 @@ class AdamPrismEngineUtils(AdamPrismEngineBase):
     Mixin with utility methods for the engine.
     """
 
-    async def _extract_and_save_lessons(self, user_message: str, response_text: str, intent: Dict):
+    async def _extract_and_save_lessons(self, user_message: str, response_text: str, intent: dict):
         """استخلاص دروس من المحادثة وحفظها (بدون Ollama — كلمات مفتاحية فقط)"""
         if not self.notebook or not hasattr(self.notebook, 'update_user_profile'):
             return
@@ -49,7 +48,7 @@ class AdamPrismEngineUtils(AdamPrismEngineBase):
         except Exception as e:
             logger.debug(f"تعذر استخلاص درس: {e}")
 
-    def _quick_classify_intent(self, message: str) -> Dict[str, Any]:
+    def _quick_classify_intent(self, message: str) -> dict[str, Any]:
         """تصنيف سريع بدون Ollama — كلمات مفتاحية فقط"""
         msg = message.lower()
         keywords = {
@@ -70,7 +69,7 @@ class AdamPrismEngineUtils(AdamPrismEngineBase):
             best = "teacher"
         return {"mode": best, "intent_type": "general", "confidence": 1.0, "topics": []}
 
-    async def _security_check_with_timeout(self, message: str) -> Dict:
+    async def _security_check_with_timeout(self, message: str) -> dict:
         """فحص الأمان مع timeout"""
         try:
             result = await asyncio.wait_for(
@@ -79,7 +78,7 @@ class AdamPrismEngineUtils(AdamPrismEngineBase):
             if result is None:
                 return {"allowed": True, "reason": "no_security_module"}
             return result
-        except asyncio.TimeoutError:
+        except TimeoutError:
             # [M2] Fail-closed: timeout must deny, not allow
             return {"allowed": False, "reason": "security_check_timeout"}
         except Exception as e:
@@ -87,7 +86,7 @@ class AdamPrismEngineUtils(AdamPrismEngineBase):
             # [M2] Fail-closed: errors must deny, not allow
             return {"allowed": False, "reason": f"security_check_error:{e}"}
 
-    async def _generate_with_timeout(self, message: str, context: Dict, deadline: float) -> str:
+    async def _generate_with_timeout(self, message: str, context: dict, deadline: float) -> str:
         """توليد مع deadline مطلق للمسار بالكامل"""
         remaining = max(5, deadline - time.time())
         return await asyncio.wait_for(
@@ -100,7 +99,7 @@ class AdamPrismEngineUtils(AdamPrismEngineBase):
             return
         self.conversation_history = self.conversation_history[-max_size:]
 
-    async def _heal_failed_subsystem(self, name: str) -> Optional[str]:
+    async def _heal_failed_subsystem(self, name: str) -> str | None:
         """محاولة إصلاح موديول معين — يرجع رسالة الإصلاح أو None لو ناجح"""
         try:
             if name == "ollama_base":
@@ -141,7 +140,7 @@ class AdamPrismEngineUtils(AdamPrismEngineBase):
                         if not healthy:
                             await self.eyes.restart()
                             return "Browser restarted"
-                    except asyncio.TimeoutError:
+                    except TimeoutError:
                         await self.eyes.restart()
                         return "Browser restarted (timeout)"
             return None
@@ -149,7 +148,7 @@ class AdamPrismEngineUtils(AdamPrismEngineBase):
             logger.warning(f"تعذر إصلاح {name}: {e}")
             return None
 
-    def _self_verify_response(self, response: str, user_message: str, intent: Dict) -> str:
+    def _self_verify_response(self, response: str, user_message: str, intent: dict) -> str:
         """تحقق ذاتي من جودة الرد قبل إرساله — قواعد بسيطة بدون استدعاء موديل"""
         if not response or not response.strip():
             return "مش فاهم طلبك — وضح أكتر."
@@ -184,11 +183,11 @@ class AdamPrismEngineUtils(AdamPrismEngineBase):
             self.metrics.timing("ollama.generate", (time.time() - start) * 1000)
             self.metrics.inc("ollama.generate_calls")
             return result
-        except Exception as e:
+        except Exception:
             self.metrics.error("ollama.generate")
             raise
 
-    async def _call_ollama_chat(self, messages: List[Dict]) -> str:
+    async def _call_ollama_chat(self, messages: list[dict]) -> str:
         """استدعاء provider.chat (قديم — بقى wrapper)"""
         start = time.time()
         try:
@@ -196,11 +195,11 @@ class AdamPrismEngineUtils(AdamPrismEngineBase):
             self.metrics.timing("ollama.chat", (time.time() - start) * 1000)
             self.metrics.inc("ollama.chat_calls")
             return result
-        except Exception as e:
+        except Exception:
             self.metrics.error("ollama.chat")
             raise
 
-    def _truncate_messages_for_lora(self, messages: List[Dict], max_chars: int = 8000) -> List[Dict]:
+    def _truncate_messages_for_lora(self, messages: list[dict], max_chars: int = 8000) -> list[dict]:
         """تقليم محتوى الرسائل مع الحفاظ على بنية conversation: system + user + assistant + user ..."""
         if not messages:
             return messages
@@ -236,7 +235,7 @@ class AdamPrismEngineUtils(AdamPrismEngineBase):
 
         return result
 
-    async def _call_lora_server(self, messages: List[Dict]) -> str:
+    async def _call_lora_server(self, messages: list[dict]) -> str:
         """استدعاء LoRA server مع manual retry (async-safe)"""
         import logging as _log
         start = time.time()
@@ -271,7 +270,7 @@ class AdamPrismEngineUtils(AdamPrismEngineBase):
         self.metrics.error("ollama.chat")
         raise last_exc or RuntimeError("LoRA server call failed")
 
-    def set_inference_mode(self, mode: str, lora_url: str = None):
+    def set_inference_mode(self, mode: str, lora_url: str | None = None):
         """تغيير وضع الاستدلال في وقت التشغيل"""
         if mode in ("ollama", "lora", "openai", "anthropic"):
             self.provider.set_mode(mode)
@@ -280,7 +279,7 @@ class AdamPrismEngineUtils(AdamPrismEngineBase):
                 self.lora_server_url = lora_url
             logger.info(f"🔄 تغيير وضع الاستدلال إلى: {mode}")
 
-    async def get_status(self) -> Dict[str, Any]:
+    async def get_status(self) -> dict[str, Any]:
         """حالة النظام الكاملة"""
         p = self.provider
         current_provider = p.current if p and hasattr(p, "current") else None

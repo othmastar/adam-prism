@@ -20,10 +20,9 @@ from __future__ import annotations
 import logging
 import time
 import uuid
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, suppress
 from dataclasses import dataclass, field
-from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger("adam_prism.observability.tracing")
 
@@ -53,7 +52,7 @@ class SpanEvent:
     """
     name: str
     timestamp: float = field(default_factory=time.time)
-    attributes: Dict[str, Any] = field(default_factory=dict)
+    attributes: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -80,10 +79,10 @@ class Span:
     name: str = ""
     start_time: float = 0.0
     end_time: float = 0.0
-    attributes: Dict[str, Any] = field(default_factory=dict)
+    attributes: dict[str, Any] = field(default_factory=dict)
     status: str = SpanStatus.UNSET
-    events: List[SpanEvent] = field(default_factory=list)
-    parent_id: Optional[str] = None
+    events: list[SpanEvent] = field(default_factory=list)
+    parent_id: str | None = None
     trace_id: str = field(default_factory=lambda: str(uuid.uuid4())[:32])
 
     @property
@@ -103,7 +102,7 @@ class Span:
         """
         self.attributes[key] = value
 
-    def add_event(self, name: str, attributes: Optional[Dict[str, Any]] = None) -> None:
+    def add_event(self, name: str, attributes: dict[str, Any] | None = None) -> None:
         """
         إضافة حدث — Add an event to the span.
         """
@@ -117,7 +116,7 @@ class Span:
         if description:
             self.attributes["status_description"] = description
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """
         تحويل إلى قاموس — Convert to dictionary.
         """
@@ -191,8 +190,8 @@ class AdamTracer:
         """
         self._slow_threshold_ms = slow_threshold_ms
         self._max_spans = max_spans
-        self._spans: Dict[str, Span] = {}
-        self._active_spans: Dict[str, Span] = {}
+        self._spans: dict[str, Span] = {}
+        self._active_spans: dict[str, Span] = {}
 
         # عدادات — Counters
         self._total_spans: int = 0
@@ -206,8 +205,8 @@ class AdamTracer:
     def start_span(
         self,
         name: str,
-        parent: Optional[Span] = None,
-        attributes: Optional[Dict[str, Any]] = None,
+        parent: Span | None = None,
+        attributes: dict[str, Any] | None = None,
     ) -> Span:
         """
         بدء Span — Start a new span.
@@ -278,8 +277,8 @@ class AdamTracer:
     async def span(
         self,
         name: str,
-        parent: Optional[Span] = None,
-        attributes: Optional[Dict[str, Any]] = None,
+        parent: Span | None = None,
+        attributes: dict[str, Any] | None = None,
     ):
         """
         Context manager لإنشاء Span — Async context manager for spans.
@@ -313,7 +312,7 @@ class AdamTracer:
     # استخراج البيانات / Data Extraction
     # ─────────────────────────────────────────────
 
-    def get_trace(self, span: Span) -> Dict[str, Any]:
+    def get_trace(self, span: Span) -> dict[str, Any]:
         """
         الحصول على التتبع الكامل — Get the full trace for a span.
 
@@ -357,7 +356,7 @@ class AdamTracer:
     # تكامل OpenTelemetry / OpenTelemetry Integration
     # ─────────────────────────────────────────────
 
-    def export_to_otel(self, span: Span) -> Optional[Any]:
+    def export_to_otel(self, span: Span) -> Any | None:
         """
         تصدير Span إلى OpenTelemetry — Export span to OpenTelemetry (if available).
 
@@ -378,10 +377,8 @@ class AdamTracer:
 
             # تعيين السمات — Set attributes
             for key, value in span.attributes.items():
-                try:
+                with suppress(Exception):
                     otel_span.set_attribute(key, str(value)[:256])
-                except Exception:
-                    pass
 
             # تعيين الحالة — Set status
             if span.status == SpanStatus.OK:
@@ -405,7 +402,7 @@ class AdamTracer:
     # إحصائيات / Statistics
     # ─────────────────────────────────────────────
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """
         الحصول على إحصائيات المتتبع — Get tracer statistics.
 
@@ -428,7 +425,7 @@ class AdamTracer:
 # ═══════════════════════════════════════════════════════════════
 
 # مثيل عالمي — Global tracer instance for convenience
-_global_tracer: Optional[AdamTracer] = None
+_global_tracer: AdamTracer | None = None
 
 
 def get_tracer() -> AdamTracer:

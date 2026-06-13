@@ -7,7 +7,6 @@ Backward-compatible config: engine accepts both dict and AdamConfig.
 import logging
 import os
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
 
 logger = logging.getLogger("adam_prism.config")
 
@@ -29,7 +28,7 @@ class AdamConfig:
     notebook_dir: str = os.path.expanduser("~/.local/adam_notebook")
     todo_file: str = os.path.expanduser("~/.local/share/adam/todo_list.json")
     playwright_browsers_path: str = os.path.expanduser("~/.local/ms-playwright")
-    extra_disk_paths: List[str] = field(default_factory=list)
+    extra_disk_paths: list[str] = field(default_factory=list)
     plugins_dir: str = "data/plugins"
     max_tool_calls: int = 5
     tool_timeout: int = 30
@@ -55,7 +54,7 @@ class AdamConfig:
                 logger.warning(f"{url_field}='{url_val}' لا يبدو URL صالحاً")
 
     @classmethod
-    def from_dict(cls, d: Dict) -> "AdamConfig":
+    def from_dict(cls, d: dict) -> "AdamConfig":
         known = {k for k in cls.__dataclass_fields__}
         kwargs = {k: v for k, v in d.items() if k in known}
         unknown = set(d.keys()) - known
@@ -63,5 +62,5 @@ class AdamConfig:
             logger.warning(f"AdamConfig: مفاتيح غير معروفة تم تجاهلها: {unknown}")
         return cls(**kwargs)
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {k: getattr(self, k) for k in self.__dataclass_fields__}

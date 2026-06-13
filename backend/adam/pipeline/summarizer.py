@@ -13,7 +13,7 @@ import json
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, List, Optional, AsyncGenerator
+from typing import Any
 
 import httpx
 
@@ -23,20 +23,20 @@ logger = logging.getLogger("adam_prism.pipeline.summarizer")
 class LiveSummarizer:
     """
     التلخيص الحي الهرمي.
-    
+
     الآلية:
     1. يُقسّم الملف الكبير لأجزاء (chunks)
     2. كل جزء يُلخص مع سياق من الجزء السابق
     3. الملخصات تُكتب في ملفات حية فوراً
     4. بعد الانتهاء: ملخص شامل + خريطة مفاهيم + بيانات تدريبية
-    
+
     هذا يمنع:
     - اختناق السياق (context overflow)
     - ضياع المعلومات بين الأجزاء
     - فقدان الروابط بين الأفكار
     """
 
-    def __init__(self, config: Dict[str, Any], shared_clients=None):
+    def __init__(self, config: dict[str, Any], shared_clients=None):
         self.config = config
         self.shared_clients = shared_clients
         self.ollama_base = config.get("ollama_base", "http://localhost:11434")
@@ -45,7 +45,7 @@ class LiveSummarizer:
         self.overlap = config.get("overlap", 200)
         self.output_dir = Path(config.get("summary_output_dir", "./notebook/summaries"))
         self.output_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # الملف الحي الرئيسي
         self.live_file = self.output_dir / "live_summary.md"
 
@@ -55,10 +55,10 @@ class LiveSummarizer:
         source: str = "unknown",
         title: str = "untitled",
         progress_callback=None
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         تلخيص مستند كامل بالآلية الهرمية.
-        
+
         Returns:
             {
                 "master_summary": str,
@@ -69,20 +69,20 @@ class LiveSummarizer:
             }
         """
         start_time = datetime.now()
-        
+
         # 1. تقسيم المستند
         chunks = self._split_text(text)
         logger.info(f"تم تقسيم المستند إلى {len(chunks)} جزء")
-        
+
         # 2. تلخيص كل جزء مع السياق التراكمي
         chunk_summaries = []
         cumulative_context = ""
         concept_map = {"nodes": [], "edges": []}
         training_data = []
-        
+
         for i, chunk in enumerate(chunks):
             logger.info(f"تلخيص الجزء {i+1}/{len(chunks)}...")
-            
+
             # تلخيص مع السياق السابق
             summary = await self._summarize_chunk(
                 chunk=chunk,
@@ -91,33 +91,33 @@ class LiveSummarizer:
                 previous_context=cumulative_context,
                 source=source
             )
-            
+
             chunk_summaries.append(summary)
-            
+
             # تحديث السياق التراكمي (آخر ملخصين فقط لمنع التضخم)
             cumulative_context = " ".join(chunk_summaries[-2:])
-            
+
             # استخراج المفاهيم
             concepts = await self._extract_concepts(summary)
             concept_map["nodes"].extend(concepts)
-            
+
             # استخراج بيانات تدريبية
             qa_pairs = await self._extract_training_data(summary, chunk)
             training_data.extend(qa_pairs)
-            
+
             # كتابة في الملف الحي فوراً
             self._write_live(i + 1, len(chunks), summary, concepts, source)
-            
+
             # إرسال تقدم
             if progress_callback:
                 await progress_callback(i + 1, len(chunks), summary)
 
         # 3. إنشاء الملخص الشامل
         master_summary = await self._create_master_summary(chunk_summaries, title)
-        
+
         # 4. بناء خريطة المفاهيم الكاملة
         concept_map = await self._build_concept_map(concept_map, chunk_summaries)
-        
+
         # 5. حفظ النتائج
         result = {
             "master_summary": master_summary,
@@ -132,20 +132,20 @@ class LiveSummarizer:
                 "duration_seconds": (datetime.now() - start_time).total_seconds()
             }
         }
-        
+
         # حفظ على القرص
         self._save_results(title, result)
-        
+
         return result
 
-    def _split_text(self, text: str) -> List[str]:
+    def _split_text(self, text: str) -> list[str]:
         """تقسيم النص لأجزاء مع تداخل"""
         # تقسيم حسب الفقرات أولاً
         paragraphs = text.split("\n\n")
-        
+
         chunks = []
         current_chunk = ""
-        
+
         for para in paragraphs:
             # لو الفقرة أطول من chunk_size، قسمها على كلمات
             if len(para) > self.chunk_size:
@@ -171,10 +171,10 @@ class LiveSummarizer:
                 current_chunk = overlap_text + "\n\n" + para
             else:
                 current_chunk += "\n\n" + para if current_chunk else para
-        
+
         if current_chunk.strip():
             chunks.append(current_chunk.strip())
-        
+
         return chunks
 
     async def _summarize_chunk(
@@ -231,7 +231,7 @@ class LiveSummarizer:
             if not self.shared_clients and 'client' in dir() and client:
                 await client.aclose()
 
-    async def _extract_concepts(self, summary: str) -> List[Dict]:
+    async def _extract_concepts(self, summary: str) -> list[dict]:
         """استخراج المفاهيم من الملخص"""
         prompt = f"""استخرج المفاهيم الرئيسية من النص التالي.
 لكل مفهوم: الاسم، التعريف المختصر، النوع (نظرية/مفهوم/مبدأ/أداة/شخص/حدث)
@@ -264,7 +264,7 @@ class LiveSummarizer:
             if not self.shared_clients and 'client' in dir() and client:
                 await client.aclose()
 
-    async def _extract_training_data(self, summary: str, original: str) -> List[Dict]:
+    async def _extract_training_data(self, summary: str, original: str) -> list[dict]:
         """استخراج أزواج سؤال-جواب للبيانات التدريبية"""
         prompt = f"""من الملخص التالي، استخرج أزواج سؤال وجواب مفيدة كبيانات تدريبية.
 
@@ -296,12 +296,12 @@ class LiveSummarizer:
             if not self.shared_clients and 'client' in dir() and client:
                 await client.aclose()
 
-    async def _create_master_summary(self, chunk_summaries: List[str], title: str) -> str:
+    async def _create_master_summary(self, chunk_summaries: list[str], title: str) -> str:
         """إنشاء الملخص الشامل من كل الملخصات الجزئية"""
         all_summaries = "\n\n---\n\n".join([
             f"الجزء {i+1}: {s}" for i, s in enumerate(chunk_summaries)
         ])
-        
+
         prompt = f"""أنت آدم - أنشئ ملخصاً شاملاً نهائياً من كل الملخصات الجزئية.
 
 العنوان: {title}
@@ -336,12 +336,12 @@ class LiveSummarizer:
             if not self.shared_clients and 'client' in dir() and client:
                 await client.aclose()
 
-    async def _build_concept_map(self, concept_map: Dict, summaries: List[str]) -> Dict:
+    async def _build_concept_map(self, concept_map: dict, summaries: list[str]) -> dict:
         """بناء خريطة المفاهيم مع الروابط"""
         # تبسيط: استخراج الروابط من المفاهيم
         nodes = concept_map.get("nodes", [])
         edges = []
-        
+
         # ربط المفاهيم من نفس النوع
         for i, node_a in enumerate(nodes):
             for node_b in nodes[i+1:]:
@@ -351,11 +351,11 @@ class LiveSummarizer:
                         "target": node_b.get("name", ""),
                         "relation": "same_type"
                     })
-        
+
         concept_map["edges"] = edges
         return concept_map
 
-    def _write_live(self, chunk_num: int, total: int, summary: str, concepts: List, source: str):
+    def _write_live(self, chunk_num: int, total: int, summary: str, concepts: list, source: str):
         """كتابة في الملف الحي فوراً"""
         with open(self.live_file, "a", encoding="utf-8") as f:
             f.write(f"\n## الجزء {chunk_num}/{total} — {source}\n")
@@ -364,18 +364,18 @@ class LiveSummarizer:
             if concepts:
                 f.write("**المفاهيم**: " + ", ".join([c.get("name", "") for c in concepts[:5]]) + "\n")
 
-    def _save_results(self, title: str, result: Dict):
+    def _save_results(self, title: str, result: dict):
         """حفظ النتائج الكاملة"""
         safe_title = "".join(c for c in title if c.isalnum() or c in " _-")[:50]
-        
+
         # الملخص الشامل
         with open(self.output_dir / f"{safe_title}_master.md", "w", encoding="utf-8") as f:
             f.write(result["master_summary"])
-        
+
         # خريطة المفاهيم
         with open(self.output_dir / f"{safe_title}_concepts.json", "w", encoding="utf-8") as f:
             json.dump(result["concept_map"], f, ensure_ascii=False, indent=2)
-        
+
         # البيانات التدريبية
         with open(self.output_dir / f"{safe_title}_training.jsonl", "w", encoding="utf-8") as f:
             for item in result["training_data"]:

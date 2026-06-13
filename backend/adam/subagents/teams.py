@@ -7,8 +7,8 @@ Adam Prism — Subagent Teams
 import asyncio
 import json
 import logging
-from datetime import datetime, timezone
-from typing import Dict, Any, List, Optional, Callable, Awaitable
+from datetime import UTC, datetime
+from typing import Any
 
 from adam.subagents.session import SubagentSession
 
@@ -18,7 +18,7 @@ logger = logging.getLogger("adam_prism.subagents.teams")
 class SubagentTeam:
     """
     فريق وكلاء — بيوزع المهام ويجمع النتائج.
-    
+
     مثال:
     ```python
     team = SubagentTeam(engine, name="code-team")
@@ -32,10 +32,10 @@ class SubagentTeam:
     def __init__(self, engine, name: str = "team"):
         self.engine = engine
         self.name = name
-        self.agents: Dict[str, SubagentSession] = {}
-        self._order: List[str] = []
-        self._results: Dict[str, Dict] = {}
-        self.created_at = datetime.now(timezone.utc)
+        self.agents: dict[str, SubagentSession] = {}
+        self._order: list[str] = []
+        self._results: dict[str, dict] = {}
+        self.created_at = datetime.now(UTC)
 
     def add_agent(
         self,
@@ -66,11 +66,11 @@ class SubagentTeam:
         self,
         task: str,
         parallel: bool = False,
-        context: Optional[Dict] = None,
-    ) -> Dict[str, Any]:
+        context: dict | None = None,
+    ) -> dict[str, Any]:
         """
         تشغيل الفريق بالكامل على مهمة.
-        
+
         Args:
             task: المهمة المطلوبة
             parallel: إذا كان True، الـ agents يشتغلوا بالتوازي
@@ -83,7 +83,7 @@ class SubagentTeam:
             return await self._run_parallel(task, context_str)
         return await self._run_sequential(task, context_str)
 
-    async def _run_sequential(self, task: str, context: str = "") -> Dict[str, Any]:
+    async def _run_sequential(self, task: str, context: str = "") -> dict[str, Any]:
         """تشغيل agents بالتسلسل — كل واحد يشوف ناتج اللي قبله"""
         previous_result = ""
         for name in self._order:
@@ -99,7 +99,7 @@ class SubagentTeam:
                 self._results[name] = {
                     "response": agent_result,
                     "status": "success",
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "timestamp": datetime.now(UTC).isoformat(),
                 }
                 previous_result += f"\n--- {name} ---\n{agent_result}"
             except Exception as e:
@@ -108,7 +108,7 @@ class SubagentTeam:
 
         return self._summarize(task)
 
-    async def _run_parallel(self, task: str, context: str = "") -> Dict[str, Any]:
+    async def _run_parallel(self, task: str, context: str = "") -> dict[str, Any]:
         """تشغيل agents بالتوازي — كل واحد يشتغل لوحده"""
         prompts = {name: f"المهمة:\n{task}\n{context}" for name in self._order}
 
@@ -119,7 +119,7 @@ class SubagentTeam:
                 self._results[name] = {
                     "response": result.get("response", ""),
                     "status": "success",
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "timestamp": datetime.now(UTC).isoformat(),
                 }
             except Exception as e:
                 self._results[name] = {"response": "", "status": f"error: {e}"}
@@ -128,7 +128,7 @@ class SubagentTeam:
         await asyncio.gather(*tasks)
         return self._summarize(task)
 
-    def _summarize(self, task: str) -> Dict[str, Any]:
+    def _summarize(self, task: str) -> dict[str, Any]:
         """تجميع نتائج كل agents في تقرير واحد"""
         all_results = {name: data["response"] for name, data in self._results.items()}
         return {
@@ -140,18 +140,18 @@ class SubagentTeam:
             "created_at": self.created_at.isoformat(),
         }
 
-    async def chat_with_agent(self, agent_name: str, message: str) -> Dict:
+    async def chat_with_agent(self, agent_name: str, message: str) -> dict:
         """التحدث مع وكيل معين داخل الفريق"""
         if agent_name not in self.agents:
             return {"error": f"Agent '{agent_name}' not found"}
         return await self.agents[agent_name].chat(message)
 
-    def get_agent_result(self, agent_name: str) -> Optional[str]:
+    def get_agent_result(self, agent_name: str) -> str | None:
         """الحصول على نتيجة وكيل معين"""
         data = self._results.get(agent_name)
         return data["response"] if data else None
 
-    def get_status(self) -> Dict:
+    def get_status(self) -> dict:
         return {
             "name": self.name,
             "agents": list(self.agents.keys()),
@@ -170,21 +170,21 @@ class TeamManager:
 
     def __init__(self, engine):
         self.engine = engine
-        self._teams: Dict[str, SubagentTeam] = {}
+        self._teams: dict[str, SubagentTeam] = {}
 
     def create_team(self, name: str) -> SubagentTeam:
         team = SubagentTeam(self.engine, name=name)
         self._teams[name] = team
         return team
 
-    def get_team(self, name: str) -> Optional[SubagentTeam]:
+    def get_team(self, name: str) -> SubagentTeam | None:
         return self._teams.get(name)
 
     def remove_team(self, name: str) -> bool:
         team = self._teams.pop(name, None)
         return team is not None
 
-    def list_teams(self) -> List[Dict]:
+    def list_teams(self) -> list[dict]:
         return [t.get_status() for t in self._teams.values()]
 
     def remove_all(self):

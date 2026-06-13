@@ -1,13 +1,13 @@
 """أدوات الذاكرة — store / recall / reflect"""
 
+
 from core import memory_store
-from typing import Dict
 
 
 class MemoryToolsMixin:
     """Mixin: memory tools — store, recall, reflect"""
 
-    async def _tool_memory(self, tool_name: str, params: Dict) -> Dict:
+    async def _tool_memory(self, tool_name: str, params: dict) -> dict:
         try:
             if tool_name == "memory_store":
                 content = params.get("content", "")

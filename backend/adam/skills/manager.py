@@ -1,7 +1,6 @@
-import os
+import builtins
 import logging
 from pathlib import Path
-from typing import Dict, Any, List, Optional
 
 from .base import Skill
 
@@ -13,22 +12,20 @@ class SkillManager:
 
     def __init__(self, engine=None):
         self.engine = engine
-        self._skills: Dict[str, Skill] = {}
+        self._skills: dict[str, Skill] = {}
 
         # مسار البحث: built-in + user
         self._builtin_dir = Path(__file__).parent / "builtin"
         self._user_dir = Path.home() / ".adam" / "skills"
 
-    def discover(self) -> List[str]:
+    def discover(self) -> list[str]:
         """اكتشاف كل المهارات المتاحة (built-in + user)"""
         found = []
 
         # Built-in: .md files and .py subclasses
         if self._builtin_dir.exists():
             for f in sorted(self._builtin_dir.iterdir()):
-                if f.suffix == ".md":
-                    found.append(str(f.absolute()))
-                elif f.suffix == ".py" and f.stem != "__init__":
+                if f.suffix == ".md" or (f.suffix == ".py" and f.stem != "__init__"):
                     found.append(str(f.absolute()))
 
         # User skills
@@ -39,7 +36,7 @@ class SkillManager:
 
         return found
 
-    async def load(self, path: str) -> Optional[Skill]:
+    async def load(self, path: str) -> Skill | None:
         """تحميل مهارة من ملف"""
         p = Path(path)
         if not p.exists():
@@ -87,17 +84,17 @@ class SkillManager:
                 count += 1
         return count
 
-    def get(self, name: str) -> Optional[Skill]:
+    def get(self, name: str) -> Skill | None:
         return self._skills.get(name)
 
-    def list(self) -> List[Dict]:
+    def list(self) -> list[dict]:
         return [
             {"name": s.name, "description": s.description,
              "version": s.version, "triggers": s.triggers}
             for s in self._skills.values()
         ]
 
-    def match(self, message: str) -> List[Skill]:
+    def match(self, message: str) -> builtins.list[Skill]:
         """لاقي المهارات اللي triggers بتاعتها match الرسالة"""
         msg_lower = message.lower()
         matched = []

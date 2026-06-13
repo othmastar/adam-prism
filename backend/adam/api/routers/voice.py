@@ -6,7 +6,7 @@ Adam Prism — Voice Router
 [FIX v3] Router split — extracted from server.py for better maintainability
 """
 
-from fastapi import APIRouter, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, File, Form, UploadFile
 
 router = APIRouter(tags=["voice"])
 

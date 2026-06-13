@@ -6,7 +6,7 @@ Adam Prism — Memory Router
 [FIX v3] Router split — extracted from server.py for better maintainability
 """
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Request
 
 router = APIRouter(tags=["memory"])
 

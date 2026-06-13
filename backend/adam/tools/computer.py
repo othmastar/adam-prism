@@ -5,10 +5,9 @@ Adam Prism — Computer Use Tools
 تستخدم xdotool, xsel, xrandr, import (ImageMagick).
 """
 
+import logging
 import os
 import subprocess
-import logging
-from typing import Dict, Any, Optional
 
 logger = logging.getLogger("adam_prism.tools")
 
@@ -19,7 +18,7 @@ _ENV = {**os.environ, "PATH": f"{_WS_BIN}:{os.environ.get('PATH', '')}"}
 class ComputerToolManager:
     """إدارة أدوات الحاسوب — تعمل بدون Playwright"""
 
-    async def execute_action(self, action: Dict) -> Dict:
+    async def execute_action(self, action: dict) -> dict:
         action_type = action.get("type", "")
         handler = getattr(self, f"_{action_type}", None)
         if not handler:
@@ -31,7 +30,7 @@ class ComputerToolManager:
 
     # ─── Mouse ───────────────────────────────────────────
 
-    async def _mouse_click(self, action: Dict) -> Dict:
+    async def _mouse_click(self, action: dict) -> dict:
         x = action.get("x")
         y = action.get("y")
         button = action.get("button", "left")
@@ -46,7 +45,7 @@ class ComputerToolManager:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    async def _mouse_move(self, action: Dict) -> Dict:
+    async def _mouse_move(self, action: dict) -> dict:
         x, y = action.get("x"), action.get("y")
         if x is None or y is None:
             return {"success": False, "error": "مفيش x, y"}
@@ -57,7 +56,7 @@ class ComputerToolManager:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    async def _mouse_scroll(self, action: Dict) -> Dict:
+    async def _mouse_scroll(self, action: dict) -> dict:
         dx = action.get("delta_x", 0) or 0
         dy = action.get("delta_y", 0) or 0
         try:
@@ -71,12 +70,12 @@ class ComputerToolManager:
                 for _ in range(min(abs(int(dx)) // 10 + 1, 20)):
                     clicks += ["click", btn]
             if clicks:
-                subprocess.run(["xdotool"] + clicks, capture_output=True, timeout=5, env=_ENV)
+                subprocess.run(["xdotool", *clicks], capture_output=True, timeout=5, env=_ENV)
             return {"success": True}
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    async def _mouse_drag(self, action: Dict) -> Dict:
+    async def _mouse_drag(self, action: dict) -> dict:
         sx, sy = action.get("start_x"), action.get("start_y")
         ex, ey = action.get("end_x"), action.get("end_y")
         if None in (sx, sy, ex, ey):
@@ -92,7 +91,7 @@ class ComputerToolManager:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    async def _mouse_position(self, action: Dict) -> Dict:
+    async def _mouse_position(self, action: dict) -> dict:
         try:
             r = subprocess.run(["xdotool", "getmouselocation"],
                               capture_output=True, text=True, timeout=5, env=_ENV)
@@ -110,7 +109,7 @@ class ComputerToolManager:
 
     # ─── Keyboard ────────────────────────────────────────
 
-    async def _keyboard_type(self, action: Dict) -> Dict:
+    async def _keyboard_type(self, action: dict) -> dict:
         text = action.get("text", "")
         if not text:
             return {"success": False, "error": "مفيش نص"}
@@ -121,7 +120,7 @@ class ComputerToolManager:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    async def _keyboard_press(self, action: Dict) -> Dict:
+    async def _keyboard_press(self, action: dict) -> dict:
         key = action.get("key", "")
         if not key:
             return {"success": False, "error": "مفيش key"}
@@ -132,7 +131,7 @@ class ComputerToolManager:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    async def _keyboard_hotkey(self, action: Dict) -> Dict:
+    async def _keyboard_hotkey(self, action: dict) -> dict:
         keys = action.get("keys", [])
         if not keys:
             return {"success": False, "error": "مفيش keys"}
@@ -145,14 +144,14 @@ class ComputerToolManager:
 
     # ─── Clipboard ───────────────────────────────────────
 
-    async def _clipboard_read(self, action: Dict) -> Dict:
+    async def _clipboard_read(self, action: dict) -> dict:
         try:
             r = subprocess.run(["xsel", "-b", "-o"], capture_output=True, text=True, timeout=5, env=_ENV)
             return {"success": r.returncode == 0, "data": r.stdout, "error": r.stderr.strip() or ""}
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    async def _clipboard_write(self, action: Dict) -> Dict:
+    async def _clipboard_write(self, action: dict) -> dict:
         text = action.get("text", "")
         if not text:
             return {"success": False, "error": "مفيش نص"}
@@ -164,14 +163,14 @@ class ComputerToolManager:
 
     # ─── Screen ──────────────────────────────────────────
 
-    async def _screen_info(self, action: Dict) -> Dict:
+    async def _screen_info(self, action: dict) -> dict:
         try:
             r = subprocess.run(["xrandr"], capture_output=True, text=True, timeout=5)
             return {"success": r.returncode == 0, "data": r.stdout, "error": r.stderr.strip() or ""}
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    async def _screen_ocr(self, action: Dict) -> Dict:
+    async def _screen_ocr(self, action: dict) -> dict:
         """تصوير الشاشة + OCR — يحتاج tesseract"""
         try:
             import uuid
@@ -192,7 +191,7 @@ class ComputerToolManager:
 
     # ─── Window ──────────────────────────────────────────
 
-    async def _window_focus(self, action: Dict) -> Dict:
+    async def _window_focus(self, action: dict) -> dict:
         window = action.get("window", "")
         if not window:
             return {"success": False, "error": "مفيش window"}
@@ -203,7 +202,7 @@ class ComputerToolManager:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    async def _window_list(self, action: Dict) -> Dict:
+    async def _window_list(self, action: dict) -> dict:
         try:
             r = subprocess.run(["wmctrl", "-l"], capture_output=True, text=True, timeout=5)
             windows = []

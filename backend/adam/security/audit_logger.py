@@ -25,9 +25,9 @@ import json
 import logging
 import os
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger("adam_prism.security.audit")
 
@@ -52,7 +52,7 @@ class AuditLogger:
         is_valid = await audit.verify_integrity(log_file)
     """
 
-    def __init__(self, log_dir: Optional[str] = None) -> None:
+    def __init__(self, log_dir: str | None = None) -> None:
         """
         تهيئة سجل التدقيق — Initialize the audit logger.
 
@@ -68,8 +68,8 @@ class AuditLogger:
 
         # آخر تجزئة في السلسلة — Last hash in the chain
         self._last_hash: str = "GENESIS"  # البداية — Genesis block
-        self._current_file: Optional[Path] = None
-        self._current_date: Optional[str] = None
+        self._current_file: Path | None = None
+        self._current_date: str | None = None
 
         # قفل للسلامة — Lock for thread safety
         self._lock = asyncio.Lock()
@@ -91,7 +91,7 @@ class AuditLogger:
         action: str,
         target: str,
         result: str,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> str:
         """
         تسجيل حدث تدقيق — Log an audit event.
@@ -119,13 +119,13 @@ class AuditLogger:
         action: str,
         target: str,
         result: str,
-        metadata: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        metadata: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """
         بناء سجل التدقيق — Build an audit entry dict.
         """
         return {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "epoch": time.time(),
             "event_type": event_type,
             "actor": actor,
@@ -136,7 +136,7 @@ class AuditLogger:
             "prev_hash": self._last_hash,
         }
 
-    async def _write_entry(self, entry: Dict[str, Any]) -> str:
+    async def _write_entry(self, entry: dict[str, Any]) -> str:
         """
         كتابة سجل إلى الملف — Write an entry to the log file.
 
@@ -177,7 +177,7 @@ class AuditLogger:
         """
         التأكد من ملف السجل الحالي — Ensure current log file exists (daily rotation).
         """
-        today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        today = datetime.now(UTC).strftime("%Y-%m-%d")
 
         if self._current_date == today and self._current_file is not None:
             return  # نفس اليوم — Same day
@@ -194,12 +194,12 @@ class AuditLogger:
             # else: ابقِ على التجزئة الحالية (ربما يوم جديد) — Keep current hash
 
     @staticmethod
-    def _get_last_hash_from_file(filepath: Path) -> Optional[str]:
+    def _get_last_hash_from_file(filepath: Path) -> str | None:
         """
         الحصول على آخر تجزئة من ملف — Get the last hash from a log file.
         """
         try:
-            with open(filepath, "r", encoding="utf-8") as f:
+            with open(filepath, encoding="utf-8") as f:
                 last_line = None
                 for line in f:
                     line = line.strip()
@@ -217,7 +217,7 @@ class AuditLogger:
     # التحقق من السلامة / Integrity Verification
     # ─────────────────────────────────────────────
 
-    async def verify_integrity(self, log_file: Optional[str] = None) -> bool:
+    async def verify_integrity(self, log_file: str | None = None) -> bool:
         """
         التحقق من سلامة سلسلة التجزئة — Verify the hash chain integrity.
 
@@ -239,10 +239,10 @@ class AuditLogger:
 
         prev_hash = "GENESIS"
         line_num = 0
-        errors: List[str] = []
+        errors: list[str] = []
 
         try:
-            with open(filepath, "r", encoding="utf-8") as f:
+            with open(filepath, encoding="utf-8") as f:
                 for line in f:
                     line = line.strip()
                     if not line:
@@ -297,9 +297,9 @@ class AuditLogger:
 
     async def search(
         self,
-        query: Dict[str, str],
+        query: dict[str, str],
         limit: int = 100,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         البحث في سجلات التدقيق — Search audit logs.
 
@@ -311,7 +311,7 @@ class AuditLogger:
         Returns / المخرجات:
             قائمة بالسجلات المتطابقة — List of matching entries
         """
-        results: List[Dict[str, Any]] = []
+        results: list[dict[str, Any]] = []
 
         # البحث في جميع ملفات السجلات — Search all log files
         log_files = sorted(self._log_dir.glob("audit-*.jsonl"), reverse=True)
@@ -321,7 +321,7 @@ class AuditLogger:
                 break
 
             try:
-                with open(log_file, "r", encoding="utf-8") as f:
+                with open(log_file, encoding="utf-8") as f:
                     for line in f:
                         if len(results) >= limit:
                             break
@@ -354,7 +354,7 @@ class AuditLogger:
         self,
         actor: str,
         tool_name: str,
-        params: Dict[str, Any],
+        params: dict[str, Any],
         result: str,
         allowed: bool = True,
     ) -> str:
@@ -419,7 +419,7 @@ class AuditLogger:
         action: str,
         target: str,
         success: bool,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> str:
         """
         تسجيل حدث مصادقة — Audit an authentication event.
@@ -479,7 +479,7 @@ class AuditLogger:
     # إحصائيات / Stats
     # ─────────────────────────────────────────────
 
-    async def get_stats(self) -> Dict[str, Any]:
+    async def get_stats(self) -> dict[str, Any]:
         """
         الحصول على إحصائيات سجل التدقيق — Get audit logger statistics.
 

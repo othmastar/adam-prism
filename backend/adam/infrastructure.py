@@ -14,13 +14,12 @@ Adam Prism - Production Infrastructure — HARDENED v3
 import asyncio
 import hashlib
 import logging
-import os
 import time
-from contextlib import asynccontextmanager
-from dataclasses import dataclass, field
+from collections.abc import Callable
+from dataclasses import dataclass
 from functools import wraps
 from pathlib import Path
-from typing import Dict, Any, Callable, Optional, Tuple, List
+from typing import Any
 
 import httpx
 
@@ -35,8 +34,8 @@ class SharedClients:
     """مشاركة اتصال HTTP واحد لكل خدمة — بدلاً من create جديد كل مرة"""
 
     def __init__(self):
-        self._clients: Dict[str, httpx.AsyncClient] = {}
-        self._client_timeouts: Dict[str, float] = {}
+        self._clients: dict[str, httpx.AsyncClient] = {}
+        self._client_timeouts: dict[str, float] = {}
         self._lock = asyncio.Lock()
 
     def _make_client(self, base_url: str, timeout: float = 30.0) -> httpx.AsyncClient:
@@ -70,12 +69,12 @@ class SharedClients:
     async def close_all(self):
         """إغلاق كل الاتصالات — للخروج النظيف"""
         async with self._lock:
-            for name, client in self._clients.items():
+            for _name, client in self._clients.items():
                 if not client.is_closed:
                     await client.aclose()
             self._clients.clear()
 
-    async def health(self) -> Dict[str, bool]:
+    async def health(self) -> dict[str, bool]:
         """حالة كل الاتصالات"""
         return {name: not c.is_closed for name, c in self._clients.items()}
 
@@ -93,7 +92,7 @@ class TTLCache:
     """كاش خفيف في الذاكرة مع TTL — بدون Redis"""
 
     def __init__(self, default_ttl: float = 300.0, max_size: int = 500):
-        self._data: Dict[str, CacheEntry] = {}
+        self._data: dict[str, CacheEntry] = {}
         self._default_ttl = default_ttl
         self._max_size = max_size
         self._hits = 0
@@ -115,7 +114,7 @@ class TTLCache:
             del self._data[key]
         return None
 
-    def set(self, key: str, value: Any, ttl: Optional[float] = None):
+    def set(self, key: str, value: Any, ttl: float | None = None):
         """كتابة في الكاش"""
         if len(self._data) >= self._max_size:
             self._evict()
@@ -135,7 +134,7 @@ class TTLCache:
         self._hits = 0
         self._misses = 0
 
-    def stats(self) -> Dict:
+    def stats(self) -> dict:
         total = self._hits + self._misses
         return {
             "size": len(self._data),
@@ -150,7 +149,7 @@ class TTLCache:
 # ═══════════════════════════════════════
 
 def retry(max_attempts: int = 3, base_delay: float = 0.5, max_delay: float = 10.0,
-          retryable_exceptions: Tuple = (httpx.TimeoutException, httpx.ConnectError,
+          retryable_exceptions: tuple = (httpx.TimeoutException, httpx.ConnectError,
                                           httpx.RemoteProtocolError, ConnectionError, TimeoutError)):
     """ديكوريتور لإعادة المحاولة مع exponential backoff"""
     def decorator(func: Callable) -> Callable:
@@ -181,9 +180,9 @@ class MetricsCollector:
     """عدادات أداء بسيطة — جاهزة للتصدير لـ Prometheus لاحقاً"""
 
     def __init__(self):
-        self._counters: Dict[str, int] = {}
-        self._timers: Dict[str, List[float]] = {}
-        self._errors: Dict[str, int] = {}
+        self._counters: dict[str, int] = {}
+        self._timers: dict[str, list[float]] = {}
+        self._errors: dict[str, int] = {}
 
     def inc(self, name: str, value: int = 1):
         self._counters[name] = self._counters.get(name, 0) + value
@@ -200,7 +199,7 @@ class MetricsCollector:
         self._errors[name] = self._errors.get(name, 0) + 1
         self.inc("errors_total")
 
-    def dump(self) -> Dict:
+    def dump(self) -> dict:
         result = {}
         for name, count in sorted(self._counters.items()):
             result[f"counter_{name}"] = count
@@ -253,7 +252,7 @@ BLOCKED_FILENAMES = [
 ]
 
 
-def sanitize_path(path: str) -> Optional[str]:
+def sanitize_path(path: str) -> str | None:
     """التحقق من أن المسار مصرح به — يمنع الوصول لملفات النظام"""
     if not path or ".." in path:
         return None
@@ -336,7 +335,7 @@ class CircuitBreaker:
             result = await func(*args, **kwargs)
             self._on_success()
             return result
-        except Exception as e:
+        except Exception:
             self._on_failure()
             raise
 
@@ -356,7 +355,7 @@ class CircuitBreaker:
             self.state = self.OPEN
             logger.warning(f"CircuitBreaker '{self.name}' OPEN — تعطلت الخدمة ({self.failure_count} تعذر)")
 
-    def stats(self) -> Dict:
+    def stats(self) -> dict:
         return {
             "name": self.name,
             "state": self.state,
@@ -374,15 +373,15 @@ class ModelSwapper:
     """مبادل الموديلات — يضمن أن موديلاً واحداً فقط في VRAM في اللحظة."""
 
     def __init__(self, max_vram_gb: float = 12.0):
-        self._current_model: Optional[str] = None
-        self._models: Dict[str, Dict[str, Any]] = {}
+        self._current_model: str | None = None
+        self._models: dict[str, dict[str, Any]] = {}
         self._max_vram_gb = max_vram_gb
         self._lock = asyncio.Lock()
         self._swap_count = 0
         self._total_swap_time_ms = 0.0
 
     def register(self, model_id: str, load_fn: Callable, unload_fn: Callable,
-                 vram_gb: float = 1.0, metadata: Optional[Dict] = None):
+                 vram_gb: float = 1.0, metadata: dict | None = None):
         """تسجيل موديل مع دوال التحميل والتفريغ"""
         self._models[model_id] = {
             "load_fn": load_fn,
@@ -451,14 +450,14 @@ class ModelSwapper:
             logger.info("ModelSwapper: VRAM فارغ")
 
     @property
-    def current_model(self) -> Optional[str]:
+    def current_model(self) -> str | None:
         return self._current_model
 
     def is_loaded(self, model_id: str) -> bool:
         m = self._models.get(model_id)
         return m is not None and m["loaded"]
 
-    def stats(self) -> Dict:
+    def stats(self) -> dict:
         return {
             "current_model": self._current_model,
             "registered_models": list(self._models.keys()),

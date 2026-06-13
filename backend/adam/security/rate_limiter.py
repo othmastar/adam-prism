@@ -25,7 +25,7 @@ import asyncio
 import logging
 import time
 from dataclasses import dataclass, field
-from typing import Any, Dict, Optional, Tuple
+from typing import Any
 
 from fastapi import Request, Response
 from fastapi.responses import JSONResponse
@@ -40,7 +40,7 @@ logger = logging.getLogger("adam_prism.security.rate_limiter")
 
 # الحدود الافتراضية لكل نقطة نهاية (طلبات/دقيقة)
 # Default rate limits per endpoint category (requests/minute)
-DEFAULT_ENDPOINT_LIMITS: Dict[str, int] = {
+DEFAULT_ENDPOINT_LIMITS: dict[str, int] = {
     "chat": 30,
     "voice": 15,
     "admin": 5,
@@ -132,7 +132,7 @@ class RateLimiter:
 
     def __init__(
         self,
-        endpoint_limits: Optional[Dict[str, int]] = None,
+        endpoint_limits: dict[str, int] | None = None,
     ) -> None:
         """
         تهيئة محدد المعدل — Initialize the rate limiter.
@@ -144,7 +144,7 @@ class RateLimiter:
         self._limits = endpoint_limits or DEFAULT_ENDPOINT_LIMITS.copy()
 
         # دواليب الرموز: (user_id, endpoint) → TokenBucket
-        self._buckets: Dict[Tuple[str, str], TokenBucket] = {}
+        self._buckets: dict[tuple[str, str], TokenBucket] = {}
 
         # قفل للسلامة — Lock for thread safety
         self._lock = asyncio.Lock()
@@ -198,7 +198,7 @@ class RateLimiter:
         self,
         user_id: str,
         endpoint: str,
-    ) -> Tuple[bool, int, float]:
+    ) -> tuple[bool, int, float]:
         """
         فحص معدل الطلبات — Check if a request is allowed.
 
@@ -231,7 +231,7 @@ class RateLimiter:
 
         return allowed, remaining, reset_at
 
-    async def reset(self, user_id: Optional[str] = None) -> int:
+    async def reset(self, user_id: str | None = None) -> int:
         """
         إعادة تعيين الحدود — Reset rate limits.
 
@@ -257,7 +257,7 @@ class RateLimiter:
         logger.info("Rate limit reset: %d buckets cleared", count)
         return count
 
-    async def get_stats(self) -> Dict[str, Any]:
+    async def get_stats(self) -> dict[str, Any]:
         """
         الحصول على إحصائيات المحدد — Get rate limiter statistics.
 
@@ -266,7 +266,7 @@ class RateLimiter:
         """
         async with self._lock:
             active_users = set(k[0] for k in self._buckets)
-            category_counts: Dict[str, int] = {}
+            category_counts: dict[str, int] = {}
             for k in self._buckets:
                 cat = k[1]
                 category_counts[cat] = category_counts.get(cat, 0) + 1
@@ -300,8 +300,8 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
     def __init__(
         self,
         app: Any,
-        rate_limiter: Optional[RateLimiter] = None,
-        exclude_paths: Optional[list] = None,
+        rate_limiter: RateLimiter | None = None,
+        exclude_paths: list | None = None,
     ) -> None:
         """
         تهيئة الوسيط — Initialize the middleware.

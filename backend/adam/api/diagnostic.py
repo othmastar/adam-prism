@@ -12,8 +12,9 @@ Features:
 5. Module health check
 """
 
+import contextlib
 import logging
-from typing import Dict, Any, Optional
+from datetime import UTC
 
 from fastapi import APIRouter, HTTPException, Request
 
@@ -142,10 +143,8 @@ async def module_health(module_name: str, request: Request):
 
     # Get module-specific status if available
     if hasattr(module, 'get_status'):
-        try:
+        with contextlib.suppress(Exception):
             health_info["details"] = module.get_status()
-        except Exception:
-            pass
 
     return health_info
 
@@ -169,7 +168,7 @@ async def task_queue_stats(request: Request):
 
 
 @router.get("/tasks/list")
-async def task_list(request: Request, status: Optional[str] = None, limit: int = 50):
+async def task_list(request: Request, status: str | None = None, limit: int = 50):
     """قائمة المهام"""
     orchestrator = getattr(request.app.state, "orchestrator", None)
     if not orchestrator:
@@ -225,5 +224,5 @@ async def execute_workflow(request: Request):
 
 
 def _now():
-    from datetime import datetime, timezone
-    return datetime.now(timezone.utc).isoformat()
+    from datetime import datetime
+    return datetime.now(UTC).isoformat()

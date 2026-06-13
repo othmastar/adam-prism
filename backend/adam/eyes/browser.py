@@ -4,11 +4,11 @@ Adam Prism — Browser Automation (Eyes)
 أتمتة المتصفح عبر Playwright Firefox.
 """
 
-import os
+import asyncio
 import ipaddress
 import logging
-import asyncio
-from typing import Optional, Dict, Any
+import os
+from typing import Any
 from urllib.parse import urlparse
 
 logger = logging.getLogger("adam_prism.eyes")
@@ -32,12 +32,10 @@ def _is_private_ip(hostname: str) -> bool:
     if hostname.lower() in localhost_names:
         return True
     internal_suffixes = (".local", ".internal", ".localhost", ".docker", ".container")
-    if any(hostname.lower().endswith(s) for s in internal_suffixes):
-        return True
-    return False
+    return bool(any(hostname.lower().endswith(s) for s in internal_suffixes))
 
 
-def _validate_url(url: str) -> Dict:
+def _validate_url(url: str) -> dict:
     """التحقق من صحة وأمان URL — منع SSRF"""
     if not url:
         return {"valid": False, "error": "مفيش URL"}
@@ -58,7 +56,7 @@ def _validate_url(url: str) -> Dict:
 class Browser:
     """التحكم في المتصفح — Playwright Firefox"""
 
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         self._playwright = None
         self._browser = None
@@ -126,7 +124,7 @@ class Browser:
         self._browser = None
         self._playwright = None
 
-    async def open(self, url: str) -> Dict:
+    async def open(self, url: str) -> dict:
         if not self._healthy:
             return {"success": False, "error": "Browser not initialized"}
         validation = _validate_url(url)
@@ -139,7 +137,7 @@ class Browser:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    async def fetch(self, url: str) -> Dict:
+    async def fetch(self, url: str) -> dict:
         if not self._healthy:
             return {"success": False, "error": "Browser not initialized"}
         validation = _validate_url(url)
@@ -156,7 +154,7 @@ class Browser:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    async def click(self, selector: str) -> Dict:
+    async def click(self, selector: str) -> dict:
         if not self._healthy:
             return {"success": False, "error": "Browser not initialized"}
         try:
@@ -165,7 +163,7 @@ class Browser:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    async def type_text(self, selector: str, text: str) -> Dict:
+    async def type_text(self, selector: str, text: str) -> dict:
         if not self._healthy:
             return {"success": False, "error": "Browser not initialized"}
         try:
@@ -177,7 +175,7 @@ class Browser:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    async def read(self) -> Dict:
+    async def read(self) -> dict:
         if not self._healthy:
             return {"success": False, "error": "Browser not initialized"}
         try:
@@ -187,7 +185,7 @@ class Browser:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    async def screenshot(self) -> Dict:
+    async def screenshot(self) -> dict:
         if not self._healthy:
             return {"success": False, "error": "Browser not initialized"}
         try:

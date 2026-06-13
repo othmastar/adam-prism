@@ -9,7 +9,6 @@
 import json
 import os
 from datetime import datetime
-from typing import Dict, Optional
 from urllib.parse import urlparse
 
 from adam.core.permissions import classify_tool, log_permission
@@ -20,7 +19,7 @@ class KnowledgeMixin:
 
     # [M9] Qdrant client is created once and reused
     _qdrant_client = None
-    _qdrant_collection_name: Optional[str] = None  # [M10] default collection for scroll fallback
+    _qdrant_collection_name: str | None = None  # [M10] default collection for scroll fallback
 
     def _get_qdrant_client(self):
         """[M9] Lazily create and cache a Qdrant client."""
@@ -40,7 +39,7 @@ class KnowledgeMixin:
             logging.getLogger("adam_prism.core").warning(f"Failed to create Qdrant client: {e}")
         return self._qdrant_client
 
-    async def _tool_knowledge(self, params: Dict) -> Dict:
+    async def _tool_knowledge(self, params: dict) -> dict:
         query = params.get("query", "")
         top_k = params.get("top_k", 3)
         if not query:
@@ -89,7 +88,7 @@ class KnowledgeMixin:
         except Exception as e:
             return {"success": False, "error": f"قاعدة المعرفة غير متصلة: {e}"}
 
-    async def _tool_preferences(self, tool_name: str, params: Dict) -> Dict:
+    async def _tool_preferences(self, tool_name: str, params: dict) -> dict:
         if tool_name == "request_permission":
             action = params.get("action", params.get("tool", ""))
             reason = params.get("reason", "")
@@ -128,7 +127,7 @@ class KnowledgeMixin:
                 profile_path = os.path.join(notes_dir, "user_profile.json")
                 profile = {}
                 if os.path.exists(profile_path):
-                    with open(profile_path, "r") as f:
+                    with open(profile_path) as f:
                         profile = json.load(f)
                 if section not in profile:
                     profile[section] = {}

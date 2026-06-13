@@ -4,11 +4,12 @@ Adam Prism — WhatsApp Channel Adapter
 WhatsApp Business API عبر webhooks (Meta Cloud API).
 """
 
-import json
-import hmac
 import hashlib
+import hmac
+import json
 import logging
-from typing import Dict, Any, Optional
+from typing import Any
+
 from .base import BaseChannel
 
 logger = logging.getLogger("adam_prism.channels.whatsapp")
@@ -20,7 +21,7 @@ class WhatsAppChannel(BaseChannel):
     is_polling = False
     is_webhook = True
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         super().__init__(config)
         cfg = config.get(self.name, config)
         self.phone_number_id = cfg.get("phone_number_id", config.get("whatsapp_phone_number_id", ""))
@@ -37,7 +38,7 @@ class WhatsAppChannel(BaseChannel):
         self.running = True
         logger.info("📡 WhatsApp webhook mode (endpoints at /webhook/whatsapp)")
 
-    def verify_webhook(self, mode: str, token: str, challenge: str) -> Optional[str]:
+    def verify_webhook(self, mode: str, token: str, challenge: str) -> str | None:
         if mode == "subscribe" and token == self.webhook_verify_token:
             return challenge
         return None
@@ -49,7 +50,7 @@ class WhatsAppChannel(BaseChannel):
         expected = hmac.new(self.app_secret.encode(), raw_body, hashlib.sha256).hexdigest()
         return hmac.compare_digest(f"sha256={expected}", signature_header)
 
-    async def process_incoming(self, payload: Dict) -> Dict:
+    async def process_incoming(self, payload: dict) -> dict:
         results = []
         for entry in payload.get("entry", []):
             for change in entry.get("changes", []):
@@ -58,7 +59,7 @@ class WhatsAppChannel(BaseChannel):
                     results.append(await self._handle_message(msg, value.get("metadata", {})))
         return {"status": "processed", "count": len(results)}
 
-    async def _handle_message(self, msg: Dict, metadata: Dict) -> Dict:
+    async def _handle_message(self, msg: dict, metadata: dict) -> dict:
         from_number = msg.get("from", "")
         msg_type = msg.get("type", "text")
         if msg_type == "text":

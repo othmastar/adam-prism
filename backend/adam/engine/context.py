@@ -5,7 +5,6 @@ Build context with intelligent collection routing (RAG)
 """
 
 import logging
-from typing import Dict
 
 from adam.engine.utils import AdamPrismEngineUtils
 
@@ -17,7 +16,7 @@ class AdamPrismEngineContext(AdamPrismEngineUtils):
     Mixin: context building with RAG collection routing.
     """
 
-    async def _build_context(self, message: str, intent: Dict) -> Dict:
+    async def _build_context(self, message: str, intent: dict) -> dict:
         """بناء السياق + RAG ذكي: يدور في الكوليكشن المناسب حسب intent"""
         context = {
             "intent": intent,

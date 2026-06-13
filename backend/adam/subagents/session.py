@@ -13,10 +13,10 @@ Adam Prism — Subagent Session — HARDENED v3
 5. Allow controlled tool access via tools_enabled parameter with restricted toolset
 """
 
-import re
 import logging
-from datetime import datetime, timezone
-from typing import Dict, Any, List, Optional
+import re
+from datetime import UTC, datetime
+from typing import Any
 from uuid import uuid4
 
 logger = logging.getLogger("adam_prism.subagents")
@@ -50,13 +50,13 @@ class SubagentSession:
     # الحد الأقصى لعدد الرسائل في الجلسة
     ABSOLUTE_MAX_HISTORY = 100
 
-    def __init__(self, name: str, engine, config: Dict[str, Any] = None):
+    def __init__(self, name: str, engine, config: dict[str, Any] | None = None):
         self.id = str(uuid4())[:8]
         self.name = name
         self.engine = engine
         self.config = config or {}
-        self.conversation_history: List[Dict] = []
-        self.created_at = datetime.now(timezone.utc)
+        self.conversation_history: list[dict] = []
+        self.created_at = datetime.now(UTC)
         self.last_active = self.created_at
         self._blocked_count = 0  # [NEW] عداد الرسائل المحظورة
 
@@ -94,7 +94,7 @@ class SubagentSession:
             self.tools_enabled = False
             self.allowed_tools = frozenset()
 
-    async def chat(self, message: str) -> Dict[str, Any]:
+    async def chat(self, message: str) -> dict[str, Any]:
         """إرسال رسالة للوكيل الفرعي واستقبال الرد"""
         message = message.strip()
         if not message:
@@ -117,7 +117,7 @@ class SubagentSession:
                     "blocked": True,
                 }
 
-        self.last_active = datetime.now(timezone.utc)
+        self.last_active = datetime.now(UTC)
 
         # بناء الرسائل مع system prompt
         messages = [{"role": "system", "content": self.system_prompt}]
@@ -149,7 +149,7 @@ class SubagentSession:
             "created_at": self.created_at.isoformat(),
         }
 
-    def get_status(self) -> Dict[str, Any]:
+    def get_status(self) -> dict[str, Any]:
         return {
             "id": self.id,
             "name": self.name,

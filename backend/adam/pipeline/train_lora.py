@@ -18,12 +18,9 @@ Adam Prism v1.0.0 — Gemma 4 E4B QLoRA Training Pipeline
 """
 
 import json
-import os
-import sys
 import logging
+import os
 import random
-from pathlib import Path
-from typing import Dict, List, Optional, Literal
 from dataclasses import dataclass, field
 
 logger = logging.getLogger("adam_prism.train")
@@ -50,7 +47,7 @@ class TrainingConfig:
     lora_r: int = 16
     lora_alpha: int = 32
     lora_dropout: float = 0.05
-    lora_target_modules: List[str] = field(default_factory=lambda: [
+    lora_target_modules: list[str] = field(default_factory=lambda: [
         "q_proj", "k_proj", "v_proj", "o_proj",
         "gate_proj", "up_proj", "down_proj"
     ])
@@ -90,7 +87,7 @@ class TrainingConfig:
 # تحميل البيانات
 # ═══════════════════════════════════════════════
 
-def load_chat_data(data_dir: str) -> List[Dict]:
+def load_chat_data(data_dir: str) -> list[dict]:
     """تحميل بيانات التدريب من مجلد splits — كلها chat format"""
     data = []
     splits = ["train.jsonl", "val.jsonl", "test.jsonl"]
@@ -98,7 +95,7 @@ def load_chat_data(data_dir: str) -> List[Dict]:
         path = os.path.join(data_dir, split_file)
         if not os.path.exists(path):
             continue
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             for line in f:
                 if line.strip():
                     item = json.loads(line)
@@ -108,7 +105,7 @@ def load_chat_data(data_dir: str) -> List[Dict]:
     return data
 
 
-def format_for_gemma4(conversation: Dict, config: TrainingConfig) -> Dict:
+def format_for_gemma4(conversation: dict, config: TrainingConfig) -> dict:
     """
     تحويل المحادثة لصيغة Gemma 4.
     - نضيف system prompt موحد إذا مش موجود أو مختلف
@@ -143,7 +140,7 @@ def format_for_gemma4(conversation: Dict, config: TrainingConfig) -> Dict:
     }
 
 
-def prepare_dataset(data: List[Dict], config: TrainingConfig):
+def prepare_dataset(data: list[dict], config: TrainingConfig):
     """تجهيز البيانات للتدريب — format + shuffle"""
     from datasets import Dataset
 
@@ -170,8 +167,8 @@ def prepare_dataset(data: List[Dict], config: TrainingConfig):
 def load_model_and_tokenizer(config: TrainingConfig):
     """تحميل Gemma 4 E4B مع 4-bit quantization"""
     import torch
-    from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
     from peft import prepare_model_for_kbit_training
+    from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
     logger.info(f"تحميل الموديل: {config.model_id}")
 
@@ -228,8 +225,8 @@ def setup_lora(model, config: TrainingConfig):
 
 def train(config: TrainingConfig):
     """تنفيذ التدريب الكامل"""
-    from trl import SFTTrainer, SFTConfig
     import torch
+    from trl import SFTConfig, SFTTrainer
 
     # 1. تحميل البيانات
     raw_data = load_chat_data(config.data_dir)
@@ -300,8 +297,8 @@ def train(config: TrainingConfig):
 def merge_and_convert(config: TrainingConfig):
     """دمج LoRA مع base + تحويل GGUF"""
     import torch
-    from transformers import AutoModelForCausalLM, AutoTokenizer
     from peft import PeftModel
+    from transformers import AutoModelForCausalLM, AutoTokenizer
 
     logger.info("دمج LoRA adapters مع base model...")
     base = AutoModelForCausalLM.from_pretrained(
@@ -325,7 +322,7 @@ def merge_and_convert(config: TrainingConfig):
 لتحويل GGUF:
 
     pip install llama-cpp-python
-    
+
     # تحويل Safetensors → GGUF
     python -c "
     from llama_cpp import Llama
@@ -349,7 +346,6 @@ def merge_and_convert(config: TrainingConfig):
 
 def create_ollama_model(config: TrainingConfig):
     """إنشاء Modelfile + نموذج Ollama"""
-    import subprocess
 
     modelfile = f"""FROM {config.gguf_path}
 

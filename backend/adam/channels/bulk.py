@@ -6,12 +6,13 @@ Adam Prism — Bulk Channel Adapters (15+ channels)
 
 import json
 import logging
-from typing import Dict, Any, Optional
+from typing import Any
+
 from .base import BaseChannel
 
 logger = logging.getLogger("adam_prism.channels.bulk")
 
-BULK_CHANNELS: Dict[str, type] = {}
+BULK_CHANNELS: dict[str, type] = {}
 
 
 def _register(cls):
@@ -27,7 +28,7 @@ class DiscordChannel(BaseChannel):
     is_polling = True
     is_webhook = True
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         super().__init__(config)
         cfg = config.get(self.name, config)
         self.bot_token = cfg.get("bot_token", "")
@@ -58,7 +59,9 @@ class DiscordChannel(BaseChannel):
                     if data["op"] == 10:
                         import asyncio
                         heartbeat_interval = data["d"]["heartbeat_interval"] / 1000
-                        asyncio.create_task(self._heartbeat(ws, heartbeat_interval))
+                        task = asyncio.create_task(self._heartbeat(ws, heartbeat_interval))
+                        self._tasks.add(task)
+                        task.add_done_callback(self._tasks.discard)
                         await ws.send(json.dumps({"op": 2, "d": {"token": self.bot_token, "intents": 512, "properties": {"os": "linux", "browser": "adam", "device": "adam"}}}))
                     elif data["op"] == 0:
                         await self._handle_dispatch(data)
@@ -134,7 +137,7 @@ class SlackChannel(BaseChannel):
     is_polling = False
     is_webhook = True
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         super().__init__(config)
         cfg = config.get(self.name, config)
         self.bot_token = cfg.get("bot_token", "")
@@ -159,7 +162,8 @@ class SlackChannel(BaseChannel):
         if not self.signing_secret:
             logger.warning("Slack: signing_secret غير مضبوط — توثيق webhook معطل")
             return False
-        import hashlib, hmac
+        import hashlib
+        import hmac
         base = f"v0:{timestamp}:{body.decode()}"
         expected = "v0=" + hmac.new(self.signing_secret.encode(), base.encode(), hashlib.sha256).hexdigest()
         return hmac.compare_digest(expected, signature)
@@ -194,7 +198,7 @@ class EmailChannel(BaseChannel):
     requires = ["smtp_host", "smtp_user", "smtp_pass"]
     is_polling = True
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         super().__init__(config)
         cfg = config.get(self.name, config)
         self.smtp_host = cfg.get("smtp_host", "")
@@ -223,9 +227,10 @@ class EmailChannel(BaseChannel):
             await asyncio.sleep(60)
 
     async def _check_inbox(self):
-        import imaplib, email as eml
         import asyncio
-        loop = asyncio.get_event_loop()
+        import email as eml
+        import imaplib
+        asyncio.get_event_loop()
         def _fetch():
             mail = imaplib.IMAP4_SSL(self.imap_host)
             mail.login(self.imap_user, self.imap_pass)
@@ -258,6 +263,7 @@ class EmailChannel(BaseChannel):
                 await self.send_message(msg["from"], result.get("response", ""))
 
     async def send_message(self, target: str, text: str, subject: str = "آدم"):
+        import asyncio
         import smtplib
         from email.mime.text import MIMEText
         loop = asyncio.get_event_loop()
@@ -280,7 +286,7 @@ class SMSChannel(BaseChannel):
     requires = ["twilio_account_sid", "twilio_auth_token", "from_number"]
     is_polling = True
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         super().__init__(config)
         cfg = config.get(self.name, config)
         self.account_sid = cfg.get("twilio_account_sid", "")
@@ -323,7 +329,7 @@ class WebSocketChannel(BaseChannel):
     requires = []
     is_polling = True
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         super().__init__(config)
         cfg = config.get(self.name, config)
         self.host = cfg.get("host", "0.0.0.0")
@@ -333,6 +339,7 @@ class WebSocketChannel(BaseChannel):
     async def start_polling(self):
         self.running = True
         import asyncio
+
         import websockets
         async def handler(ws):
             self._clients.add(ws)
@@ -370,7 +377,7 @@ class WebChatChannel(BaseChannel):
     is_polling = False
     is_webhook = True
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         super().__init__(config)
         cfg = config.get(self.name, config)
         self.allowed_origins = cfg.get("allowed_origins", ["*"])
@@ -424,7 +431,7 @@ class TwitterChannel(BaseChannel):
     requires = ["bearer_token"]
     is_polling = True
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         super().__init__(config)
         cfg = config.get(self.name, config)
         self.bearer_token = cfg.get("bearer_token", "")
@@ -437,7 +444,9 @@ class TwitterChannel(BaseChannel):
             return
         self.running = True
         logger.info("📡 Twitter DM polling active")
-        import asyncio, httpx
+        import asyncio
+
+        import httpx
         async with httpx.AsyncClient() as client:
             while self.running:
                 try:
@@ -482,7 +491,7 @@ class FacebookChannel(BaseChannel):
     is_polling = False
     is_webhook = True
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         super().__init__(config)
         cfg = config.get(self.name, config)
         self.page_access_token = cfg.get("page_access_token", "")
@@ -509,7 +518,8 @@ class FacebookChannel(BaseChannel):
         if not self.app_secret:
             logger.warning("Facebook: app_secret غير مضبوط — توثيق webhook معطل")
             return False
-        import hmac, hashlib
+        import hashlib
+        import hmac
         expected = "sha256=" + hmac.new(self.app_secret.encode(), body, hashlib.sha256).hexdigest()
         return hmac.compare_digest(expected, signature)
 
@@ -550,7 +560,7 @@ class MatrixChannel(BaseChannel):
     requires = ["homeserver", "access_token"]
     is_polling = True
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         super().__init__(config)
         cfg = config.get(self.name, config)
         self.homeserver = cfg.get("homeserver", "https://matrix.org")
@@ -563,7 +573,9 @@ class MatrixChannel(BaseChannel):
             return
         self.running = True
         logger.info(f"📡 Matrix sync on {self.homeserver}")
-        import asyncio, httpx
+        import asyncio
+
+        import httpx
         async with httpx.AsyncClient(timeout=60.0) as client:
             while self.running:
                 try:
@@ -609,7 +621,7 @@ class SignalChannel(BaseChannel):
     requires = ["cli_path"]
     is_polling = True
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         super().__init__(config)
         cfg = config.get(self.name, config)
         self.cli_path = cfg.get("cli_path", "signal-cli")
@@ -657,7 +669,7 @@ class InstagramChannel(BaseChannel):
     requires = ["username", "password"]
     is_polling = True
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         super().__init__(config)
         cfg = config.get(self.name, config)
         self.username = cfg.get("username", "")
@@ -681,7 +693,7 @@ class LINEChannel(BaseChannel):
     is_polling = False
     is_webhook = True
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         super().__init__(config)
         cfg = config.get(self.name, config)
         self.access_token = cfg.get("channel_access_token", "")
@@ -730,7 +742,7 @@ class ViberChannel(BaseChannel):
     is_polling = False
     is_webhook = True
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         super().__init__(config)
         cfg = config.get(self.name, config)
         self.auth_token = cfg.get("auth_token", "")
@@ -772,7 +784,7 @@ class TeamsChannel(BaseChannel):
     is_polling = False
     is_webhook = True
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         super().__init__(config)
         cfg = config.get(self.name, config)
         self.webhook_url = cfg.get("webhook_url", "")
@@ -809,7 +821,7 @@ class GoogleChatChannel(BaseChannel):
     is_polling = False
     is_webhook = True
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         super().__init__(config)
         cfg = config.get(self.name, config)
         self.webhook_url = cfg.get("webhook_url", "")
@@ -845,7 +857,7 @@ class IRCChannel(BaseChannel):
     requires = ["server", "nick"]
     is_polling = True
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         super().__init__(config)
         cfg = config.get(self.name, config)
         self.server = cfg.get("server", "irc.libera.chat")
@@ -900,7 +912,7 @@ class XMPPChannel(BaseChannel):
     requires = ["jid", "password"]
     is_polling = True
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         super().__init__(config)
         cfg = config.get(self.name, config)
         self.jid = cfg.get("jid", "")
@@ -921,7 +933,7 @@ class TelegramWebhookChannel(BaseChannel):
     is_polling = False
     is_webhook = True
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         super().__init__(config)
         cfg = config.get(self.name, config)
         self.bot_token = cfg.get("bot_token", "")
@@ -961,7 +973,7 @@ class GenericWebhookChannel(BaseChannel):
     is_polling = False
     is_webhook = True
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         super().__init__(config)
         cfg = config.get(self.name, config)
         self.secret = cfg.get("secret", "")
@@ -992,7 +1004,7 @@ class RSSChannel(BaseChannel):
     requires = ["feeds"]
     is_polling = True
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         super().__init__(config)
         cfg = config.get(self.name, config)
         self.feeds = cfg.get("feeds", [])
@@ -1003,7 +1015,9 @@ class RSSChannel(BaseChannel):
             return
         self.running = True
         logger.info(f"📡 RSS polling {len(self.feeds)} feeds")
-        import asyncio, httpx
+        import asyncio
+
+        import httpx
         async with httpx.AsyncClient() as client:
             while self.running:
                 for url in self.feeds:
@@ -1029,7 +1043,7 @@ class NotionChannel(BaseChannel):
     requires = ["api_key"]
     is_polling = True
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         super().__init__(config)
         cfg = config.get(self.name, config)
         self.api_key = cfg.get("api_key", "")
@@ -1048,7 +1062,7 @@ class NotionChannel(BaseChannel):
         async with httpx.AsyncClient() as client:
             try:
                 await client.post(
-                    f"https://api.notion.com/v1/pages",
+                    "https://api.notion.com/v1/pages",
                     headers={"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json",
                              "Notion-Version": "2022-06-28"},
                     json={"parent": {"database_id": self.database_id or target},
@@ -1064,7 +1078,7 @@ class GitHubChannel(BaseChannel):
     requires = ["token"]
     is_polling = True
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         super().__init__(config)
         cfg = config.get(self.name, config)
         self.token = cfg.get("token", "")
@@ -1076,7 +1090,9 @@ class GitHubChannel(BaseChannel):
             return
         self.running = True
         logger.info(f"📡 GitHub polling {len(self.repos)} repos")
-        import asyncio, httpx
+        import asyncio
+
+        import httpx
         async with httpx.AsyncClient() as client:
             while self.running:
                 for repo in self.repos:
@@ -1117,7 +1133,7 @@ class WeChatChannel(BaseChannel):
     requires = ["corp_id", "corp_secret"]
     is_polling = True
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         super().__init__(config)
         cfg = config.get(self.name, config)
         self.corp_id = cfg.get("corp_id", "")
@@ -1133,7 +1149,7 @@ class WeChatChannel(BaseChannel):
         async with httpx.AsyncClient() as client:
             try:
                 token_resp = await client.get(
-                    f"https://qyapi.weixin.qq.com/cgi-bin/gettoken",
+                    "https://qyapi.weixin.qq.com/cgi-bin/gettoken",
                     params={"corpid": self.corp_id, "corpsecret": self.corp_secret},
                 )
                 token = token_resp.json().get("access_token", "")

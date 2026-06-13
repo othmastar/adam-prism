@@ -5,12 +5,12 @@ Adam Prism - Chat History Store
 """
 
 import json
-import sqlite3
 import logging
+import sqlite3
 import time
 import uuid
 from pathlib import Path
-from typing import Optional, List, Dict, Any
+from typing import Any
 
 logger = logging.getLogger("adam_prism.chat_store")
 
@@ -20,7 +20,7 @@ DB_PATH = Path(__file__).resolve().parent.parent / "data" / "chat_history.db"
 class ChatStore:
     """
     تخزين واسترجاع تاريخ المحادثات.
-    
+
     الجدوال:
     - sessions: جلسات المحادثة (id, title, created_at, updated_at)
     - messages: الرسائل (id, session_id, role, content, mode, metadata, timestamp)
@@ -34,7 +34,7 @@ class ChatStore:
     @staticmethod
     def _escape_fts5(query: str) -> str:
         """Escape FTS5 special characters from user input to prevent injection.
-        
+
         FTS5 special characters: " * + - : ^ ( )
         We wrap each token in double quotes after escaping internal quotes.
         """
@@ -95,7 +95,7 @@ class ChatStore:
 
     # ── Sessions ──────────────────────────────────────────
 
-    def list_sessions(self, limit: int = 50, offset: int = 0) -> List[Dict[str, Any]]:
+    def list_sessions(self, limit: int = 50, offset: int = 0) -> list[dict[str, Any]]:
         """قائمة الجلسات مرتبة حسب آخر تحديث"""
         with self._get_conn() as conn:
             rows = conn.execute(
@@ -104,7 +104,7 @@ class ChatStore:
             ).fetchall()
             return [dict(r) for r in rows]
 
-    def get_session(self, session_id: str) -> Optional[Dict[str, Any]]:
+    def get_session(self, session_id: str) -> dict[str, Any] | None:
         """جلب جلسة معينة"""
         with self._get_conn() as conn:
             row = conn.execute(
@@ -113,7 +113,7 @@ class ChatStore:
             ).fetchone()
             return dict(row) if row else None
 
-    def create_session(self, title: str = "New Conversation") -> Dict[str, Any]:
+    def create_session(self, title: str = "New Conversation") -> dict[str, Any]:
         """إنشاء جلسة جديدة"""
         session_id = str(uuid.uuid4())
         now = time.time()
@@ -150,7 +150,7 @@ class ChatStore:
 
     # ── Messages ──────────────────────────────────────────
 
-    def list_messages(self, session_id: str) -> List[Dict[str, Any]]:
+    def list_messages(self, session_id: str) -> list[dict[str, Any]]:
         """جلب كل رسائل جلسة مرتبة حسب timestamp"""
         with self._get_conn() as conn:
             rows = conn.execute(
@@ -174,9 +174,9 @@ class ChatStore:
         session_id: str,
         role: str,
         content: str,
-        mode: Optional[str] = None,
-        metadata: Optional[Dict] = None,
-    ) -> Dict[str, Any]:
+        mode: str | None = None,
+        metadata: dict | None = None,
+    ) -> dict[str, Any]:
         """إضافة رسالة إلى جلسة"""
         msg_id = str(uuid.uuid4())
         now = time.time()
@@ -205,7 +205,7 @@ class ChatStore:
             "timestamp": now,
         }
 
-    def search_messages(self, query: str, limit: int = 20) -> List[Dict[str, Any]]:
+    def search_messages(self, query: str, limit: int = 20) -> list[dict[str, Any]]:
         """البحث في محتوى الرسائل باستخدام FTS"""
         safe_query = self._escape_fts5(query)
         with self._get_conn() as conn:
