@@ -15,6 +15,7 @@ logger = logging.getLogger("adam_prism.providers.ollama")
 
 class OllamaProvider(BaseProvider):
     name = "ollama"
+    supports_vision = False
 
     def __init__(self, config: dict[str, Any]):
         self.base_url = config.get("ollama_base", "http://localhost:11434")
@@ -44,8 +45,12 @@ class OllamaProvider(BaseProvider):
                 "stream": False,
                 "options": options,
             })
+            if r.status_code == 400 and "does not support image" in r.text:
+                raise ValueError("هذا الموديل لا يدعم الصور. استخدم موديل multimodal.")
             r.raise_for_status()
             return r.json().get("message", {}).get("content", "")
+        except ValueError:
+            raise
         except Exception:
             logger.exception("Ollama chat failed:")
             raise
@@ -63,8 +68,12 @@ class OllamaProvider(BaseProvider):
                     "top_p": 0.9,
                 },
             })
+            if r.status_code == 400 and "does not support image" in r.text:
+                raise ValueError("هذا الموديل لا يدعم الصور. استخدم موديل multimodal.")
             r.raise_for_status()
             return r.json().get("response", "")
+        except ValueError:
+            raise
         except Exception:
             logger.exception("Ollama generate failed:")
             raise
