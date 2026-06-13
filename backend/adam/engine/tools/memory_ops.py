@@ -1,7 +1,9 @@
 """أدوات الذاكرة — store / recall / reflect"""
 
 
-from core import memory_store
+from adam.memory.store import MemoryStore
+
+memory_store = MemoryStore()
 
 
 class MemoryToolsMixin:

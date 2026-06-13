@@ -368,71 +368,11 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
     chat_store = ChatStore()
 
     # ═══════════════════════════════════════════════════════
-    # [FIX v3] Include routers from separate modules
+    # Routes are defined inline below (monolith mode)
+    # Router stubs in adam/api/routers/ were extracted for
+    # future refactoring but contain pass handlers only.
+    # TODO: move route implementations into router modules.
     # ═══════════════════════════════════════════════════════
-    try:
-        from adam.api.routers import (
-            channels as channels_router,
-        )
-        from adam.api.routers import (
-            chat as chat_router,
-        )
-        from adam.api.routers import (
-            engine as engine_router,
-        )
-        from adam.api.routers import (
-            knowledge as knowledge_router,
-        )
-        from adam.api.routers import (
-            mcp as mcp_router,
-        )
-        from adam.api.routers import (
-            memory as memory_router,
-        )
-        from adam.api.routers import (
-            permissions as permissions_router,
-        )
-        from adam.api.routers import (
-            plugins as plugins_router,
-        )
-        from adam.api.routers import (
-            scheduler as scheduler_router,
-        )
-        from adam.api.routers import (
-            skills as skills_router,
-        )
-        from adam.api.routers import (
-            subagents as subagents_router,
-        )
-        from adam.api.routers import (
-            tools as tools_router,
-        )
-        from adam.api.routers import (
-            voice as voice_router,
-        )
-
-        # Pass shared dependencies to routers
-        _router_deps = {
-            "engine": engine,
-            "channel_manager": channel_manager,
-            "chat_store": chat_store,
-            "api_key": _api_key,
-            "admin_key": _admin_key,
-            "hmac": _hmac,
-        }
-
-        for router_module in [chat_router, knowledge_router, memory_router, tools_router,
-                              skills_router, subagents_router, voice_router, mcp_router,
-                              engine_router, channels_router, plugins_router, scheduler_router,
-                              permissions_router]:
-            if hasattr(router_module, 'router'):
-                app.include_router(router_module.router)
-
-        logger.info("API routers loaded successfully")
-    except ImportError:
-        logger.exception("Could not load API routers (running in monolith mode):")
-    except Exception:
-        logger.exception("Router setup error:")
 
     # ═══════════════════════════════════════
     # Core Routes (kept in main file for reliability)

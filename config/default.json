@@ -1,7 +1,7 @@
 {
   "ollama_base": "http://localhost:11434",
   "model_name": "adam-prism-v13:latest",
-  "inference_mode": "lora",
+  "inference_mode": "ollama",
   "lora_server_url": "http://localhost:7861",
   "context_window": 4096,
   "token_budget": 4000,
