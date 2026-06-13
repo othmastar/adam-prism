@@ -233,7 +233,7 @@ def train(config: TrainingConfig):
     dataset = prepare_dataset(raw_data, config)
 
     # 2. تحميل الموديل
-    model, tokenizer = load_model_and_processor(config)
+    model, tokenizer = load_model_and_processor(config)  # noqa: F821
     model = setup_lora(model, config)
 
     # 3. إعداد التدريب
