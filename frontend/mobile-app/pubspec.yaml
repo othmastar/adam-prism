@@ -1,0 +1,90 @@
+name: adam_prism
+description: Adam Prism AI Agent Framework - Mobile Client
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.5.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # State Management
+  flutter_riverpod: ^2.5.1
+  riverpod_annotation: ^2.3.5
+
+  # Local Storage
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  flutter_secure_storage: ^9.2.2
+
+  # Network
+  http: ^1.2.1
+  dio: ^5.4.3+1
+  web_socket_channel: ^3.0.1
+
+  # UI
+  google_fonts: ^6.2.1
+  flutter_markdown: ^0.7.3
+  markdown: ^7.2.2
+  flutter_highlight: ^0.7.0
+  highlight: ^0.7.0
+
+  # Media
+  record: ^5.0.5
+  audioplayers: ^6.0.0
+  path_provider: ^2.1.3
+  file_picker: ^8.0.3
+
+  # Notifications
+  flutter_local_notifications: ^17.1.2
+
+  # Utilities
+  intl: ^0.19.0
+  uuid: ^4.3.3
+  share_plus: ^9.0.0
+  url_launcher: ^6.2.6
+  connectivity_plus: ^6.0.3
+  cached_network_image: ^3.3.1
+  shimmer: ^3.0.0
+  flutter_animate: ^4.5.0
+  provider: ^6.1.2
+  go_router: ^14.2.0
+  freezed_annotation: ^2.4.1
+  json_annotation: ^4.9.0
+  tuple: ^2.0.2
+  collection: ^1.18.0
+  characters: ^1.3.0
+  async: ^2.11.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  build_runner: ^2.4.9
+  freezed: ^2.5.2
+  json_serializable: ^6.8.0
+  hive_generator: ^2.0.1
+
+flutter:
+  generate: true
+
+  uses-material-design: true
+
+  # Note: google_fonts package loads fonts at runtime
+  # If you want to bundle fonts locally, download NotoSansArabic
+  # from https://fonts.google.com/noto/specimen/Noto+Sans+Arabic
+  # and uncomment the fonts section below:
+  #
+  # fonts:
+  #   - family: NotoSansArabic
+  #     fonts:
+  #       - asset: assets/fonts/NotoSansArabic-Regular.ttf
+  #       - asset: assets/fonts/NotoSansArabic-Medium.ttf
+  #         weight: 500
+  #       - asset: assets/fonts/NotoSansArabic-SemiBold.ttf
+  #         weight: 600
+  #       - asset: assets/fonts/NotoSansArabic-Bold.ttf
+  #         weight: 700

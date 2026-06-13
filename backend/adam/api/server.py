@@ -234,15 +234,36 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
     logger.info("API Key authentication enabled")
     logger.info(f"Rate limiter: {os.environ.get('ADAM_RATE_LIMIT', '60')} req/min")
 
-    # [FIX] CORS — تقييد أصل الإنتاج
-    cors_origins = os.environ.get("CORS_ORIGINS", "*")
+    # [FIX v3] CORS — تقييد أصل الإنتاج مع دعم ADAM_CORS_ORIGINS
+    # Now supports ADAM_CORS_ORIGINS (higher priority) and CORS_ORIGINS
+    # In production mode, wildcard "*" is rejected
+    _cors_origins_str = os.environ.get("ADAM_CORS_ORIGINS", "") or os.environ.get("CORS_ORIGINS", "*")
+
+    if _cors_origins_str.strip() == "*":
+        _cors_origins = ["*"]
+        _allow_credentials = False
+        if _is_production:
+            logger.error("=" * 60)
+            logger.error("SECURITY: CORS wildcard (*) is not allowed in production!")
+            logger.error("Set ADAM_CORS_ORIGINS to a comma-separated list of allowed origins.")
+            logger.error("Example: ADAM_CORS_ORIGINS=http://localhost:3000,https://yourdomain.com")
+            logger.error("=" * 60)
+            raise RuntimeError(
+                "SECURITY: CORS wildcard (*) is not allowed in production mode! "
+                "Set ADAM_CORS_ORIGINS to specific allowed origins."
+            )
+    else:
+        _cors_origins = [o.strip() for o in _cors_origins_str.split(",") if o.strip()]
+        _allow_credentials = True
+
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=cors_origins.split(",") if cors_origins != "*" else ["*"],
-        allow_credentials=cors_origins != "*",
+        allow_origins=_cors_origins,
+        allow_credentials=_allow_credentials,
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    logger.info(f"CORS origins: {_cors_origins}")
 
     # === V3: Install security middleware (audit, rate-limit, headers, tracing) ===
     try:
@@ -250,6 +271,39 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
         install_all_middleware(app, engine=engine)
     except Exception as e:
         logger.warning(f"Middleware install failed: {e}")
+
+    # ═══════════════════════════════════════════════════════
+    # [FIX v3] Include routers from separate modules
+    # ═══════════════════════════════════════════════════════
+    try:
+        from adam.api.routers import (
+            chat as chat_router,
+            knowledge as knowledge_router,
+            memory as memory_router,
+            tools as tools_router,
+            skills as skills_router,
+            subagents as subagents_router,
+            voice as voice_router,
+            mcp as mcp_router,
+            engine as engine_router,
+            channels as channels_router,
+            plugins as plugins_router,
+            scheduler as scheduler_router,
+            permissions as permissions_router,
+        )
+
+        for router_module in [chat_router, knowledge_router, memory_router, tools_router,
+                              skills_router, subagents_router, voice_router, mcp_router,
+                              engine_router, channels_router, plugins_router, scheduler_router,
+                              permissions_router]:
+            if hasattr(router_module, 'router'):
+                app.include_router(router_module.router)
+
+        logger.info("API routers loaded successfully")
+    except ImportError as e:
+        logger.warning(f"Could not load API routers (running in monolith mode): {e}")
+    except Exception as e:
+        logger.warning(f"Router setup error: {e}")
 
     # ═══════════════════════════════════════════════════════
     # نقاط webhook — الآن بعد المصادقة، محمية تلقائياً
@@ -952,6 +1006,96 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
         if channel_manager:
             return {"channels": channel_manager.list_channels()}
         return {"channels": []}
+
+    # ═══════════════════════════════════════════════════════
+    # [FIX v3] Missing Frontend Endpoints
+    # نقاط نهاية كانت مفقودة من الباك اند لكن الفرونت اند يستدعيها
+    # ═══════════════════════════════════════════════════════
+
+    @app.get("/api/engine/health")
+    async def engine_health():
+        """فحص صحة المحرك — مطلوب من الفرونت اند"""
+        if not engine:
+            return {"status": "not_attached", "healthy": False}
+        health = {
+            "status": "running" if engine else "stopped",
+            "healthy": True,
+            "cycle_count": getattr(engine, 'cycle_count', 0),
+            "model": getattr(engine, 'model_name', 'unknown'),
+            "inference_mode": getattr(engine, 'inference_mode', 'unknown'),
+            "session_id": getattr(engine, 'session_id', 'unknown'),
+            "subsystems": {},
+        }
+        for name in ["memory", "ethics", "security", "notebook", "knowledge",
+                      "eyes", "tools", "pipeline", "scheduler", "plugins",
+                      "subagents", "trace_recorder", "meta_learner",
+                      "continuous_learner"]:
+            obj = getattr(engine, name, None)
+            health["subsystems"][name] = obj is not None
+        return health
+
+    @app.get("/api/engine/stream")
+    async def engine_stream():
+        """SSE stream لأحداث المعالجة — مطلوب من الفرونت اند"""
+        async def event_generator():
+            import asyncio as _aio
+            try:
+                while True:
+                    if engine and hasattr(engine, '_current_cycle_steps'):
+                        steps = getattr(engine, '_current_cycle_steps', [])
+                        for step in steps:
+                            yield f"data: {json.dumps(step, ensure_ascii=False)}\n\n"
+                        engine._current_cycle_steps = []
+                    yield f"data: {json.dumps({'type': 'keepalive'}, ensure_ascii=False)}\n\n"
+                    await _aio.sleep(2)
+            except asyncio.CancelledError:
+                pass
+        return StreamingResponse(event_generator(), media_type="text/event-stream")
+
+    @app.get("/api/engine/diagnostics")
+    async def engine_diagnostics():
+        """تشخيصات تفصيلية — مطلوب من الفرونت اند"""
+        if not engine:
+            return {"status": "engine_not_attached", "summary": {"total": 0, "healthy": 0, "failed": 0}}
+        diag = {
+            "status": "running",
+            "summary": {"total": 0, "healthy": 0, "failed": 0, "warnings": 0},
+            "checks": [],
+        }
+        checks_list = []
+        for name in ["memory", "ethics", "security", "notebook", "knowledge",
+                      "eyes", "tools", "pipeline", "scheduler", "plugins",
+                      "subagents", "trace_recorder", "meta_learner",
+                      "continuous_learner"]:
+            obj = getattr(engine, name, None)
+            is_ok = obj is not None
+            checks_list.append({"name": name, "status": "healthy" if is_ok else "failed"})
+            diag["summary"]["total"] += 1
+            if is_ok:
+                diag["summary"]["healthy"] += 1
+            else:
+                diag["summary"]["failed"] += 1
+        diag["checks"] = checks_list
+        return diag
+
+    @app.get("/api/engine/pipeline-log")
+    async def engine_pipeline_log(limit: int = 50):
+        """سجل خطوات المعالجة — مطلوب من الفرونت اند"""
+        if engine and hasattr(engine, '_pipeline_log'):
+            steps = engine._pipeline_log[-limit:]
+            return {"steps": steps, "count": len(steps)}
+        return {"steps": [], "count": 0}
+
+    @app.post("/api/engine/heal")
+    async def engine_heal():
+        """إصلاح تلقائي — مطلوب من الفرونت اند"""
+        if engine and hasattr(engine, '_heal_failed_subsystem'):
+            try:
+                await engine._heal_failed_subsystem()
+                return {"status": "healed", "message": "تم محاولة الإصلاح"}
+            except Exception as e:
+                return {"status": "error", "message": str(e)}
+        return {"status": "no_engine", "message": "المحرك غير متصل"}
 
     # ─── WebSocket ──────────────────────────────────────
     # [FIX] WebSocket authentication — التحقق من token

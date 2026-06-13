@@ -1,4 +1,15 @@
-"""أدوات الشل وتنفيذ بايثون — HARDENED v2"""
+"""
+أدوات الشل وتنفيذ بايثون — HARDENED v3
+=========================================
+
+[FIX v3 — CRITICAL SECURITY]
+- Added Python class hierarchy bypass patterns:
+  __class__, __mro__, __subclasses__, __base__, __dict__,
+  __globals__, __init__, __func__, __code__
+- Added vars(), dir(), type.__subclasses__ to blocked patterns
+- Added sandboxed execution mode with restricted __builtins__
+- Prevents escape from the Python sandbox via object traversal
+"""
 
 import subprocess
 import shlex
@@ -74,31 +85,67 @@ class ShellToolsMixin:
             if len(code) > 2000:
                 return {"success": False, "error": "الكود طويل جداً (الحد: 2000 حرف)"}
 
-            # منع الأنماط الخطرة — قائمة شاملة
+            # [FIX v3] منع الأنماط الخطرة — قائمة شاملة مع حماية من الالتفاف
+            # يشمل الآن حماية من تجاوز الصندوق عبر تسلسل الفئات
             _dangerous_patterns = [
+                # استيراد خطير
                 "import os", "from os ", "import subprocess", "from subprocess",
                 "import shutil", "from shutil ", "import sys", "sys.modules",
                 "__import__", "exec(", "eval(", "compile(", "globals(",
                 "locals(", "open(", "__builtins__", "getattr(", "setattr(",
                 "delattr(", "hasattr(", "type(", "chr(", "ord(",
+                # شبكات
                 "socket", "http", "urllib", "requests",
                 # أنماط خطرة إضافية
                 "breakpoint(", "input(", "exit(", "quit(",
                 "os.system", "os.popen", "os.exec", "os.spawn",
                 "ctypes", "multiprocessing", "threading",
-                # [NEW v2] أنماط إضافية
+                # أنماط إضافية ضد الالتفاف
                 "pathlib.Path", "os.path.join", "os.makedirs",
                 "os.remove", "os.rmdir", "shutil.rmtree",
+                # [NEW v3] حماية من الالتفاف على الحماية
+                "importlib", "import_module", "_import_",
+                "base64.b64decode", "base64.b64encode",
+                "pickle.loads", "pickle.dumps", "marshal.loads",
+                "subprocess.popen", "subprocess.run",
+                "os.environ", "os.getenv",
+                "  import ",  # مسافات متعددة قبل import
+                # [NEW v3 — CRITICAL] حماية من تجاوز الصندوق عبر تسلسل فئات بايثون
+                # هذه الأنماط تسمح بالوصول لأي فئة في بايثون وبالتالي
+                # تنفيذ أي كود عبر object.__subclasses__()
+                "__class__", "__mro__", "__subclasses__", "__base__",
+                "__dict__", "__globals__", "__init__", "__func__",
+                "__code__",
+                # دوال كشف البنية
+                "vars(", "dir(",
+                "type.__subclasses__",
             ]
-            code_lower = code.lower()
+            code_lower = code.lower().replace('\t', ' ')  # توحيد المسافات
             for _dp in _dangerous_patterns:
-                if _dp.lower() in code_lower:
+                # فحص غير حساس للمسافات — يمنع الالتفاف بمسافات متعددة
+                dp_normalized = ' '.join(_dp.lower().split())
+                code_normalized = ' '.join(code_lower.split())
+                if dp_normalized in code_normalized:
                     return {"success": False, "error": f"نمط غير آمن: {_dp}"}
 
+            # [NEW v3] تنفيذ في وضع sandbox مع restricted __builtins__
             try:
-                r = subprocess.run(["python3", "-c", code], capture_output=True, text=True, timeout=30)
+                # بناء كود sandboxed — يحدد __builtins__ بمجموعة آمنة فقط
+                _sandbox_header = (
+                    "import math, json, re, collections, itertools, functools, "
+                    "datetime, decimal, fractions, random, statistics, typing, "
+                    "string, textwrap, pprint, hashlib, uuid\n"
+                    "__builtins__ = {}\n"
+                )
+                sandboxed_code = _sandbox_header + code
+
+                r = subprocess.run(
+                    ["python3", "-c", sandboxed_code],
+                    capture_output=True, text=True, timeout=30,
+                    env={"PATH": "/usr/bin:/bin"},  # حدد PATH فقط
+                )
                 output = r.stdout.strip() + ("\n" + r.stderr.strip() if r.stderr.strip() else "")
-                logger.info(f"python_exec: exit={r.returncode}")
+                logger.info(f"python_exec (sandboxed): exit={r.returncode}")
                 return {"success": r.returncode == 0, "output": output, "exit_code": r.returncode}
             except subprocess.TimeoutExpired:
                 return {"success": False, "error": "الكود تجاوز الـ 30 ثانية"}
