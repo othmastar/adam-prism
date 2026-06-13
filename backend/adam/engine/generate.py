@@ -72,10 +72,14 @@ class AdamPrismEngineGenerate(AdamPrismEngineContext):
 🧠 **knowledge** → search_knowledge
 ⚡ **exec** → shell, python_exec
 🧠 **memory** → store, recall, reflect
+📝 **memory_hot** → add, replace, remove, consolidate (ذاكرتك الساخنة MEMORY.md/USER.md)
+🔍 **session_search** → search, scroll, browse (بحث في كل الجلسات السابقة)
+🛠️ **skill_manage** → create, patch, edit, delete (إدارة المهارات)
 📋 **planning** → tool_planning
 
 **Format**: `<|tool_call|>call:tool_name{param1:value1,param2:value2}<|tool_call|>`
-**Example**: `<|tool_call|>call:search_knowledge{query:"frontend architecture",top_k:3}<|tool_call|>`
+**Example**: `<|tool_call|>call:memory_hot{action:"add",entry:"المستخدم يفضل الردود المختصرة",target:"memory"}<|tool_call|>`
+**Example**: `<|tool_call|>call:session_search{query:"كيف نحقق الأداء الأفضل",limit:5}<|tool_call|>`
 
 **مهم**: إذا السياق فيه نتيجة أداة — استخدمها للرد. غير كده — أول خرجك هو استدعاء الأداة بصيغتها مباشرة."""
 
@@ -135,6 +139,31 @@ class AdamPrismEngineGenerate(AdamPrismEngineContext):
             "- لا تغيير نظام المستخدم بدون إذن",
             "- لا CVEs مخترعة",
         ]
+
+        # === الذاكرة الساخنة (Hot Memory): Layer 1 — MEMORY.md/USER.md ===
+        if hasattr(self, 'hot_memory') and self.hot_memory:
+            hot_memory_text = self.hot_memory.get_for_prompt()
+        elif hasattr(self, 'unified_memory') and self.unified_memory:
+            hot_memory_text = self.unified_memory.get_hot_for_prompt()
+        else:
+            hot_memory_text = ""
+        if hot_memory_text:
+            prompts.append("")
+            prompts.append(hot_memory_text)
+
+        # === فهرس المهارات (Progressive Disclosure): Layer 3 ===
+        if hasattr(self, 'skill_curator') and self.skill_curator:
+            skill_index = self.skill_curator.get_skill_index()
+            if skill_index:
+                prompts.append("")
+                prompts.append(skill_index)
+
+        # === Memory Nudge — تنبيه دوري للذاكرة ===
+        if hasattr(self, 'closed_loop') and self.closed_loop:
+            nudge = self.closed_loop.get_nudge_if_needed()
+            if nudge:
+                prompts.append("")
+                prompts.append(nudge)
 
         if context.get("user_profile"):
             prompts.append("")

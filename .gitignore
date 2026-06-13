@@ -89,3 +89,4 @@ adam_prism.egg-info/
 unsloth_compiled_cache/
 apps/desktop/node_modules/
 apps/desktop/out/
+data/learning/
