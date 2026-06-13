@@ -76,7 +76,7 @@ cd deploy && docker compose up -d            # Full stack
 | Layer | File | What It Does | Can You Disable It? |
 |-------|------|-------------|---------------------|
 | 3 | `security/guard.py` | InputGuard + OutputGuard — 14 injection patterns + PII | ✅ `guard.enabled = False` |
-| 5 | `memory/system.py` | Qdrant vector store — 6 collections + Nomic embed | ✅ Remove Qdrant from docker-compose |
+| 5 | `memory/{system,hot_memory,session_search,unified}.py` | 4-layer Iron Memory: Hot (MEMORY.md) + FTS5 search + Qdrant vector + Skills index — zero token cost session search (~20ms) | ✅ Disable any layer independently |
 | 7 | `ethics/gate.py` | EthicsGate — 4 laws (Justice/Learning/Survival/Creativity) | ✅ `ethics.weights = {0,0,0,0}` |
 | 9 | `subagents/teams.py` | TeamManager — sequential/parallel execution | ✅ Don't call it |
 
@@ -91,8 +91,8 @@ cd deploy && docker compose up -d            # Full stack
 | 2 | Context Engine | `engine/context.py` | RAG context building with collection routing |
 | 3 | Security Guard | `security/guard.py` | 3-tier protection: Input + Output + Tool |
 | 4 | Tool Orchestration | `engine/tools/` | 38 tools + MCP + secure shell |
-| 5 | Memory System | `memory/system.py` | Qdrant vector + SQLite persistent |
-| 6 | Learning Engine | `core/learning.py` | ContinuousLearner from every conversation |
+| 5 | Iron Memory | `memory/{system,hot_memory,session_search,unified}.py` | 4 layers: Hot (MEMORY.md) + FTS5 + Vector + Skills |
+| 6 | Learning Engine | `core/learning.py` + `learning/closed_loop.py` | ContinuousLearner + Closed Loop (nudge/skill create/improve) |
 | 7 | Ethics Gate | `ethics/gate.py` | 4 laws + LLM evaluation |
 | 8 | Channel Hub | `channels/manager.py` | 25 communication channels |
 | 9 | Subagent Teams | `subagents/teams.py` | Swarm orchestration |
@@ -294,14 +294,14 @@ The extension is built into the project — edit anything seamlessly without wri
 
 ---
 
-## 📱 Apps Coming
+## 📱 Apps
 
-| App | Status | Platforms |
-|-----|--------|-----------|
-| **Desktop** | Ready | Windows + Linux + macOS |
-| **Android** | Ready | Phone + Tablet |
-| **iOS** | Ready | iPhone + iPad + Mac |
-| **VS Code** | Built-in | All platforms |
+| App | Stack | Platforms |
+|-----|-------|-----------|
+| **Desktop** | Electron + Vite + React | Windows + Linux + macOS |
+| **Mobile** | Flutter + Riverpod | Android + iOS |
+| **Web UI** | Next.js + Tailwind | All browsers |
+| **VS Code** | Extension API | All platforms |
 
 ---
 
