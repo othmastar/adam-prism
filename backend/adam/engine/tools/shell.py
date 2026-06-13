@@ -1,21 +1,12 @@
 """
-أدوات الشل وتنفيذ بايثون — HARDENED v4
+أدوات الشل وتنفيذ بايثون — HARDENED v5
 =========================================
 
-[FIX v4 — CRITICAL SECURITY]
-- C1: Python sandbox rebuilt from scratch:
-  - Removed ALL imports from sandbox header (math, json, etc)
-  - Strict __builtins__ whitelist: only safe builtins that can't escape
-  - Expanded dangerous pattern checks: __import__, __builtins__,
-    __globals__, __code__, exec, compile, open, getattr, setattr,
-    delattr, __class__, __subclasses__, __bases__, __mro__,
-    globals, locals, vars, dir, eval
-  - Block string concatenation tricks for dunder attributes
-- C5: Shell find path traversal protection:
-  - SENSITIVE_PATHS list blocks access to /etc, /proc, /sys, etc.
-  - Any argument starting with a sensitive path is rejected
+[C1] Python sandbox: AST-based safe execution with restricted globals
+[C5] Shell path traversal protection
 """
 
+import ast
 import subprocess
 import shlex
 import logging
@@ -50,6 +41,77 @@ def _is_sensitive_path(arg: str) -> bool:
         if normalized == sensitive or normalized.startswith(sensitive + "/"):
             return True
     return False
+
+
+# دوال آمنة مسموح باستخدامها في الـ sandbox
+_SAFE_BUILTINS = {
+    "None": None, "True": True, "False": False,
+    "print": print, "range": range, "len": len,
+    "int": int, "float": float, "str": str, "repr": repr,
+    "list": list, "dict": dict, "tuple": tuple,
+    "set": set, "bool": bool, "type": type,
+    "isinstance": isinstance, "enumerate": enumerate,
+    "zip": zip, "map": map, "filter": filter,
+    "sorted": sorted, "reversed": reversed,
+    "min": min, "max": max, "sum": sum,
+    "abs": abs, "round": round, "any": any, "all": all,
+    "ord": ord, "chr": chr, "hex": hex, "oct": oct, "bin": bin,
+    "pow": pow, "divmod": divmod, "hash": hash, "id": id,
+    "iter": iter, "next": next, "slice": slice,
+    "isinstance": isinstance, "issubclass": issubclass,
+    "hasattr": hasattr, "getattr": getattr,
+}
+
+
+_DANGEROUS_DUNDERS = frozenset({
+    "__class__", "__bases__", "__subclasses__",
+    "__mro__", "__globals__", "__code__",
+    "__builtins__", "__dict__", "__init__",
+    "__func__", "__base__", "__module__",
+})
+
+_DANGEROUS_FUNCS = frozenset({
+    "exec", "eval", "compile", "__import__", "open",
+    "breakpoint", "input", "exit", "quit",
+    "globals", "locals", "vars", "dir",
+})
+
+
+def _check_ast_safe(tree: ast.AST) -> str | None:
+    """فحص AST ورفض العُقد الخطرة. يرجع رسالة الخطأ أو None لو آمن."""
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.Import, ast.ImportFrom)):
+            return "import غير مسموح به"
+        # منع دوال خطرة
+        if isinstance(node, ast.Call):
+            if isinstance(node.func, ast.Name):
+                name = node.func.id
+                if name in _DANGEROUS_FUNCS:
+                    return f"لا يمكن استخدام {name}()"
+            elif isinstance(node.func, ast.Attribute):
+                if node.func.attr in ("__import__",):
+                    return f"لا يمكن استخدام {node.func.attr}()"
+        # منع الوصول للـ dunder attributes
+        if isinstance(node, ast.Attribute):
+            if node.attr in _DANGEROUS_DUNDERS:
+                return f"لا يمكن الوصول لـ {node.attr}"
+        # منع الـ dunders كـ string constants — يحمي من getattr(obj, '__class__')
+        if isinstance(node, ast.Constant) and isinstance(node.value, str):
+            if node.value in _DANGEROUS_DUNDERS:
+                return f"لا يمكن استخدام سترينج: {node.value}"
+    return None
+
+
+def _build_sandbox_code(code: str) -> str:
+    """بناء كود sandboxed مع restricted globals."""
+    import textwrap
+    safe_repr = repr(_SAFE_BUILTINS)
+    # exec() مع globals مخصصة — الـ __builtins__ مش في الكود نفسه
+    exec_wrapper = textwrap.dedent(f"""\
+_sandbox_globals = {{"__builtins__": {safe_repr}}}
+exec({repr(code)}, _sandbox_globals)
+""").strip()
+    return exec_wrapper
 
 
 class ShellToolsMixin:
@@ -108,85 +170,27 @@ class ShellToolsMixin:
             if not code:
                 return {"success": False, "error": "مفيش كود"}
 
-            # حد أقصى لكود البايثون — منع كود طويل جداً
             if len(code) > 2000:
                 return {"success": False, "error": "الكود طويل جداً (الحد: 2000 حرف)"}
 
-            # [C1] منع الأنماط الخطرة — قائمة شاملة مع حماية من الالتفاف
-            _dangerous_patterns = [
-                # استيراد خطير
-                "import os", "from os ", "import subprocess", "from subprocess",
-                "import shutil", "from shutil ", "import sys", "sys.modules",
-                "__import__", "exec(", "eval(", "compile(",
-                "open(", "__builtins__", "getattr(", "setattr(",
-                "delattr(", "hasattr(",
-                # شبكات
-                "socket", "http", "urllib", "requests",
-                # أنماط خطرة إضافية
-                "breakpoint(", "input(", "exit(", "quit(",
-                "os.system", "os.popen", "os.exec", "os.spawn",
-                "ctypes", "multiprocessing", "threading",
-                # أنماط إضافية ضد الالتفاف
-                "pathlib.Path", "os.path.join", "os.makedirs",
-                "os.remove", "os.rmdir", "shutil.rmtree",
-                # حماية من الالتفاف على الحماية
-                "importlib", "import_module", "_import_",
-                "base64.b64decode", "base64.b64encode",
-                "pickle.loads", "pickle.dumps", "marshal.loads",
-                "subprocess.popen", "subprocess.run",
-                "os.environ", "os.getenv",
-                "  import ",  # مسافات متعددة قبل import
-                # [C1] حماية من تجاوز الصندوق عبر تسلسل فئات بايثون
-                "__class__", "__mro__", "__subclasses__", "__base__",
-                "__bases__", "__dict__", "__globals__", "__init__",
-                "__func__", "__code__",
-                # [C1] دوال كشف البنية — محظورة تماماً
-                "globals(", "locals(", "vars(", "dir(",
-                "type.__subclasses__",
-            ]
-            code_lower = code.lower().replace('\t', ' ')  # توحيد المسافات
-            for _dp in _dangerous_patterns:
-                # فحص غير حساس للمسافات — يمنع الالتفاف بمسافات متعددة
-                dp_normalized = ' '.join(_dp.lower().split())
-                code_normalized = ' '.join(code_lower.split())
-                if dp_normalized in code_normalized:
-                    return {"success": False, "error": f"نمط غير آمن: {_dp}"}
-
-            # [C1] فحص حيل دمج النصوص — مثل "__imp" + "ort__"
-            # نحذف علامات الاقتباس وعلامات الجمع والمسافات لنكشف الدمج
-            _dunder_fragments = [
-                "__import__", "__builtins__", "__globals__", "__code__",
-                "__class__", "__subclasses__", "__bases__", "__mro__",
-                "__init__", "__func__", "__dict__", "__base__",
-            ]
-            # Remove quotes, plus signs, and spaces to detect concatenation tricks
-            code_stripped = code.replace('"', '').replace("'", "").replace("+", "").replace(" ", "")
-            for fragment in _dunder_fragments:
-                if fragment in code_stripped:
-                    return {"success": False, "error": f"نمط غير آمن (concat): {fragment}"}
-
-            # [C1] تنفيذ في وضع sandbox مع restricted __builtins__
+            # [C1] Sandbox عبر AST parsing بدلاً من pattern matching
             try:
-                # بناء كود sandboxed — __builtins__ يحتوي فقط على آمنة
-                _safe_builtins = {
-                    "None": None, "True": True, "False": False,
-                    "print": print, "range": range, "len": len,
-                    "int": int, "float": float, "str": str,
-                    "list": list, "dict": dict, "tuple": tuple,
-                    "set": set, "bool": bool, "type": type,
-                    "isinstance": isinstance, "enumerate": enumerate,
-                    "zip": zip, "map": map, "filter": filter,
-                    "sorted": sorted, "reversed": reversed,
-                    "min": min, "max": max, "sum": sum,
-                    "abs": abs, "round": round, "any": any, "all": all,
-                }
-                _sandbox_header = f"__builtins__ = {_safe_builtins}\n"
-                sandboxed_code = _sandbox_header + code
+                tree = ast.parse(code, mode='exec')
+            except SyntaxError as e:
+                return {"success": False, "error": f"Syntax error: {e}"}
 
+            # فحص AST للعُقد الخطرة
+            blocked = _check_ast_safe(tree)
+            if blocked:
+                return {"success": False, "error": f"نمط غير آمن: {blocked}"}
+
+            # تنفيذ في subprocess مع restricted globals
+            try:
+                sandboxed_code = _build_sandbox_code(code)
                 r = subprocess.run(
                     ["python3", "-c", sandboxed_code],
                     capture_output=True, text=True, timeout=30,
-                    env={"PATH": "/usr/bin:/bin"},  # حدد PATH فقط
+                    env={"PATH": "/usr/bin:/bin"},
                 )
                 output = r.stdout.strip() + ("\n" + r.stderr.strip() if r.stderr.strip() else "")
                 logger.info(f"python_exec (sandboxed): exit={r.returncode}")
