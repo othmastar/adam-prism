@@ -83,8 +83,8 @@ class WhatsAppChannel(BaseChannel):
                     json={"messaging_product": "whatsapp", "to": target, "type": "text",
                           "text": {"preview_url": preview_url, "body": text}},
                 )
-            except Exception as e:
-                logger.error(f"WhatsApp send failed: {e}")
+            except Exception:
+                logger.exception("WhatsApp send failed:")
 
     def stop(self):
         self.running = False

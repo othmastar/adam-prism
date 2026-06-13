@@ -82,7 +82,7 @@ class AdamPrismEngineUtils(AdamPrismEngineBase):
             # [M2] Fail-closed: timeout must deny, not allow
             return {"allowed": False, "reason": "security_check_timeout"}
         except Exception as e:
-            logger.warning(f"Security check error: {e}")
+            logger.exception("Security check error:")
             # [M2] Fail-closed: errors must deny, not allow
             return {"allowed": False, "reason": f"security_check_error:{e}"}
 
@@ -144,8 +144,8 @@ class AdamPrismEngineUtils(AdamPrismEngineBase):
                         await self.eyes.restart()
                         return "Browser restarted (timeout)"
             return None
-        except Exception as e:
-            logger.warning(f"تعذر إصلاح {name}: {e}")
+        except Exception:
+            logger.exception("تعذر إصلاح {name}:")
             return None
 
     def _self_verify_response(self, response: str, user_message: str, intent: dict) -> str:

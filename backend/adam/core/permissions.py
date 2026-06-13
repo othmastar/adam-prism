@@ -184,6 +184,6 @@ def log_permission(action: str, tool: str, category: str, reason: str, level: st
     try:
         with open(PERMISSION_LOG, "a", encoding="utf-8") as f:
             f.write(json.dumps(entry, ensure_ascii=False) + "\n")
-    except Exception as e:
-        logger.warning(f"Failed to log permission: {e}")
+    except Exception:
+        logger.exception("Failed to log permission:")
     return entry

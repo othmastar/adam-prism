@@ -186,8 +186,8 @@ class EthicsGate:
             }
             self._eval_cache.set(cache_key, scores, ttl=300.0)
             return scores
-        except Exception as e:
-            logger.warning(f"فشل التقييم الأخلاقي: {e}")
+        except Exception:
+            logger.exception("فشل التقييم الأخلاقي:")
             return {"fairness": 0.5, "learning": 0.5, "survival": 0.5, "creativity": 0.5}
         finally:
             # [M4] Use client is not None instead of 'client' in locals()

@@ -132,8 +132,8 @@ class AdamPrismEngineTools(
                 perm_verdict = await self.security_guard.check_tool_call(tool_name, params)
                 if perm_verdict.action.value == "block":
                     return False, tool_name, params
-            except Exception as e:
-                logger.warning(f"Tool permission check error: {e}")
+            except Exception:
+                logger.exception("Tool permission check error:")
 
         if tool_name != "request_permission":
             cat = classify_tool(tool_name)

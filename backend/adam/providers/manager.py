@@ -39,8 +39,8 @@ class ProviderManager:
                 return OpenAIProvider(self.config)
             elif name == "anthropic":
                 return AnthropicProvider(self.config)
-        except Exception as e:
-            logger.warning(f"Failed to init provider '{name}': {e}")
+        except Exception:
+            logger.exception("Failed to init provider '{name}':")
         return None
 
     @property
@@ -68,7 +68,7 @@ class ProviderManager:
                 return await self.current.chat(messages, **kwargs)
             except Exception as e:
                 errors.append(f"{self.mode}: {e}")
-                logger.warning(f"⚠️ {self.mode} failed, will fallback: {e}")
+                logger.exception("⚠️ {self.mode} failed, will fallback:")
         else:
             errors.append(f"{self.mode}: not initialized")
 
@@ -89,8 +89,8 @@ class ProviderManager:
         if self.current:
             try:
                 return await self.current.generate(prompt, system, **kwargs)
-            except Exception as e:
-                logger.warning(f"⚠️ {self.mode} generate failed: {e}")
+            except Exception:
+                logger.exception("⚠️ {self.mode} generate failed:")
         return ""
 
     async def chat_stream(self, messages: list[dict], **kwargs):
@@ -100,8 +100,8 @@ class ProviderManager:
                 async for chunk in self.current.chat_stream(messages, **kwargs):
                     yield chunk
                 return
-            except Exception as e:
-                logger.warning(f"⚠️ {self.mode} stream failed: {e}")
+            except Exception:
+                logger.exception("⚠️ {self.mode} stream failed:")
 
         for name, provider in self._providers.items():
             if name == self.mode:

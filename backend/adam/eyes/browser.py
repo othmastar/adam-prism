@@ -83,8 +83,8 @@ class Browser:
         except ImportError:
             logger.warning("⚠️ playwright غير مثبت — شغّل: pip install playwright && playwright install firefox")
             return False
-        except Exception as e:
-            logger.error(f"❌ Browser init failed: {e}")
+        except Exception:
+            logger.exception("❌ Browser init failed:")
             return False
 
     async def is_healthy(self) -> bool:

@@ -41,8 +41,8 @@ class OpenAIProvider(BaseProvider):
                 )
                 r.raise_for_status()
                 return r.json()["choices"][0]["message"]["content"]
-        except Exception as e:
-            logger.warning(f"OpenAI chat failed: {e}")
+        except Exception:
+            logger.exception("OpenAI chat failed:")
             raise
 
     async def generate(self, prompt: str, system: str = "", **kwargs) -> str:
@@ -82,5 +82,5 @@ class OpenAIProvider(BaseProvider):
                                     yield content
                             except Exception:
                                 pass
-        except Exception as e:
-            logger.warning(f"OpenAI stream failed: {e}")
+        except Exception:
+            logger.exception("OpenAI stream failed:")

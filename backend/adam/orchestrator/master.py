@@ -344,7 +344,7 @@ class MasterOrchestrator:
             except Exception as e:
                 errors.append(f"{module_name}: {e}")
                 self._record_routing_failure(request_type.value, module_name)
-                logger.warning(f"MasterOrchestrator: module '{module_name}' failed: {e}")
+                logger.exception("MasterOrchestrator: module '{module_name}' failed:")
                 continue
 
         # Learn from this routing decision
@@ -541,8 +541,8 @@ class MasterOrchestrator:
                 await self.check_all_modules_health()
             except asyncio.CancelledError:
                 break
-            except Exception as e:
-                logger.error(f"Health monitor error: {e}")
+            except Exception:
+                logger.exception("Health monitor error:")
 
     async def check_all_modules_health(self):
         """فحص صحة كل الموديولات"""
@@ -604,8 +604,8 @@ class MasterOrchestrator:
                     )
                     if action:
                         logger.info(f"MasterOrchestrator: healed '{module}': {action}")
-                except Exception as e:
-                    logger.warning(f"MasterOrchestrator: failed to heal '{module}': {e}")
+                except Exception:
+                    logger.exception("MasterOrchestrator: failed to heal '{module}':")
 
     async def _on_module_error(self, event: Event):
         """معالجة خطأ في موديول"""

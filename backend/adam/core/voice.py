@@ -108,8 +108,8 @@ class SileroVAD:
             self._available = True
             logger.info("Silero VAD جاهز على CPU")
             return True
-        except Exception as e:
-            logger.warning(f"تعذر تحميل Silero VAD: {e}")
+        except Exception:
+            logger.exception("تعذر تحميل Silero VAD:")
             self._available = False
             return False
 
@@ -222,8 +222,8 @@ class FasterWhisperASR:
             self._available = True
             logger.info(f"faster-whisper {self._model_size} جاهز على {self._device}")
             return True
-        except Exception as e:
-            logger.warning(f"تعذر تحميل faster-whisper: {e}")
+        except Exception:
+            logger.exception("تعذر تحميل faster-whisper:")
             self._available = False
             return False
 
@@ -271,8 +271,8 @@ class FasterWhisperASR:
                 ],
                 is_final=True,
             )
-        except Exception as e:
-            logger.error(f"تعذر النسخ الصوتي: {e}")
+        except Exception:
+            logger.exception("تعذر النسخ الصوتي:")
             return TranscriptionResult(
                 text="", language="ar", duration_seconds=0.0,
                 segments=[], is_final=False,
@@ -325,8 +325,8 @@ class EdgeTTS:
                 logger.warning("لا توجد أصوات عربية في EdgeTTS")
             self._available = True
             return True
-        except Exception as e:
-            logger.warning(f"EdgeTTS غير متوفر: {e}")
+        except Exception:
+            logger.exception("EdgeTTS غير متوفر:")
             self._available = False
             return False
 
@@ -401,8 +401,8 @@ class EdgeTTS:
                 duration_seconds=duration,
                 text=text,
             )
-        except Exception as e:
-            logger.error(f"EdgeTTS تعذر: {e}")
+        except Exception:
+            logger.exception("EdgeTTS تعذر:")
             return SynthesisResult(audio=b"", text=text)
 
     def unload(self):
@@ -468,8 +468,8 @@ class LahgtnaTTS:
             self._available = True
             logger.info(f"LahgtnaTTS جاهز — لهجة: {self._dialect} ({self.DIALECTS.get(self._dialect, {}).get('name', '')})")
             return True
-        except Exception as e:
-            logger.warning(f"LahgtnaTTS تعذر تحميل: {e}")
+        except Exception:
+            logger.exception("LahgtnaTTS تعذر تحميل:")
             self._available = False
             return False
 
@@ -511,8 +511,8 @@ class LahgtnaTTS:
                 audio=frames, sample_rate=sample_rate,
                 duration_seconds=duration, text=text,
             )
-        except Exception as e:
-            logger.error(f"LahgtnaTTS تعذر: {e}")
+        except Exception:
+            logger.exception("LahgtnaTTS تعذر:")
             return SynthesisResult(audio=b"", text=text)
 
     def unload(self):
@@ -650,8 +650,8 @@ class VoicePipeline:
                 raw = seg.raw_data
                 audio = np.frombuffer(raw, dtype=np.int16).astype(np.float32) / 32767.0
                 return np.clip(audio, -1.0, 1.0), seg.frame_rate
-            except Exception as e:
-                logger.warning(f"تعذر فك WebM: {e}")
+            except Exception:
+                logger.exception("تعذر فك WebM:")
         # افتراضي: PCM int16 raw
         audio = int16_to_float32(audio_data)
         return audio, self.TARGET_SAMPLE_RATE

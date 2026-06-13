@@ -78,8 +78,8 @@ class TelegramChannel:
                         self.last_update_id = update.get("update_id", 0)
                         await self._process_update(update)
 
-                except Exception as e:
-                    logger.error(f"خطأ في polling: {e}")
+                except Exception:
+                    logger.exception("خطأ في polling:")
                     import asyncio
                     await asyncio.sleep(5)
 
@@ -158,8 +158,8 @@ class TelegramChannel:
                             "parse_mode": parse_mode
                         }
                     )
-            except Exception as e:
-                logger.error(f"تعذر إرسال رسالة Telegram: {e}")
+            except Exception:
+                logger.exception("تعذر إرسال رسالة Telegram:")
 
     def stop(self):
         """إيقاف الاستماع"""

@@ -38,8 +38,8 @@ def _validate_plugin_path(path: str) -> bool:
             logger.warning(f"⚠️ Plugin path rejected (outside allowed dir): {path} -> {resolved} (allowed: {allowed_resolved})")
             return False
         return True
-    except Exception as e:
-        logger.warning(f"⚠️ Plugin path validation error: {e}")
+    except Exception:
+        logger.exception("⚠️ Plugin path validation error:")
         return False
 
 
@@ -99,8 +99,8 @@ class PluginManager:
             self.plugins[name] = instance
             self._hook_order.append(name)
             logger.info(f"✅ Plugin loaded: {name} v{instance.version}")
-        except Exception as e:
-            logger.warning(f"⚠️ Plugin load failed: {e}")
+        except Exception:
+            logger.exception("⚠️ Plugin load failed:")
 
     def _load_single(self, path: str):
         """يحمل plugin واحد من مسار"""
@@ -132,8 +132,8 @@ class PluginManager:
             for _name, obj in inspect.getmembers(mod, inspect.isclass):
                 if issubclass(obj, AdamPlugin) and obj is not AdamPlugin:
                     self.load_plugin(obj)
-        except Exception as e:
-            logger.warning(f"⚠️ تعذر تحميل plugin من {path}: {e}")
+        except Exception:
+            logger.exception("⚠️ تعذر تحميل plugin من {path}:")
 
     async def unload(self, plugin_name: str) -> bool:
         """إلغاء تحميل plugin"""
@@ -162,8 +162,8 @@ class PluginManager:
                         message = result["message"]
                     if "context" in result:
                         context = result["context"]
-            except Exception as e:
-                logger.warning(f"⚠️ Plugin '{name}'.before_generate error: {e}")
+            except Exception:
+                logger.exception("⚠️ Plugin '{name}'.before_generate error:")
         return message, context
 
     async def run_after_generate(self, message: str, response: str) -> str:
@@ -174,8 +174,8 @@ class PluginManager:
                 result = await plugin.after_generate(message, response)
                 if result is not None:
                     response = result
-            except Exception as e:
-                logger.warning(f"⚠️ Plugin '{name}'.after_generate error: {e}")
+            except Exception:
+                logger.exception("⚠️ Plugin '{name}'.after_generate error:")
         return response
 
     async def run_before_tool(self, action: dict) -> dict | None:
@@ -188,8 +188,8 @@ class PluginManager:
                     logger.info(f"🚫 Plugin '{name}' منع الأداة: {action.get('type')}")
                     return None  # امان
                 action = result
-            except Exception as e:
-                logger.warning(f"⚠️ Plugin '{name}'.before_tool error: {e}")
+            except Exception:
+                logger.exception("⚠️ Plugin '{name}'.before_tool error:")
         return action
 
     async def run_after_tool(self, action: dict, result: dict) -> dict:
@@ -200,8 +200,8 @@ class PluginManager:
                 new_result = await plugin.after_tool(action, result)
                 if new_result is not None:
                     result = new_result
-            except Exception as e:
-                logger.warning(f"⚠️ Plugin '{name}'.after_tool error: {e}")
+            except Exception:
+                logger.exception("⚠️ Plugin '{name}'.after_tool error:")
         return result
 
     # ─── Query ─────────────────────────────────────────

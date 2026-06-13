@@ -72,8 +72,8 @@ class DiscordBot:
             self._running = True
             logger.info("✅ Discord bot started")
             return True
-        except Exception as e:
-            logger.warning(f"⚠️ Discord bot start failed: {e}")
+        except Exception:
+            logger.exception("⚠️ Discord bot start failed:")
             return False
 
     async def stop(self):
@@ -81,8 +81,8 @@ class DiscordBot:
         if self.bot and self._running:
             try:
                 await self.bot.close()
-            except Exception as e:
-                logger.warning(f"⚠️ Discord bot close error: {e}")
+            except Exception:
+                logger.exception("⚠️ Discord bot close error:")
         self._running = False
         logger.info("Discord bot stopped")
 
@@ -117,7 +117,7 @@ class DiscordBot:
                     response = response[:1900] + "\n\n... [تم تقصير الرد]"
                 await message.channel.send(response)
         except Exception as e:
-            logger.warning(f"⚠️ Discord message handling error: {e}")
+            logger.exception("⚠️ Discord message handling error:")
             await message.channel.send(f"⚠️ خطأ: {e}")
 
     def get_status(self) -> dict[str, Any]:

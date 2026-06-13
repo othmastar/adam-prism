@@ -125,7 +125,7 @@ class AdamPrismEngineContext(AdamPrismEngineUtils):
                 profile = await self.notebook.load_user_profile()
                 if profile:
                     context["user_profile"] = profile
-            except Exception as e:
-                logger.warning(f"تعذر تحميل ملف المستخدم: {e}")
+            except Exception:
+                logger.exception("تعذر تحميل ملف المستخدم:")
 
         return context

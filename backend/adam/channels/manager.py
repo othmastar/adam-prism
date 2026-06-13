@@ -69,8 +69,8 @@ class ChannelManager:
                 if channel.is_webhook:
                     self._webhook_routes.extend(channel.get_webhook_routes())
                 logger.info(f"✅ {name} channel ready")
-            except Exception as e:
-                logger.warning(f"⚠️ {name} init failed: {e}")
+            except Exception:
+                logger.exception("⚠️ {name} init failed:")
 
     async def start_polling_all(self):
         for name, channel in self.channels.items():

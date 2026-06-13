@@ -228,8 +228,8 @@ class EventBus:
                 continue
             except asyncio.CancelledError:
                 break
-            except Exception as e:
-                logger.error(f"EventBus worker {worker_id} error: {e}")
+            except Exception:
+                logger.exception("EventBus worker {worker_id} error:")
 
     async def enqueue(self, event: Event):
         """إضافة حدث لطابور الأولوية — يُعالج بواسطة workers"""

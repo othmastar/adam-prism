@@ -80,8 +80,8 @@ class MCPConnection:
             ]
             self._connected = True
             logger.info(f"MCP '{self.name}' متصل — {len(self.tools)} أداة: {[t.name for t in self.tools]}")
-        except Exception as e:
-            logger.warning(f"MCP '{self.name}' تعذر الاتصال: {e}")
+        except Exception:
+            logger.exception("MCP '{self.name}' تعذر الاتصال:")
             await self._cleanup()
             raise
 
@@ -162,7 +162,7 @@ class MCPManager:
             for tool in conn.tools:
                 self._tool_map[tool.name] = name
             logger.warning(f"MCP server added: name={name}, command={command}, tools={len(conn.tools)}")
-        except Exception as e:
+        except Exception:
             # [FIX v3] Remove failed connections from self.connections
             # Previously, failed connections were stored but never cleaned up
             # This caused memory leaks and stale connection references
@@ -171,7 +171,7 @@ class MCPManager:
             tools_to_remove = [t_name for t_name, t_conn in self._tool_map.items() if t_conn == name]
             for t_name in tools_to_remove:
                 self._tool_map.pop(t_name, None)
-            logger.warning(f"MCP server '{name}' connection failed, removed from connections: {e}")
+            logger.exception("MCP server '{name}' connection failed, removed from connections:")
 
     async def initialize(self, servers: list[dict] | None = None):
         """تهيئة خوادم MCP من config"""

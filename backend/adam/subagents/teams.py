@@ -103,7 +103,7 @@ class SubagentTeam:
                 }
                 previous_result += f"\n--- {name} ---\n{agent_result}"
             except Exception as e:
-                logger.warning(f"⚠️ Agent '{name}' failed: {e}")
+                logger.exception("⚠️ Agent '{name}' failed:")
                 self._results[name] = {"response": "", "status": f"error: {e}"}
 
         return self._summarize(task)
