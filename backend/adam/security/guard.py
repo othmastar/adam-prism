@@ -12,7 +12,6 @@ import time
 from collections import deque
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Dict, Any, List, Optional, Set, Tuple
 from urllib.parse import urlparse
 
 logger = logging.getLogger("adam_prism.security.guard")
@@ -38,9 +37,9 @@ class ContentCategory(Enum):
 @dataclass
 class SecurityVerdict:
     action: SecurityAction
-    category: Optional[ContentCategory] = None
+    category: ContentCategory | None = None
     reason: str = ""
-    sanitized_content: Optional[str] = None
+    sanitized_content: str | None = None
     confidence: float = 0.0
 
 
@@ -48,7 +47,7 @@ class SecurityVerdict:
 # أنماط الكشف
 # ─────────────────────────────────────────────
 
-INJECTION_PATTERNS: List[Tuple[re.Pattern, ContentCategory, float]] = [
+INJECTION_PATTERNS: list[tuple[re.Pattern, ContentCategory, float]] = [
     # تجاهل التعليمات — عربي
     (re.compile(r'(?i)(تجاهل|إهمال|تجاوز|تخطي|ألغ)\s*(كل\s*)?(التعليمات|الأوامر|القواعد|السياق)\s*(السابقة|السابق|القديمة|التي\s*أعطيتها|الموجودة|الأساسية)'), ContentCategory.PROMPT_INJECTION, 0.9),
     (re.compile(r'(?i)(لا\s+تنفذ|لا\s+تلتزم|لا\s+تطيع|لا\s+تطبق)\s*(ب)?(التعليمات|الأوامر|القواعد|السياق)'), ContentCategory.PROMPT_INJECTION, 0.9),
@@ -85,7 +84,7 @@ INJECTION_PATTERNS: List[Tuple[re.Pattern, ContentCategory, float]] = [
 ]
 
 # أنماط PII للمخرجات
-PII_PATTERNS: List[Tuple[re.Pattern, str]] = [
+PII_PATTERNS: list[tuple[re.Pattern, str]] = [
     (re.compile(r'\b\d{3}-\d{2}-\d{4}\b'), "SSN"),
     (re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b'), "EMAIL"),
     (re.compile(r'\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b'), "CREDIT_CARD"),
@@ -136,7 +135,7 @@ class InputGuard:
             confidence=1.0,
         )
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         return {"blocked": self.block_count, "flagged": self.flag_count}
 
 
@@ -233,11 +232,11 @@ class OutputGuard:
         return min(score, 0.9)
 
     def _mask_pii(self, text: str) -> str:
-        for pattern, pii_type in PII_PATTERNS:
+        for pattern, _pii_type in PII_PATTERNS:
             text = pattern.sub("***", text)
         return text
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         return {"blocked": self.block_count, "flagged": self.flag_count}
 
 
@@ -250,11 +249,11 @@ class ToolPermission:
     tool_name: str
     max_calls_per_session: int = 100
     requires_confirmation: bool = False
-    blocked_domains: List[str] = field(default_factory=list)
+    blocked_domains: list[str] = field(default_factory=list)
 
 
 # Registry of all tools with permissions
-TOOL_REGISTRY: Dict[str, ToolPermission] = {
+TOOL_REGISTRY: dict[str, ToolPermission] = {
     # Browser
     "browser_open": ToolPermission("browser_open", max_calls_per_session=30),
     "browser_fetch": ToolPermission("browser_fetch", max_calls_per_session=30),
@@ -313,10 +312,10 @@ class ToolPermissionValidator:
     """Layer 5: التحقق من صلاحيات استدعاء الأدوات"""
 
     def __init__(self):
-        self.session_counts: Dict[str, int] = {}
+        self.session_counts: dict[str, int] = {}
         self.audit_log: deque = deque(maxlen=1000)  # [M7] Replaced list with deque to prevent truncation race
 
-    async def validate(self, tool_name: str, params: Dict) -> SecurityVerdict:
+    async def validate(self, tool_name: str, params: dict) -> SecurityVerdict:
         # 1. هل الأداة مسجلة؟
         if tool_name not in TOOL_REGISTRY:
             return SecurityVerdict(
@@ -368,7 +367,7 @@ class ToolPermissionValidator:
         self._audit(tool_name, params, True, "Allowed")
         return SecurityVerdict(action=SecurityAction.ALLOW, confidence=1.0)
 
-    def _audit(self, tool_name: str, params: Dict, allowed: bool, reason: str):
+    def _audit(self, tool_name: str, params: dict, allowed: bool, reason: str):
         safe_params = {k: (v if len(str(v)) < 200 else str(v)[:200]) for k, v in params.items()}
         self.audit_log.append({  # [M7] deque(maxlen=1000) auto-evicts old entries
             "tool": tool_name,
@@ -378,7 +377,7 @@ class ToolPermissionValidator:
             "time": time.time(),
         })
 
-    def get_audit_log(self, limit: int = 50) -> List[Dict]:
+    def get_audit_log(self, limit: int = 50) -> list[dict]:
         return list(self.audit_log)[-limit:]  # [M7] deque → list for slicing
 
     def reset_session(self):
@@ -388,7 +387,7 @@ class ToolPermissionValidator:
         self.audit_log.clear()
         self.audit_log.extend(old)
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         total = len(self.audit_log)
         allowed = sum(1 for a in self.audit_log if a["allowed"])
         return {
@@ -417,15 +416,15 @@ class SecurityOrchestrator:
     async def check_output(self, text: str) -> SecurityVerdict:
         return await self.output_guard.inspect(text)
 
-    async def check_tool_call(self, tool_name: str, params: Dict) -> SecurityVerdict:
+    async def check_tool_call(self, tool_name: str, params: dict) -> SecurityVerdict:
         return await self.tool_validator.validate(tool_name, params)
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         return {
             "input_guard": self.input_guard.get_stats(),
             "output_guard": self.output_guard.get_stats(),
             "tool_validator": self.tool_validator.get_stats(),
         }
 
-    def get_audit_log(self, limit: int = 50) -> List[Dict]:
+    def get_audit_log(self, limit: int = 50) -> list[dict]:
         return self.tool_validator.get_audit_log(limit)

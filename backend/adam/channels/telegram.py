@@ -9,7 +9,8 @@ Long-polling عبر Telegram Bot API.
 """
 
 import logging
-from typing import Dict, Any
+from typing import Any
+
 from .base import BaseChannel
 
 logger = logging.getLogger("adam_prism.channels.telegram")
@@ -21,7 +22,7 @@ class TelegramChannel(BaseChannel):
     is_polling = True
     is_webhook = False
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         super().__init__(config)
         cfg = config.get(self.name, config)
         self.bot_token = cfg.get("bot_token", config.get("telegram_bot_token", ""))
@@ -60,7 +61,7 @@ class TelegramChannel(BaseChannel):
                 import asyncio
                 await asyncio.sleep(5)
 
-    async def _process(self, update: Dict):
+    async def _process(self, update: dict):
         msg = update.get("message", {})
         chat_id = msg.get("chat", {}).get("id")
         if not chat_id:

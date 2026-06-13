@@ -15,7 +15,7 @@ import tempfile
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional, List, Dict, Any
+from typing import Any
 
 logger = logging.getLogger("adam_prism.voice_pipeline")
 
@@ -59,7 +59,7 @@ class TranscriptionResult:
     text: str
     language: str
     duration_seconds: float
-    segments: List[Dict[str, Any]]
+    segments: list[dict[str, Any]]
     is_final: bool = True
 
 
@@ -132,7 +132,7 @@ class SileroVAD:
             return 0.0
 
     async def detect_speech_segments(self, audio: _load_numpy().ndarray,
-                                      sample_rate: int) -> List[Dict[str, float]]:
+                                      sample_rate: int) -> list[dict[str, float]]:
         """تقسيم الصوت إلى مقاطع كلام وسكوت — يعيد قائمة {start, end, speech}"""
         if not self._available:
             return [{"start": 0.0, "end": len(audio) / sample_rate, "speech": True}]
@@ -287,11 +287,9 @@ class FasterWhisperASR:
 # Model Swapper Import (اختياري — للتوافق)
 # ═══════════════════════════════════════
 
-try:
-    from infrastructure import ModelSwapper
-    _model_swapper_available = True
-except ImportError:
-    _model_swapper_available = False
+import importlib.util
+
+_model_swapper_available = importlib.util.find_spec("infrastructure") is not None
 
 # ═══════════════════════════════════════
 # Text-to-Speech
@@ -380,8 +378,9 @@ class EdgeTTS:
             return SynthesisResult(audio=b"", text=text)
 
         try:
-            import edge_tts
             import io
+
+            import edge_tts
 
             cleaned = self._clean_text(text)
             if not cleaned.strip():
@@ -446,7 +445,8 @@ class LahgtnaTTS:
 
     async def load(self) -> bool:
         try:
-            import sys, os
+            import os
+            import sys
             os.chdir(self._repo_src)
             if self._repo_src not in sys.path:
                 sys.path.insert(0, self._repo_src)
@@ -481,7 +481,8 @@ class LahgtnaTTS:
         if language and language.startswith("ar"):
             pass
         try:
-            import os, wave
+            import os
+            import wave
             out_path = os.path.join(tempfile.gettempdir(), f"lahgtna_{int(time.time())}.wav")
             loop = asyncio.get_event_loop()
             text_len = len(text)
@@ -585,7 +586,7 @@ class VoicePipeline:
         self._temp_dir = Path(temp_dir)
         self._temp_dir.mkdir(parents=True, exist_ok=True)
         self._recording = False
-        self._current_buffer: List[_load_numpy().ndarray] = []
+        self._current_buffer: list[_load_numpy().ndarray] = []
 
     async def load_vad(self) -> bool:
         return await self.vad.load()
@@ -628,7 +629,8 @@ class VoicePipeline:
         np = _load_numpy()
         # كشف WAV
         if audio_data[:4] == b'RIFF':
-            import wave, io
+            import io
+            import wave
             try:
                 with wave.open(io.BytesIO(audio_data), 'r') as w:
                     sr = w.getframerate()
@@ -640,8 +642,9 @@ class VoicePipeline:
         # كشف WebM (Opus من المتصفح)
         if audio_data[:4] == b'\x1a\x45\xdf\xa3':
             try:
-                import pydub
                 from io import BytesIO
+
+                import pydub
                 seg = pydub.AudioSegment.from_file(BytesIO(audio_data), format="webm")
                 seg = seg.set_frame_rate(self.TARGET_SAMPLE_RATE).set_channels(1)
                 raw = seg.raw_data
@@ -697,7 +700,7 @@ class VoicePipeline:
             is_final=True,
         )
 
-    async def _transcribe_long(self, audio: _load_numpy().ndarray) -> List[str]:
+    async def _transcribe_long(self, audio: _load_numpy().ndarray) -> list[str]:
         """تقسيم الصوت الطويل إلى أجزاء 11 ثانية ونسخ كل جزء"""
         max_samples = int(self.MAX_CHUNK_DURATION * self.TARGET_SAMPLE_RATE)
         results = []
@@ -724,7 +727,7 @@ class VoicePipeline:
         if self._recording:
             self._current_buffer.append(chunk)
 
-    def stop_recording(self) -> Optional[_load_numpy().ndarray]:
+    def stop_recording(self) -> _load_numpy().ndarray | None:
         self._recording = False
         if not self._current_buffer:
             return None

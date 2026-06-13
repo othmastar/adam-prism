@@ -16,11 +16,11 @@ import asyncio
 import logging
 import time
 import uuid
-from collections import defaultdict
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import IntEnum
-from typing import Any, Callable, Dict, List, Optional, Set
+from typing import Any
 
 logger = logging.getLogger("adam_prism.orchestrator.task_queue")
 
@@ -47,18 +47,18 @@ class Task:
     name: str
     handler: Callable
     args: tuple = ()
-    kwargs: Dict[str, Any] = field(default_factory=dict)
+    kwargs: dict[str, Any] = field(default_factory=dict)
     priority: TaskPriority = TaskPriority.NORMAL
     task_id: str = field(default_factory=lambda: str(uuid.uuid4())[:10])
-    dedup_key: Optional[str] = None
+    dedup_key: str | None = None
     max_retries: int = 2
     retry_count: int = 0
     status: str = TaskStatus.PENDING
     result: Any = None
-    error: Optional[str] = None
-    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
-    started_at: Optional[str] = None
-    completed_at: Optional[str] = None
+    error: str | None = None
+    created_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
+    started_at: str | None = None
+    completed_at: str | None = None
     timeout: float = 300.0  # 5 minutes default
 
     def __lt__(self, other):
@@ -91,21 +91,21 @@ class TaskQueue:
 
     def __init__(self, max_concurrent: int = 3):
         self._queue: asyncio.PriorityQueue = asyncio.PriorityQueue()
-        self._tasks: Dict[str, Task] = {}
-        self._dedup_keys: Set[str] = set()
+        self._tasks: dict[str, Task] = {}
+        self._dedup_keys: set[str] = set()
         self._max_concurrent = max_concurrent
         self._running_count = 0
-        self._worker_tasks: List[asyncio.Task] = []
+        self._worker_tasks: list[asyncio.Task] = []
         self._running = False
-        self._results_cache: Dict[str, Any] = {}
-        self._results_ttl: Dict[str, float] = {}
+        self._results_cache: dict[str, Any] = {}
+        self._results_ttl: dict[str, float] = {}
         self._lock = asyncio.Lock()
         # Stats
         self._total_enqueued = 0
         self._total_completed = 0
         self._total_failed = 0
 
-    async def start(self, num_workers: int = None):
+    async def start(self, num_workers: int | None = None):
         """تشغيل عمال الطابور"""
         if self._running:
             return
@@ -129,9 +129,9 @@ class TaskQueue:
         name: str,
         handler: Callable,
         args: tuple = (),
-        kwargs: Dict[str, Any] = None,
+        kwargs: dict[str, Any] | None = None,
         priority: TaskPriority = TaskPriority.NORMAL,
-        dedup_key: Optional[str] = None,
+        dedup_key: str | None = None,
         max_retries: int = 2,
         timeout: float = 300.0,
     ) -> Task:
@@ -199,7 +199,7 @@ class TaskQueue:
         while self._running:
             try:
                 task = await asyncio.wait_for(self._queue.get(), timeout=1.0)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 continue
             except asyncio.CancelledError:
                 break
@@ -217,7 +217,7 @@ class TaskQueue:
 
             self._running_count += 1
             task.status = TaskStatus.RUNNING
-            task.started_at = datetime.now(timezone.utc).isoformat()
+            task.started_at = datetime.now(UTC).isoformat()
 
             try:
                 result = await asyncio.wait_for(
@@ -226,12 +226,12 @@ class TaskQueue:
                 )
                 task.result = result
                 task.status = TaskStatus.COMPLETED
-                task.completed_at = datetime.now(timezone.utc).isoformat()
+                task.completed_at = datetime.now(UTC).isoformat()
                 self._total_completed += 1
                 # Cache result
                 self._results_cache[task.task_id] = result
                 self._results_ttl[task.task_id] = time.time() + 300  # 5 min cache
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 task.error = f"Task timed out after {task.timeout}s"
                 await self._handle_failure(task)
             except asyncio.CancelledError:
@@ -258,11 +258,11 @@ class TaskQueue:
             await self._queue.put(task)
         else:
             task.status = TaskStatus.FAILED
-            task.completed_at = datetime.now(timezone.utc).isoformat()
+            task.completed_at = datetime.now(UTC).isoformat()
             self._total_failed += 1
             logger.error(f"TaskQueue: '{task.name}' failed permanently: {task.error}")
 
-    def get_task(self, task_id: str) -> Optional[Dict[str, Any]]:
+    def get_task(self, task_id: str) -> dict[str, Any] | None:
         """معلومات مهمة"""
         task = self._tasks.get(task_id)
         if not task:
@@ -279,7 +279,7 @@ class TaskQueue:
             "completed_at": task.completed_at,
         }
 
-    def list_tasks(self, status: Optional[str] = None, limit: int = 50) -> List[Dict[str, Any]]:
+    def list_tasks(self, status: str | None = None, limit: int = 50) -> list[dict[str, Any]]:
         """قائمة المهام"""
         tasks = list(self._tasks.values())
         if status:
@@ -298,7 +298,7 @@ class TaskQueue:
 
     def cleanup(self, max_age_hours: int = 24):
         """تنظيف المهام القديمة"""
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         cutoff = now.timestamp() - (max_age_hours * 3600)
         to_remove = []
         for task_id, task in self._tasks.items():
@@ -323,7 +323,7 @@ class TaskQueue:
         if to_remove or expired:
             logger.info(f"TaskQueue: cleaned up {len(to_remove)} old tasks, {len(expired)} expired cache entries")
 
-    def stats(self) -> Dict[str, Any]:
+    def stats(self) -> dict[str, Any]:
         return {
             "total_enqueued": self._total_enqueued,
             "total_completed": self._total_completed,

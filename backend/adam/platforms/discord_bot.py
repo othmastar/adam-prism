@@ -6,7 +6,7 @@ Adam Prism — Discord Bot
 """
 
 import logging
-from typing import Dict, Any, List, Optional
+from typing import Any
 
 logger = logging.getLogger("adam_prism.platforms.discord")
 
@@ -18,18 +18,18 @@ except ImportError:
     DISCORD_AVAILABLE = False
     logger.info("discord.py مش منصب — Discord bot مش هينفع يشتغل")
     # Mock classes for type hints
-    class discord:
+    class discord:  # noqa: N801 — mock mimicking library name
         class Intents:
-            def default(cls): return None
+            def default(self): return None
         class Message: pass
-    class discord_commands:
+    class discord_commands:  # noqa: N801 — mock mimicking library name
         class Bot: pass
 
 
 class DiscordBot:
     """بوت Discord لآدم — محادثة في كل سيرفر"""
 
-    def __init__(self, engine, config: Dict[str, Any] = None):
+    def __init__(self, engine, config: dict[str, Any] | None = None):
         self.engine = engine
         self.config = config or {}
         self.token = self.config.get("discord_token", "")
@@ -120,7 +120,7 @@ class DiscordBot:
             logger.warning(f"⚠️ Discord message handling error: {e}")
             await message.channel.send(f"⚠️ خطأ: {e}")
 
-    def get_status(self) -> Dict[str, Any]:
+    def get_status(self) -> dict[str, Any]:
         return {
             "type": "discord",
             "running": self._running,

@@ -11,7 +11,7 @@ import json
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Any
 
 logger = logging.getLogger("adam_prism.learning")
 
@@ -19,16 +19,16 @@ logger = logging.getLogger("adam_prism.learning")
 class ContinuousLearner:
     """التعلم المستمر — يشتغل في الخلفية بعد كل محادثة"""
 
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         self.base_path = Path(self.config.get("learning_path", "./data/learning"))
         self.base_path.mkdir(parents=True, exist_ok=True)
 
         # سجل التعلم
-        self._reflections: List[Dict] = []
-        self._knowledge: List[Dict] = []
-        self._generated_skills: List[Dict] = []
-        self._reinforcement: List[Dict] = []
+        self._reflections: list[dict] = []
+        self._knowledge: list[dict] = []
+        self._generated_skills: list[dict] = []
+        self._reinforcement: list[dict] = []
 
         self._load()
 
@@ -51,7 +51,7 @@ class ContinuousLearner:
 
     # ─── 1. Reflection ← يراجع الردود ───────────────
 
-    async def reflect(self, message: str, response: str, context: Dict) -> Dict:
+    async def reflect(self, message: str, response: str, context: dict) -> dict:
         """يراجع المحادثة ويستخرج تقييم للرد"""
         reflection = {
             "timestamp": datetime.now().isoformat(),
@@ -67,7 +67,7 @@ class ContinuousLearner:
         self._save("reflections")
         return reflection
 
-    def _auto_evaluate(self, response: str, context: Dict) -> Dict:
+    def _auto_evaluate(self, response: str, context: dict) -> dict:
         """تقييم تلقائي للرد (بدون نموذج — تحليل نصي)"""
         issues = []
         feedback = "ok"
@@ -97,7 +97,7 @@ class ContinuousLearner:
 
     # ─── 2. Knowledge Extraction ← يستخرج معلومات ───
 
-    async def extract_knowledge(self, message: str, response: str, context: Dict) -> Optional[Dict]:
+    async def extract_knowledge(self, message: str, response: str, context: dict) -> dict | None:
         """يستخرج معلومة جديدة من المحادثة (skill-generator placeholder)"""
         # بسيط: أي رد فيه كود أو خطوات → يعتبر معرفة
         if "```" in response or "**" in response:
@@ -116,7 +116,7 @@ class ContinuousLearner:
 
     # ─── 3. Skill Generation ← يكتب مهارات ───────────
 
-    async def generate_skill(self, knowledge: Dict) -> Optional[str]:
+    async def generate_skill(self, knowledge: dict) -> str | None:
         """يولّد skill من معرفة جديدة (placeholder — محتاج LLM)"""
         if knowledge.get("applied"):
             return None
@@ -149,7 +149,7 @@ Original response:
 
     # ─── 4. Reinforcement ← يتذكر إيه نجح ───────────
 
-    async def record_feedback(self, message: str, response: str, user_rating: str = None):
+    async def record_feedback(self, message: str, response: str, user_rating: str | None = None):
         """يسجل feedback من المستخدم (explicit or implicit)"""
         record = {
             "timestamp": datetime.now().isoformat(),
@@ -162,7 +162,7 @@ Original response:
 
     # ─── Pipeline ← يشغل الكل ──────────────────────
 
-    async def process_interaction(self, message: str, response: str, context: Dict) -> Dict:
+    async def process_interaction(self, message: str, response: str, context: dict) -> dict:
         """معالجة تفاعل كامل: reflection → knowledge → skill generation"""
         result = {"reflection": None, "knowledge": None, "skill": None}
 
@@ -182,7 +182,7 @@ Original response:
 
     # ─── Stats ──────────────────────────────────────
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         return {
             "total_reflections": len(self._reflections),
             "total_knowledge": len(self._knowledge),

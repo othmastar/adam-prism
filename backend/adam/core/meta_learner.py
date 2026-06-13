@@ -8,7 +8,7 @@ No Ollama calls - uses lightweight heuristics only.
 """
 
 import logging
-from typing import Dict, List, Optional
+
 from adam.core.trace_recorder import ConversationTrace
 
 logger = logging.getLogger("adam_prism.meta_learner")
@@ -23,7 +23,7 @@ PATTERN_TYPES = {
 }
 
 
-def _extract_tool_sequence(trace: ConversationTrace) -> Optional[Dict]:
+def _extract_tool_sequence(trace: ConversationTrace) -> dict | None:
     if not trace.tool_calls:
         return None
     tool_names = [t["name"] for t in trace.tool_calls]
@@ -38,7 +38,7 @@ def _extract_tool_sequence(trace: ConversationTrace) -> Optional[Dict]:
     }
 
 
-def _extract_tool_selections(trace: ConversationTrace) -> List[Dict]:
+def _extract_tool_selections(trace: ConversationTrace) -> list[dict]:
     patterns = []
     for tc in trace.tool_calls:
         if tc.get("success"):
@@ -67,7 +67,7 @@ def _extract_tool_selections(trace: ConversationTrace) -> List[Dict]:
     return patterns
 
 
-def _extract_planning_depth(trace: ConversationTrace) -> Optional[Dict]:
+def _extract_planning_depth(trace: ConversationTrace) -> dict | None:
     if trace.tool_call_count < 2:
         return None
     return {

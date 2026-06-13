@@ -4,21 +4,20 @@ Adam Prism Engine Tools - تنفيذ الأدوات
 Tool dispatcher + 14 handler methods split across sub-modules.
 """
 
-import os
-import re
 import json
 import logging
-from typing import Optional, Dict, List, Any
+import os
+import re
 
 from adam.core.permissions import classify_tool, log_permission
 from adam.engine.generate import AdamPrismEngineGenerate
 from adam.engine.tools.browser import BrowserToolsMixin
-from adam.engine.tools.system_tools import SystemToolsMixin
 from adam.engine.tools.file_ops import FileOpsMixin
 from adam.engine.tools.knowledge import KnowledgeMixin
-from adam.engine.tools.shell import ShellToolsMixin
 from adam.engine.tools.memory_ops import MemoryToolsMixin
 from adam.engine.tools.planning import PlanningMixin
+from adam.engine.tools.shell import ShellToolsMixin
+from adam.engine.tools.system_tools import SystemToolsMixin
 
 logger = logging.getLogger("adam_prism.core")
 
@@ -32,7 +31,7 @@ class AdamPrismEngineTools(
     Mixin: tool dispatcher + 14 handler methods.
     """
 
-    def _parse_tool_request(self, text: str) -> Optional[Dict]:
+    def _parse_tool_request(self, text: str) -> dict | None:
         func_pattern = r'<\|?tool_call\|?>\s*<function=(\w+)>(.*?)</function>\s*<\|?/?tool_call\|?>'
         func_match = re.search(func_pattern, text, re.DOTALL)
         if func_match:
@@ -81,7 +80,7 @@ class AdamPrismEngineTools(
 
         return None
 
-    async def _execute_tool(self, tool_name: str, params: Dict) -> Dict:
+    async def _execute_tool(self, tool_name: str, params: dict) -> dict:
         result = {"success": False, "error": "أداة غير معروفة"}
 
         allowed, tool_name, params = await self._tool_check_permissions(tool_name, params)
@@ -127,7 +126,7 @@ class AdamPrismEngineTools(
             result = await self.plugins.run_after_tool({"type": tool_name, "params": params}, result)
         return result
 
-    async def _tool_check_permissions(self, tool_name: str, params: Dict) -> tuple:
+    async def _tool_check_permissions(self, tool_name: str, params: dict) -> tuple:
         if self.security_guard:
             try:
                 perm_verdict = await self.security_guard.check_tool_call(tool_name, params)

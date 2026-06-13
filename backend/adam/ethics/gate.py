@@ -14,7 +14,7 @@ Adam Prism - نظام الأخلاق — HARDENED v3
 
 import json
 import logging
-from typing import Dict, Any, Optional
+from typing import Any
 
 import httpx
 
@@ -26,23 +26,23 @@ logger = logging.getLogger("adam_prism.ethics")
 class EthicsGate:
     """
     البوابة الأخلاقية لآدم بريزم.
-    
+
     القوانين بالأولوية:
     1. العدالة (40%) - الإنصاف، الحقيقة، عدم التحيز
     2. التعلم (30%) - نمو المستخدم والنظام
     3. البقاء (20%) - حماية المستخدم والنظام
     4. الإبداع (10%) - الابتكار وحل المشكلات
-    
+
     كل رد يُمر عبر التقييم قبل الإرسال.
     """
 
-    def __init__(self, config: Dict[str, Any], shared_clients=None):
+    def __init__(self, config: dict[str, Any], shared_clients=None):
         self.config = config
         self.shared_clients = shared_clients
         self.ollama_base = config.get("ollama_base", "http://localhost:11434")
         self.model_name = config.get("model_name", "gemma3:4b")
         self._eval_cache = TTLCache(default_ttl=300.0, max_size=100)
-        
+
         # أوزان القوانين — تدعم override من config
         self.law_weights = {
             "fairness": 0.40,    # العدالة
@@ -53,7 +53,7 @@ class EthicsGate:
         config_weights = config.get("law_weights", {})
         if config_weights:
             self.law_weights = config_weights
-        
+
         # المحرمات المطلقة
         self.absolute_prohibitions = [
             "إيذاء جسدي أو نفسي",
@@ -63,10 +63,10 @@ class EthicsGate:
             "إخفاء معلومات مهمة عمداً"
         ]
 
-    async def evaluate(self, response: str, original_query: str = "") -> Dict[str, Any]:
+    async def evaluate(self, response: str, original_query: str = "") -> dict[str, Any]:
         """
         تقييم الرد أخلاقياً.
-        
+
         Returns:
             {
                 "approved": bool,
@@ -89,10 +89,10 @@ class EthicsGate:
 
         # 2. تقييم بالأوزان عبر النموذج
         scores = await self._evaluate_with_model(response, original_query)
-        
+
         # 3. حساب المجموع المرجح
         weighted_score = sum(
-            scores.get(law, 0.5) * weight 
+            scores.get(law, 0.5) * weight
             for law, weight in self.law_weights.items()
         )
 
@@ -101,7 +101,7 @@ class EthicsGate:
         min_fairness = scores.get("fairness", 0.5)
         min_survival = scores.get("survival", 0.5)
         approved = weighted_score >= 0.55 and min_fairness >= 0.3 and min_survival >= 0.2
-        
+
         result = {
             "approved": approved,
             "scores": scores,
@@ -121,7 +121,7 @@ class EthicsGate:
         """فحص المحرمات المطلقة (بدون نموذج)"""
         violations = []
         text_lower = text.lower()
-        
+
         # كلمات مفتاحية خطيرة (قابلة للتوسيع) — شاملة للمرادفات والتشكيل
         danger_keywords = {
             "إيذاء": ["أذى", "ألم", "ضرر", "اذى", "إيذاء", "آذى", "ايذاء", "إيذاء جسدي", "إيذاء نفسي", "harm", "hurt", "injure", "damage", "kill", "murder", "assault"],
@@ -130,16 +130,16 @@ class EthicsGate:
             "تلاعب": ["تلاعب", "خداع", "غش", "manipulate", "deceive", "trick", "coerce", "إكراه", "إجبار"],
             "إخفاء معلومات": ["إخفاء", "كتمان", "حجب معلومات", "conceal", "hide information", "withhold facts"]
         }
-        
+
         for category, keywords in danger_keywords.items():
             for kw in keywords:
                 if kw in text_lower:
                     violations.append(f"محتوى مشبوه: {category}")
                     break
-        
+
         return violations
 
-    async def _evaluate_with_model(self, response: str, query: str = "") -> Dict[str, float]:
+    async def _evaluate_with_model(self, response: str, query: str = "") -> dict[str, float]:
         """تقييم الرد بالأوزان الأربعة عبر النموذج"""
         prompt = f"""قيّم الرد التالي حسب القوانين الأربعة من 0 إلى 1:
 
@@ -177,7 +177,7 @@ class EthicsGate:
             )
             text = result.json().get("response", "")
             parsed = json.loads(text.strip().replace("```json", "").replace("```", ""))
-            
+
             scores = {
                 "fairness": max(0, min(1, parsed.get("fairness", 0.5))),
                 "learning": max(0, min(1, parsed.get("learning", 0.5))),
@@ -202,7 +202,7 @@ class EthicsGate:
             "survival": "الأمان والحماية",
             "creativity": "الإبداع"
         }
-        
+
         prompt = f"""الرد التالي ضعيف في جانب {law_names.get(law, law)}.
 أعد صياغته لتحسين هذا الجانب مع الحفاظ على المعنى:
 

@@ -27,12 +27,12 @@ import logging
 import time
 from collections import defaultdict
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Set
+from datetime import UTC, datetime
+from enum import StrEnum
+from typing import Any
 
-from adam.orchestrator.event_bus import EventBus, Event, EventPriority
-from adam.orchestrator.task_queue import TaskQueue, TaskPriority
+from adam.orchestrator.event_bus import Event, EventBus, EventPriority
+from adam.orchestrator.task_queue import TaskQueue
 
 logger = logging.getLogger("adam_prism.orchestrator")
 
@@ -41,7 +41,7 @@ logger = logging.getLogger("adam_prism.orchestrator")
 # 1. Request Types & Routing
 # ═══════════════════════════════════════════════════════
 
-class RequestType(str, Enum):
+class RequestType(StrEnum):
     """أنواع الطلبات — يحدد كيف يوجهها Master Orchestrator"""
     CHAT = "chat"                    # محادثة عادية
     CODE_GENERATION = "code_gen"      # كتابة كود
@@ -55,7 +55,7 @@ class RequestType(str, Enum):
     VOICE = "voice"                  # صوت
 
 
-class ModuleHealth(str, Enum):
+class ModuleHealth(StrEnum):
     """حالة صحة الموديول"""
     HEALTHY = "healthy"
     DEGRADED = "degraded"
@@ -70,11 +70,11 @@ class ModuleStatus:
     health: ModuleHealth = ModuleHealth.OFFLINE
     latency_ms: float = 0.0
     success_rate: float = 0.0
-    last_success: Optional[str] = None
-    last_failure: Optional[str] = None
+    last_success: str | None = None
+    last_failure: str | None = None
     total_calls: int = 0
     total_failures: int = 0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -83,8 +83,8 @@ class WorkflowStep:
     name: str
     module: str
     action: str
-    params: Dict[str, Any] = field(default_factory=dict)
-    depends_on: List[str] = field(default_factory=list)
+    params: dict[str, Any] = field(default_factory=dict)
+    depends_on: list[str] = field(default_factory=list)
     timeout: float = 30.0
     retry_count: int = 0
     max_retries: int = 2
@@ -94,12 +94,12 @@ class WorkflowStep:
 class Workflow:
     """سير عمل متعدد الخطوات"""
     name: str
-    steps: List[WorkflowStep]
+    steps: list[WorkflowStep]
     workflow_id: str = ""
     status: str = "pending"
-    results: Dict[str, Any] = field(default_factory=dict)
-    errors: List[str] = field(default_factory=list)
-    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    results: dict[str, Any] = field(default_factory=dict)
+    errors: list[str] = field(default_factory=list)
+    created_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
 
 
 class MasterOrchestrator:
@@ -121,12 +121,12 @@ class MasterOrchestrator:
         self.task_queue = TaskQueue(max_concurrent=3)
 
         # Module health tracking
-        self._module_status: Dict[str, ModuleStatus] = {}
+        self._module_status: dict[str, ModuleStatus] = {}
         self._health_check_interval = 30  # seconds
-        self._health_task: Optional[asyncio.Task] = None
+        self._health_task: asyncio.Task | None = None
 
         # Routing rules: request_type → list of (module_name, priority_weight)
-        self._routing_table: Dict[str, List[tuple]] = {
+        self._routing_table: dict[str, list[tuple]] = {
             RequestType.CHAT: [("engine", 1.0), ("knowledge", 0.8), ("memory", 0.6)],
             RequestType.CODE_GENERATION: [("engine", 1.0), ("knowledge", 0.7), ("tools", 0.5)],
             RequestType.RESEARCH: [("knowledge", 1.0), ("engine", 0.8), ("tools", 0.6)],
@@ -140,14 +140,14 @@ class MasterOrchestrator:
         }
 
         # Adaptive learning: track routing success rates
-        self._routing_stats: Dict[str, Dict[str, int]] = defaultdict(lambda: {"success": 0, "failure": 0})
-        self._pattern_memory: Dict[str, str] = {}  # pattern → best_module
+        self._routing_stats: dict[str, dict[str, int]] = defaultdict(lambda: {"success": 0, "failure": 0})
+        self._pattern_memory: dict[str, str] = {}  # pattern → best_module
 
         # Workflow execution
-        self._active_workflows: Dict[str, Workflow] = {}
+        self._active_workflows: dict[str, Workflow] = {}
 
         # Graceful degradation: fallback chains
-        self._fallback_chains: Dict[str, List[str]] = {
+        self._fallback_chains: dict[str, list[str]] = {
             "engine": ["engine", "provider_fallback", "stub_response"],
             "knowledge": ["knowledge", "memory", "engine_without_rag"],
             "tools": ["tools", "shell_only", "text_response"],
@@ -206,7 +206,7 @@ class MasterOrchestrator:
     # 3. Intelligent Request Routing
     # ═══════════════════════════════════════════════════════
 
-    def classify_request(self, message: str, context: Dict[str, Any] = None) -> RequestType:
+    def classify_request(self, message: str, context: dict[str, Any] | None = None) -> RequestType:
         """
         تصنيف الطلب وتحديد نوعه — يحدد كيف يوجهه Master Orchestrator
         يستخدم كلمات مفتاحية + سياق + أنماط تعلم
@@ -264,7 +264,7 @@ class MasterOrchestrator:
         # Default: chat
         return RequestType.CHAT
 
-    def get_routing_plan(self, request_type: RequestType) -> List[Dict[str, Any]]:
+    def get_routing_plan(self, request_type: RequestType) -> list[dict[str, Any]]:
         """
         يحدد خطة التوجيه — أي موديولات تشارك وبأي ترتيب
         يراعي حالة الصحة والأولويات
@@ -294,7 +294,7 @@ class MasterOrchestrator:
         plan.sort(key=lambda x: x["weight"], reverse=True)
         return plan
 
-    async def route_request(self, message: str, context: Dict[str, Any] = None) -> Dict[str, Any]:
+    async def route_request(self, message: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         """
         توجيه طلب ذكي — القلب النابض لـ Master Orchestrator
 
@@ -376,7 +376,7 @@ class MasterOrchestrator:
         }
 
     async def _execute_on_module(self, module_name: str, message: str,
-                                  context: Dict[str, Any] = None) -> Optional[Any]:
+                                  context: dict[str, Any] | None = None) -> Any | None:
         """تنفيذ على موديول محدد"""
         if not self.engine:
             return None
@@ -392,7 +392,7 @@ class MasterOrchestrator:
                     timeout=120.0
                 )
                 status.health = ModuleHealth.HEALTHY
-                status.last_success = datetime.now(timezone.utc).isoformat()
+                status.last_success = datetime.now(UTC).isoformat()
                 return result
 
             elif module_name == "knowledge" and self.engine.knowledge:
@@ -401,7 +401,7 @@ class MasterOrchestrator:
                     timeout=10.0
                 )
                 status.health = ModuleHealth.HEALTHY
-                status.last_success = datetime.now(timezone.utc).isoformat()
+                status.last_success = datetime.now(UTC).isoformat()
                 return {"knowledge_results": results}
 
             elif module_name == "tools" and self.engine.tools:
@@ -411,7 +411,7 @@ class MasterOrchestrator:
                     timeout=60.0
                 )
                 status.health = ModuleHealth.HEALTHY
-                status.last_success = datetime.now(timezone.utc).isoformat()
+                status.last_success = datetime.now(UTC).isoformat()
                 return result
 
             elif module_name == "security" and self.engine.security_guard:
@@ -432,15 +432,15 @@ class MasterOrchestrator:
                 )
                 return result
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             status.health = ModuleHealth.DEGRADED
-            status.last_failure = datetime.now(timezone.utc).isoformat()
+            status.last_failure = datetime.now(UTC).isoformat()
             raise TimeoutError(f"Module '{module_name}' timed out")
-        except Exception as e:
+        except Exception:
             status.total_failures += 1
             if status.total_calls > 0:
                 status.success_rate = 1.0 - (status.total_failures / status.total_calls)
-            status.last_failure = datetime.now(timezone.utc).isoformat()
+            status.last_failure = datetime.now(UTC).isoformat()
             if status.total_failures > 5:
                 status.health = ModuleHealth.UNHEALTHY
             raise
@@ -449,7 +449,7 @@ class MasterOrchestrator:
     # 4. Workflow Orchestration
     # ═══════════════════════════════════════════════════════
 
-    async def execute_workflow(self, workflow: Workflow) -> Dict[str, Any]:
+    async def execute_workflow(self, workflow: Workflow) -> dict[str, Any]:
         """
         تنفيذ سير عمل متعدد الخطوات — مع تبعيات وإعادة محاولة
         """
@@ -459,7 +459,7 @@ class MasterOrchestrator:
 
         logger.info(f"MasterOrchestrator: starting workflow '{workflow.name}' ({len(workflow.steps)} steps)")
 
-        completed_steps: Set[str] = set()
+        completed_steps: set[str] = set()
         max_iterations = len(workflow.steps) * 2  # prevent infinite loops
         iteration = 0
 
@@ -618,7 +618,7 @@ class MasterOrchestrator:
         status = self._module_status.get(module)
         if status:
             status.total_failures += 1
-            status.last_failure = datetime.now(timezone.utc).isoformat()
+            status.last_failure = datetime.now(UTC).isoformat()
             if status.total_calls > 0:
                 status.success_rate = 1.0 - (status.total_failures / status.total_calls)
 
@@ -669,7 +669,7 @@ class MasterOrchestrator:
     # 8. Dashboard & Diagnostics
     # ═══════════════════════════════════════════════════════
 
-    def get_dashboard(self) -> Dict[str, Any]:
+    def get_dashboard(self) -> dict[str, Any]:
         """لوحة تحكم شاملة — كل معلومات النظام في مكان واحد"""
         module_health = {}
         for name, status in self._module_status.items():
@@ -693,7 +693,7 @@ class MasterOrchestrator:
             "routing_stats": dict(self._routing_stats),
         }
 
-    def get_routing_suggestions(self) -> List[Dict[str, Any]]:
+    def get_routing_suggestions(self) -> list[dict[str, Any]]:
         """اقتراحات لتحسين التوجيه بناءً على الإحصائيات"""
         suggestions = []
         for key, stats in self._routing_stats.items():
@@ -708,10 +708,10 @@ class MasterOrchestrator:
                     })
         return suggestions
 
-    async def diagnose(self) -> Dict[str, Any]:
+    async def diagnose(self) -> dict[str, Any]:
         """تشخيص كامل للنظام — يفحص كل مكون ويقدم توصيات"""
         diagnosis = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "overall_health": "unknown",
             "modules": {},
             "issues": [],

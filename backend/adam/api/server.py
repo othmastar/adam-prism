@@ -22,24 +22,24 @@ Adam Prism - API Server — HARDENED v3
 11. Router split — endpoints extracted to separate router modules
 """
 
+import asyncio
+import contextlib
 import json
+import logging
 import os
 import sqlite3
-import logging
-import asyncio
 import time
 from datetime import datetime
-from typing import Dict, Any, Optional, List
+from typing import Any
 
 import httpx
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Request, UploadFile, File, Form
+from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse, HTMLResponse, JSONResponse
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
+
 from adam.api.chat_store import ChatStore
-from adam.core.voice import VoicePipeline, int16_to_float32, resample_audio
-from adam.core.permissions import log_permission
+from adam.core.voice import VoicePipeline
 
 logger = logging.getLogger("adam_prism.api")
 
@@ -49,29 +49,29 @@ logger = logging.getLogger("adam_prism.api")
 
 class ChatRequest(BaseModel):
     message: str
-    context: Optional[Any] = None
+    context: Any | None = None
     voice: bool = True  # رد صوتي دائم
 
 class ToolRecord(BaseModel):
     name: str
-    params: Dict = {}
+    params: dict = {}
     success: bool = False
-    error: Optional[str] = None
+    error: str | None = None
 
 class ChatResponse(BaseModel):
     response: str
     mode: str = "communicator"
-    intent: Optional[Dict] = None
+    intent: dict | None = None
     knowledge_used: int = 0
     tool_calls_made: int = 0
-    tools_used: List[str] = []
-    tool_records: List[ToolRecord] = []
-    errors: List[str] = []
+    tools_used: list[str] = []
+    tool_records: list[ToolRecord] = []
+    errors: list[str] = []
     cycle: int = 0
-    duration_ms: Optional[int] = None
-    reason: Optional[str] = None
-    audio_url: Optional[str] = None  # رابط الاستماع للرد
-    permission_pending: Optional[Dict] = None  # طلب صلاحية معلّق (Phase 1b)
+    duration_ms: int | None = None
+    reason: str | None = None
+    audio_url: str | None = None  # رابط الاستماع للرد
+    permission_pending: dict | None = None  # طلب صلاحية معلّق (Phase 1b)
 
 class SearchRequest(BaseModel):
     query: str
@@ -86,10 +86,10 @@ class SummarizeRequest(BaseModel):
 
 class ActionRequest(BaseModel):
     action: str
-    params: Dict = {}
+    params: dict = {}
 
 # متغير عام لوقت بدء التشغيل
-_start_time: Optional[datetime] = None
+_start_time: datetime | None = None
 
 def _qdrant_url(engine):
     if engine and engine.config:
@@ -125,7 +125,7 @@ class RateLimiter:
     def __init__(self, max_requests: int = 60, window_seconds: int = 60):
         self.max_requests = max_requests
         self.window_seconds = window_seconds
-        self._requests: Dict[str, List[float]] = {}
+        self._requests: dict[str, list[float]] = {}
 
     def is_allowed(self, key: str) -> bool:
         now = time.time()
@@ -196,7 +196,7 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
     if _api_key == "adam-prism-change-me":
         if os.path.isfile(_api_key_file):
             # Reuse previously generated key
-            with open(_api_key_file, "r") as f:
+            with open(_api_key_file) as f:
                 _api_key = f.read().strip()
         else:
             # Generate a new random key and persist it
@@ -291,7 +291,7 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
     # في وضع الإنتاج، يتم رفض wildcard "*"
     # ═══════════════════════════════════════════════════════
     _cors_origins_str = os.environ.get("ADAM_CORS_ORIGINS", "") or os.environ.get("CORS_ORIGINS", "*")
-    
+
     if _cors_origins_str.strip() == "*":
         _cors_origins = ["*"]
         _allow_credentials = False
@@ -308,7 +308,7 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
     else:
         _cors_origins = [o.strip() for o in _cors_origins_str.split(",") if o.strip()]
         _allow_credentials = True
-    
+
     app.add_middleware(
         CORSMiddleware,
         allow_origins=_cors_origins,
@@ -372,21 +372,45 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
     # ═══════════════════════════════════════════════════════
     try:
         from adam.api.routers import (
-            chat as chat_router,
-            knowledge as knowledge_router,
-            memory as memory_router,
-            tools as tools_router,
-            skills as skills_router,
-            subagents as subagents_router,
-            voice as voice_router,
-            mcp as mcp_router,
-            engine as engine_router,
             channels as channels_router,
-            plugins as plugins_router,
-            scheduler as scheduler_router,
+        )
+        from adam.api.routers import (
+            chat as chat_router,
+        )
+        from adam.api.routers import (
+            engine as engine_router,
+        )
+        from adam.api.routers import (
+            knowledge as knowledge_router,
+        )
+        from adam.api.routers import (
+            mcp as mcp_router,
+        )
+        from adam.api.routers import (
+            memory as memory_router,
+        )
+        from adam.api.routers import (
             permissions as permissions_router,
         )
-        
+        from adam.api.routers import (
+            plugins as plugins_router,
+        )
+        from adam.api.routers import (
+            scheduler as scheduler_router,
+        )
+        from adam.api.routers import (
+            skills as skills_router,
+        )
+        from adam.api.routers import (
+            subagents as subagents_router,
+        )
+        from adam.api.routers import (
+            tools as tools_router,
+        )
+        from adam.api.routers import (
+            voice as voice_router,
+        )
+
         # Pass shared dependencies to routers
         _router_deps = {
             "engine": engine,
@@ -396,14 +420,14 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
             "admin_key": _admin_key,
             "hmac": _hmac,
         }
-        
+
         for router_module in [chat_router, knowledge_router, memory_router, tools_router,
                               skills_router, subagents_router, voice_router, mcp_router,
                               engine_router, channels_router, plugins_router, scheduler_router,
                               permissions_router]:
             if hasattr(router_module, 'router'):
                 app.include_router(router_module.router)
-        
+
         logger.info("API routers loaded successfully")
     except ImportError as e:
         logger.warning(f"Could not load API routers (running in monolith mode): {e}")
@@ -482,7 +506,7 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
                     synthesis = await pipeline.process_text(reply_text, "ar")
                     if synthesis.audio:
                         filename = f"reply_{int(datetime.now().timestamp())}.mp3"
-                        audio_path = await pipeline.save_audio(synthesis.audio, filename)
+                        await pipeline.save_audio(synthesis.audio, filename)
                         response.audio_url = f"/api/voice/audio/{filename}"
 
                     # تفريغ TTS من VRAM بعد الانتهاء
@@ -498,7 +522,7 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
 
     class CreateSessionRequest(BaseModel):
         title: str = "New Conversation"
-        first_message: Optional[str] = None
+        first_message: str | None = None
 
     class UpdateSessionRequest(BaseModel):
         title: str
@@ -506,8 +530,8 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
     class AddMessageRequest(BaseModel):
         role: str
         content: str
-        mode: Optional[str] = None
-        metadata: Optional[Dict] = None
+        mode: str | None = None
+        metadata: dict | None = None
 
     class ChatSearchRequest(BaseModel):
         query: str
@@ -572,7 +596,7 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
         return msg
 
     @app.post("/api/chat/sessions/{session_id}/sync")
-    async def sync_session(session_id: str, messages: List[Dict]):
+    async def sync_session(session_id: str, messages: list[dict]):
         """مزامنة كل رسائل جلسة دفعة واحدة (يحل محل القديم)"""
         session = chat_store.get_session(session_id)
         if not session:
@@ -1374,13 +1398,11 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
             logger.info("WebSocket disconnected")
         except Exception as e:
             logger.error(f"WebSocket error: {e}")
-            try:
+            with contextlib.suppress(Exception):
                 await websocket.close(code=1011, reason=str(e))
-            except Exception:
-                pass
 
     # ─── Voice Pipeline ─────────────────────────────────
-    _voice_pipeline: Optional[VoicePipeline] = None
+    _voice_pipeline: VoicePipeline | None = None
 
     def get_voice_pipeline() -> VoicePipeline:
         nonlocal _voice_pipeline
@@ -1429,7 +1451,7 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
             synthesis = await pipeline.process_text(text, lang)
             if synthesis.audio:
                 filename = f"synth_{int(datetime.now().timestamp())}.mp3"
-                audio_path = await pipeline.save_audio(synthesis.audio, filename)
+                await pipeline.save_audio(synthesis.audio, filename)
                 return {"success": True, "audio_url": f"/api/voice/audio/{filename}"}
             return {"success": False, "error": "تعذر التوليد"}
         except HTTPException:
@@ -1447,10 +1469,8 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
     @app.on_event("shutdown")
     async def on_shutdown():
         if channel_manager:
-            try:
+            with contextlib.suppress(Exception):
                 await channel_manager.shutdown()
-            except Exception:
-                pass
         logger.info("Adam Prism API stopped")
 
     return app

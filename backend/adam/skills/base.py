@@ -1,4 +1,3 @@
-from typing import Dict, Any, Optional, List
 
 
 class Skill:
@@ -7,7 +6,7 @@ class Skill:
     name: str = ""
     description: str = ""
     version: str = "1.0.0"
-    triggers: List[str] = []
+    triggers: list[str] = []
     instructions: str = ""
     author: str = "adam"
     engine = None
@@ -18,7 +17,7 @@ class Skill:
     async def on_unload(self):
         pass
 
-    async def on_trigger(self, message: str, context: Dict) -> Optional[str]:
+    async def on_trigger(self, message: str, context: dict) -> str | None:
         """لما skill يتفعل. يرجع instructions مخصصة أو None"""
         return self.instructions
 

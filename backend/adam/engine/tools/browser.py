@@ -9,12 +9,10 @@
 - Prevents access to internal network addresses
 """
 
-import os
 import ipaddress
+import os
 import uuid
-from typing import Dict
 from urllib.parse import urlparse
-
 
 # ═══════════════════════════════════════════════════════
 # [NEW v2] SSRF Protection — منع الوصول للشبكة الداخلية
@@ -36,7 +34,7 @@ def _is_private_ip(hostname: str) -> bool:
     except ValueError:
         # الـ hostname مش عنوان IP — ممكن يكون اسم نطاق
         pass
-    
+
     # فحص أسماء المضيفين المحلية
     localhost_names = {
         "localhost", "localhost.localdomain",
@@ -45,48 +43,45 @@ def _is_private_ip(hostname: str) -> bool:
     }
     if hostname.lower() in localhost_names:
         return True
-    
+
     # فحص النطاقات الداخلية
     internal_suffixes = (".local", ".internal", ".localhost", ".docker", ".container")
-    if any(hostname.lower().endswith(s) for s in internal_suffixes):
-        return True
-    
-    return False
+    return bool(any(hostname.lower().endswith(s) for s in internal_suffixes))
 
 
-def _validate_url(url: str) -> Dict:
+def _validate_url(url: str) -> dict:
     """التحقق من صحة وأمان URL — منع SSRF"""
     if not url:
         return {"valid": False, "error": "مفيش URL"}
-    
+
     try:
         parsed = urlparse(url)
     except Exception:
         return {"valid": False, "error": f"URL غير صالح: {url}"}
-    
+
     # التحقق من البروتوكول
     if parsed.scheme not in ("http", "https"):
         return {"valid": False, "error": f"بروتوكول غير مسموح: {parsed.scheme} — يُسمح بـ http و https فقط"}
-    
+
     # التحقق من وجود hostname
     hostname = parsed.hostname
     if not hostname:
         return {"valid": False, "error": "URL بدون hostname"}
-    
+
     # التحقق من إن الـ hostname مش عنوان خاص
     if _is_private_ip(hostname):
         return {
             "valid": False,
             "error": f"SSRF محظور: لا يمكن الوصول لعناوين الشبكة الداخلية ({hostname})"
         }
-    
+
     return {"valid": True}
 
 
 class BrowserToolsMixin:
     """Mixin: browser tools — open, fetch, click, type, read, screenshot"""
 
-    async def _tool_browser(self, tool_name: str, params: Dict) -> Dict:
+    async def _tool_browser(self, tool_name: str, params: dict) -> dict:
         try:
             from playwright.async_api import async_playwright
             os.environ["PLAYWRIGHT_BROWSERS_PATH"] = self.config.get(

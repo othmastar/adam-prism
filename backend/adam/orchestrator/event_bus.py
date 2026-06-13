@@ -14,13 +14,13 @@ Features:
 
 import asyncio
 import logging
-import time
 import uuid
 from collections import defaultdict
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import IntEnum
-from typing import Any, Callable, Dict, List, Optional, Set
+from typing import Any
 
 logger = logging.getLogger("adam_prism.orchestrator.event_bus")
 
@@ -38,11 +38,11 @@ class EventPriority(IntEnum):
 class Event:
     """حدث في النظام"""
     topic: str
-    data: Dict[str, Any]
+    data: dict[str, Any]
     priority: EventPriority = EventPriority.NORMAL
     source: str = ""
     event_id: str = field(default_factory=lambda: str(uuid.uuid4())[:12])
-    timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    timestamp: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
     replay: bool = False  # هل يُعاد بثه للمشتركين الجدد؟
 
     def __lt__(self, other):
@@ -56,7 +56,7 @@ class DeadLetterQueue:
     """طابور الأحداث الفاشلة — للمراجعة والإعادة"""
 
     def __init__(self, max_size: int = 1000):
-        self._queue: List[Dict[str, Any]] = []
+        self._queue: list[dict[str, Any]] = []
         self._max_size = max_size
 
     def add(self, event: Event, error: str):
@@ -67,14 +67,14 @@ class DeadLetterQueue:
             "data": event.data,
             "source": event.source,
             "error": error,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
         }
         self._queue.append(entry)
         if len(self._queue) > self._max_size:
             self._queue = self._queue[-self._max_size:]
         logger.warning(f"DLQ: Event {event.event_id} on '{event.topic}' failed: {error}")
 
-    def get_all(self) -> List[Dict[str, Any]]:
+    def get_all(self) -> list[dict[str, Any]]:
         return list(self._queue)
 
     def clear(self):
@@ -107,11 +107,11 @@ class EventBus:
 
     def __init__(self, replay_buffer_size: int = 100):
         # topic → list of handlers
-        self._subscribers: Dict[str, List[Callable]] = defaultdict(list)
+        self._subscribers: dict[str, list[Callable]] = defaultdict(list)
         # topic → wildcard pattern subscribers
-        self._wildcard_subscribers: Dict[str, List[Callable]] = defaultdict(list)
+        self._wildcard_subscribers: dict[str, list[Callable]] = defaultdict(list)
         # Replay buffer: topic → list of recent events
-        self._replay_buffer: Dict[str, List[Event]] = defaultdict(list)
+        self._replay_buffer: dict[str, list[Event]] = defaultdict(list)
         self._replay_buffer_size = replay_buffer_size
         # Dead letter queue
         self._dlq = DeadLetterQueue()
@@ -122,7 +122,8 @@ class EventBus:
         # Processing
         self._processing = False
         self._priority_queue: asyncio.PriorityQueue = asyncio.PriorityQueue()
-        self._worker_task: Optional[asyncio.Task] = None
+        self._worker_task: asyncio.Task | None = None
+        self._tasks: set[asyncio.Task] = set()
         self._num_workers = 3
 
     def subscribe(self, topic: str, handler: Callable, replay: bool = False):
@@ -144,7 +145,9 @@ class EventBus:
             for event in self._replay_buffer.get(topic, []):
                 try:
                     if asyncio.iscoroutinefunction(handler):
-                        asyncio.create_task(handler(event))
+                        task = asyncio.create_task(handler(event))
+                        self._tasks.add(task)
+                        task.add_done_callback(self._tasks.discard)
                     else:
                         handler(event)
                 except Exception as e:
@@ -197,7 +200,9 @@ class EventBus:
 
     def publish_sync(self, event: Event):
         """نشر حدث بدون انتظار — يُنشئ task في الخلفية"""
-        asyncio.create_task(self.publish(event))
+        task = asyncio.create_task(self.publish(event))
+        self._tasks.add(task)
+        task.add_done_callback(self._tasks.discard)
 
     def start_workers(self):
         """تشغيل عمال المعالجة من priority queue"""
@@ -206,6 +211,8 @@ class EventBus:
         self._processing = True
         for i in range(self._num_workers):
             task = asyncio.create_task(self._worker_loop(i))
+            self._tasks.add(task)
+            task.add_done_callback(self._tasks.discard)
         logger.info(f"EventBus: {self._num_workers} workers started")
 
     async def _worker_loop(self, worker_id: int):
@@ -217,7 +224,7 @@ class EventBus:
                 )
                 await self.publish(event)
                 self._priority_queue.task_done()
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 continue
             except asyncio.CancelledError:
                 break
@@ -232,7 +239,7 @@ class EventBus:
         """إيقاف العمال"""
         self._processing = False
 
-    def get_subscribers(self, topic: str) -> List[str]:
+    def get_subscribers(self, topic: str) -> list[str]:
         """أسماء المشتركين في موضوع"""
         handlers = self._subscribers.get(topic, [])
         return [h.__name__ for h in handlers if hasattr(h, '__name__')]
@@ -241,7 +248,7 @@ class EventBus:
     def dlq(self) -> DeadLetterQueue:
         return self._dlq
 
-    def stats(self) -> Dict[str, Any]:
+    def stats(self) -> dict[str, Any]:
         return {
             "published": self._published,
             "delivered": self._delivered,

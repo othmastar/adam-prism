@@ -27,7 +27,7 @@ import logging
 import time
 import uuid
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import httpx
 from fastapi import APIRouter, HTTPException
@@ -58,13 +58,13 @@ class AgentCard:
     name: str = "Adam Prism"
     description: str = "Digital Twin AI Framework — إطار الذكاء الاصطناعي التوأم الرقمي"
     url: str = "http://localhost:8000"
-    capabilities: List[str] = field(default_factory=lambda: [
+    capabilities: list[str] = field(default_factory=lambda: [
         "chat", "code_generation", "research", "analysis",
         "tool_execution", "workflow", "voice", "memory",
     ])
     version: str = "1.0.0"
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """تحويل إلى قاموس — Convert to dict."""
         return {
             "name": self.name,
@@ -94,11 +94,11 @@ class A2AMessage:
     sender: str = ""
     receiver: str = ""
     content: Any = None
-    artifacts: List[Dict[str, Any]] = field(default_factory=list)
+    artifacts: list[dict[str, Any]] = field(default_factory=list)
     timestamp: float = field(default_factory=time.time)
     message_type: str = "task"
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """تحويل إلى قاموس — Convert to dict."""
         return {
             "task_id": self.task_id,
@@ -119,7 +119,7 @@ class A2ATaskRequest(BaseModel):
     """
     طلب مهمة A2A — A2A task request body.
     """
-    task_id: Optional[str] = Field(None, description="معرف المهمة — Task ID (auto-generated if not provided)")
+    task_id: str | None = Field(None, description="معرف المهمة — Task ID (auto-generated if not provided)")
     sender: str = Field(..., description="المرسل — Sender agent name")
     receiver: str = Field("adam_prism", description="المستقبل — Receiver agent name")
     content: Any = Field(..., description="محتوى المهمة — Task content")
@@ -149,7 +149,7 @@ class A2AServer:
 
     def __init__(
         self,
-        agent_card: Optional[AgentCard] = None,
+        agent_card: AgentCard | None = None,
         engine: Any = None,
         max_tasks: int = 1000,
     ) -> None:
@@ -166,10 +166,10 @@ class A2AServer:
         self._max_tasks = max_tasks
 
         # المهام الواردة — Incoming tasks
-        self._tasks: Dict[str, Dict[str, Any]] = {}
+        self._tasks: dict[str, dict[str, Any]] = {}
 
         # عميل HTTP — HTTP client for outgoing messages
-        self._http_client: Optional[httpx.AsyncClient] = None
+        self._http_client: httpx.AsyncClient | None = None
 
         # قفل — Lock
         self._lock = asyncio.Lock()
@@ -344,7 +344,7 @@ class A2AServer:
     # إدارة المهام / Task Management
     # ─────────────────────────────────────────────
 
-    async def get_task_status(self, task_id: str) -> Dict[str, Any]:
+    async def get_task_status(self, task_id: str) -> dict[str, Any]:
         """
         الحصول على حالة مهمة — Get task status.
 
@@ -407,7 +407,7 @@ class A2AServer:
             summary="بطاقة الوكيل — Agent Card",
             description="يعيد بطاقة اكتشاف الوكيل وفقاً لبروتوكول A2A.",
         )
-        async def get_agent_card() -> Dict[str, Any]:
+        async def get_agent_card() -> dict[str, Any]:
             """بطاقة الوكيل — Agent discovery card."""
             return server.get_agent_card().to_dict()
 
@@ -416,7 +416,7 @@ class A2AServer:
             summary="استقبال مهمة — Receive A2A task",
             description="يستقبل مهمة من وكيل آخر ويعيد الرد.",
         )
-        async def receive_task(request: A2ATaskRequest) -> Dict[str, Any]:
+        async def receive_task(request: A2ATaskRequest) -> dict[str, Any]:
             """استقبال مهمة — Receive a task from another agent."""
             message = A2AMessage(
                 task_id=request.task_id or str(uuid.uuid4()),
@@ -439,7 +439,7 @@ class A2AServer:
             summary="حالة المهمة — Task status",
             description="يعيد حالة مهمة A2A محددة.",
         )
-        async def get_task_status(task_id: str) -> Dict[str, Any]:
+        async def get_task_status(task_id: str) -> dict[str, Any]:
             """حالة المهمة — Get task status."""
             try:
                 return await server.get_task_status(task_id)
@@ -451,7 +451,7 @@ class A2AServer:
             summary="إلغاء المهمة — Cancel task",
             description="يلغي مهمة A2A قيد التنفيذ.",
         )
-        async def cancel_task(task_id: str) -> Dict[str, Any]:
+        async def cancel_task(task_id: str) -> dict[str, Any]:
             """إلغاء المهمة — Cancel a task."""
             cancelled = await server.cancel_task(task_id)
             if not cancelled:

@@ -8,12 +8,9 @@ No weights, no fine-tuning — كل حاجة state-based.
 """
 
 import json
-import os
-import time
 import logging
+import os
 from datetime import datetime
-from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 
 logger = logging.getLogger("adam_prism.learning")
 
@@ -26,16 +23,16 @@ class PreferenceLearner:
     """يتعلم تفضيلات المستخدم من قرارات الصلاحية"""
 
     def __init__(self):
-        self.preferences: Dict[str, dict] = self._load_preferences()
-        self.history: List[dict] = self._load_history()
-        self._session_decisions: List[dict] = []
+        self.preferences: dict[str, dict] = self._load_preferences()
+        self.history: list[dict] = self._load_history()
+        self._session_decisions: list[dict] = []
 
     # ─── التخزين ─────────────────────────────────
 
-    def _load_preferences(self) -> Dict:
+    def _load_preferences(self) -> dict:
         try:
             if os.path.exists(PREFERENCES_PATH):
-                with open(PREFERENCES_PATH, "r", encoding="utf-8") as f:
+                with open(PREFERENCES_PATH, encoding="utf-8") as f:
                     return json.load(f)
         except Exception as e:
             logger.warning(f"تعذر تحميل التفضيلات: {e}")
@@ -49,10 +46,10 @@ class PreferenceLearner:
         except Exception as e:
             logger.warning(f"تعذر حفظ التفضيلات: {e}")
 
-    def _load_history(self) -> List:
+    def _load_history(self) -> list:
         try:
             if os.path.exists(HISTORY_PATH):
-                with open(HISTORY_PATH, "r", encoding="utf-8") as f:
+                with open(HISTORY_PATH, encoding="utf-8") as f:
                     return json.load(f)
         except Exception:
             pass
@@ -135,7 +132,7 @@ class PreferenceLearner:
 
     # ─── الاستعلام ─────────────────────────────────
 
-    def get_summary(self) -> Dict:
+    def get_summary(self) -> dict:
         """ملخص التفضيلات المتعلمة"""
         summary = {}
         for cat, stats in self.preferences.items():
@@ -149,7 +146,7 @@ class PreferenceLearner:
                 }
         return summary
 
-    def get_session_decisions(self) -> List[Dict]:
+    def get_session_decisions(self) -> list[dict]:
         """قرارات الجلسة الحالية"""
         return self._session_decisions
 

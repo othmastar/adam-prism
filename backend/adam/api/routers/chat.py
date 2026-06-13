@@ -6,10 +6,8 @@ Adam Prism — Chat Router
 [FIX v3] Router split — extracted from server.py for better maintainability
 """
 
-import sqlite3
-from typing import Dict, Optional, List
 
-from fastapi import APIRouter, HTTPException, Request, UploadFile, File
+from fastapi import APIRouter, File, UploadFile
 from pydantic import BaseModel
 
 router = APIRouter(tags=["chat"])
@@ -17,7 +15,7 @@ router = APIRouter(tags=["chat"])
 
 class CreateSessionRequest(BaseModel):
     title: str = "New Conversation"
-    first_message: Optional[str] = None
+    first_message: str | None = None
 
 class UpdateSessionRequest(BaseModel):
     title: str
@@ -25,8 +23,8 @@ class UpdateSessionRequest(BaseModel):
 class AddMessageRequest(BaseModel):
     role: str
     content: str
-    mode: Optional[str] = None
-    metadata: Optional[Dict] = None
+    mode: str | None = None
+    metadata: dict | None = None
 
 class ChatSearchRequest(BaseModel):
     query: str
@@ -37,7 +35,6 @@ class ChatSearchRequest(BaseModel):
 async def list_sessions(limit: int = 50, offset: int = 0):
     """قائمة جلسات المحادثة"""
     # Note: chat_store is injected via app.state in production
-    from fastapi import Request
     # This endpoint will be registered with proper dependencies in server.py
     pass
 
@@ -79,7 +76,7 @@ async def add_message(session_id: str, req: AddMessageRequest):
 
 
 @router.post("/api/chat/sessions/{session_id}/sync")
-async def sync_session(session_id: str, messages: List[Dict]):
+async def sync_session(session_id: str, messages: list[dict]):
     """مزامنة كل رسائل جلسة"""
     pass
 

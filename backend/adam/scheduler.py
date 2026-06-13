@@ -5,15 +5,15 @@ Adam Prism — Scheduler
 لتشغيل تقارير، ريماندات، أدوات، backup في الخلفية.
 """
 
-import asyncio
 import logging
-from datetime import datetime, timedelta
-from typing import Dict, Any, List, Optional, Callable, Awaitable
+from collections.abc import Awaitable, Callable
+from datetime import datetime
+from typing import Any
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
-from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.triggers.date import DateTrigger
+from apscheduler.triggers.interval import IntervalTrigger
 
 logger = logging.getLogger("adam_prism.scheduler")
 
@@ -26,7 +26,7 @@ class AdamScheduler:
     def __init__(self, engine=None):
         self.engine = engine
         self.scheduler = AsyncIOScheduler()
-        self._jobs: Dict[str, Dict] = {}
+        self._jobs: dict[str, dict] = {}
         self._running = False
 
     def _safe_next_run(self, job_id: str) -> str:
@@ -59,7 +59,7 @@ class AdamScheduler:
             logger.info("Scheduler stopped")
 
     def add_cron(self, job_id: str, cron_expr: str, func: JobFunc,
-                 args: List = None, kwargs: Dict = None, name: str = ""):
+                 args: list | None = None, kwargs: dict | None = None, name: str = ""):
         """إضافة مهمة cron"""
         self._ensure_running()
         parts = cron_expr.strip().split()
@@ -82,7 +82,7 @@ class AdamScheduler:
         logger.info(f"📅 Cron '{job_id}' added: {cron_expr}")
 
     def add_interval(self, job_id: str, seconds: int, func: JobFunc,
-                     args: List = None, kwargs: Dict = None, name: str = ""):
+                     args: list | None = None, kwargs: dict | None = None, name: str = ""):
         """إضافة مهمة دورية"""
         self._ensure_running()
         trigger = IntervalTrigger(seconds=seconds)
@@ -98,7 +98,7 @@ class AdamScheduler:
         logger.info(f"⏱ Interval '{job_id}' added: every {seconds}s")
 
     def add_once(self, job_id: str, run_at: datetime, func: JobFunc,
-                 args: List = None, kwargs: Dict = None, name: str = ""):
+                 args: list | None = None, kwargs: dict | None = None, name: str = ""):
         """إضافة مهمة مرة واحدة"""
         self._ensure_running()
         trigger = DateTrigger(run_date=run_at)
@@ -121,7 +121,7 @@ class AdamScheduler:
             return True
         return False
 
-    def list_jobs(self) -> List[Dict]:
+    def list_jobs(self) -> list[dict]:
         jobs = []
         for job_id, info in self._jobs.items():
             jobs.append({
@@ -133,7 +133,7 @@ class AdamScheduler:
             })
         return jobs
 
-    def get_job(self, job_id: str) -> Optional[Dict]:
+    def get_job(self, job_id: str) -> dict | None:
         info = self._jobs.get(job_id)
         if not info:
             return None

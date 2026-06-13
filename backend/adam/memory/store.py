@@ -15,14 +15,10 @@ Adam Memory Store — Persistent SQLite Memory — HARDENED v3
 - Added close() method for proper cleanup
 """
 
-import json
+import os
 import sqlite3
 import time
-import os
-from datetime import datetime
-from typing import List, Optional, Dict, Any
-from pathlib import Path
-
+from typing import Any
 
 # Default database path (module-level for backward compatibility)
 MEMORY_DB = os.environ.get("ADAM_MEMORY_DB",
@@ -32,32 +28,32 @@ MEMORY_DB = os.environ.get("ADAM_MEMORY_DB",
 class MemoryStore:
     """
     مخزن الذاكرة المستمر — SQLite
-    
+
     يمكن إنشاء عدة نسخ بمسارات مختلفة (للاختبار مثلاً)
     أو استخدام النسخة الافتراضية عبر الدوال على مستوى الموديول
-    
+
     Usage:
         store = MemoryStore()  # default path
         store = MemoryStore(db_path="/tmp/test_memory.db")  # custom path
-        
+
         mem_id = store.store("معلومة مهمة", tags="مهم", priority=5)
         results = store.search("معلومة")
     """
-    
-    def __init__(self, db_path: str = None):
+
+    def __init__(self, db_path: str | None = None):
         self.db_path = db_path or MEMORY_DB
         os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
         self._conn = sqlite3.connect(self.db_path)
         self._conn.execute("PRAGMA journal_mode=WAL")
         self._conn.execute("PRAGMA foreign_keys=ON")
         self._ensure_db()
-    
+
     def close(self):
         """Close the persistent database connection"""
         if self._conn:
             self._conn.close()
             self._conn = None
-    
+
     def _ensure_db(self):
         """إنشاء الجدول إن لم يكن موجوداً"""
         if self._conn is None:
@@ -79,7 +75,7 @@ class MemoryStore:
         self._conn.execute("CREATE INDEX IF NOT EXISTS idx_memories_tags ON memories(tags)")
         self._conn.execute("CREATE INDEX IF NOT EXISTS idx_memories_priority ON memories(priority)")
         self._conn.commit()
-    
+
     def store(self, content: str, tags: str = "", priority: int = 3, source: str = "adam") -> int:
         """تخزين ذكرى جديد"""
         now = time.time()
@@ -90,8 +86,8 @@ class MemoryStore:
         mem_id = cur.lastrowid
         self._conn.commit()
         return mem_id
-    
-    def search(self, query: str, limit: int = 10) -> List[Dict[str, Any]]:
+
+    def search(self, query: str, limit: int = 10) -> list[dict[str, Any]]:
         """البحث في الذاكرة"""
         self._conn.row_factory = sqlite3.Row
 
@@ -116,14 +112,14 @@ class MemoryStore:
         if ids:
             self._conn.execute(
                 f"UPDATE memories SET access_count = access_count + 1, accessed_at = ? WHERE id IN ({','.join('?'*len(ids))})",
-                [time.time()] + ids
+                [time.time(), *ids]
             )
             self._conn.commit()
 
         self._conn.row_factory = None
         return results
-    
-    def recall(self, memory_id: int) -> Optional[Dict[str, Any]]:
+
+    def recall(self, memory_id: int) -> dict[str, Any] | None:
         """استرجاع ذكرى بالمعرف"""
         self._conn.row_factory = sqlite3.Row
         row = self._conn.execute("SELECT * FROM memories WHERE id = ?", (memory_id,)).fetchone()
@@ -133,8 +129,8 @@ class MemoryStore:
             self._conn.commit()
         self._conn.row_factory = None
         return dict(row) if row else None
-    
-    def reflect(self, days: int = 1) -> Dict[str, Any]:
+
+    def reflect(self, days: int = 1) -> dict[str, Any]:
         """تأمل في الذكريات"""
         cutoff = time.time() - (days * 86400)
         self._conn.row_factory = sqlite3.Row
@@ -156,8 +152,8 @@ class MemoryStore:
             "most_accessed": [dict(r) for r in top],
             "period_days": days,
         }
-    
-    def stats(self) -> Dict[str, Any]:
+
+    def stats(self) -> dict[str, Any]:
         """إحصائيات الذاكرة"""
         total = self._conn.execute("SELECT COUNT(*) FROM memories").fetchone()[0]
         by_priority = {}
@@ -172,13 +168,13 @@ class MemoryStore:
             "newest": newest,
             "db_path": self.db_path,
         }
-    
+
     def delete(self, memory_id: int) -> bool:
         """حذف ذكرى بالمعرف"""
         cur = self._conn.execute("DELETE FROM memories WHERE id = ?", (memory_id,))
         self._conn.commit()
         return cur.rowcount > 0
-    
+
     def clear(self) -> int:
         """حذف كل الذكريات — يرجع عدد المحذوفات"""
         count = self._conn.execute("SELECT COUNT(*) FROM memories").fetchone()[0]
@@ -205,21 +201,21 @@ def store(content: str, tags: str = "", priority: int = 3, source: str = "adam")
     return _default_store.store(content, tags, priority, source)
 
 
-def search(query: str, limit: int = 10) -> List[Dict[str, Any]]:
+def search(query: str, limit: int = 10) -> list[dict[str, Any]]:
     """البحث في الذاكرة (backward compat)"""
     return _default_store.search(query, limit)
 
 
-def recall(memory_id: int) -> Optional[Dict[str, Any]]:
+def recall(memory_id: int) -> dict[str, Any] | None:
     """استرجاع ذكرى بالمعرف (backward compat)"""
     return _default_store.recall(memory_id)
 
 
-def reflect(days: int = 1) -> Dict[str, Any]:
+def reflect(days: int = 1) -> dict[str, Any]:
     """تأمل في الذكريات (backward compat)"""
     return _default_store.reflect(days)
 
 
-def stats() -> Dict[str, Any]:
+def stats() -> dict[str, Any]:
     """إحصائيات الذاكرة (backward compat)"""
     return _default_store.stats()

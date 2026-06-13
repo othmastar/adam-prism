@@ -15,13 +15,11 @@ Adam Prism — MCP (Model Context Protocol) Integration — HARDENED v3
    causing memory leaks and stale connection references.
 """
 
-import os
-import sys
 import logging
-import json
-from contextlib import AsyncExitStack
-from typing import Dict, Any, List, Optional
-from dataclasses import dataclass, field
+import os
+from contextlib import AsyncExitStack, suppress
+from dataclasses import dataclass
+from typing import Any
 
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
@@ -40,13 +38,13 @@ class MCPTool:
 class MCPConnection:
     """اتصال بخادم MCP واحد"""
 
-    def __init__(self, name: str, command: str, args: List[str] = None, env: Dict[str, str] = None):
+    def __init__(self, name: str, command: str, args: list[str] | None = None, env: dict[str, str] | None = None):
         self.name = name
         self.command = command
         self.args = args or []
         self.env = env or {}
-        self.session: Optional[ClientSession] = None
-        self.tools: List[MCPTool] = []
+        self.session: ClientSession | None = None
+        self.tools: list[MCPTool] = []
         self._exit_stack = AsyncExitStack()
         self._connected = False
 
@@ -87,7 +85,7 @@ class MCPConnection:
             await self._cleanup()
             raise
 
-    async def call_tool(self, tool_name: str, arguments: Dict[str, Any] = None) -> Dict:
+    async def call_tool(self, tool_name: str, arguments: dict[str, Any] | None = None) -> dict:
         """استدعاء أداة على الخادم"""
         if not self._connected or not self.session:
             return {"success": False, "error": "MCP غير متصل"}
@@ -111,10 +109,8 @@ class MCPConnection:
         await self._cleanup()
 
     async def _cleanup(self):
-        try:
+        with suppress(Exception):
             await self._exit_stack.aclose()
-        except Exception:
-            pass
 
 
 class MCPManager:
@@ -127,10 +123,10 @@ class MCPManager:
     MAX_MCP_SERVERS = int(os.environ.get("ADAM_MAX_MCP_SERVERS", "10"))
 
     def __init__(self):
-        self.connections: Dict[str, MCPConnection] = {}
-        self._tool_map: Dict[str, str] = {}  # tool_name → connection name
+        self.connections: dict[str, MCPConnection] = {}
+        self._tool_map: dict[str, str] = {}  # tool_name → connection name
 
-    async def add_server(self, name: str, command: str, args: List[str] = None, env: Dict[str, str] = None):
+    async def add_server(self, name: str, command: str, args: list[str] | None = None, env: dict[str, str] | None = None):
         """يضيف خادم MCP جديد — مع التحقق من الأمر"""
         import shlex
 
@@ -177,7 +173,7 @@ class MCPManager:
                 self._tool_map.pop(t_name, None)
             logger.warning(f"MCP server '{name}' connection failed, removed from connections: {e}")
 
-    async def initialize(self, servers: List[Dict] = None):
+    async def initialize(self, servers: list[dict] | None = None):
         """تهيئة خوادم MCP من config"""
         for cfg in (servers or []):
             await self.add_server(
@@ -187,7 +183,7 @@ class MCPManager:
                 env=cfg.get("env"),
             )
 
-    async def call_tool(self, tool_name: str, arguments: Dict = None) -> Dict:
+    async def call_tool(self, tool_name: str, arguments: dict | None = None) -> dict:
         """استدعاء أداة من أي خادم"""
         conn_name = self._tool_map.get(tool_name)
         if not conn_name:
@@ -197,7 +193,7 @@ class MCPManager:
             return {"success": False, "error": f"خادم '{conn_name}' مش متصل"}
         return await conn.call_tool(tool_name, arguments)
 
-    def get_all_tools(self) -> List[Dict]:
+    def get_all_tools(self) -> list[dict]:
         """كل الأدوات المتاحة من كل الخوادم"""
         tools = []
         for conn in self.connections.values():

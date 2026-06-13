@@ -22,7 +22,7 @@ from __future__ import annotations
 import logging
 import time
 import uuid
-from typing import Any, Callable, Optional, Set
+from typing import Any
 
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -106,7 +106,7 @@ class AuditLoggingMiddleware(BaseHTTPMiddleware):
     Logs every request with request ID, path, method, response time, and status code.
     """
 
-    def __init__(self, app: Any, exclude_paths: Optional[Set[str]] = None) -> None:
+    def __init__(self, app: Any, exclude_paths: set[str] | None = None) -> None:
         super().__init__(app)
         self._exclude_paths = exclude_paths or {"/docs", "/openapi.json", "/favicon.ico"}
 
@@ -265,10 +265,10 @@ def _create_health_routes(engine: Any = None) -> list:
 def install_all_middleware(
     app: FastAPI,
     engine: Any = None,
-    rate_limiter: Optional[RateLimiter] = None,
-    cors_origins: Optional[list] = None,
+    rate_limiter: RateLimiter | None = None,
+    cors_origins: list | None = None,
     max_request_size: int = 10 * 1024 * 1024,
-    rate_limit_exclude_paths: Optional[list] = None,
+    rate_limit_exclude_paths: list | None = None,
 ) -> None:
     """
     تثبيت جميع الوسائط — Install all middleware on a FastAPI app.

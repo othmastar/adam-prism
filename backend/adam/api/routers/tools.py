@@ -6,16 +6,16 @@ Adam Prism — Tools Router
 [FIX v3] Router split — extracted from server.py for better maintainability
 """
 
-from fastapi import APIRouter, HTTPException, Request
+
+from fastapi import APIRouter
 from pydantic import BaseModel
-from typing import Dict
 
 router = APIRouter(tags=["tools"])
 
 
 class ActionRequest(BaseModel):
     action: str
-    params: Dict = {}
+    params: dict = {}
 
 
 @router.post("/api/tools/action")

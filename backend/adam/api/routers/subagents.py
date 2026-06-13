@@ -6,7 +6,7 @@ Adam Prism — Subagents Router
 [FIX v3] Router split — extracted from server.py for better maintainability
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 
 router = APIRouter(tags=["subagents"])
 

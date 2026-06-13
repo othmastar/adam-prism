@@ -4,7 +4,7 @@ Adam Prism — Provider Base Class
 القاعدة لكل مزودي النماذج: Ollama, OpenAI, Anthropic, ...
 """
 
-from typing import Dict, Any, List, Optional
+from typing import Any
 
 
 class BaseProvider:
@@ -12,14 +12,14 @@ class BaseProvider:
 
     name: str = ""
     model: str = ""
-    config: Dict[str, Any] = {}
+    config: dict[str, Any] = {}
 
-    async def chat(self, messages: List[Dict], **kwargs) -> str:
+    async def chat(self, messages: list[dict], **kwargs) -> str:
         raise NotImplementedError
 
     async def generate(self, prompt: str, system: str = "", **kwargs) -> str:
         raise NotImplementedError
 
-    async def chat_stream(self, messages: List[Dict], **kwargs):
+    async def chat_stream(self, messages: list[dict], **kwargs):
         """Stream response chunks. Yields strings."""
         raise NotImplementedError

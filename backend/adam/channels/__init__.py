@@ -7,10 +7,10 @@ Viber, Teams, Google Chat, IRC, XMPP, WeChat, Telegram Webhook, وغيرها.
 """
 
 from .base import BaseChannel
+from .bulk import BULK_CHANNELS
+from .manager import CHANNEL_REGISTRY, ChannelManager, discover_channels
 from .telegram import TelegramChannel
 from .whatsapp import WhatsAppChannel
-from .manager import ChannelManager, discover_channels, CHANNEL_REGISTRY
-from .bulk import BULK_CHANNELS
 
 # Map channel names to their display class names for __getattr__
 _CHANNEL_CLASS_NAMES = {
@@ -49,12 +49,34 @@ def __getattr__(name):
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 __all__ = [
-    "BaseChannel", "ChannelManager", "discover_channels", "CHANNEL_REGISTRY", "BULK_CHANNELS",
-    "TelegramChannel", "WhatsAppChannel",
-    "DiscordChannel", "SlackChannel", "EmailChannel", "SMSChannel",
-    "WebSocketChannel", "WebChatChannel", "TwitterChannel", "FacebookChannel",
-    "MatrixChannel", "SignalChannel", "InstagramChannel", "LINEChannel",
-    "ViberChannel", "TeamsChannel", "GoogleChatChannel", "IRCChannel",
-    "XMPPChannel", "TelegramWebhookChannel", "GenericWebhookChannel",
-    "RSSChannel", "NotionChannel", "GitHubChannel", "WeChatChannel",
+    "BULK_CHANNELS",
+    "CHANNEL_REGISTRY",
+    "BaseChannel",
+    "ChannelManager",
+    "DiscordChannel",
+    "EmailChannel",
+    "FacebookChannel",
+    "GenericWebhookChannel",
+    "GitHubChannel",
+    "GoogleChatChannel",
+    "IRCChannel",
+    "InstagramChannel",
+    "LINEChannel",
+    "MatrixChannel",
+    "NotionChannel",
+    "RSSChannel",
+    "SMSChannel",
+    "SignalChannel",
+    "SlackChannel",
+    "TeamsChannel",
+    "TelegramChannel",
+    "TelegramWebhookChannel",
+    "TwitterChannel",
+    "ViberChannel",
+    "WeChatChannel",
+    "WebChatChannel",
+    "WebSocketChannel",
+    "WhatsAppChannel",
+    "XMPPChannel",
+    "discover_channels",
 ]

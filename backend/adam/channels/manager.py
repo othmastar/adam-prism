@@ -6,13 +6,13 @@ Adam Prism — Dynamic Channel Manager
 
 import asyncio
 import logging
-from typing import Dict, Any, Optional
+from typing import Any
 
 from .base import BaseChannel
 
 logger = logging.getLogger("adam_prism.channels")
 
-CHANNEL_REGISTRY: Dict[str, type] = {}
+CHANNEL_REGISTRY: dict[str, type] = {}
 
 
 def discover_channels():
@@ -40,9 +40,9 @@ def discover_channels():
 
 
 class ChannelManager:
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         self.config = config
-        self.channels: Dict[str, BaseChannel] = {}
+        self.channels: dict[str, BaseChannel] = {}
         self._tasks = []
         self._webhook_routes = []
 
@@ -80,14 +80,14 @@ class ChannelManager:
                 logger.info(f"📡 {name} polling started")
 
     async def stop_all(self):
-        for name, channel in self.channels.items():
+        for _name, channel in self.channels.items():
             if hasattr(channel, "stop"):
                 channel.stop()
         for task in self._tasks:
             task.cancel()
         logger.info("🛑 All channels stopped")
 
-    def get_status(self) -> Dict:
+    def get_status(self) -> dict:
         return {name: ch.get_status() for name, ch in self.channels.items()}
 
     def get_webhook_routes(self) -> list:

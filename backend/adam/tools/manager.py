@@ -12,17 +12,16 @@ Adam Prism — Tool Manager — HARDENED v2
 6. [NEW] تحقق إضافي من أسماء الملفات
 """
 
-import os
-import json
 import logging
+import os
 import subprocess
-from typing import Dict, Any, Optional, List
+from typing import Any
 
+from adam.core.permissions import classify_tool, get_risk_level
 from adam.eyes.browser import Browser
+from adam.infrastructure import sanitize_path
 from adam.tools.computer import ComputerToolManager
 from adam.tools.mcp import MCPManager
-from adam.core.permissions import classify_tool, get_risk_level
-from adam.infrastructure import sanitize_path
 
 logger = logging.getLogger("adam_prism.tools")
 
@@ -30,12 +29,12 @@ logger = logging.getLogger("adam_prism.tools")
 class ToolManager:
     """مدير الأدوات — يوجّه الاستدعاءات للمتعامل المناسب"""
 
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         self.browser = Browser(self.config.get("browser", {}))
         self.computer = ComputerToolManager()
         self.mcp = MCPManager()
-        self.action_log: List[Dict] = []
+        self.action_log: list[dict] = []
 
     async def initialize(self):
         """تهيئة كل الأدوات"""
@@ -44,7 +43,7 @@ class ToolManager:
         if mcp_servers:
             await self.mcp.initialize(mcp_servers)
 
-    async def execute_action(self, action: Dict) -> Dict:
+    async def execute_action(self, action: dict) -> dict:
         action_type = action.get("type", "")
 
         # [FIX v2] تسجيل مفصّل مع مستوى الخطورة
@@ -84,15 +83,15 @@ class ToolManager:
 
         return {"success": False, "error": f"إجراء غير معروف: {action_type}"}
 
-    def get_mcp_tools(self) -> List[Dict]:
+    def get_mcp_tools(self) -> list[dict]:
         return self.mcp.get_all_tools()
 
-    async def add_mcp_server(self, name: str, command: str, args: List[str] = None, env: Dict[str, str] = None):
+    async def add_mcp_server(self, name: str, command: str, args: list[str] | None = None, env: dict[str, str] | None = None):
         """[FIX v2] إضافة خادم MCP — مع تسجيل أمني مفصّل"""
         logger.warning(f"MCP server add request: name={name}, command={command}, args={args}")
         await self.mcp.add_server(name, command, args, env)
 
-    async def _exec_browser(self, action: Dict) -> Dict:
+    async def _exec_browser(self, action: dict) -> dict:
         if not await self.browser.is_healthy():
             ok = await self.browser.initialize()
             if not ok:
@@ -112,7 +111,7 @@ class ToolManager:
             return await self.browser.screenshot()
         return {"success": False, "error": f"Browser action unknown: {at}"}
 
-    async def _exec_file(self, action: Dict) -> Dict:
+    async def _exec_file(self, action: dict) -> dict:
         at = action.get("type")
         try:
             if at == "file_read":
@@ -201,5 +200,5 @@ class ToolManager:
             logger.error(f"file action error: {at} — {e}")
             return {"success": False, "error": str(e)}
 
-    def get_action_log(self, limit: int = 50) -> List[Dict]:
+    def get_action_log(self, limit: int = 50) -> list[dict]:
         return self.action_log[-limit:]

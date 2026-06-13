@@ -11,13 +11,14 @@ generate+tools, finalize.
 4. [NEW — FIX] _bg_task callback now handles InvalidStateError on cancelled tasks
 """
 
-import re
-import json
-import time
 import asyncio
+import contextlib
+import json
 import logging
+import re
+import time
 from datetime import datetime
-from typing import Optional, Dict, List, Any
+from typing import Any
 
 from adam.engine.tools import AdamPrismEngineTools
 
@@ -41,7 +42,7 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
     Mixin: chat() processing cycle + sub-methods.
     """
 
-    async def chat(self, user_message: str, context: Optional[Dict] = None) -> Dict[str, Any]:
+    async def chat(self, user_message: str, context: dict | None = None) -> dict[str, Any]:
         """
         الدورة الكاملة للمعالجة (مُحسّنة للسرعة):
         أمان → تصنيف (بدون Ollama) → بحث → توليد → أدوات → حفظ
@@ -88,7 +89,7 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
             tool_records, tool_calls_made, errors, cycle_start
         )
 
-    async def _chat_check_vision(self, user_message: str) -> Optional[Dict]:
+    async def _chat_check_vision(self, user_message: str) -> dict | None:
         """فحص ذكي — يكتشف امتدادات الصور مع فحص نوع الموديل الفعلي"""
         VISION_EXTENSIONS = (".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp")
         has_image_ref = any(
@@ -107,7 +108,7 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
             }
         return None
 
-    async def _chat_run_security(self, user_message: str) -> Optional[Dict]:
+    async def _chat_run_security(self, user_message: str) -> dict | None:
         """المرحلة 1: فحص الأمان + Input Guard. يرجع dict لو ممنوع، None لو تمام"""
         await self._emit_step("فحص الأمان", "running")
         try:
@@ -138,7 +139,7 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
                 logger.warning(f"Input Guard flagged: {guard_verdict.reason}")
         return None
 
-    async def _chat_classify_context(self, user_message: str, errors: List) -> tuple:
+    async def _chat_classify_context(self, user_message: str, errors: list) -> tuple:
         """المرحلة 2-4: تصنيف القصد + بناء السياق + بحث + URL handling"""
         await self._emit_step("تحليل القصد", "running")
         try:
@@ -172,7 +173,7 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
                     self.knowledge.search(user_message, top_k=3), timeout=10
                 )
                 enriched_context["knowledge"] = relevant_knowledge
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 logger.warning("بحث المعرفة timed out")
                 errors.append("knowledge:timeout")
             except Exception as e:
@@ -201,10 +202,8 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
                 url = urls[0]
                 try:
                     if self.eyes:
-                        try:
+                        with contextlib.suppress(Exception):
                             await asyncio.wait_for(self.eyes.initialize(), timeout=15)
-                        except Exception:
-                            pass
                     result = await asyncio.wait_for(
                         self._execute_tool("browser_fetch", {"url": url}), timeout=50
                     )
@@ -216,7 +215,7 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
                     elif not result.get("success"):
                         logger.warning(f"browser_fetch failed: {result.get('error', 'unknown')}")
                         errors.append("url_fetch:fetch_failed")
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     logger.warning("URL auto-fetch timed out")
                     errors.append("url_fetch:timeout")
                 except Exception as e:
@@ -226,8 +225,8 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
         return intent, enriched_context, relevant_knowledge, cleaned_message, errors
 
     async def _chat_generate_and_tools(
-        self, cleaned_message: str, enriched_context: Dict, intent: Dict,
-        deadline: float, errors: List, relevant_knowledge: List,
+        self, cleaned_message: str, enriched_context: dict, intent: dict,
+        deadline: float, errors: list, relevant_knowledge: list,
         original_message: str = ""
     ) -> tuple:
         """المرحلة 5-6: توليد الرد + تنفيذ الأدوات + plugin hooks"""
@@ -244,8 +243,8 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
 
         try:
             response_text = await self._generate_with_timeout(cleaned_message, enriched_context, deadline=deadline)
-        except asyncio.TimeoutError:
-            logger.warning(f"التوليد تجاوز الوقت المحدد")
+        except TimeoutError:
+            logger.warning("التوليد تجاوز الوقت المحدد")
             errors.append("generation:timeout")
             response_text = ""
         except Exception as e:
@@ -295,7 +294,7 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
                     self._execute_tool(tool_name, tool_params),
                     timeout=self.config.get("tool_timeout", 30)
                 )
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 tool_result = {"success": False, "error": "الأداة تجاوزت الوقت المحدد"}
                 errors.append(f"tool:{tool_name}:timeout")
             except Exception as e:
@@ -355,10 +354,10 @@ class AdamPrismEngineChat(AdamPrismEngineTools):
     # كان يسبب تنفيذ أوامر غير مقصودة
 
     async def _chat_finalize(
-        self, user_message: str, response_text: str, intent: Dict,
-        enriched_context: Dict, tool_records: List, tool_calls_made: int,
-        errors: List, cycle_start: float
-    ) -> Dict[str, Any]:
+        self, user_message: str, response_text: str, intent: dict,
+        enriched_context: dict, tool_records: list, tool_calls_made: int,
+        errors: list, cycle_start: float
+    ) -> dict[str, Any]:
         """المرحلة 7-8: حفظ + trace + Output Guard + return"""
         fallback_response = "عذراً، حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى."
         cycle_duration = time.time() - cycle_start

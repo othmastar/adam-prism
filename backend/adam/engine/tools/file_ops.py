@@ -7,17 +7,15 @@
 - file_download calls _validate_url before downloading
 """
 
-import os
 import ipaddress
+import os
 import subprocess
 import uuid
-from typing import Dict
 from urllib.parse import urlparse
 
 import httpx
 
 from adam.infrastructure import sanitize_path
-
 
 # ═══════════════════════════════════════════════════════
 # [C3] SSRF Protection — منع الوصول للشبكة الداخلية
@@ -51,13 +49,10 @@ def _is_private_ip(hostname: str) -> bool:
 
     # فحص النطاقات الداخلية
     internal_suffixes = (".local", ".internal", ".localhost", ".docker", ".container")
-    if any(hostname.lower().endswith(s) for s in internal_suffixes):
-        return True
-
-    return False
+    return bool(any(hostname.lower().endswith(s) for s in internal_suffixes))
 
 
-def _validate_url(url: str) -> Dict:
+def _validate_url(url: str) -> dict:
     """التحقق من صحة وأمان URL — منع SSRF"""
     if not url:
         return {"valid": False, "error": "مفيش URL"}
@@ -100,18 +95,18 @@ def _validate_url(url: str) -> Dict:
 class FileOpsMixin:
     """Mixin: disk + file read/write/download tools"""
 
-    async def _tool_disk(self, params: Dict) -> Dict:
+    async def _tool_disk(self, params: dict) -> dict:
         try:
             disk_data = {}
             extra_paths = [p for p in self.config.get("extra_disk_paths", []) if os.path.exists(p)]
-            for path in ["/"] + extra_paths:
+            for path in ["/", *extra_paths]:
                     usage = subprocess.check_output(["df", "-h", path]).decode().split("\n")[1].split()
                     disk_data[path] = {"size": usage[1], "used": usage[2], "available": usage[3], "used_pct": usage[4]}
             return {"success": True, "disks": disk_data}
         except (subprocess.CalledProcessError, OSError) as e:
             return {"success": False, "error": str(e)}
 
-    async def _tool_file(self, tool_name: str, params: Dict) -> Dict:
+    async def _tool_file(self, tool_name: str, params: dict) -> dict:
         try:
             if tool_name == "file_read":
                 path = params.get("path", "")
@@ -126,7 +121,7 @@ class FileOpsMixin:
                 size = os.path.getsize(safe)
                 if size > max_size:
                     return {"success": False, "error": f"الملف كبير جداً ({size//1024}KB). الحد 1MB."}
-                with open(safe, "r", encoding="utf-8", errors="replace") as f:
+                with open(safe, encoding="utf-8", errors="replace") as f:
                     content = f.read()
                 return {"success": True, "data": content, "path": safe, "size": size}
 

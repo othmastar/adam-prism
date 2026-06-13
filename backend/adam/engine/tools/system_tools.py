@@ -3,13 +3,12 @@
 import os
 import subprocess
 import uuid
-from typing import Dict
 
 
 class SystemToolsMixin:
     """Mixin: mouse, keyboard, clipboard, screen, window tools"""
 
-    async def _tool_mouse(self, tool_name: str, params: Dict) -> Dict:
+    async def _tool_mouse(self, tool_name: str, params: dict) -> dict:
         _ws_bin = self._local_bin
         _env = {**os.environ, "PATH": f"{_ws_bin}:{os.environ.get('PATH', '')}"}
         try:
@@ -44,7 +43,7 @@ class SystemToolsMixin:
                     for _ in range(min(abs(int(dx)) // 10 + 1, 20)):
                         clicks += ["click", btn]
                 if clicks:
-                    subprocess.run(["xdotool"] + clicks, capture_output=True, timeout=5, env=_env)
+                    subprocess.run(["xdotool", *clicks], capture_output=True, timeout=5, env=_env)
                 return {"success": True}
 
             elif tool_name == "mouse_drag":
@@ -72,7 +71,7 @@ class SystemToolsMixin:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    async def _tool_keyboard(self, tool_name: str, params: Dict) -> Dict:
+    async def _tool_keyboard(self, tool_name: str, params: dict) -> dict:
         _ws_bin = self._local_bin
         _env = {**os.environ, "PATH": f"{_ws_bin}:{os.environ.get('PATH', '')}"}
         try:
@@ -100,7 +99,7 @@ class SystemToolsMixin:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    async def _tool_clipboard(self, tool_name: str, params: Dict) -> Dict:
+    async def _tool_clipboard(self, tool_name: str, params: dict) -> dict:
         _ws_bin = self._local_bin
         _env = {**os.environ, "PATH": f"{_ws_bin}:{os.environ.get('PATH', '')}"}
         try:
@@ -116,7 +115,7 @@ class SystemToolsMixin:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    async def _tool_screen(self, tool_name: str, params: Dict) -> Dict:
+    async def _tool_screen(self, tool_name: str, params: dict) -> dict:
         try:
             if tool_name == "screen_info":
                 r = subprocess.run(["xrandr"], capture_output=True, text=True, timeout=5)
@@ -143,7 +142,7 @@ class SystemToolsMixin:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    async def _tool_window(self, tool_name: str, params: Dict) -> Dict:
+    async def _tool_window(self, tool_name: str, params: dict) -> dict:
         _ws_bin = self._local_bin
         _env = {**os.environ, "PATH": f"{_ws_bin}:{os.environ.get('PATH', '')}"}
         try:

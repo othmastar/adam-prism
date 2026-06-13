@@ -7,10 +7,9 @@
 """
 
 import ast
-import subprocess
-import shlex
 import logging
-from typing import Dict
+import shlex
+import subprocess
 
 logger = logging.getLogger("adam_prism.shell")
 
@@ -36,11 +35,7 @@ def _is_sensitive_path(arg: str) -> bool:
     """فحص هل المسار يبدأ بمسار حساس"""
     # Normalize the path to prevent evasion with trailing slashes or dots
     normalized = arg.rstrip("/")
-    for sensitive in SENSITIVE_PATHS:
-        # Block if the argument starts with a sensitive path
-        if normalized == sensitive or normalized.startswith(sensitive + "/"):
-            return True
-    return False
+    return any(normalized == sensitive or normalized.startswith(sensitive + "/") for sensitive in SENSITIVE_PATHS)
 
 
 # دوال آمنة مسموح باستخدامها في الـ sandbox
@@ -57,8 +52,7 @@ _SAFE_BUILTINS = {
     "abs": abs, "round": round, "any": any, "all": all,
     "ord": ord, "chr": chr, "hex": hex, "oct": oct, "bin": bin,
     "pow": pow, "divmod": divmod, "hash": hash, "id": id,
-    "iter": iter, "next": next, "slice": slice,
-    "isinstance": isinstance, "issubclass": issubclass,
+    "iter": iter, "next": next, "slice": slice, "issubclass": issubclass,
     "hasattr": hasattr, "getattr": getattr,
 }
 
@@ -92,13 +86,11 @@ def _check_ast_safe(tree: ast.AST) -> str | None:
                 if node.func.attr in ("__import__",):
                     return f"لا يمكن استخدام {node.func.attr}()"
         # منع الوصول للـ dunder attributes
-        if isinstance(node, ast.Attribute):
-            if node.attr in _DANGEROUS_DUNDERS:
-                return f"لا يمكن الوصول لـ {node.attr}"
+        if isinstance(node, ast.Attribute) and node.attr in _DANGEROUS_DUNDERS:
+            return f"لا يمكن الوصول لـ {node.attr}"
         # منع الـ dunders كـ string constants — يحمي من getattr(obj, '__class__')
-        if isinstance(node, ast.Constant) and isinstance(node.value, str):
-            if node.value in _DANGEROUS_DUNDERS:
-                return f"لا يمكن استخدام سترينج: {node.value}"
+        if isinstance(node, ast.Constant) and isinstance(node.value, str) and node.value in _DANGEROUS_DUNDERS:
+            return f"لا يمكن استخدام سترينج: {node.value}"
     return None
 
 
@@ -109,7 +101,7 @@ def _build_sandbox_code(code: str) -> str:
     # exec() مع globals مخصصة — الـ __builtins__ مش في الكود نفسه
     exec_wrapper = textwrap.dedent(f"""\
 _sandbox_globals = {{"__builtins__": {safe_repr}}}
-exec({repr(code)}, _sandbox_globals)
+exec({code!r}, _sandbox_globals)
 """).strip()
     return exec_wrapper
 
@@ -117,7 +109,7 @@ exec({repr(code)}, _sandbox_globals)
 class ShellToolsMixin:
     """Mixin: shell + python execution tools"""
 
-    async def _tool_shell(self, tool_name: str, params: Dict) -> Dict:
+    async def _tool_shell(self, tool_name: str, params: dict) -> dict:
         if tool_name == "shell":
             command = params.get("command", "")
             if not command:

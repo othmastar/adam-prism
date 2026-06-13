@@ -4,7 +4,6 @@ Adam Prism — Plugin Base Class
 كل plugin يرث من AdamPlugin وينفذ hooks اللي يحتاجها.
 """
 
-from typing import Dict, Any, Optional, List, Callable, Awaitable
 
 
 class AdamPlugin:
@@ -21,18 +20,18 @@ class AdamPlugin:
     async def on_unload(self):
         pass
 
-    async def before_generate(self, message: str, context: Dict) -> Optional[Dict]:
+    async def before_generate(self, message: str, context: dict) -> dict | None:
         """قبل التوليد. يرجع dict معدل أو None"""
         pass
 
-    async def after_generate(self, message: str, response: str) -> Optional[str]:
+    async def after_generate(self, message: str, response: str) -> str | None:
         """بعد التوليد. يرجع رد معدل أو None"""
         pass
 
-    async def before_tool(self, action: Dict) -> Optional[Dict]:
+    async def before_tool(self, action: dict) -> dict | None:
         """قبل تنفيذ الأداة. يرجع action معدل أو None (يمنع التنفيذ)"""
         pass
 
-    async def after_tool(self, action: Dict, result: Dict) -> Optional[Dict]:
+    async def after_tool(self, action: dict, result: dict) -> dict | None:
         """بعد تنفيذ الأداة. يرجع result معدل أو None"""
         pass

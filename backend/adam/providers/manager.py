@@ -4,14 +4,13 @@ Adam Prism — Multi-Provider Manager
 يدير كل providers، يدعم auto-fallback (لو واحد وقع، جرب التاني)
 """
 
-import os
 import logging
-from typing import Dict, Any, List, Optional
+from typing import Any
 
+from adam.providers.anthropic import AnthropicProvider
 from adam.providers.base import BaseProvider
 from adam.providers.ollama import OllamaProvider
 from adam.providers.openai import OpenAIProvider
-from adam.providers.anthropic import AnthropicProvider
 
 logger = logging.getLogger("adam_prism.providers")
 
@@ -19,11 +18,11 @@ logger = logging.getLogger("adam_prism.providers")
 class ProviderManager:
     """مدير مقدمي النماذج — يدعم auto-fallback + streaming"""
 
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         self.fallback_order = self.config.get("provider_fallback", ["ollama", "openai", "anthropic"])
         self.mode = self.config.get("inference_mode", "ollama")
-        self._providers: Dict[str, BaseProvider] = {}
+        self._providers: dict[str, BaseProvider] = {}
         self._init_providers()
 
     def _init_providers(self):
@@ -32,7 +31,7 @@ class ProviderManager:
             if provider:
                 self._providers[name] = provider
 
-    def _create_provider(self, name: str) -> Optional[BaseProvider]:
+    def _create_provider(self, name: str) -> BaseProvider | None:
         try:
             if name == "ollama":
                 return OllamaProvider(self.config)
@@ -45,7 +44,7 @@ class ProviderManager:
         return None
 
     @property
-    def current(self) -> Optional[BaseProvider]:
+    def current(self) -> BaseProvider | None:
         """الـ provider النشط حالياً"""
         return self._providers.get(self.mode)
 
@@ -56,10 +55,10 @@ class ProviderManager:
         else:
             logger.warning(f"Provider '{mode}' غير متاح، المتاح: {list(self._providers.keys())}")
 
-    def list_providers(self) -> List[str]:
+    def list_providers(self) -> list[str]:
         return list(self._providers.keys())
 
-    async def chat(self, messages: List[Dict], **kwargs) -> str:
+    async def chat(self, messages: list[dict], **kwargs) -> str:
         """يحاول مع الـ provider الحالي، لو تعذر يجرب الباقي (auto-fallback)"""
         errors = []
 
@@ -94,7 +93,7 @@ class ProviderManager:
                 logger.warning(f"⚠️ {self.mode} generate failed: {e}")
         return ""
 
-    async def chat_stream(self, messages: List[Dict], **kwargs):
+    async def chat_stream(self, messages: list[dict], **kwargs):
         """Streaming مع auto-fallback"""
         if self.current:
             try:

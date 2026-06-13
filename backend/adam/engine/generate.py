@@ -6,9 +6,8 @@ Generation: message building, system prompts, tool registry prompts, classify in
 
 import json
 import logging
-from typing import Dict, List, Any
+from typing import Any
 
-from adam.security.guard import TOOL_REGISTRY
 from adam.engine.context import AdamPrismEngineContext
 
 logger = logging.getLogger("adam_prism.core")
@@ -19,7 +18,7 @@ class AdamPrismEngineGenerate(AdamPrismEngineContext):
     Mixin: generation, prompt building, message construction.
     """
 
-    async def _classify_intent(self, message: str) -> Dict[str, Any]:
+    async def _classify_intent(self, message: str) -> dict[str, Any]:
         """تصنيف قصد الرسالة وتحديد الوضع المعرفي المناسب"""
         prompt = f"""صنف قصد الرسالة التالية واختر الوضع المعرفي المناسب.
 
@@ -48,7 +47,7 @@ class AdamPrismEngineGenerate(AdamPrismEngineContext):
             logger.warning(f"تعذر تصنيف القصد: {e}")
             return {"mode": "teacher", "intent_type": "general", "confidence": 0.5, "topics": []}
 
-    async def _generate(self, message: str, context: Dict[str, Any]) -> str:
+    async def _generate(self, message: str, context: dict[str, Any]) -> str:
         """توليد الرد — عبر provider الحالي أو LoRA server"""
         messages_for_model = self._build_messages(message, context)
         # auto_tool_result: إذا في result موجود، ندمجه مع رسالة المستخدم مش كرسالة منفصلة
@@ -80,7 +79,7 @@ class AdamPrismEngineGenerate(AdamPrismEngineContext):
 
 **مهم**: إذا السياق فيه نتيجة أداة — استخدمها للرد. غير كده — أول خرجك هو استدعاء الأداة بصيغتها مباشرة."""
 
-    def _build_system_prompt(self, context: Dict) -> str:
+    def _build_system_prompt(self, context: dict) -> str:
         """يبني system prompt — هوية الوكيل الفاعل + الأدوات + السياق"""
         mode_info = self.cognitive_modes.get(self.active_mode, {})
         mode_focus = mode_info.get("focus", "تعليم وتدريب")
@@ -154,7 +153,7 @@ class AdamPrismEngineGenerate(AdamPrismEngineContext):
 
         return "\n".join(prompts)
 
-    def _build_messages(self, message: str, context: Dict[str, Any]) -> List[Dict]:
+    def _build_messages(self, message: str, context: dict[str, Any]) -> list[dict]:
         """بناء مصفوفة الرسائل للنموذج — كل system messages مدمجة في واحد (Gemma 4 apply_chat_template يطلب alternating roles)"""
         system_parts = [self._build_system_prompt(context)]
 
@@ -191,7 +190,7 @@ class AdamPrismEngineGenerate(AdamPrismEngineContext):
             system_parts.append(f"[ملف تعلم المستخدم]\n{json.dumps(context['user_profile'], ensure_ascii=False, indent=2)[:1000]}")
 
         if context.get("patterns"):
-            system_parts.append(f"أنماط تفكير من خبرات سابقة:\n" + "\n".join([f"- {p}" for p in context["patterns"]]))
+            system_parts.append("أنماط تفكير من خبرات سابقة:\n" + "\n".join([f"- {p}" for p in context["patterns"]]))
 
         auto_result = context.get("auto_tool_result")
         if auto_result:
