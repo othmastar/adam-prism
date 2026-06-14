@@ -20,14 +20,99 @@
 
 <p>
   <img src="https://img.shields.io/badge/python-3.10+-3776AB?logo=python&logoColor=white" alt="Python">
-  <img src="https://img.shields.io/badge/tests-229_passed-brightgreen" alt="Tests">
-  <img src="https://img.shields.io/badge/files-107-blue" alt="Files">
-  <img src="https://img.shields.io/badge/commits-74-orange" alt="Commits">
-  <img src="https://img.shields.io/badge/tools-38-blueviolet" alt="Tools">
+  <img src="https://img.shields.io/badge/tests-321_passed-brightgreen" alt="Tests">
+  <img src="https://img.shields.io/badge/routes-93-blue" alt="Routes">
+  <img src="https://img.shields.io/badge/commits-95-orange" alt="Commits">
+  <img src="https://img.shields.io/badge/code-78k%2B_lines-blueviolet" alt="Code">
   <img src="https://img.shields.io/badge/docker-ready-2496ED?logo=docker&logoColor=white" alt="Docker">
+  <img src="https://img.shields.io/badge/SBOM-CycloneDX-success" alt="SBOM">
+  <img src="https://img.shields.io/badge/license-Apache_2.0-blue" alt="License">
 </p>
 
 </div>
+
+---
+
+## ✨ What's Inside (v1.0.0b1)
+
+<div align="center">
+
+| Layer | Count | Highlights |
+|---|---|---|
+| **Python modules** | 128 files / 23,112 lines | `adam/` package, 14 subsystems |
+| **TypeScript/TSX** | 166 files / 23,626 lines | Next.js 16 web UI, Expo 52 mobile, Electron desktop |
+| **Tests** | 321 passed / 7 skipped | pytest, Playwright, Locust load tests |
+| **API routes** | 93 | REST + WebSocket + SSE |
+| **Tools** | 19 | Browser, shell, search, memory, voice, webhooks, WAF… |
+| **Channels** | 4 | Web, Telegram, WhatsApp, Voice |
+| **LLM providers** | 3 | Ollama (local), OpenAI, Anthropic |
+| **Storage** | 5 | Qdrant, Redis, PostgreSQL, SQLite, in-memory |
+| **Auth methods** | 5 | API key, JWT, OAuth2/SSO, session, bcrypt/PBKDF2 |
+| **Observability** | 4 | OpenTelemetry, Sentry, Prometheus, AI token/cost |
+| **CI/CD artifacts** | 28 YAML | GitHub Actions, ArgoCD, Helm, Kustomize, K8s |
+| **Docs** | 103 files / 13.9k lines | Bilingual AR/EN, examples, ADRs |
+
+</div>
+
+### 🛡️ Security & Compliance
+- **WAF** — Web Application Firewall with 10 OWASP Top 10 attack detectors (SQL injection, XSS, path traversal, command injection, SSRF, LDAP injection, XXE, NoSQL injection, JWT attacks, SSTI, open redirect)
+- **CSP headers** — strict Content Security Policy on web + Electron + VSCode
+- **Ethics Gate** — fail-closed (threshold 0.0, configurable)
+- **JWT auth** — HS256 + bcrypt + PBKDF2 fallback
+- **SSO/OAuth2** — Google, Microsoft, GitHub, Okta, Keycloak, Auth0
+- **Multi-tenancy** — 5 roles × 30 permissions RBAC
+- **Pydantic validation** — 16 request/response models
+- **SBOM** — CycloneDX software bill of materials
+- **Input sanitization** — path traversal + XSS + null byte filters
+
+### 🧠 AI & ML
+- **Hybrid Search** — BM25 + Reciprocal Rank Fusion (Arabic + English tokenization)
+- **CruxSight.ai** — Predictive bottleneck detection with 7 structural patterns + 4 prediction heads
+- **AI Observability** — token usage, USD cost, latency tracking (OpenAI, Anthropic, Ollama pricing)
+- **Voice Cloning** — 3 default voices (Egyptian male/female, MSA), 5 dialects, 32-dim speaker embeddings
+- **Memory hierarchy** — short-term, long-term, journal, knowledge graph
+
+### 🔌 Channels & Integration
+- **Web** — Next.js 16 (App Router, RSC, dark mode)
+- **Mobile** — React Native + Expo 52 (push, offline sync, theming)
+- **Desktop** — Electron 32 with auto-updater + crash reporter
+- **Telegram** — bot with long-polling + commands
+- **WhatsApp** — MCP webhook adapter with signature verification
+- **Voice** — TTS with dialect cloning
+
+### 🏗️ Infrastructure
+- **Docker Compose** — Qdrant, Ollama, API, Web UI, Telegram bot, Nginx
+- **Helm chart** — health probes (`/healthz/{live,ready,startup}`), HPA, RBAC, secrets
+- **Kustomize** — overlays for dev/staging/prod
+- **ArgoCD GitOps** — auto-sync, self-heal, image-updater
+- **K8s health probes** — liveness, readiness, startup
+- **Nginx** — reverse proxy + WebSocket + WhatsApp webhook route
+
+### 📊 Observability & Operations
+- **OpenTelemetry** — distributed tracing with OTLP exporter
+- **Sentry-compatible** — error tracking with breadcrumbs
+- **Prometheus** — `/metrics` endpoint
+- **Webhooks** — outgoing HMAC-SHA256 signed + retry with exponential backoff (1s, 2s, 4s, 8s, 16s)
+- **Audit log** — per-user, per-tenant, with replay/export
+- **Rate limiting** — per-user or per-IP
+- **Health checks** — liveness + readiness + startup
+
+### 🛠️ Developer Experience
+- **SDK (Python + TS)** — retry, rate-limit, connection pool, SSE streaming
+- **OpenAPI** — 60 paths, 64 operations, auto-exported `api-spec.json`
+- **Playwright E2E** — chromium + firefox + mobile viewports
+- **Load testing** — Locust with realistic traffic (chat 5x, admin 1x)
+- **Migration script** — v1→v2 (data, config, SQLite schema)
+- **MCP configs** — examples for Claude Desktop, Cursor, Continue
+- **Skills system** — 5 builtin skills, JSON frontmatter
+
+### 🧪 Testing & Quality
+- **321 pytest tests** — unit, integration, E2E, broken marker
+- **Playwright** — web UI across browsers
+- **Trivy** — security scanner
+- **CycloneDX** — SBOM generation
+- **ruff** — zero errors
+- **GitHub Actions** — matrix (Python 3.10/3.11/3.12) × (Ubuntu/macOS/Windows)
 
 ---
 
@@ -209,6 +294,9 @@ WhatsApp, Telegram, Discord, Slack, Email, SMS, Signal, Matrix, Mattermost, Team
 | **100% Local** | ✅ | ✅ | ✅ |
 | **Open Source** | Apache 2.0 | MIT | MIT |
 | **Apps** | Flutter + Electron + Web UI + VS Code | TUI only | macOS/Windows Hub + iOS/Android nodes |
+
+> 📊 **Detailed comparison** (capability matrix, benchmarks, code size, migration guides):
+> [`docs/COMPARISON.md`](docs/COMPARISON.md)
 
 ---
 
