@@ -135,6 +135,22 @@ class SyncMessageItem(BaseModel):
 class SyncSessionRequest(BaseModel):
     messages: list[SyncMessageItem]
 
+
+# [PHASE4] CruxSight.ai predictive monitoring models
+class ServiceMetric(BaseModel):
+    service_id: str
+    service_name: str
+    avg_latency_ms: float = 0.0
+    p99_latency_ms: float = 0.0
+    error_rate: float = 0.0
+    capacity_score: float = 1.0
+    in_degree: int = 0
+    out_degree: int = 0
+
+class BottleneckPredictRequest(BaseModel):
+    services: list[ServiceMetric]
+    edges: list[list[str]] = []  # List of [from, to] pairs
+
 class ChatResponse(BaseModel):
     response: str
     mode: str = "communicator"
@@ -1490,6 +1506,60 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
         if _voice_pipeline is None:
             _voice_pipeline = VoicePipeline()
         return _voice_pipeline
+
+    # [PHASE4] Predictive monitoring (CruxSight.ai integration)
+    _predictive_monitor = None
+
+    def get_predictive_monitor():
+        nonlocal _predictive_monitor
+        if _predictive_monitor is None:
+            from adam.predictive import PredictiveMonitor
+            _predictive_monitor = PredictiveMonitor()
+        return _predictive_monitor
+
+    @app.post("/api/predict/bottleneck")
+    async def predict_bottleneck(req: BottleneckPredictRequest):
+        """[PHASE4] Run CruxSight.ai bottleneck prediction.
+
+        Takes current service metrics and returns:
+        - Bottleneck probability (will a failure occur?)
+        - Pattern (A-G from CruxSight taxonomy)
+        - Time to breach estimate
+        - Root-cause ranking
+        """
+        monitor = get_predictive_monitor()
+        metrics = [s.model_dump() for s in req.services]
+        edges = [tuple(e) for e in req.edges if len(e) == 2]
+        result = await monitor.run_health_check(metrics, edges)
+        return result
+
+    @app.get("/api/predict/status")
+    async def predict_status():
+        """[PHASE4] Status of the predictive monitor + last prediction."""
+        monitor = get_predictive_monitor()
+        return {
+            "model_loaded": monitor.predictor.model_loaded,
+            "model_path": monitor.predictor.model_path,
+            "model_version": (
+                monitor.last_prediction.model_version
+                if monitor.last_prediction
+                else "none"
+            ),
+            "last_run": monitor.last_run,
+            "services_tracked": len(monitor._services_state),
+            "has_prediction": monitor.last_prediction is not None,
+        }
+
+    @app.get("/api/predict/last")
+    async def predict_last():
+        """[PHASE4] Get the last prediction result."""
+        monitor = get_predictive_monitor()
+        if not monitor.last_prediction:
+            return {"error": "No prediction has been made yet"}
+        return {
+            "prediction": monitor.last_prediction.to_dict(),
+            "agent_message": monitor.predictor.format_for_agent(monitor.last_prediction),
+        }
 
     @app.get("/api/voice/audio/{filename}")
     async def get_audio(filename: str):

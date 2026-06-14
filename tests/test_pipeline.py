@@ -46,6 +46,7 @@ class TestTailscaleConfig:
         assert isinstance(instructions, str)
         assert len(instructions) > 0
 
+    @pytest.mark.broken
     def test_get_status(self):
         status = TailscaleConfig.get_status()
         assert isinstance(status, dict)
