@@ -75,22 +75,10 @@ select = ["E", "F", "W", "I", "N", "UP", "B", "SIM", "RUF"]
 ignore = [
     "E501", "E402", "F403", "F405", "B904", "RUF012", "B008", "RUF001", "N806",
     "E701", "E702", "SIM102", "I001",
-    # [PHASE3] Code style - acceptable for community release
-    "B007",  # Loop variable unused
-    "RUF013",  # Implicit Optional
-    "SIM105",  # Use contextlib.suppress
-    "SIM108",  # Use ternary
-    "F841",  # Unused local variable
-    "F821",  # Undefined name (test fixtures)
-    "E712",  # == True comparison
-    "E722",  # Bare except
-    "B017",  # Blind exception assertion
-    "N801",  # Class naming
-    "RUF006",  # Store task reference
-    "RUF059",  # Unused unpacked
-    "SIM115",  # Context manager for files
-    "SIM118",  # key in dict
-    "SIM222",  # or True
+    "B007", "RUF013", "SIM105", "SIM108", "F841", "F821", "E712", "E722",
+    "B017", "N801", "RUF006", "RUF059", "SIM115", "SIM118", "SIM222",
+    # [PHASE6] str/Enum inheritance (use str instead of StrEnum for compat)
+    "UP042",
 ]
 
 [tool.ruff.format]

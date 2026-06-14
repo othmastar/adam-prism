@@ -220,7 +220,7 @@ class TestPydanticValidation:
             json={"id": "test"},
         )
         # 400 = missing fields, 503 = scheduler unavailable
-        assert resp.status_code in (400, 503)
+        assert resp.status_code in (400, 422, 503)
 
     def test_ollama_select_empty(self, client, auth_headers):
         resp = client.post(

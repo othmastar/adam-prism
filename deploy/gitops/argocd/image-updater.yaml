@@ -1,0 +1,49 @@
+# [PHASE6] ArgoCD Image Updater for Adam Prism
+# Automatically updates Adam Prism images when new versions are pushed
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: adam-prism-updater
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/othmastar/adam-prism.git
+    targetRevision: HEAD
+    path: deploy/helm/adam-prism
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: adam-prism
+
+---
+# ImageUpdater CRD
+apiVersion: argoproj.io/v1alpha1
+kind: ImageUpdater
+metadata:
+  name: adam-prism
+  namespace: argocd
+spec:
+  # Watch the api image
+  applicationRefs:
+    - name: adam-prism
+  # Update strategy: latest tag (not version pin for dev)
+  strategy: latest
+  containers:
+    - name: api
+      image: ghcr.io/othmastar/adam-prism
+      # Don't auto-update main branch in prod
+      tags:
+        - pattern: "^v[0-9]+\\.[0-9]+\\.[0-9]+$"
+        - pattern: "^main-[0-9]+-g"
+          extract: "$TS"
+      policy: semver
+    - name: web
+      image: ghcr.io/othmastar/adam-prism-web
+      tags:
+        - pattern: "^v[0-9]+\\.[0-9]+\\.[0-9]+$"
+      policy: semver
+  # Update interval
+  interval: 5m
+  # Require successful health checks
+  writeBackMethod: git
