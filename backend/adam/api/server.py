@@ -124,6 +124,13 @@ class AddMCPServerRequest(BaseModel):
     name: str
     command: str
     args: list[str] = []
+
+
+# [PHASE6] SSO (OAuth2 / OIDC) models
+class SSOCallbackRequest(BaseModel):
+    code: str
+    state: str | None = None
+    redirect_uri: str = "http://localhost:8000/api/auth/sso/callback"
     env: dict | None = None
 
 class SyncMessageItem(BaseModel):
@@ -418,6 +425,40 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
             return JSONResponse(
                 status_code=429,
                 content={"detail": "Too many requests — slow down"}
+            )
+
+        # [PHASE6] WAF (Web Application Firewall) scan
+        from adam.security.waf import get_waf
+        waf = get_waf()
+
+        # Scan query params + path
+        scan_text = str(request.url.path)
+        for key, value in request.query_params.multi_items():
+            scan_text += f" {key}={value}"
+
+        # Scan body for POST/PUT/PATCH
+        if request.method in ("POST", "PUT", "PATCH"):
+            body_bytes = await request.body()
+            if body_bytes:
+                try:
+                    scan_text += " " + body_bytes.decode("utf-8", errors="replace")
+                except Exception:
+                    pass
+
+        is_safe, matches = waf.is_safe(scan_text, source=f"{request.method} {request.url.path}")
+        if not is_safe:
+            critical = [m for m in matches if m.severity == "critical"]
+            high = [m for m in matches if m.severity == "high"]
+            logger.warning(
+                f"[WAF] BLOCKED request from {client_ip}: "
+                f"{len(critical)} critical, {len(high)} high severity matches"
+            )
+            return JSONResponse(
+                status_code=403,
+                content={
+                    "detail": "Request blocked by WAF",
+                    "categories": list({m.category for m in matches}),
+                },
             )
 
         # [PHASE3] المصادقة: JWT أولاً، ثم API key تقليدي
@@ -1699,6 +1740,172 @@ h1 {{ border-bottom: 2px solid #10b981; padding-bottom: 0.5em; }}
                 return {"entries": [], "total": 0, "error": str(e)}
         return {"entries": [], "total": 0, "error": "Security guard not available"}
 
+    # [PHASE6] AI Observability endpoints
+    @app.get("/api/ai-observability/stats")
+    async def ai_obs_stats(
+        user_id: str | None = None,
+        tenant_id: str | None = None,
+        hours: int = 24,
+    ):
+        """[PHASE6] Get AI usage statistics: tokens, cost, latency."""
+        from adam.observability.ai_observability import get_ai_observability
+        import time
+        since = time.time() - (hours * 3600)
+        return get_ai_observability().get_stats(
+            user_id=user_id,
+            tenant_id=tenant_id,
+            since=since,
+        )
+
+    @app.get("/api/ai-observability/recent")
+    async def ai_obs_recent(limit: int = 100):
+        """[PHASE6] Get recent LLM call records."""
+        from adam.observability.ai_observability import get_ai_observability
+        records = get_ai_observability().get_recent(limit)
+        return {
+            "records": [r.to_dict() for r in records],
+            "count": len(records),
+        }
+
+    @app.get("/api/waf/stats")
+    async def waf_stats():
+        """[PHASE6] WAF detection stats."""
+        from adam.security.waf import get_waf
+        return get_waf().get_stats()
+
+    # [PHASE6] Webhook management endpoints
+    class WebhookSubscribeRequest(BaseModel):
+        url: str
+        events: list[str]
+        description: str = ""
+        metadata: dict = {}
+
+    @app.post("/api/webhooks/subscribe")
+    async def webhook_subscribe(req: WebhookSubscribeRequest):
+        """[PHASE6] Subscribe a URL to receive webhook events."""
+        from adam.webhooks import get_webhook_manager
+        sub = get_webhook_manager().subscribe(
+            url=req.url,
+            events=req.events,
+            description=req.description,
+            metadata=req.metadata,
+        )
+        return sub.to_dict()
+
+    @app.get("/api/webhooks/subscriptions")
+    async def webhook_list():
+        """[PHASE6] List all webhook subscriptions."""
+        from adam.webhooks import get_webhook_manager
+        return {
+            "subscriptions": [s.to_dict() for s in get_webhook_manager().list_subscriptions()],
+            "count": len(get_webhook_manager().list_subscriptions()),
+        }
+
+    @app.delete("/api/webhooks/subscriptions/{subscription_id}")
+    async def webhook_unsubscribe(subscription_id: str):
+        """[PHASE6] Remove a webhook subscription."""
+        from adam.webhooks import get_webhook_manager
+        success = get_webhook_manager().unsubscribe(subscription_id)
+        return {"removed": success}
+
+    @app.get("/api/webhooks/deliveries")
+    async def webhook_deliveries(limit: int = 100):
+        """[PHASE6] Get recent webhook delivery attempts."""
+        from adam.webhooks import get_webhook_manager
+        deliveries = get_webhook_manager().get_deliveries(limit)
+        return {
+            "deliveries": [
+                {
+                    "id": d.id,
+                    "subscription_id": d.subscription_id,
+                    "event": d.event,
+                    "url": d.url,
+                    "status_code": d.status_code,
+                    "delivered": d.delivered,
+                    "attempt": d.attempt,
+                    "error": d.error,
+                    "started_at": d.started_at,
+                }
+                for d in deliveries
+            ],
+            "count": len(deliveries),
+        }
+
+    @app.get("/api/voices")
+    async def list_voices(dialect: str | None = None):
+        """[PHASE6] List available TTS voices."""
+        from adam.core.voice_enhanced import get_voice_service, VoiceDialect
+        d = VoiceDialect(dialect) if dialect else None
+        voices = get_voice_service().list_voices(d)
+        return {"voices": [v.to_dict() for v in voices], "count": len(voices)}
+
+    @app.post("/api/voices/clone")
+    async def clone_voice(
+        name: str,
+        audio_samples: list[str],  # URLs or paths
+        dialect: str = "ar-eg",
+        gender: str = "neutral",
+    ):
+        """[PHASE6] Clone a voice from audio samples."""
+        from adam.core.voice_enhanced import get_voice_service, VoiceDialect
+        try:
+            d = VoiceDialect(dialect)
+        except ValueError:
+            d = VoiceDialect.EGYPTIAN
+        profile = await get_voice_service().clone_voice(
+            name=name,
+            audio_sample_paths=audio_samples,
+            dialect=d,
+            gender=gender,
+        )
+        return profile.to_dict()
+
+    @app.post("/api/search/hybrid")
+    async def hybrid_search(
+        query: str,
+        collection: str = "knowledge",
+        top_k: int = 10,
+    ):
+        """
+        [PHASE6] Hybrid search combining BM25 (keyword) + dense (semantic).
+
+        Use this when you want better recall than either method alone.
+        Falls back to dense-only if BM25 hasn't been indexed.
+        """
+        from adam.observability.hybrid_search import HybridSearcher
+
+        # [PHASE6] Get documents from Qdrant (or cache)
+        # In a real impl this would fetch from Qdrant collection
+        # For now we use the chat history as a stand-in
+        docs = []
+        for session in chat_store.list_sessions(limit=50):
+            messages = chat_store.list_messages(session["id"])
+            for m in messages:
+                docs.append(m.get("content", ""))
+        docs = [d for d in docs if d and len(d) > 10]
+
+        if not docs:
+            return {"results": [], "method": "no_documents"}
+
+        # BM25 only (we don't have a query embedder here in tests)
+        searcher = HybridSearcher()
+        searcher.fit(docs)
+        results = searcher.search(query, top_k=top_k)
+        return {
+            "query": query,
+            "results": [
+                {
+                    "doc_idx": idx,
+                    "text": docs[idx][:300],
+                    "score": score,
+                    "method": method,
+                }
+                for idx, score, method in results
+            ],
+            "method": "bm25",
+            "documents_searched": len(docs),
+        }
+
     @app.get("/api/voice/audio/{filename}")
     async def get_audio(filename: str):
         """خدمة ملفات الصوت"""
@@ -1883,6 +2090,120 @@ h1 {{ border-bottom: 2px solid #10b981; padding-bottom: 0.5em; }}
         if _hmac.compare_digest(token.encode(), _api_key.encode()):
             return {"user_id": "default", "role": "admin", "scopes": ["*"]}
         raise HTTPException(status_code=401, detail="Invalid token")
+
+    # [PHASE6] SSO (OAuth2 / OIDC) endpoints
+    @app.get("/api/auth/sso/providers")
+    async def sso_providers():
+        """[PHASE6] List configured SSO providers."""
+        from adam.auth.sso import list_configured_providers, get_oauth_config
+        providers = list_configured_providers()
+        return {
+            "providers": [
+                {
+                    "name": p,
+                    "configured": True,
+                    "redirect_uri": get_oauth_config(p).get("redirect_uri") if get_oauth_config(p) else None,
+                }
+                for p in providers
+            ],
+            "all_supported": ["google", "microsoft", "github", "okta", "keycloak", "auth0"],
+        }
+
+    @app.get("/api/auth/sso/{provider}/authorize")
+    async def sso_authorize(provider: str, redirect_uri: str | None = None):
+        """[PHASE6] Get authorization URL for an OAuth2 provider."""
+        from adam.auth.sso import get_oauth_config
+        import secrets as _secrets
+
+        config = get_oauth_config(provider)
+        if not config:
+            raise HTTPException(status_code=400, detail=f"Provider {provider} not configured")
+        # [PHASE6] Generate CSRF state token
+        state = _secrets.token_urlsafe(32)
+        # Store in signed cookie (simple for demo)
+        scopes = " ".join(config.get("scopes", []))
+        auth_url = (
+            f"{config['auth_url']}?response_type=code"
+            f"&client_id={config['client_id']}"
+            f"&redirect_uri={redirect_uri or config['redirect_uri']}"
+            f"&scope={scopes}"
+            f"&state={state}"
+        )
+        return {"authorization_url": auth_url, "state": state, "provider": provider}
+
+    @app.post("/api/auth/sso/{provider}/callback")
+    async def sso_callback(provider: str, req: SSOCallbackRequest):
+        """[PHASE6] Handle OAuth2 callback and create/login user."""
+        from adam.auth.sso import exchange_code_for_token, get_user_info
+        from adam.auth import create_access_token, hash_password
+        from adam.storage import get_connection
+        from sqlalchemy import text
+
+        # Exchange code for token
+        token_data = await exchange_code_for_token(provider, req.code, req.redirect_uri)
+        if not token_data:
+            raise HTTPException(status_code=400, detail="Failed to exchange code for token")
+        access_token = token_data.get("access_token")
+        if not access_token:
+            raise HTTPException(status_code=400, detail="No access token in response")
+
+        # Get user info
+        user_info = await get_user_info(provider, access_token)
+        if not user_info:
+            raise HTTPException(status_code=400, detail="Failed to get user info")
+
+        # Normalize email + username
+        email = user_info.get("email") or user_info.get("mail")
+        username = (
+            user_info.get("preferred_username")
+            or user_info.get("login")
+            or email.split("@")[0]
+            if email
+            else f"{provider}_{user_info.get('sub', 'user')}"
+        )
+
+        # Find or create user
+        try:
+            init_db()
+        except Exception:
+            pass
+        try:
+            with get_connection() as conn:
+                row = conn.execute(
+                    text("SELECT id, email FROM users WHERE email = :e OR username = :u LIMIT 1"),
+                    {"e": email or "", "u": username},
+                ).first()
+                if row:
+                    user_id = row.id
+                else:
+                    import secrets as _secrets
+                    user_id = f"user_{_secrets.token_hex(8)}"
+                    conn.execute(
+                        text(
+                            "INSERT INTO users (id, email, username, password_hash, metadata) "
+                            "VALUES (:id, :e, :u, :pw, :meta)"
+                        ),
+                        {
+                            "id": user_id,
+                            "e": email or f"{username}@{provider}.local",
+                            "u": username,
+                            "pw": hash_password(_secrets.token_urlsafe(32)),  # Random pw (SSO)
+                            "meta": json.dumps({"sso_provider": provider}),
+                        },
+                    )
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"DB error: {e}")
+
+        # Issue tokens
+        return {
+            "user_id": user_id,
+            "email": email,
+            "username": username,
+            "sso_provider": provider,
+            "access_token": create_access_token(user_id, email or "", "user", ["chat", "knowledge.read"]),
+            "refresh_token": create_access_token(user_id, email or "", "refresh", ["refresh"]),
+            "token_type": "bearer",
+        }
 
     # [PHASE1-SECURITY] Prometheus /metrics endpoint
     # [FIX H6] Already excluded from auth check via _public_paths

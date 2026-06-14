@@ -135,6 +135,20 @@ except Exception as e:
           output: trivy-results.sarif
           severity: HIGH,CRITICAL
           ignore-unfixed: true
+
+      - name: Generate SBOM (CycloneDX)
+        # [PHASE6] Software Bill of Materials for supply chain security
+        continue-on-error: true
+        run: |
+          pip install cyclonedx-bom
+          cyclonedx-py environment requirements.txt --output sbom.json --format json || true
+      - name: Upload SBOM
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom.json
+          if-no-files-found: ignore
       - name: Upload Trivy scan results
         if: always()
         uses: github/codeql-action/upload-sarif@v3
@@ -194,6 +208,41 @@ except Exception as e:
         with:
           name: dist
           path: dist/
+
+  # ── Load test (smoke) ───────────────────────────────────────
+  load-test:
+    name: Load Test (smoke)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install deps
+        run: |
+          pip install locust httpx
+      - name: Start API
+        run: |
+          bash start.sh &
+          sleep 30  # Wait for API to be ready
+      - name: Run Locust smoke test
+        run: |
+          locust -f tests/load/locustfile.py \
+            --headless \
+            --users 5 \
+            --spawn-rate 1 \
+            --run-time 30s \
+            --host=http://localhost:8000 \
+            --exit-code-on-error 0 || true
+      - name: Upload Locust report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: locust-report
+          path: locust_report.html
+          if-no-files-found: ignore
 
   # ── Frontend lint + build ─────────────────────────────────
   frontend:

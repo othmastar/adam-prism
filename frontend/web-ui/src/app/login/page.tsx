@@ -2,11 +2,12 @@
 
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
 /**
  * [PHASE3] Login page — next-auth integration
+ * [PHASE6] Added SSO buttons (Google, Microsoft, GitHub)
  */
 export default function LoginPage() {
   const router = useRouter();
@@ -101,6 +102,19 @@ export default function LoginPage() {
           >
             {loading ? "جاري الدخول..." : "دخول / Sign in"}
           </button>
+
+          {/* [PHASE6] SSO Divider */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center" aria-hidden="true">
+              <div className="w-full border-t border-border"></div>
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">أو / or</span>
+            </div>
+          </div>
+
+          {/* [PHASE6] SSO buttons (auto-detected from backend) */}
+          <SSOButtons callbackUrl={callbackUrl} />
         </form>
 
         <p className="text-center text-sm text-muted-foreground">
@@ -119,6 +133,74 @@ export default function LoginPage() {
           </code>
         </div>
       </div>
+    </div>
+  );
+}
+
+// [PHASE6] SSO buttons component
+function SSOButtons({ callbackUrl }: { callbackUrl: string }) {
+  const [providers, setProviders] = useState<{ name: string; configured: boolean }[]>([]);
+  const [loadingProvider, setLoadingProvider] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Fetch configured SSO providers
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+    fetch(`${apiUrl}/api/auth/sso/providers`)
+      .then((r) => r.json())
+      .then((data) => setProviders(data.providers || []))
+      .catch(() => setProviders([]));
+  }, []);
+
+  const handleSSOLogin = async (provider: string) => {
+    setLoadingProvider(provider);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const resp = await fetch(
+        `${apiUrl}/api/auth/sso/${provider}/authorize?redirect_uri=${encodeURIComponent(
+          `${window.location.origin}/api/auth/sso/${provider}/callback`
+        )}`
+      );
+      const data = await resp.json();
+      if (data.authorization_url) {
+        // [PHASE6] Store state in sessionStorage for CSRF protection
+        sessionStorage.setItem("sso_state", data.state);
+        window.location.href = data.authorization_url;
+      }
+    } catch (e) {
+      console.error("SSO error:", e);
+      setLoadingProvider(null);
+    }
+  };
+
+  if (providers.length === 0) return null;
+
+  return (
+    <div className="space-y-2" role="group" aria-label="Single sign-on providers">
+      {providers.map((p) => (
+        <button
+          key={p.name}
+          onClick={() => handleSSOLogin(p.name)}
+          disabled={loadingProvider !== null}
+          className="w-full border border-border bg-background py-2 px-4 rounded-md hover:bg-accent/10 transition disabled:opacity-50 flex items-center justify-center gap-2"
+          aria-label={`Sign in with ${p.name}`}
+        >
+          {loadingProvider === p.name ? (
+            <span className="text-sm">جاري التحويل...</span>
+          ) : (
+            <>
+              <span className="text-sm font-medium capitalize">
+                {p.name === "google" && "G"}
+                {p.name === "microsoft" && "M"}
+                {p.name === "github" && "GH"}
+                {p.name === "okta" && "OK"}
+                {p.name === "keycloak" && "KC"}
+                {p.name === "auth0" && "A0"}
+              </span>
+              <span className="text-sm">دخول عبر {p.name} / Sign in with {p.name}</span>
+            </>
+          )}
+        </button>
+      ))}
     </div>
   );
 }
