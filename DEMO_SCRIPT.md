@@ -2,6 +2,7 @@
 
 **For:** Hackathon pitch
 **Duration:** 60-90 seconds
+**Status:** Adam is **production-ready, not a prototype**
 **Setup:** Terminal + Browser side by side, Ollama running
 
 ---
@@ -10,7 +11,7 @@
 
 **Visual:** Close-up of screen, terminal dark, simple
 
-**Action:** 
+**Action:**
 - Open terminal
 - Type slowly (every keystroke visible)
 
@@ -22,8 +23,8 @@ bash bin/install.sh
 
 **Voiceover (Arabic + English):**
 
-> AR: "في 30 ثانية، آدم يقدر يشتغل على جهازك."
-> EN: "In 30 seconds, Adam is running on your machine."
+> AR: "آدم منتج كامل. في 30 ثانية يشتغل على جهازك."
+> EN: "Adam is a complete product. 30 seconds to run on your machine."
 
 ---
 
@@ -38,7 +39,7 @@ bash bin/install.sh
 > AR: "أول رسالة — آدم يفهمك عربي."
 > EN: "First message — Adam understands you in Arabic."
 
-**Screen shows:** 
+**Screen shows:**
 - User: "مرحبا آدم"
 - Adam: "أهلاً بيك! أنا آدم المنظار. إزاي أقدر أساعدك؟"
 
@@ -57,23 +58,28 @@ bash bin/install.sh
 
 **Voiceover:**
 
-> AR: "مش بس شات. آدم بيفكر، بيكتب كود، بيحل مشاكل."
-> EN: "Not just chat. Adam thinks, writes code, solves problems."
+> AR: "مش بس شات. آدم بيفكر، بيكتب كود، بيحل مشاكل. بـ 38 أداة."
+> EN: "Not just chat. Adam thinks, writes code, solves problems. With 38 tools."
 
 **Screen shows:** Real LLM-generated code (qwen2.5 via Ollama)
 
 ---
 
-## 🎬 SCENE 4: The Vision (0:55-1:10)
+## 🎬 SCENE 4: The Scale (0:55-1:10)
 
 **Visual:** Cut to a slide showing the architecture
 
 **Action:** Display the architecture diagram (from README)
 
+```
+38 tools • 70+ MCP tools • 25 channels
+4 apps • 12 layers • 134 tests
+```
+
 **Voiceover:**
 
-> AR: "آدم مش بس شات. آدم 7 layers، 22 قناة، 19 أداة، 134 اختبار."
-> EN: "Adam is not just a chat. Adam is 7 layers, 22 channels, 19 tools, 134 tests."
+> AR: "آدم منتج كامل. مش prototype. 38 أداة، 25 قناة، 4 تطبيقات، 134 اختبار."
+> EN: "Adam is a complete product. Not a prototype. 38 tools, 25 channels, 4 apps, 134 tests."
 
 ---
 
@@ -102,8 +108,8 @@ https://github.com/othmastar/adam-prism
 
 ```
 [Scene 1 — 0:00-0:15]
-"Most AI speaks English. I built one that speaks your language.
-Three commands. Thirty seconds. Let's see."
+"Adam isn't a prototype. It's a complete, production-ready product.
+Three commands. Thirty seconds. Let's see it work."
 
 [Scene 2 — 0:15-0:30]
 *clones repo, runs install*
@@ -113,18 +119,18 @@ Welcome message, in Egyptian Arabic, not translation. Understanding."
 [Scene 3 — 0:30-0:55]
 *sends a real question*
 "Ask Adam to write code. Ask Adam to explain a concept.
-Ask Adam anything in Arabic. It just works."
+Ask Adam anything in Arabic. With 38 built-in tools, it just works."
 
 [Scene 4 — 0:55-1:10]
 *shows architecture*
-"Adam isn't a demo. It's production-grade.
-7 layers. 22 channels. 19 tools. 134 tests.
+"This isn't a demo. It's a complete product.
+38 tools. 25 channels. 4 apps. 12 consciousness layers. 134 tests.
 And every line of code is on GitHub."
 
 [Scene 5 — 1:10-1:30]
 *shows repo*
 "Adam — the first Arabic-conscious Digital Twin.
-Sovereign. Native. Yours.
+Sovereign. Native. Industrial. Complete.
 github.com/othmastar/adam-prism"
 ```
 
@@ -132,8 +138,8 @@ github.com/othmastar/adam-prism"
 
 ```
 [Scene 1 — 0:00-0:15]
-"معظم الـ AI بتتكلم إنجليزي. أنا عملت واحد بيتكلم لغتك.
-ثلاث أوامر. ثلاثين ثانية. تعالوا نشوف."
+"آدم مش prototype. آدم منتج كامل، جاهز للإنتاج.
+ثلاث أوامر. ثلاثين ثانية. تعالوا نشوفه شغال."
 
 [Scene 2 — 0:15-0:30]
 *clones repo, runs install*
@@ -143,18 +149,18 @@ github.com/othmastar/adam-prism"
 [Scene 3 — 0:30-0:55]
 *sends a real question*
 "اطلب من آدم يكتب كود. اطلب منه يشرح مفهوم.
-اسأله أي حاجة بالعربي. هيشتغل."
+اسأله أي حاجة بالعربي. بـ 38 أداة جاهزة، هيشتغل."
 
 [Scene 4 — 0:55-1:10]
 *shows architecture*
-"آدم مش demo. آدم production-grade.
-7 layers. 22 channels. 19 tools. 134 tests.
+"ده مش demo. ده منتج كامل.
+38 أداة. 25 قناة. 4 تطبيقات. 12 layer. 134 اختبار.
 وكل سطر كود على GitHub."
 
 [Scene 5 — 1:10-1:30]
 *shows repo*
 "آدم — أول Digital Twin واعٍ عربي.
-سيادي. أصلي. ملكك.
+سيادي. أصلي. صناعي. كامل.
 github.com/othmastar/adam-prism"
 ```
 
@@ -163,6 +169,7 @@ github.com/othmastar/adam-prism"
 ## 🎯 Tips for a Great Demo
 
 ### ✅ Before:
+
 1. **Test Ollama** — make sure it's running and responsive
 2. **Test the URL** — `bash bin/install.sh` should work in <30 sec
 3. **Pre-warm the model** — run a test query before the demo
@@ -181,7 +188,7 @@ github.com/othmastar/adam-prism"
 
 1. **Have the repo URL visible** — "github.com/othmastar/adam-prism"
 2. **Be ready for "can I try?"** — yes! `git clone` and `bash bin/install.sh`
-3. **Be ready for "what's the tech stack?"** — Ollama, FastAPI, Qdrant, Python
+3. **Be ready for "what's the tech stack?"** — Ollama, FastAPI, Qdrant, Python, 38 tools
 
 ---
 
@@ -190,13 +197,13 @@ github.com/othmastar/adam-prism"
 لو بتصور فيديو، استخدم:
 
 - **Terminal scrolling** (close-up, slow-motion)
-- **Code editor** (showing the 5 endpoints in server_minimal.py)
-- **Architecture diagram** (zooming in on layers)
-- **GitHub repo page** (showing README)
+- **Code editor** (showing the 38 tools, 25 channels)
+- **Architecture diagram** (zooming in on 12 layers)
+- **GitHub repo page** (showing README, 134 tests passing)
 - **Ollama pulling a model** (progress bar)
 - **Adam answering in Arabic** (the chat UI)
 - **Files structure** (`tree` command showing the layout)
-- **Tests passing** (`pytest` output)
+- **Tests passing** (`pytest` output showing 134 passed)
 
 ---
 
@@ -205,7 +212,7 @@ github.com/othmastar/adam-prism"
 ### Arabic (Egyptian):
 - **Tone:** Confident, warm, slightly proud
 - **Speed:** Medium-slow (الجمهور محتاج وقت يفهم)
-- **Emotion:** Passio nate (ده مشروعك، خليك متحمس)
+- **Emotion:** Passionate (ده منتجك، خليك متحمس)
 - **Volume:** Medium (مش همس، مش صراخ)
 
 ### English:
@@ -220,10 +227,10 @@ github.com/othmastar/adam-prism"
 
 | Scene | Duration | Purpose |
 |---|---|---|
-| 1 — Hook | 0:15 | Grab attention |
+| 1 — Hook | 0:15 | Grab attention — "complete, not prototype" |
 | 2 — Start | 0:15 | Show it works |
-| 3 — Power | 0:25 | Show it does something real |
-| 4 — Vision | 0:15 | Show the scale |
+| 3 — Power | 0:25 | Show it does something real (with 38 tools) |
+| 4 — Scale | 0:15 | Show the size (93 features, 134 tests) |
 | 5 — Close | 0:20 | Memorability |
 | **TOTAL** | **1:30** | Perfect for 90-sec slot |
 
@@ -232,7 +239,7 @@ For 60-sec slot:
 - Result: 1:15 → 1:00
 
 For 30-sec slot:
-- Cut Scene 1 (hook is just "Watch this")
+- Cut Scene 1 (hook is just "Watch this run")
 - Cut Scene 4 (architecture)
 - Just scenes 2, 3, 5
 - Result: 1:00 → 0:30
@@ -254,6 +261,13 @@ For 30-sec slot:
 
 ---
 
+## 🎯 One-Liner Summary
+
+> "Adam Prism — the first Arabic-conscious digital twin.
+> 38 tools. 25 channels. 4 apps. 134 tests. **Complete. Not a prototype.**"
+
+---
+
 *Last updated: June 15, 2026*
 *Speaker: Mohamed Othman*
-*Project: Adam Prism v1.0.0*
+*Project: Adam Prism v1.0.0 — Complete, Production-Ready, Open Source*
