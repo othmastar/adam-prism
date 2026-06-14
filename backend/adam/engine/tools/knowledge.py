@@ -13,7 +13,6 @@ from urllib.parse import urlparse
 
 from adam.core.permissions import classify_tool, log_permission
 
-
 class KnowledgeMixin:
     """Mixin: knowledge search + preferences + notebook"""
 

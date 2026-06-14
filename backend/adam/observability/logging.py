@@ -18,18 +18,15 @@ from typing import Any
 
 _request_id_var: ContextVar[str] = ContextVar("request_id", default="-")
 
-
 def set_request_id(request_id: str | None = None) -> str:
     """Set a request ID for the current async context. Returns the ID."""
     rid = request_id or str(uuid.uuid4())[:8]
     _request_id_var.set(rid)
     return rid
 
-
 def get_request_id() -> str:
     """Get the current request ID."""
     return _request_id_var.get()
-
 
 class JSONFormatter(logging.Formatter):
     """Format log records as JSON for structured logging."""
@@ -66,7 +63,6 @@ class JSONFormatter(logging.Formatter):
                     log_data[key] = str(value)
 
         return json.dumps(log_data, ensure_ascii=False)
-
 
 def setup_logging(
     level: str | None = None,

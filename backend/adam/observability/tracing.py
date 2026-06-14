@@ -26,7 +26,6 @@ from typing import Any
 
 logger = logging.getLogger("adam_prism.observability.tracing")
 
-
 # ═══════════════════════════════════════════════════════════════
 # أنماط البيانات / Data Models
 # ═══════════════════════════════════════════════════════════════
@@ -38,7 +37,6 @@ class SpanStatus(str):
     UNSET = "UNSET"
     OK = "OK"
     ERROR = "ERROR"
-
 
 @dataclass
 class SpanEvent:
@@ -53,7 +51,6 @@ class SpanEvent:
     name: str
     timestamp: float = field(default_factory=time.time)
     attributes: dict[str, Any] = field(default_factory=dict)
-
 
 @dataclass
 class Span:
@@ -139,7 +136,6 @@ class Span:
                 for e in self.events
             ],
         }
-
 
 # ═══════════════════════════════════════════════════════════════
 # Adam Tracer
@@ -419,14 +415,12 @@ class AdamTracer:
             "max_spans": self._max_spans,
         }
 
-
 # ═══════════════════════════════════════════════════════════════
 # Global Tracer Instance
 # ═══════════════════════════════════════════════════════════════
 
 # مثيل عالمي — Global tracer instance for convenience
 _global_tracer: AdamTracer | None = None
-
 
 def get_tracer() -> AdamTracer:
     """
@@ -439,7 +433,6 @@ def get_tracer() -> AdamTracer:
     if _global_tracer is None:
         _global_tracer = AdamTracer()
     return _global_tracer
-
 
 def set_tracer(tracer: AdamTracer) -> None:
     """

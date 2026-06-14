@@ -4,7 +4,6 @@ import asyncio
 import os
 import uuid
 
-
 class SystemToolsMixin:
     """Mixin: mouse, keyboard, clipboard, screen, window tools"""
 
@@ -23,7 +22,7 @@ class SystemToolsMixin:
                 stdout, stderr = await asyncio.wait_for(
                     proc.communicate(input=stdin_data), timeout=timeout
                 )
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 proc.kill()
                 await proc.wait()
                 return {"success": False, "error": "timeout", "exit_code": -1}

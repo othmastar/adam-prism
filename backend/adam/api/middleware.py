@@ -34,7 +34,6 @@ from adam.security.rate_limiter import RateLimiter, RateLimitMiddleware
 
 logger = logging.getLogger("adam_prism.api.middleware")
 
-
 # ═══════════════════════════════════════════════════════════════
 # Security Headers Middleware
 # ═══════════════════════════════════════════════════════════════
@@ -66,7 +65,6 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
         return response
 
-
 # ═══════════════════════════════════════════════════════════════
 # Request ID Middleware
 # ═══════════════════════════════════════════════════════════════
@@ -92,7 +90,6 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
         response = await call_next(request)
         response.headers["X-Request-ID"] = request_id
         return response
-
 
 # ═══════════════════════════════════════════════════════════════
 # Audit Logging Middleware
@@ -150,7 +147,6 @@ class AuditLoggingMiddleware(BaseHTTPMiddleware):
             )
             raise
 
-
 # ═══════════════════════════════════════════════════════════════
 # Request Size Limit Middleware
 # ═══════════════════════════════════════════════════════════════
@@ -198,7 +194,6 @@ class RequestSizeLimitMiddleware(BaseHTTPMiddleware):
                 pass
 
         return await call_next(request)
-
 
 # ═══════════════════════════════════════════════════════════════
 # Health Probe Endpoints
@@ -256,7 +251,6 @@ def _create_health_routes(engine: Any = None) -> list:
         Route("/health/ready", readiness, methods=["GET"]),
         Route("/health/startup", startup_check, methods=["GET"]),
     ]
-
 
 # ═══════════════════════════════════════════════════════════════
 # Install All Middleware

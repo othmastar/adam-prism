@@ -7,7 +7,6 @@ Adam Prism — Base Channel Abstract Class
 from abc import ABC, abstractmethod
 from typing import Any
 
-
 class BaseChannel(ABC):
     name: str = ""
     requires: list[str] = []

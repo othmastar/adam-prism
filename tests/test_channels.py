@@ -5,8 +5,6 @@ from adam.channels.base import BaseChannel
 from adam.channels.telegram import TelegramChannel
 from adam.channels.whatsapp import WhatsAppChannel
 from adam.channels.manager import ChannelManager, discover_channels
-from adam.channels.bulk import BULK_CHANNELS
-
 
 class TestBaseChannel:
     def test_abstract_cant_instantiate(self):
@@ -43,7 +41,6 @@ class TestBaseChannel:
         assert s["name"] == "telegram"
         assert s["running"] is False
 
-
 class TestTelegramChannel:
     def test_init_no_token(self):
         ch = TelegramChannel({"telegram": {"bot_token": ""}})
@@ -52,7 +49,6 @@ class TestTelegramChannel:
     def test_init_fallback_config(self):
         ch = TelegramChannel({"telegram_bot_token": "123:abc"})
         assert ch.bot_token == "123:abc"
-
 
 class TestWhatsAppChannel:
     def test_init(self):
@@ -73,7 +69,8 @@ class TestWhatsAppChannel:
 
     def test_verify_signature_valid(self):
         ch = WhatsAppChannel({"whatsapp": {"app_secret": "secret"}})
-        import hmac, hashlib
+        import hmac
+        import hashlib
         body = b'{"test": true}'
         expected = hmac.new(b"secret", body, hashlib.sha256).hexdigest()
         assert ch.verify_signature(body, f"sha256={expected}") is True
@@ -87,7 +84,6 @@ class TestWhatsAppChannel:
         routes = ch.get_webhook_routes()
         assert len(routes) == 2
         assert routes[0]["path"] == "/webhook/whatsapp"
-
 
 class TestDiscovery:
     def test_discover_returns_telegram_whatsapp(self):
@@ -117,7 +113,6 @@ class TestDiscovery:
     def test_total_channels(self):
         registry = discover_channels()
         assert len(registry) >= 21, f"Got {len(registry)}, expected >= 21"
-
 
 class TestChannelManager:
     def test_init(self):
@@ -204,7 +199,6 @@ class TestChannelManager:
 
         import asyncio
         asyncio.run(run())
-
 
 class TestNewChannels:
     @pytest.mark.parametrize("name,cls", [

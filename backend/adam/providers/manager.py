@@ -14,7 +14,6 @@ from adam.providers.openai import OpenAIProvider
 
 logger = logging.getLogger("adam_prism.providers")
 
-
 class ProviderManager:
     """مدير مقدمي النماذج — يدعم auto-fallback + streaming"""
 

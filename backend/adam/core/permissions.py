@@ -92,14 +92,11 @@ TOOL_CATEGORY_MAP = {
     "workflow_execute": "workflow",
 }
 
-
 def classify_tool(tool_name: str) -> str:
     return TOOL_CATEGORY_MAP.get(tool_name, "shell.dangerous")
 
-
 def default_level(category: str) -> str:
     return PERMISSION_CATEGORIES.get(category, {}).get("default", "always-ask")
-
 
 # [FIX H11] Map categories to risk levels
 def get_risk_level(category: str) -> str:
@@ -131,7 +128,6 @@ def get_risk_level(category: str) -> str:
         "workflow": "medium",
     }
     return _RISK_MAP.get(category, "high")
-
 
 class PermissionState:
     """تتبع حالة الصلاحيات لكل جلسة"""
@@ -169,7 +165,6 @@ class PermissionState:
             return None
         dl = default_level(category)
         return dl  # "once" or "always-ask"
-
 
 def log_permission(action: str, tool: str, category: str, reason: str, level: str, verdict: str):
     entry = {

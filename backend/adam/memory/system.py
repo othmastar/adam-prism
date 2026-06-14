@@ -15,7 +15,6 @@ from infrastructure import TTLCache
 
 logger = logging.getLogger("adam_prism.memory")
 
-
 class MemorySystem:
     """
     نظام الذاكرة لآدم بريزم.

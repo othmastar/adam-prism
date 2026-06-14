@@ -20,7 +20,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
 
-
 def main():
     parser = argparse.ArgumentParser(description="Export Adam Prism OpenAPI spec and generate SDKs")
     parser.add_argument("--output", default=str(ROOT / "api-spec.json"), help="Output spec file path")
@@ -107,7 +106,6 @@ def main():
     if args.generate_sdk:
         generate_sdk(args.output, args.generate_sdk, args.sdk_output)
 
-
 def generate_sdk(spec_path: str, language: str, output_dir: str | None = None):
     """[PHASE3] Generate client SDK from OpenAPI spec using openapi-generator."""
     if output_dir is None:
@@ -128,7 +126,7 @@ def generate_sdk(spec_path: str, language: str, output_dir: str | None = None):
         "-i", spec_path,
         "-g", generators[language],
         "-o", output_dir,
-        "--additional-properties", f"packageName=adam_prism_client,projectName=adam-prism-sdk",
+        "--additional-properties", "packageName=adam_prism_client,projectName=adam-prism-sdk",
     ]
 
     try:
@@ -141,7 +139,6 @@ def generate_sdk(spec_path: str, language: str, output_dir: str | None = None):
         print("  brew install openapi-generator")
     except subprocess.CalledProcessError as e:
         print(f"❌ SDK generation failed: {e}")
-
 
 if __name__ == "__main__":
     main()

@@ -3,27 +3,21 @@
 Requires a running API server (set ADAM_TEST_URL).
 Run: ADAM_TEST_URL=http://localhost:8000 pytest tests/test_integration.py -v
 """
-import asyncio
 import os
-import time
 import uuid
 
 import pytest
 import httpx
 
-
 TEST_URL = os.environ.get("ADAM_TEST_URL", "http://localhost:8000")
 TEST_API_KEY = os.environ.get("ADAM_API_KEY", "test-key")
-
 
 def _auth_headers():
     return {"Authorization": f"Bearer {TEST_API_KEY}"}
 
-
 @pytest.fixture
 def client():
     return httpx.Client(base_url=TEST_URL, timeout=10.0)
-
 
 @pytest.mark.integration
 class TestHealthEndpoints:
@@ -45,7 +39,8 @@ class TestHealthEndpoints:
     def test_startup(self, client):
         r = client.get("/healthz/startup")
         assert r.status_code in (200, 503)
-        assert "status" in data if r.status_code == 200 else True
+        data = r.json() if r.status_code == 200 else {}
+        assert "status" in data or r.status_code == 503
 
     def test_health_overview(self, client):
         r = client.get("/health")
@@ -59,7 +54,6 @@ class TestHealthEndpoints:
         assert "adam_up" in r.text
         assert "# HELP" in r.text
         assert "# TYPE" in r.text
-
 
 @pytest.mark.integration
 class TestAuthFlow:
@@ -139,7 +133,6 @@ class TestAuthFlow:
             pytest.skip("Test key may not be the actual API key")
         assert r.status_code == 200
 
-
 @pytest.mark.integration
 class TestChatFlow:
     """Test chat end-to-end with engine"""
@@ -163,7 +156,6 @@ class TestChatFlow:
             headers=_auth_headers(),
         )
         assert r.status_code == 400
-
 
 @pytest.mark.integration
 class TestKnowledgeFlow:

@@ -13,7 +13,6 @@ from urllib.parse import urlparse
 
 logger = logging.getLogger("adam_prism.eyes")
 
-
 def _is_private_ip(hostname: str) -> bool:
     """فحص هل الـ hostname يرجع لعنوان IP خاص أو داخلي (SSRF protection)"""
     try:
@@ -34,7 +33,6 @@ def _is_private_ip(hostname: str) -> bool:
     internal_suffixes = (".local", ".internal", ".localhost", ".docker", ".container")
     return bool(any(hostname.lower().endswith(s) for s in internal_suffixes))
 
-
 def _validate_url(url: str) -> dict:
     """التحقق من صحة وأمان URL — منع SSRF"""
     if not url:
@@ -51,7 +49,6 @@ def _validate_url(url: str) -> dict:
     if _is_private_ip(hostname):
         return {"valid": False, "error": f"SSRF محظور: عنوان داخلي ({hostname})"}
     return {"valid": True}
-
 
 class Browser:
     """التحكم في المتصفح — Playwright Firefox"""

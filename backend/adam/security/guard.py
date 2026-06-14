@@ -16,13 +16,11 @@ from urllib.parse import urlparse
 
 logger = logging.getLogger("adam_prism.security.guard")
 
-
 class SecurityAction(Enum):
     ALLOW = "allow"
     BLOCK = "block"
     SANITIZE = "sanitize"
     FLAG = "flag"
-
 
 class ContentCategory(Enum):
     BENIGN = auto()
@@ -33,7 +31,6 @@ class ContentCategory(Enum):
     CODE_INJECTION = auto()
     SUSPICIOUS = auto()
 
-
 @dataclass
 class SecurityVerdict:
     action: SecurityAction
@@ -41,7 +38,6 @@ class SecurityVerdict:
     reason: str = ""
     sanitized_content: str | None = None
     confidence: float = 0.0
-
 
 # ─────────────────────────────────────────────
 # أنماط الكشف
@@ -91,7 +87,6 @@ PII_PATTERNS: list[tuple[re.Pattern, str]] = [
     (re.compile(r'(?i)(api[-\s]?key|secret|password|token)[:\s]+["\']?[A-Za-z0-9_\-]{16,}["\']?'), "CREDENTIAL"),
 ]
 
-
 # ─────────────────────────────────────────────
 # Input Guard
 # ─────────────────────────────────────────────
@@ -137,7 +132,6 @@ class InputGuard:
 
     def get_stats(self) -> dict:
         return {"blocked": self.block_count, "flagged": self.flag_count}
-
 
 # ─────────────────────────────────────────────
 # Output Guard
@@ -239,7 +233,6 @@ class OutputGuard:
     def get_stats(self) -> dict:
         return {"blocked": self.block_count, "flagged": self.flag_count}
 
-
 # ─────────────────────────────────────────────
 # Tool Permission Validator
 # ─────────────────────────────────────────────
@@ -250,7 +243,6 @@ class ToolPermission:
     max_calls_per_session: int = 100
     requires_confirmation: bool = False
     blocked_domains: list[str] = field(default_factory=list)
-
 
 # Registry of all tools with permissions
 TOOL_REGISTRY: dict[str, ToolPermission] = {
@@ -306,7 +298,6 @@ TOOL_REGISTRY: dict[str, ToolPermission] = {
     "memory_recall": ToolPermission("memory_recall", max_calls_per_session=50),
     "memory_reflect": ToolPermission("memory_reflect", max_calls_per_session=20),
 }
-
 
 class ToolPermissionValidator:
     """Layer 5: التحقق من صلاحيات استدعاء الأدوات"""
@@ -396,7 +387,6 @@ class ToolPermissionValidator:
             "blocked": total - allowed,
             "tools_used": len(self.session_counts),
         }
-
 
 # ─────────────────────────────────────────────
 # Security Orchestrator

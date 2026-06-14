@@ -21,7 +21,6 @@ from adam.engine.tools.system_tools import SystemToolsMixin
 
 logger = logging.getLogger("adam_prism.core")
 
-
 class AdamPrismEngineTools(
     PlanningMixin, MemoryToolsMixin, ShellToolsMixin,
     KnowledgeMixin, FileOpsMixin, SystemToolsMixin,

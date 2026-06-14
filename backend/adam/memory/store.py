@@ -24,7 +24,6 @@ from typing import Any
 MEMORY_DB = os.environ.get("ADAM_MEMORY_DB",
     os.path.join(os.getcwd(), ".adam_memory", "adam_memory.db"))
 
-
 class MemoryStore:
     """
     مخزن الذاكرة المستمر — SQLite
@@ -182,7 +181,6 @@ class MemoryStore:
         self._conn.commit()
         return count
 
-
 # ═══════════════════════════════════════════════════════
 # Module-level singleton for backward compatibility
 # الدوال على مستوى الموديول — للتوافق مع الكود القديم
@@ -190,31 +188,25 @@ class MemoryStore:
 
 _default_store = MemoryStore()
 
-
 def _ensure_db():
     """إنشاء الجدول إن لم يكن موجوداً (backward compat)"""
     _default_store._ensure_db()
-
 
 def store(content: str, tags: str = "", priority: int = 3, source: str = "adam") -> int:
     """تخزين ذكرى جديد (backward compat)"""
     return _default_store.store(content, tags, priority, source)
 
-
 def search(query: str, limit: int = 10) -> list[dict[str, Any]]:
     """البحث في الذاكرة (backward compat)"""
     return _default_store.search(query, limit)
-
 
 def recall(memory_id: int) -> dict[str, Any] | None:
     """استرجاع ذكرى بالمعرف (backward compat)"""
     return _default_store.recall(memory_id)
 
-
 def reflect(days: int = 1) -> dict[str, Any]:
     """تأمل في الذكريات (backward compat)"""
     return _default_store.reflect(days)
-
 
 def stats() -> dict[str, Any]:
     """إحصائيات الذاكرة (backward compat)"""

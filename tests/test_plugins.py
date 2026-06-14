@@ -4,7 +4,6 @@ import pytest
 from adam.plugins.manager import PluginManager
 from adam.plugins.base import AdamPlugin
 
-
 class TestPlugin(AdamPlugin):
     name = "test"
     version = "1.0.0"
@@ -33,14 +32,12 @@ class TestPlugin(AdamPlugin):
         self.after_tool_called = True
         return {**result, "plugin_processed": True}
 
-
 @pytest.mark.asyncio
 async def test_load_plugin():
     pm = PluginManager()
     pm.load_plugin(TestPlugin)
     assert len(pm.list_plugins()) == 1
     assert pm.list_plugins()[0]["name"] == "test"
-
 
 @pytest.mark.asyncio
 async def test_before_generate_hook():
@@ -51,7 +48,6 @@ async def test_before_generate_hook():
     assert plugin.before_called
     assert "[modified]" in msg
 
-
 @pytest.mark.asyncio
 async def test_after_generate_hook():
     pm = PluginManager()
@@ -60,7 +56,6 @@ async def test_after_generate_hook():
     plugin = pm.get_plugin("test")
     assert plugin.after_called
     assert "[signed]" in result
-
 
 @pytest.mark.asyncio
 async def test_before_tool_hook():
@@ -73,7 +68,6 @@ async def test_before_tool_hook():
     assert result is not None
     assert "_modified" in result["type"]
 
-
 @pytest.mark.asyncio
 async def test_after_tool_hook():
     pm = PluginManager()
@@ -83,7 +77,6 @@ async def test_after_tool_hook():
     assert plugin.after_tool_called
     assert result["plugin_processed"]
 
-
 @pytest.mark.asyncio
 async def test_unload():
     pm = PluginManager()
@@ -92,10 +85,10 @@ async def test_unload():
     await pm.unload("test")
     assert len(pm.list_plugins()) == 0
 
-
 @pytest.mark.asyncio
 async def test_load_from_dir():
-    import os, tempfile
+    import os
+    import tempfile
     # [C4] السماح بـ /tmp لاختبارات
     os.environ["ADAM_PLUGIN_DIR"] = "/tmp"
     pm = PluginManager()
@@ -118,10 +111,10 @@ class TempPlugin(AdamPlugin):
         names = [p["name"] for p in pm.list_plugins()]
         assert "temp" in names
 
-
 @pytest.mark.asyncio
 async def test_discover():
-    import tempfile, os
+    import tempfile
+    import os
     pm = PluginManager()
     with tempfile.TemporaryDirectory() as td:
         # Empty dir

@@ -19,7 +19,6 @@ import httpx
 
 logger = logging.getLogger("adam_prism.pipeline.summarizer")
 
-
 class LiveSummarizer:
     """
     التلخيص الحي الهرمي.

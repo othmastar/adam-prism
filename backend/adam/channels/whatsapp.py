@@ -14,7 +14,6 @@ from .base import BaseChannel
 
 logger = logging.getLogger("adam_prism.channels.whatsapp")
 
-
 class WhatsAppChannel(BaseChannel):
     name = "whatsapp"
     requires = ["phone_number_id", "access_token"]

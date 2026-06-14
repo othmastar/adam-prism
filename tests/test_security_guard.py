@@ -1,10 +1,8 @@
 """
 [PHASE2] Tests for the security guard
 """
-import pytest
 import asyncio
 from adam.security.guard import InputGuard, OutputGuard
-
 
 class TestInputGuard:
     """Test input validation and injection detection"""
@@ -47,7 +45,6 @@ class TestInputGuard:
         result = asyncio.run(guard.sanitize_web_content("some web content"))
         assert result is not None
 
-
 class TestOutputGuard:
     """Test output validation"""
 
@@ -65,7 +62,6 @@ class TestOutputGuard:
         guard = OutputGuard()
         result = asyncio.run(guard.inspect(""))
         assert result is not None
-
 
 class TestTOOL_REGISTRY:
     """Test tool registry is properly initialized"""

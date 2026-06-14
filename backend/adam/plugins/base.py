@@ -4,8 +4,6 @@ Adam Prism — Plugin Base Class
 كل plugin يرث من AdamPlugin وينفذ hooks اللي يحتاجها.
 """
 
-
-
 class AdamPlugin:
     """القاعدة لكل الإضافات"""
 

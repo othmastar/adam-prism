@@ -7,7 +7,6 @@ from adam.providers.ollama import OllamaProvider
 from adam.providers.openai import OpenAIProvider
 from adam.providers.anthropic import AnthropicProvider
 
-
 class TestProviderInit:
     def test_default_config(self):
         pm = ProviderManager({})
@@ -54,7 +53,6 @@ class TestProviderInit:
             "anthropic_model": "claude-3-opus",
         })
         assert pm.current is not None
-
 
 class TestIndividualProviders:
     @pytest.mark.asyncio
@@ -112,7 +110,6 @@ class TestIndividualProviders:
             result = await p.chat([{"role": "user", "content": "hi"}])
             assert result == "claude reply"
 
-
 class TestProviderChat:
     @pytest.fixture
     def pm(self):
@@ -124,7 +121,6 @@ class TestProviderChat:
             result = await pm.chat([{"role": "user", "content": "hello"}])
             assert result == "ollama response"
 
-
 class TestProviderGenerate:
     @pytest.mark.asyncio
     async def test_generate_delegates(self):
@@ -132,7 +128,6 @@ class TestProviderGenerate:
         with patch.object(pm.current, "generate", new=AsyncMock(return_value="generated")):
             result = await pm.generate("test prompt", system="be helpful")
             assert result == "generated"
-
 
 class TestProviderFallback:
     @pytest.mark.asyncio
@@ -159,7 +154,6 @@ class TestProviderFallback:
         pm._providers["ollama"].chat = AsyncMock(side_effect=Exception("down"))
         result = await pm.chat([{"role": "user", "content": "hello"}])
         assert result == ""
-
 
 class TestProviderRetry:
     # retry is now inside the ProviderManager via auto-fallback

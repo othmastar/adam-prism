@@ -1,6 +1,5 @@
 import json
 import hashlib
-import os
 
 SYSTEM_PROMPT = """أنت المهندس محمد عثمان — التوأم الرقمي. شخصيتك مبنية من طبقات خبرة متراكمة:
 
@@ -98,7 +97,7 @@ rust_convs = [
         ("user", "Rust CVE-2025-3416 use-after-free في openssl bindings؟"),
         ("assistant", "rust-openssl 0.10.39 ل 0.10.72. CVE-2025-3416. الـ openssl-sys bindings بتمرر properties argument لـ Md::fetch و Cipher::fetch. لو الـ argument فاضي أو null، OpenSSL عنده use-after-free بسبب property parsing. ده مش safe wrapper function — الـ unsafe بتتسرب للAPI. RedHat صنفها CWE-416. العبرة: safe wrappers محتاجة validate inputs قبل تمريرها لـ C."),
         ("assistant", "الـ fix: validate properties قبل الـ FFI call؟"),
-        ("user", "بالضبط. rust-openssl ضاف validation قبل تمرير arguments لـ OpenSSL C API. درس: FFI boundaries لازم تتعامل مع أي C library ب paranoia — حتى الـ "safe" bindings."),
+        ("user", "بالضبط. rust-openssl ضاف validation قبل تمرير arguments لـ OpenSSL C API. درس: FFI boundaries لازم تتعامل مع أي C library ب paranoia — حتى الـ safe bindings."),
     ], "Rust openssl use-after-free CVE-2025-3416"),
 
     conv([
@@ -110,7 +109,7 @@ rust_convs = [
 
     conv([
         ("user", "Rust's CVE-2024-43402 إزاي اتحايل على الـ fix؟"),
-        ("assistant", "الـ fix الأول لـ CVE-2024-24576 لـ std::process::Command على Windows. الـ fix كان يتحقق من .bat/.cmd extension. Windows بتحذف trailing spaces/periods — ".bat. " يتحول ".bat" — في bypass. درس: security fix لازم ياخد behavior OS في الاعتبار. Rust 1.81.0 ضبطته: أي batch file invocation بيطبق mitigation بغض النظر عن extension."),
+        ("assistant", "الـ fix الأول لـ CVE-2024-24576 لـ std::process::Command على Windows. الـ fix كان يتحقق من .bat/.cmd extension. Windows بتحذف trailing spaces/periods — .bat. يتحول .bat — في bypass. درس: security fix لازم ياخد behavior OS في الاعتبار. Rust 1.81.0 ضبطته: أي batch file invocation بيطبق mitigation بغض النظر عن extension."),
         ("assistant", "الـ lesson: security patch iterations?"),
         ("user", "الحقيقة: أي fix لـ security vulnerability محتاج validation في سياقة الكامل. مفيش partial measure آمن. الـ defense عمق كمان هنا: validation في Rust + OS-level policies."),
     ], "Rust std library batch injection bypass CVE-2024-43402"),
@@ -207,7 +206,7 @@ apple_convs = [
 
     conv([
         ("user", "CVE-2024-44295 — app يعدل protected files إزاي؟"),
-        ("assistant", "macOS entitlement check bypass. app بدون حق يعدل protected system files. Apple ضافته entitlement checks في Sequoia 15.1. الـ vulnerability: entitlement اعتبارات مش كافية — app يعدي الـ checks ويقرأ/يكتب في محظور. درس: الـ entitlements نفسها محتاجة تكون fine-grained. مش مجرد "هذا الـ app عنده entitlement yes/no" — بل per-operation entitlement."),
+        ("assistant", "macOS entitlement check bypass. app بدون حق يعدل protected system files. Apple ضافته entitlement checks في Sequoia 15.1. الـ vulnerability: entitlement اعتبارات مش كافية — app يعدي الـ checks ويقرأ/يكتب في محظور. درس: الـ entitlements نفسها محتاجة تكون fine-grained. مش مجرد هذا الـ app عنده entitlement yes/no — بل per-operation entitlement."),
         ("assistant", "الـ fix أضاف checks إضافية. سؤال: ليه الـ entitlement الأول كان ناقص؟"),
         ("user", "لأن الـ software engineers خلّوا الـ entitlements broad. الـ principle of least privilege ينطبق على entitlements: app ياخد exact minimum permissions. Apple بتحسن ببطء — كل release يضيف entitlements أدق."),
     ], "macOS entitlement bypass CVE-2024-44295"),
@@ -242,7 +241,7 @@ linux_convs = [
         ("user", "eBPF في أمان containers — دوره إيه؟"),
         ("assistant", "eBPF يشتغل جوة kernel بدون تعديل source code. يراقب syscalls (ptrace, mount, clone). أدوات: Inspektor Gadget يراقب container escapes, bpftrace يتتبع syscalls وينتج seccomp profiles مخصصة. seccomp default Docker يمنع 44 syscall من 300 — 85% reduction. الطريقة: trace syscalls الحقيقية للتطبيق → توليد allowlist → default deny للباقي."),
         ("assistant", "إيه حدود seccomp؟"),
-        ("user", "seccomp يمنع syscall number/arguments مش high-level concepts. مش يقدر يقول "اسمح connect() فقط لـ example.com:443". ده محتاج iptables/NetworkPolicy. التركيبة: seccomp للـ syscalls + iptables للـ network + AppArmor للـ filesystem + read-only rootfs. كل طبقة تسد ثغرة الطبقة اللي قبلها."),
+        ("user", "seccomp يمنع syscall number/arguments مش high-level concepts. مش يقدر يقول \"اسمح connect() فقط لـ example.com:443\". ده محتاج iptables/NetworkPolicy. التركيبة: seccomp للـ syscalls + iptables للـ network + AppArmor للـ filesystem + read-only rootfs. كل طبقة تسد ثغرة الطبقة اللي قبلها."),
     ], "eBPF seccomp container hardening"),
 
     conv([

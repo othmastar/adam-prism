@@ -22,7 +22,6 @@ PATTERN_TYPES = {
     "reasoning_path": "Chain of reasoning steps for problem types",
 }
 
-
 def _extract_tool_sequence(trace: ConversationTrace) -> dict | None:
     if not trace.tool_calls:
         return None
@@ -36,7 +35,6 @@ def _extract_tool_sequence(trace: ConversationTrace) -> dict | None:
         "outcome": trace.outcome,
         "success": trace.outcome == "success",
     }
-
 
 def _extract_tool_selections(trace: ConversationTrace) -> list[dict]:
     patterns = []
@@ -66,7 +64,6 @@ def _extract_tool_selections(trace: ConversationTrace) -> list[dict]:
             })
     return patterns
 
-
 def _extract_planning_depth(trace: ConversationTrace) -> dict | None:
     if trace.tool_call_count < 2:
         return None
@@ -81,7 +78,6 @@ def _extract_planning_depth(trace: ConversationTrace) -> dict | None:
         "mode": trace.mode,
         "outcome": trace.outcome,
     }
-
 
 class MetaLearner:
     def __init__(self, memory):

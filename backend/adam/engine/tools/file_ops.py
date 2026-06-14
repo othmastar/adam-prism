@@ -51,7 +51,6 @@ def _is_private_ip(hostname: str) -> bool:
     internal_suffixes = (".local", ".internal", ".localhost", ".docker", ".container")
     return bool(any(hostname.lower().endswith(s) for s in internal_suffixes))
 
-
 def _validate_url(url: str) -> dict:
     """التحقق من صحة وأمان URL — منع SSRF"""
     if not url:
@@ -90,7 +89,6 @@ def _validate_url(url: str) -> dict:
         }
 
     return {"valid": True}
-
 
 class FileOpsMixin:
     """Mixin: disk + file read/write/download tools"""

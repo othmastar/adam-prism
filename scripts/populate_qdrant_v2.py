@@ -1,4 +1,7 @@
-import requests, uuid, json, sys, os, time
+import requests
+import uuid
+import os
+import time
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
 
@@ -19,7 +22,7 @@ def embed(text):
         except Exception as e:
             print(f"  Embed attempt {attempt+1} failed: {e}")
             time.sleep(1)
-    raise RuntimeError(f"Failed to embed after 3 attempts")
+    raise RuntimeError("Failed to embed after 3 attempts")
 
 def ensure_collection(name):
     try:

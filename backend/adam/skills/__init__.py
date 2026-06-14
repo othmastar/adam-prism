@@ -11,4 +11,4 @@ from .base import Skill
 from .manager import SkillManager
 from .curator import SkillCurator
 
-__all__ = ["Skill", "SkillManager", "SkillCurator"]
+__all__ = ["Skill", "SkillCurator", "SkillManager"]

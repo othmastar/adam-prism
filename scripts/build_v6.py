@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """Build othmastar_v6.zip — combine all batches 1-8 (327 DEEP conversations)"""
-import json, os, random, zipfile
+import json
+import os
+import random
+import zipfile
 
 BASE = "/mnt/Workspace/Adam_Prism_Complete_v2/data/training"
 BATCHES = [f"batch{i}_total.json" for i in range(1, 9)]

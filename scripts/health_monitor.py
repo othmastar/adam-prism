@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """Adam Health Monitor — يراقب الخدمات ويصلحها تلقائياً"""
 
-import os, sys, time, json, logging, subprocess, signal
+import os
+import time
+import logging
+import subprocess
+import signal
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Optional
 
 LOG = "/tmp/adam_health.log"
 PID_FILE = "/tmp/adam_health.pid"
@@ -52,11 +55,10 @@ GRACE_PERIOD = {
     "ui": 10,
 }
 
-stats: Dict[str, Dict] = {
+stats: dict[str, dict] = {
     name: {"restarts": 0, "last_fail": 0, "healthy": False, "last_restart": 0}
     for name in SERVICES
 }
-
 
 def _curl(url: str, timeout: int = 5) -> bool:
     try:
@@ -66,7 +68,6 @@ def _curl(url: str, timeout: int = 5) -> bool:
     except Exception:
         return False
 
-
 def _run(cmd: str, cwd: str = None, timeout: int = 60) -> bool:
     try:
         subprocess.run(cmd, shell=True, cwd=cwd, capture_output=True, timeout=timeout)
@@ -75,8 +76,7 @@ def _run(cmd: str, cwd: str = None, timeout: int = 60) -> bool:
         logging.error(f"Command failed: {cmd[:80]} — {e}")
         return False
 
-
-def _pid_on_port(port: int) -> Optional[int]:
+def _pid_on_port(port: int) -> int | None:
     try:
         result = subprocess.run(
             ["lsof", "-ti", f":{port}"],
@@ -85,7 +85,6 @@ def _pid_on_port(port: int) -> Optional[int]:
         return int(result.stdout.strip()) if result.stdout.strip() else None
     except Exception:
         return None
-
 
 def _restart_model():
     kill_port(7860)
@@ -102,7 +101,6 @@ def _restart_model():
     logging.info("Model restarted — waiting 60s for load")
     return True
 
-
 def _restart_api():
     kill_port(8000)
     time.sleep(1)
@@ -114,7 +112,6 @@ def _restart_api():
     )
     logging.info("API restarted")
     return True
-
 
 def _restart_ui():
     kill_port(3000)
@@ -128,7 +125,6 @@ def _restart_ui():
     logging.info("UI restarted")
     return True
 
-
 def kill_port(port: int):
     pid = _pid_on_port(port)
     if pid:
@@ -137,7 +133,6 @@ def kill_port(port: int):
             time.sleep(1)
         except Exception:
             pass
-
 
 def check_gpu():
     try:
@@ -160,7 +155,6 @@ def check_gpu():
     except Exception as e:
         logging.error(f"GPU check failed: {e}")
     return None
-
 
 def check_services():
     now = time.time()
@@ -193,7 +187,6 @@ def check_services():
         s["restarts"] += 1
         s["last_restart"] = now
 
-
 def write_status():
     now = datetime.now().isoformat()
     gpu_pct = check_gpu()
@@ -206,7 +199,6 @@ def write_status():
     if gpu_pct is not None:
         lines.append(f"💾 GPU: {gpu_pct:.0f}%")
     Path("/tmp/adam_health_status.txt").write_text("\n".join(lines) + "\n")
-
 
 def main():
     logging.info("=" * 50)
@@ -226,7 +218,6 @@ def main():
         except Exception as e:
             logging.error(f"Monitor error: {e}")
         time.sleep(CHECK_INTERVAL)
-
 
 if __name__ == "__main__":
     main()

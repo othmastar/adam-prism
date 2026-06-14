@@ -5,10 +5,8 @@ Tests for the tools package (adam.engine.tools)
 import json
 import pytest
 from unittest.mock import AsyncMock, patch
-from typing import Dict
 
 from adam.engine.tools import AdamPrismEngineTools
-
 
 @pytest.fixture
 def tools():
@@ -34,7 +32,6 @@ def tools():
     engine._qdrant_client = None
     return engine
 
-
 class TestToolsParse:
     def test_parse_tool_request_json(self, tools):
         text = '{"_tool": "shell", "params": {"command": "ls"}}'
@@ -54,7 +51,6 @@ class TestToolsParse:
 
     def test_data_dir_property(self, tools):
         assert "/tmp/adam_test" in tools._data_dir
-
 
 class TestToolsShell:
     @pytest.mark.asyncio
@@ -79,7 +75,6 @@ class TestToolsShell:
         result = await tools._tool_shell("python_exec", {"code": "import os; print('hi')"})
         assert result["success"] is False
         assert "غير آمن" in result.get("error", "")
-
 
 class TestToolsPlanning:
     @pytest.mark.asyncio

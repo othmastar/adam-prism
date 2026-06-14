@@ -1,7 +1,11 @@
 """Adam Prism Inference Server — V87 checkpoint (أدوات + أخلاق + وعي)"""
-import sys, os, gc, json, logging, torch, warnings
+import sys
+import os
+import gc
+import logging
+import torch
+import warnings
 from pathlib import Path
-from typing import Optional, List, Dict
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
@@ -25,7 +29,7 @@ except ImportError as e:
 app = FastAPI(title="Adam Prism V87 Inference", version="1.0.0-beta")
 
 class ChatRequest(BaseModel):
-    messages: List[Dict]
+    messages: list[dict]
     temperature: float = 0.4
     max_tokens: int = 512
     top_p: float = 0.95

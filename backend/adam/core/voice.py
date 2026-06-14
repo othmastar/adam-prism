@@ -41,7 +41,6 @@ def _load_scipy():
         _scipy = s
     return _scipy
 
-
 # ═══════════════════════════════════════
 # Audio types
 # ═══════════════════════════════════════
@@ -53,7 +52,6 @@ class AudioChunk:
     is_final: bool = False
     timestamp: float = 0.0
 
-
 @dataclass
 class TranscriptionResult:
     text: str
@@ -62,14 +60,12 @@ class TranscriptionResult:
     segments: list[dict[str, Any]]
     is_final: bool = True
 
-
 @dataclass
 class SynthesisResult:
     audio: bytes
     sample_rate: int = 24000
     duration_seconds: float = 0.0
     text: str = ""
-
 
 # ═══════════════════════════════════════
 # Voice Activity Detection
@@ -181,7 +177,6 @@ class SileroVAD:
         self._model = None
         self._available = False
 
-
 # ═══════════════════════════════════════
 # Automatic Speech Recognition
 # ═══════════════════════════════════════
@@ -281,7 +276,6 @@ class FasterWhisperASR:
     def unload(self):
         self._model = None
         self._available = False
-
 
 # ═══════════════════════════════════════
 # Model Swapper Import (اختياري — للتوافق)
@@ -408,7 +402,6 @@ class EdgeTTS:
     def unload(self):
         self._available = False
 
-
 class LahgtnaTTS:
     """TTS باستخدام Lahgtna Chatterbox — on-premise، عربي، GPU، 3 لهجات"""
 
@@ -525,7 +518,6 @@ class LahgtnaTTS:
             pass
         logger.info("LahgtnaTTS مُفرغ من VRAM")
 
-
 # ═══════════════════════════════════════
 # Audio utilities
 # ═══════════════════════════════════════
@@ -548,18 +540,15 @@ def resample_audio(audio, orig_rate: int, target_rate: int):
             audio,
         )
 
-
 def audio_to_int16(audio) -> bytes:
     """تحويل float32 [-1, 1] إلى int16 PCM bytes"""
     audio = _load_numpy().clip(audio, -1.0, 1.0)
     return (audio * 32767).astype(_load_numpy().int16).tobytes()
 
-
 def int16_to_float32(audio_bytes: bytes):
     """تحويل int16 PCM bytes إلى float32 [-1, 1]"""
     audio = _load_numpy().frombuffer(audio_bytes, dtype=_load_numpy().int16).astype(_load_numpy().float32) / 32767.0
     return _load_numpy().clip(audio, -1.0, 1.0)
-
 
 # ═══════════════════════════════════════
 # Main Voice Pipeline

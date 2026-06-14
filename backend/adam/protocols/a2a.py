@@ -35,7 +35,6 @@ from pydantic import BaseModel, Field
 
 logger = logging.getLogger("adam_prism.protocols.a2a")
 
-
 # ═══════════════════════════════════════════════════════════════
 # أنماط البيانات / Data Models
 # ═══════════════════════════════════════════════════════════════
@@ -75,7 +74,6 @@ class AgentCard:
             "protocol": "a2a",
         }
 
-
 @dataclass
 class A2AMessage:
     """
@@ -110,7 +108,6 @@ class A2AMessage:
             "message_type": self.message_type,
         }
 
-
 # ═══════════════════════════════════════════════════════════════
 # Pydantic Models for API
 # ═══════════════════════════════════════════════════════════════
@@ -125,7 +122,6 @@ class A2ATaskRequest(BaseModel):
     content: Any = Field(..., description="محتوى المهمة — Task content")
     artifacts: list = Field(default_factory=list, description="المرفقات — Artifacts")
     message_type: str = Field("task", description="نوع الرسالة — Message type")
-
 
 # ═══════════════════════════════════════════════════════════════
 # A2A Server

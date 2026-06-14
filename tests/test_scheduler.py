@@ -1,10 +1,8 @@
 """Tests for AdamScheduler — cron/interval/once job scheduling via APScheduler"""
 
-import asyncio
 import pytest
 from datetime import datetime, timedelta
 from adam.scheduler import AdamScheduler
-
 
 class TestSchedulerInit:
     def test_default_init(self):
@@ -16,7 +14,6 @@ class TestSchedulerInit:
     def test_init_with_engine(self):
         sched = AdamScheduler(engine="dummy")
         assert sched.scheduler is not None
-
 
 class TestSchedulerJobs:
     @pytest.fixture
@@ -93,7 +90,6 @@ class TestSchedulerJobs:
 
     def test_get_job_nonexistent(self, sched):
         assert sched.get_job("no_such_job") is None
-
 
 class TestSchedulerLifecycle:
     @pytest.fixture

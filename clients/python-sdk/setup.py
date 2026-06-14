@@ -1,13 +1,11 @@
 """Adam Prism Python SDK — setup.py"""
 
-import os
 import subprocess
 from pathlib import Path
 
 from setuptools import find_packages, setup
 
 HERE = Path(__file__).parent
-
 
 def get_version() -> str:
     """Get version from git tag (e.g. v1.0.0 → 1.0.0) or fallback."""
@@ -24,13 +22,11 @@ def get_version() -> str:
     except Exception:
         return "0.1.0"
 
-
 def get_long_description() -> str:
     readme = HERE / "README.md"
     if readme.exists():
         return readme.read_text(encoding="utf-8")
     return ""
-
 
 setup(
     name="adam-prism-client",

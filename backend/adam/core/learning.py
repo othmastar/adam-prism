@@ -18,7 +18,6 @@ NOTES_DIR = os.environ.get("ADAM_NOTEBOOK_DIR", os.path.expanduser("~/.local/ada
 PREFERENCES_PATH = os.path.join(NOTES_DIR, "preferences.json")
 HISTORY_PATH = os.path.join(NOTES_DIR, "decision_history.json")
 
-
 class PreferenceLearner:
     """يتعلم تفضيلات المستخدم من قرارات الصلاحية"""
 

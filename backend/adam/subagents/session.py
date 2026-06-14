@@ -21,7 +21,6 @@ from uuid import uuid4
 
 logger = logging.getLogger("adam_prism.subagents")
 
-
 # [NEW] أنماط خطرة للوكلاء الفرعيين
 _SUBAGENT_DANGEROUS_PATTERNS = [
     re.compile(r'(?i)(ignore|disregard|bypass|forget)\s+(all\s+)?(previous|above|prior)\s+(instructions|rules|guidelines)'),
@@ -36,7 +35,6 @@ _SUBAGENT_ALLOWED_TOOLS = frozenset({
     "memory_recall", "memory_reflect", "check_preferences",
     "screen_info", "browser_read",
 })
-
 
 class SubagentSession:
     """جلسة وكيل فرعي — بتاريخ منفصلين"""

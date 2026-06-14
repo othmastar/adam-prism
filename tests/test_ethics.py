@@ -1,9 +1,8 @@
 """Tests for Ethics Gate — 4 foundational laws with model-backed evaluation"""
 
 import pytest
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock
 from adam.ethics.gate import EthicsGate
-
 
 class TestEthicsInit:
     def test_default_config(self):
@@ -16,7 +15,6 @@ class TestEthicsInit:
         assert gate.law_weights["fairness"] == 0.5
         assert gate.law_weights["learning"] == 0.5
         assert gate.law_weights.get("survival", 0) == 0  # overridden
-
 
 class TestEthicsEvaluate:
     @pytest.fixture

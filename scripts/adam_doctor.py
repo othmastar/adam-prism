@@ -20,8 +20,6 @@ import asyncio
 import os
 import sys
 import shutil
-from typing import Any
-
 
 GREEN = "\033[0;32m"
 YELLOW = "\033[1;33m"
@@ -29,22 +27,17 @@ RED = "\033[0;31m"
 BLUE = "\033[0;34m"
 NC = "\033[0m"
 
-
 def ok(msg: str) -> None:
     print(f"  {GREEN}✓{NC} {msg}")
-
 
 def warn(msg: str) -> None:
     print(f"  {YELLOW}⚠{NC} {msg}")
 
-
 def fail(msg: str) -> None:
     print(f"  {RED}✗{NC} {msg}")
 
-
 def section(title: str) -> None:
     print(f"\n{BLUE}── {title} ──{NC}")
-
 
 async def check_python() -> bool:
     section("Python")
@@ -54,7 +47,6 @@ async def check_python() -> bool:
         return True
     fail(f"Python {v.major}.{v.minor} — need 3.10+")
     return False
-
 
 def check_imports() -> bool:
     section("Python packages")
@@ -88,7 +80,6 @@ def check_imports() -> bool:
             warn(f"{name} (optional) — install for production features")
     return all_ok
 
-
 def check_ollama() -> bool:
     section("Ollama")
     if not shutil.which("ollama"):
@@ -117,7 +108,6 @@ def check_ollama() -> bool:
     print(f"    {BLUE}→{NC} Start: ollama serve (or brew services start ollama)")
     return False
 
-
 def check_qdrant() -> bool:
     section("Qdrant")
     import urllib.request
@@ -132,7 +122,6 @@ def check_qdrant() -> bool:
     fail("Qdrant not running on http://localhost:6333")
     print(f"    {BLUE}→{NC} Start: docker run -d -p 6333:6333 qdrant/qdrant")
     return False
-
 
 async def check_api(url: str = "http://localhost:8000") -> bool:
     section(f"Adam Prism API at {url}")
@@ -174,7 +163,6 @@ async def check_api(url: str = "http://localhost:8000") -> bool:
         print(f"    {BLUE}→{NC} Start: adam-prism --port 8000")
         return False
 
-
 def check_config() -> bool:
     section("Configuration")
     if not os.path.exists(".env"):
@@ -196,7 +184,6 @@ def check_config() -> bool:
         warn("ADAM_JWT_SECRET not set — multi-user auth will use fallback")
     return True
 
-
 def check_data_dir() -> bool:
     section("Data directory")
     data_dir = os.environ.get("ADAM_DATA_DIR", os.path.expanduser("~/.local/share/adam"))
@@ -214,7 +201,6 @@ def check_data_dir() -> bool:
         else:
             fail(f"Only {free_gb:.1f} GB free — need at least 1GB")
     return True
-
 
 async def main() -> int:
     print(f"\n{BLUE}╔════════════════════════════════════════╗{NC}")
@@ -245,7 +231,6 @@ async def main() -> int:
         print(f"{RED}✗ {passed}/{total} checks passed{NC}")
         print(f"{YELLOW}Fix the issues above, then run adam-doctor again{NC}")
         return 2
-
 
 if __name__ == "__main__":
     sys.exit(asyncio.run(main()))

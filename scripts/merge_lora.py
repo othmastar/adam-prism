@@ -21,7 +21,7 @@ try:
     model = PeftModel.from_pretrained(model, lora_path)
 
     # الدمج النهائي اللي بيحل مشكلة الـ positional argument
-    model = model.merge_and_unload() 
+    model = model.merge_and_unload()
 
     output_path = "/mnt/Workspace/adam_final_engine"
     print(f"💾 حفظ في: {output_path}")

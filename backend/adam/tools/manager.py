@@ -25,7 +25,6 @@ from adam.tools.mcp import MCPManager
 
 logger = logging.getLogger("adam_prism.tools")
 
-
 class ToolManager:
     """مدير الأدوات — يوجّه الاستدعاءات للمتعامل المناسب"""
 
@@ -201,7 +200,7 @@ class ToolManager:
                     )
                     stdout, _ = await asyncio.wait_for(proc.communicate(), timeout=5)
                     return {"success": True, "data": stdout.decode("utf-8", errors="replace")}
-                except (asyncio.TimeoutError, Exception) as e:
+                except (TimeoutError, Exception) as e:
                     return {"success": False, "error": str(e)}
             return {"success": False, "error": f"File action unknown: {at}"}
         except Exception as e:

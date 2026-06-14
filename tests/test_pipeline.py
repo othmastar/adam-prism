@@ -1,10 +1,9 @@
 """Tests for Pipeline — TelegramChannel + LiveSummarizer"""
 
 import pytest
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock
 from adam.pipeline.channels import TelegramChannel, TailscaleConfig
 from adam.pipeline.summarizer import LiveSummarizer
-
 
 # ─── TelegramChannel Tests ───────────────────────────────────────────────────
 
@@ -39,7 +38,6 @@ class TestTelegramChannel:
     def test_stop_does_not_crash(self, channel):
         channel.stop()  # not started, should not crash
 
-
 # ─── TailscaleConfig Tests ────────────────────────────────────────────────────
 
 class TestTailscaleConfig:
@@ -53,7 +51,6 @@ class TestTailscaleConfig:
         assert isinstance(status, dict)
         # Should gracefully handle when tailscale isn't installed
         assert "error" in status or "status" in status or True
-
 
 # ─── LiveSummarizer Tests ────────────────────────────────────────────────────
 

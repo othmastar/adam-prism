@@ -24,7 +24,6 @@ from typing import Any
 
 logger = logging.getLogger("adam_prism.orchestrator.task_queue")
 
-
 class TaskStatus(str):
     PENDING = "pending"
     RUNNING = "running"
@@ -33,13 +32,11 @@ class TaskStatus(str):
     CANCELLED = "cancelled"
     RETRYING = "retrying"
 
-
 class TaskPriority(IntEnum):
     CRITICAL = 0
     HIGH = 1
     NORMAL = 2
     LOW = 3
-
 
 @dataclass
 class Task:
@@ -65,7 +62,6 @@ class Task:
         if not isinstance(other, Task):
             return NotImplemented
         return self.priority < other.priority
-
 
 class TaskQueue:
     """

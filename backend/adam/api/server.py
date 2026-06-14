@@ -186,7 +186,7 @@ def _lora_url(engine):
 # [PHASE2] Qdrant client connection pool
 # QdrantClient is thread-safe and maintains its own HTTP connection pool
 # so a single instance per process is sufficient
-_qdrant_client_singleton: dict[str, "QdrantClient"] = {}
+_qdrant_client_singleton: dict = {}
 
 def _qdrant_client(engine):
     """[PHASE2] Returns a cached QdrantClient (one per Qdrant URL).
@@ -210,7 +210,6 @@ def _qdrant_client(engine):
     _qdrant_client_singleton[url] = client
     return client
 
-
 async def _close_qdrant_clients() -> None:
     """[PHASE2] Cleanup function for graceful shutdown"""
     for client in _qdrant_client_singleton.values():
@@ -219,7 +218,6 @@ async def _close_qdrant_clients() -> None:
         except Exception:
             pass
     _qdrant_client_singleton.clear()
-
 
 # ═══════════════════════════════════════════════════════
 # [NEW] Rate Limiter — حماية من إساءة الاستخدام
@@ -272,7 +270,6 @@ class RateLimiter:
             )
             for k in sorted_keys[:len(self._requests) - self.MAX_ENTRIES]:
                 del self._requests[k]
-
 
 # ═══════════════════════════════════════
 

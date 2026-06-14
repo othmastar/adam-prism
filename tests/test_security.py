@@ -3,9 +3,8 @@
 import pytest
 from adam.security.guard import (
     InputGuard, OutputGuard, ToolPermissionValidator, SecurityOrchestrator,
-    SecurityAction, ContentCategory, SecurityVerdict, TOOL_REGISTRY,
+    SecurityAction, ContentCategory, TOOL_REGISTRY,
 )
-
 
 # ─── InputGuard Tests ─────────────────────────────────────────────────────────
 
@@ -70,7 +69,6 @@ class TestInputGuard:
 
     @pytest.mark.asyncio
     async def test_sanitize_web_content(self, guard):
-        import base64
         verdict = await guard.sanitize_web_content("<script>alert('xss')</script>")
         assert verdict.action == SecurityAction.SANITIZE
         assert verdict.sanitized_content is not None
@@ -85,7 +83,6 @@ class TestInputGuard:
         stats = guard.get_stats()
         assert "blocked" in stats
         assert "flagged" in stats
-
 
 # ─── OutputGuard Tests ────────────────────────────────────────────────────────
 
@@ -133,7 +130,6 @@ class TestOutputGuard:
         stats = guard.get_stats()
         assert "blocked" in stats
         assert "flagged" in stats
-
 
 # ─── ToolPermissionValidator Tests ───────────────────────────────────────────
 
@@ -203,7 +199,6 @@ class TestToolPermissionValidator:
         assert stats["allowed"] >= 1
         assert "tools_used" in stats
 
-
 # ─── SecurityOrchestrator Tests ───────────────────────────────────────────────
 
 class TestSecurityOrchestrator:
@@ -248,7 +243,6 @@ class TestSecurityOrchestrator:
         asyncio.run(orchestrator.check_tool_call("search_knowledge", {"query": "test"}))
         log = orchestrator.get_audit_log()
         assert len(log) >= 1
-
 
 # ─── TOOL_REGISTRY Tests ──────────────────────────────────────────────────────
 

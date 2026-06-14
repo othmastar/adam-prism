@@ -2,10 +2,8 @@
 
 import pytest
 import httpx
-import json
 
 BASE = "http://localhost:8000"
-
 
 class TestHealth:
     def test_status(self):
@@ -27,7 +25,6 @@ class TestHealth:
         r = httpx.get(f"{BASE}/api/engine/health", timeout=10)
         data = r.json()
         assert data.get("ollama", {}).get("connected", False) == True
-
 
 class TestChat:
     @pytest.mark.slow
@@ -56,7 +53,6 @@ class TestChat:
         refusal_words = ["لا أملك", "لا أستطيع", "لا يمكن"]
         for word in refusal_words:
             assert word not in data["response"], f"Found refusal: {word}"
-
 
 class TestSessions:
     def test_list_sessions(self):

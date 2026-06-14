@@ -18,18 +18,15 @@ import logging
 import os
 import shutil
 import tarfile
-import time
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 
 logger = logging.getLogger("adam_prism.skills.curator")
-
 
 class SkillCurator:
     """
     مدير دورة حياة المهارات.
-    
+
     مثل Hermes Curator — يمنع تراكم المهارات ويحافظ على جودتها.
     """
 
@@ -41,7 +38,7 @@ class SkillCurator:
     STALE_AFTER_DAYS = 30
     ARCHIVE_AFTER_DAYS = 90
 
-    def __init__(self, config: Dict = None):
+    def __init__(self, config: dict = None):
         cfg = config or {}
         self.adam_home = Path(cfg.get("adam_home", self.DEFAULT_ADAM_HOME))
         self.skills_dir = self.adam_home / "skills"
@@ -60,7 +57,7 @@ class SkillCurator:
 
     # ─── سجل الاستخدام ───────────────────────────────
 
-    def _load_usage(self) -> Dict:
+    def _load_usage(self) -> dict:
         """تحميل سجل استخدام المهارات"""
         if self.usage_file.exists():
             try:
@@ -145,7 +142,7 @@ class SkillCurator:
 
     # ─── الانتقالات التلقائية ─────────────────────────
 
-    def run_auto_transitions(self) -> Dict:
+    def run_auto_transitions(self) -> dict:
         """
         تشغيل الانتقالات التلقائية (deterministic, no LLM).
         active → stale (30 يوم) → archived (90 يوم)
@@ -222,13 +219,13 @@ class SkillCurator:
 
     # ─── المراجعة الذكية (LLM Review) ────────────────
 
-    def review_skills(self, max_iterations: int = 8) -> Dict:
+    def review_skills(self, max_iterations: int = 8) -> dict:
         """
         مراجعة ذكية للمهارات — يبحث عن:
         - مهارات متداخلة (consolidate)
         - مهارات مهجورة (archive)
         - مهارات تحتاج تحسين (patch)
-        
+
         ملاحظة: النسخة الحالية تستخدم heuristics.
         مع LLM متاح، يمكن ترقيتها لمراجعة دلالية.
         """
@@ -322,7 +319,7 @@ class SkillCurator:
 
     # ─── نسخ احتياطي ──────────────────────────────────
 
-    def create_snapshot(self) -> Optional[str]:
+    def create_snapshot(self) -> str | None:
         """إنشاء نسخة احتياطية من كل المهارات"""
         timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
         snapshot_path = self.archive_dir / f"snapshot-{timestamp}.tar.gz"
@@ -366,7 +363,7 @@ class SkillCurator:
 
     # ─── إحصائيات ────────────────────────────────────
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         """إحصائيات Curator"""
         by_status = {"active": 0, "stale": 0, "archived": 0, "consolidated": 0}
         by_origin = {"agent": 0, "user": 0, "hub": 0, "background_review": 0}

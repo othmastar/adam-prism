@@ -10,9 +10,10 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from typing import Any, Callable, Awaitable
+from typing import Any
+from collections.abc import Callable, Awaitable
 
-from fastapi import APIRouter, FastAPI, Response, status
+from fastapi import FastAPI, Response
 from fastapi.responses import JSONResponse
 
 logger = logging.getLogger("adam_prism.health")
@@ -20,7 +21,6 @@ logger = logging.getLogger("adam_prism.health")
 # Subsystem check functions
 # Each returns (healthy: bool, details: dict)
 CheckFunc = Callable[[], Awaitable[tuple[bool, dict[str, Any]]]]
-
 
 class HealthRegistry:
     """[PHASE3] Registry of health checks for subsystems."""
@@ -56,7 +56,7 @@ class HealthRegistry:
         for name, task in check_tasks.items():
             try:
                 healthy, details = await asyncio.wait_for(task, timeout=5.0)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 healthy, details = False, {"error": "timeout"}
             except Exception as e:
                 healthy, details = False, {"error": str(e)}
@@ -68,7 +68,6 @@ class HealthRegistry:
                 all_healthy = False
 
         return all_healthy, results
-
 
 # Default subsystem health checks
 async def check_qdrant(engine) -> tuple[bool, dict[str, Any]]:
@@ -89,7 +88,6 @@ async def check_qdrant(engine) -> tuple[bool, dict[str, Any]]:
     except Exception as e:
         return False, {"error": str(e)[:200]}
 
-
 async def check_ollama(engine) -> tuple[bool, dict[str, Any]]:
     """Check Ollama connectivity"""
     try:
@@ -105,7 +103,6 @@ async def check_ollama(engine) -> tuple[bool, dict[str, Any]]:
         return False, {"url": url, "status": resp.status_code}
     except Exception as e:
         return False, {"error": str(e)[:200]}
-
 
 async def check_disk_space(engine) -> tuple[bool, dict[str, Any]]:
     """Check disk space available"""
@@ -124,7 +121,6 @@ async def check_disk_space(engine) -> tuple[bool, dict[str, Any]]:
     except Exception as e:
         return False, {"error": str(e)[:200]}
 
-
 async def check_memory(engine) -> tuple[bool, dict[str, Any]]:
     """Check available memory"""
     try:
@@ -139,7 +135,6 @@ async def check_memory(engine) -> tuple[bool, dict[str, Any]]:
         return True, {"psutil": "not installed"}
     except Exception as e:
         return False, {"error": str(e)[:200]}
-
 
 def setup_health_endpoints(app: FastAPI, engine, registry: HealthRegistry) -> None:
     """[PHASE3] Register health check endpoints on the FastAPI app."""

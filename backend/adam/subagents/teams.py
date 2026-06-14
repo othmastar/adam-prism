@@ -14,7 +14,6 @@ from adam.subagents.session import SubagentSession
 
 logger = logging.getLogger("adam_prism.subagents.teams")
 
-
 class SubagentTeam:
     """
     فريق وكلاء — بيوزع المهام ويجمع النتائج.
@@ -163,7 +162,6 @@ class SubagentTeam:
         """إزالة وكيل من الفريق"""
         self.agents.pop(name, None)
         self._order = [n for n in self._order if n != name]
-
 
 class TeamManager:
     """مدير فرق الوكلاء — بيدير creation + orchestration"""

@@ -6,7 +6,6 @@ from .base import Skill
 
 logger = logging.getLogger("adam_prism.skills")
 
-
 class SkillManager:
     """مدير المهارات — يكتشف، يحمل، يشغل المهارات"""
 

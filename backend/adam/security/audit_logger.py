@@ -31,7 +31,6 @@ from typing import Any
 
 logger = logging.getLogger("adam_prism.security.audit")
 
-
 # ═══════════════════════════════════════════════════════════════
 # Audit Logger
 # ═══════════════════════════════════════════════════════════════

@@ -6,7 +6,6 @@ Adam Prism — Provider Base Class
 
 from typing import Any
 
-
 class BaseProvider:
     """Base class for all LLM providers"""
 

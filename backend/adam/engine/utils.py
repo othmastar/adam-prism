@@ -16,7 +16,6 @@ from adam.engine.base import AdamPrismEngineBase
 
 logger = logging.getLogger("adam_prism.core")
 
-
 class AdamPrismEngineUtils(AdamPrismEngineBase):
     """
     Mixin with utility methods for the engine.
@@ -78,7 +77,7 @@ class AdamPrismEngineUtils(AdamPrismEngineBase):
             if result is None:
                 return {"allowed": True, "reason": "no_security_module"}
             return result
-        except asyncio.TimeoutError:
+        except TimeoutError:
             # [M2] Fail-closed: timeout must deny, not allow
             return {"allowed": False, "reason": "security_check_timeout"}
         except Exception as e:

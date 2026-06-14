@@ -13,7 +13,6 @@ from adam.providers.base import BaseProvider
 
 logger = logging.getLogger("adam_prism.providers.anthropic")
 
-
 class AnthropicProvider(BaseProvider):
     name = "anthropic"
 
