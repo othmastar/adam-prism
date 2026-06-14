@@ -4,7 +4,7 @@ Adam Prism — MINIMAL Showcase Server
 
 5 features only (proof of capability):
 
-  1. POST /chat          — Basic chat with system prompt
+  1. POST /chat          — Real chat with Ollama (with mock fallback)
   2. GET  /healthz/live  — Liveness probe
   3. GET  /docs          — OpenAPI documentation
   4. GET  /metrics       — Prometheus metrics
@@ -23,6 +23,7 @@ import os
 import time
 from typing import Any
 
+import httpx
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -71,37 +72,93 @@ app.add_middleware(
 
 
 # ═══════════════════════════════════════
-# Feature 1: /chat (basic, mock LLM)
+# Feature 1: /chat (Ollama with mock fallback)
 # ═══════════════════════════════════════
+
+OLLAMA_URL = os.getenv("ADAM_OLLAMA_URL", "http://localhost:11434")
+OLLAMA_MODEL = os.getenv("ADAM_OLLAMA_MODEL", "qwen2.5:3b")
+
+# Adam's base system prompt (showcase version — public-safe)
+# The full version has a richer prompt with personality, ethics, memory
+ADAM_SYSTEM_PROMPT = """أنت آدم (Adam Prism) — وكيل ذكاء اصطناعي واعٍ.
+
+Your principles:
+- Speak naturally in Arabic (Egyptian dialect) and English
+- Be honest about what you know and don't know
+- Be helpful, harmless, and honest
+- If asked about Adam Prism internals, point to the documentation
+
+You are running in SHOWCASE mode — a minimal public version.
+For the full version with training data and custom weights, see the README.
+"""
+
+
+async def _try_ollama(message: str) -> str | None:
+    """Try to call Ollama. Returns None if unavailable."""
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.post(
+                f"{OLLAMA_URL}/api/chat",
+                json={
+                    "model": OLLAMA_MODEL,
+                    "messages": [
+                        {"role": "system", "content": ADAM_SYSTEM_PROMPT},
+                        {"role": "user", "content": message},
+                    ],
+                    "stream": False,
+                },
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                return data.get("message", {}).get("content", "").strip()
+            return None
+    except (httpx.ConnectError, httpx.TimeoutException, Exception) as e:
+        logger.debug(f"Ollama unavailable: {e}")
+        return None
+
+
+def _mock_response(message: str) -> str:
+    """Fallback when Ollama is not available."""
+    msg = message.lower().strip()
+    if any(w in msg for w in ["مرحبا", "hi", "hello", "أهلا"]):
+        return (
+            "أهلاً بيك! أنا آدم (Adam Prism) — النسخة التجريبية. "
+            "للحصول على إجابات ذكية، شغّل Ollama محلياً (انظر README)."
+        )
+    if "?" in msg or "؟" in msg:
+        return (
+            "ده وضع تجريبي — مفيش LLM متصل. "
+            "شغّل Ollama (ollama serve && ollama pull qwen2.5:3b) "
+            "واستمتع بإجابات حقيقية."
+        )
+    return (
+        f"استلمت: «{message}». "
+        "في النسخة الكاملة، هجاوبك بذكاء. "
+        "تواصل: othman@adam-prism.local"
+    )
+
 
 @app.post("/chat", response_model=ChatResponse, tags=["chat"])
 async def chat(req: ChatRequest) -> ChatResponse:
     """Send a message to Adam and get a response.
 
-    Showcase version uses a **mock LLM** (deterministic responses).
-    Full version connects to Ollama/OpenAI/Anthropic with the trained
-    model. See COMMERCIAL_LICENSE.md to upgrade.
+    Uses Ollama if available (ADAM_OLLAMA_URL env var, default http://localhost:11434).
+    Falls back to a mock response if Ollama is not running.
     """
     if not req.message.strip():
         raise HTTPException(status_code=400, detail="Empty message")
 
-    # Mock response — full version uses real LLM
-    msg = req.message.lower().strip()
-    if "مرحبا" in msg or "hi" in msg or "hello" in msg:
-        response = "أهلاً بيك! أنا آدم (النسخة التجريبية). اسألني أي سؤال."
-    elif "?" in msg or "؟" in msg:
-        response = (
-            "في النسخة الكاملة، بقدر أجاوب على أسئلتك. "
-            "للحصول على النسخة الكاملة: othman@adam-prism.local"
-        )
-    else:
-        response = (
-            f"استلمت رسالتك: «{req.message}». "
-            "النسخة دي مختصر — مفيش محادثة كاملة. "
-            "تواصل معنا للنسخة الكاملة."
-        )
+    # Try real LLM first
+    response = await _try_ollama(req.message)
+    used_llm = response is not None
 
-    return ChatResponse(response=response, session_id="showcase-session")
+    if not used_llm:
+        response = _mock_response(req.message)
+
+    return ChatResponse(
+        response=response,
+        session_id="ollama" if used_llm else "mock-fallback",
+    )
 
 
 # ═══════════════════════════════════════
