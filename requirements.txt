@@ -1,46 +1,51 @@
 # Adam Prism - المتطلبات
 # ========================
+# [PHASE2] Pinned with upper bounds to prevent supply chain attacks
 
 # المحرك الأساسي
-httpx>=0.25.0
-pydantic>=2.0.0
+httpx>=0.25.0,<1.0.0
+pydantic>=2.0.0,<3.0.0
 
 # API Server
-fastapi>=0.104.0
-uvicorn[standard]>=0.24.0
-websockets>=12.0
+fastapi>=0.104.0,<1.0.0
+uvicorn[standard]>=0.24.0,<1.0.0
+websockets>=12.0,<14.0
 
 # المتصفح الآلي
-playwright>=1.40.0
+playwright>=1.40.0,<2.0.0
 
 # قاعدة البيانات الشعاعية (Qdrant)
-qdrant-client>=1.7.0
+qdrant-client>=1.7.0,<2.0.0
 
 # معالجة النصوص
-beautifulsoup4>=4.12.0
-lxml>=4.9.0
+beautifulsoup4>=4.12.0,<5.0.0
+lxml>=4.9.0,<6.0.0
 
 # أدوات النظام
-Pillow>=10.0.0
+Pillow>=10.0.0,<12.0.0
 
 # MCP - آلاف الأدوات القياسية
-mcp[cli]>=1.27.0
+mcp[cli]>=1.27.0,<2.0.0
 
 # Scheduler - جدولة المهام
-apscheduler>=3.11.0
+apscheduler>=3.11.0,<4.0.0
 
 # Settings & Validation
-pydantic-settings>=2.0.0
+pydantic-settings>=2.0.0,<3.0.0
 
 # Document Processing
-PyMuPDF>=1.23.0
-python-docx>=1.1.0
+PyMuPDF>=1.23.0,<2.0.0
+python-docx>=1.1.0,<2.0.0
 
 # Voice - TTS
-edge-tts>=6.1.0
+edge-tts>=6.1.0,<8.0.0
+
+# Dev/test
+pytest>=8.0,<10.0
+pytest-asyncio>=0.23,<1.0
 
 # لو حابب تستخدم LoRA لاحقاً
-# torch>=2.1.0
-# transformers>=4.36.0
-# peft>=0.7.0
-# datasets>=2.14.0
+# torch>=2.1.0,<3.0.0
+# transformers>=4.36.0,<5.0.0
+# peft>=0.7.0,<1.0.0
+# datasets>=2.14.0,<4.0.0

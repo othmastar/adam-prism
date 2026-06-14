@@ -6,6 +6,7 @@ Adam Prism - نظام القناة (Tailscale + Telegram)
 - Telegram Bot (رسائل فورية)
 """
 
+import asyncio
 import json
 import logging
 from typing import Any
@@ -222,17 +223,26 @@ tailscale ip -4
 """
 
     @staticmethod
-    def get_status() -> dict:
+    async def get_status() -> dict:
         """حالة Tailscale"""
+        # [PHASE2] async subprocess instead of blocking subprocess.run
         try:
-            import subprocess
-            result = subprocess.run(
-                ["tailscale", "status", "--json"],
-                capture_output=True, text=True, timeout=5
+            proc = await asyncio.create_subprocess_exec(
+                "tailscale", "status", "--json",
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
             )
-            if result.returncode == 0:
-                return json.loads(result.stdout)
-        except Exception:
-            pass
+            try:
+                stdout, _ = await asyncio.wait_for(proc.communicate(), timeout=5)
+            except asyncio.TimeoutError:
+                proc.kill()
+                await proc.wait()
+                return {"status": "timeout"}
+            if proc.returncode == 0:
+                return json.loads(stdout.decode("utf-8", errors="replace"))
+        except FileNotFoundError:
+            return {"status": "not_installed"}
+        except Exception as e:
+            logger.debug("tailscale status check failed: %s", e)
 
         return {"status": "not_installed_or_not_running"}

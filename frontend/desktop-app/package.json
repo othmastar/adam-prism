@@ -62,14 +62,49 @@
     "files": [
       "out/**/*"
     ],
+    "publish": {
+      "provider": "github",
+      "owner": "othmastar",
+      "repo": "adam-prism",
+      "releaseType": "release"
+    },
     "mac": {
-      "target": "dmg"
+      "target": "dmg",
+      "category": "public.app-category.developer-tools",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "notarize": {
+        "teamId": "${env.APPLE_TEAM_ID}"
+      }
+    },
+    "dmg": {
+      "sign": false
     },
     "win": {
-      "target": "nsis"
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64", "arm64"]
+        }
+      ],
+      "publisherName": "Mohamed Othman"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Adam Prism"
     },
     "linux": {
-      "target": "AppImage"
-    }
+      "target": ["AppImage", "deb"],
+      "category": "Development",
+      "maintainer": "Mohamed Othman",
+      "vendor": "Adam Prism"
+    },
+    "icon": "build/icon.png"
   }
 }
