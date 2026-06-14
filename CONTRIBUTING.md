@@ -128,4 +128,78 @@ Open a [discussion](https://github.com/othmastar/adam-prism/discussions) or tag 
 
 ---
 
+## How to Add New Components
+
+### Adding a new channel
+
+1. Subclass `BaseChannel` in `backend/adam/channels/`
+2. Implement `start_polling()` and `send_message()`
+3. Add to `bulk.py` registry OR import in `manager.py`
+4. Add tests
+
+```python
+from adam.channels.base import BaseChannel
+
+class MyChannel(BaseChannel):
+    name = "my-channel"
+    requires = ["api_key"]
+
+    async def start_polling(self):
+        ...
+
+    async def send_message(self, chat_id, text):
+        ...
+```
+
+### Adding a new provider
+
+1. Subclass `BaseProvider` in `backend/adam/providers/`
+2. Implement `chat()`, `generate()`, `chat_stream()`
+3. Add to `ProviderManager._create_provider()`
+4. Add tests
+
+```python
+from adam.providers.base import BaseProvider
+
+class MyProvider(BaseProvider):
+    name = "my-provider"
+    model = "my-model"
+
+    async def chat(self, messages, **kwargs):
+        ...
+
+    async def generate(self, prompt, system="", **kwargs):
+        ...
+
+    async def chat_stream(self, messages, **kwargs):
+        ...
+```
+
+### Adding a new tool
+
+1. Add handler in `backend/adam/tools/manager.py`
+2. Register in `TOOL_REGISTRY` in `security/guard.py`
+3. Add tests
+
+### Adding a new skill
+
+Create a Markdown file in `~/.adam/skills/` with JSON frontmatter:
+
+```markdown
+---
+name: "my-skill"
+description: "Does something useful"
+triggers: ["help me with X"]
+---
+
+When to Use
+When the user asks about X...
+
+Procedure
+1. Step one
+2. Step two
+```
+
+---
+
 **Made with ❤️ by Mohamed Othman — عين الحارس**

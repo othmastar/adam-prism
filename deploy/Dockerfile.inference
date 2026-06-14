@@ -18,13 +18,13 @@ RUN pip install --no-cache-dir \
 RUN playwright install firefox && playwright install-deps firefox
 
 # Copy inference server
-COPY جيما\ 4\ 12\ مليار/fastapi_server.py /app/server.py
-COPY جيما\ 4\ 12\ مليار/subagent.py /app/subagent.py
-COPY جيما\ 4\ 12\ مليار/sandbox.py /app/sandbox.py
+COPY gemma4_12b/fastapi_server.py /app/server.py
+COPY gemma4_12b/subagent.py /app/subagent.py
+COPY gemma4_12b/sandbox.py /app/sandbox.py
 
 # Model volume mount point
-VOLUME /mnt/Workspace/gemma4_12b_4bit
-ENV MODEL_PATH=/mnt/Workspace/gemma4_12b_4bit
+VOLUME /models
+ENV MODEL_PATH=/models
 
 EXPOSE 7861
 

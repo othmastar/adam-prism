@@ -319,6 +319,127 @@ The extension is built into the project — edit anything seamlessly without wri
 
 ---
 
+## 🏗️ Architecture
+
+```
+┌─────────────────────────────────────────────────────┐
+│ API Layer                                           │
+│ FastAPI (40+ endpoints) + WebSocket + Python SDK   │
+└───────────────────────┬─────────────────────────────┘
+                        │
+┌───────────────────────▼─────────────────────────────┐
+│ Engine (Mixin Chain)                                │
+│ Base → Utils → Context → Generate → Tools → Chat   │
+└──┬──────┬──────┬──────┬──────┬──────┬──────┬────────┘
+   │      │      │      │      │      │      │
+Security Ethics Memory Tools Channels Plugins Subagents
+│3-tier│4 laws│4-layer│Browser│23 ch │hooks │teams │
+│guard │gate │iron │+MCP │      │      │      │
+└──────┴──────┴───────┴──────┴──────┴──────┴───────┘
+                        │
+┌───────────────────────▼─────────────────────────────┐
+│ Provider Manager                                    │
+│ Ollama (local) ←→ OpenAI ←→ Anthropic              │
+│ Auto-fallback if primary fails                      │
+└─────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🔧 Use as a Framework
+
+```python
+from adam import AdamPrismEngine
+
+engine = AdamPrismEngine(config={
+    "inference_mode": "ollama",
+    "qdrant_url": "http://localhost:6333",
+})
+
+result = await engine.chat("Hello, who are you?")
+print(result["response"])
+```
+
+---
+
+## 🌐 Use the API
+
+```bash
+# Chat
+curl -X POST http://localhost:8001/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Hello", "session_id": "my-session"}'
+
+# Search knowledge
+curl -X POST http://localhost:8001/api/knowledge/search \
+  -d '{"query": "deployment architecture"}'
+
+# Add MCP tool server
+curl -X POST http://localhost:8001/api/tools/mcp/add \
+  -d '{"name": "filesystem", "command": "npx", "args": ["-y", "@modelcontextprotocol/server-filesystem", "/tmp"]}'
+```
+
+---
+
+## 🧩 Extend It
+
+### Add a new LLM provider
+
+```python
+from adam.providers.base import BaseProvider
+
+class MyProvider(BaseProvider):
+    name = "my-provider"
+    model = "my-model"
+    
+    async def chat(self, messages, **kwargs):
+        # Your implementation
+        ...
+    
+    async def generate(self, prompt, system="", **kwargs):
+        # Your implementation
+        ...
+    
+    async def chat_stream(self, messages, **kwargs):
+        # Your implementation
+        ...
+```
+
+### Add a new channel
+
+```python
+from adam.channels.base import BaseChannel
+
+class MyChannel(BaseChannel):
+    name = "my-channel"
+    requires = ["api_key"]
+    
+    async def start_polling(self):
+        ...
+    
+    async def send_message(self, chat_id, text):
+        ...
+```
+
+### Add a new skill
+
+Create `~/.adam/skills/my-skill.md`:
+
+```markdown
+---
+name: "my-skill"
+description: "Does something useful"
+triggers: ["help me with X"]
+---
+
+When to Use
+When the user asks about X...
+
+Procedure
+1. Step one
+2. Step two
+```
+
 ## 🎯 You're Not Downloading a Framework
 
 **You're claiming your digital sovereignty.**
@@ -329,6 +450,12 @@ The extension is built into the project — edit anything seamlessly without wri
 - No one deciding for you what's safe and what isn't
 
 **Adam Prism isn't the product. Freedom is the product.**
+
+---
+
+## 📄 License
+
+Apache-2.0 — Use it, modify it, distribute it, sell it.
 
 ---
 
