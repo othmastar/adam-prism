@@ -1,0 +1,12 @@
+# [PHASE3] Kustomize base — Adam Prism on Kubernetes
+# Apply with: kubectl apply -k deploy/k8s/overlays/production
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - api.yaml
+  - ollama.yaml
+  - qdrant.yaml
+  - ingress.yaml
+  - secrets.yaml
+  - configmap.yaml

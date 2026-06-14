@@ -53,6 +53,7 @@ Documentation = "https://github.com/othmastar/adam-prism#readme"
 [project.scripts]
 adam-prism = "adam.__main__:main"
 adam = "adam.__main__:main"
+adam-doctor = "scripts.adam_doctor:main"
 
 [dependency-groups]
 dev = [

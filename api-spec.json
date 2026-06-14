@@ -1,0 +1,2983 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Adam Prism API",
+    "description": "API for the Adam Prism AI agent framework — built-in security, ethics, memory, and 25+ channel integrations.",
+    "version": "2.0.0",
+    "contact": {
+      "name": "Mohamed Othman",
+      "email": "othmastar@gmail.com",
+      "url": "https://github.com/othmastar/adam-prism"
+    },
+    "license": {
+      "name": "Apache-2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0"
+    }
+  },
+  "paths": {
+    "/chat/webhook": {
+      "post": {
+        "summary": " Webhook Post",
+        "operationId": "_webhook_post_chat_webhook_post",
+        "parameters": [
+          {
+            "name": "request",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "title": "Request"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response  Webhook Post Chat Webhook Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/chat/widget": {
+      "get": {
+        "summary": " Widget Get",
+        "operationId": "_widget_get_chat_widget_get",
+        "parameters": [
+          {
+            "name": "request",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "title": "Request"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response  Widget Get Chat Widget Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "summary": "Root",
+        "description": "الصفحة الرئيسية",
+        "operationId": "root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/status": {
+      "get": {
+        "summary": "Get Status",
+        "description": "حالة النظام",
+        "operationId": "get_status_api_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chat": {
+      "post": {
+        "summary": "Chat",
+        "description": "إرسال رسالة والحصول على رد مع رد صوتي",
+        "operationId": "chat_api_chat_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chat/sessions": {
+      "get": {
+        "summary": "List Sessions",
+        "description": "قائمة جلسات المحادثة",
+        "operationId": "list_sessions_api_chat_sessions_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create Session",
+        "description": "إنشاء جلسة جديدة (اختيارياً مع أول رسالة)",
+        "operationId": "create_session_api_chat_sessions_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSessionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chat/sessions/{session_id}": {
+      "get": {
+        "summary": "Get Session",
+        "description": "جلب جلسة مع رسائلها",
+        "operationId": "get_session_api_chat_sessions__session_id__get",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update Session",
+        "description": "تحديث عنوان الجلسة",
+        "operationId": "update_session_api_chat_sessions__session_id__patch",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSessionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Session",
+        "description": "حذف جلسة",
+        "operationId": "delete_session_api_chat_sessions__session_id__delete",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chat/sessions/{session_id}/messages": {
+      "get": {
+        "summary": "List Messages",
+        "description": "جلب رسائل جلسة معينة",
+        "operationId": "list_messages_api_chat_sessions__session_id__messages_get",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Add Message",
+        "description": "إضافة رسالة إلى جلسة",
+        "operationId": "add_message_api_chat_sessions__session_id__messages_post",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddMessageRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chat/sessions/{session_id}/sync": {
+      "post": {
+        "summary": "Sync Session",
+        "description": "مزامنة كل رسائل جلسة دفعة واحدة (يحل محل القديم)",
+        "operationId": "sync_session_api_chat_sessions__session_id__sync_post",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SyncSessionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chat/search": {
+      "post": {
+        "summary": "Search Chat History",
+        "description": "البحث النصي الكامل في تاريخ المحادثات عبر FTS5",
+        "operationId": "search_chat_history_api_chat_search_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatSearchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/knowledge/search": {
+      "post": {
+        "summary": "Search Knowledge",
+        "description": "البحث في القاعدة المعرفية",
+        "operationId": "search_knowledge_api_knowledge_search_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/knowledge/collections": {
+      "get": {
+        "summary": "List Collections",
+        "description": "عرض كل المجموعات في Qdrant مع عدد النقاط",
+        "operationId": "list_collections_api_knowledge_collections_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/knowledge/add": {
+      "post": {
+        "summary": "Add Knowledge",
+        "description": "إضافة معرفة جديدة لـ Qdrant",
+        "operationId": "add_knowledge_api_knowledge_add_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddKnowledgeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/pipeline/summarize": {
+      "post": {
+        "summary": "Summarize Text",
+        "description": "تلخيص نص",
+        "operationId": "summarize_text_api_pipeline_summarize_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SummarizeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tools/action": {
+      "post": {
+        "summary": "Execute Tool Action",
+        "description": "تنفيذ إجراء عبر مدير الأدوات",
+        "operationId": "execute_tool_action_api_tools_action_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tools/available": {
+      "get": {
+        "summary": "List Available Tools",
+        "description": "عرض الأدوات المتاحة مع صلاحياتها",
+        "operationId": "list_available_tools_api_tools_available_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/mcp/add-server": {
+      "post": {
+        "summary": "Add Mcp Server",
+        "description": "إضافة خادم MCP — يتطلب مفتاح المسؤول",
+        "operationId": "add_mcp_server_api_mcp_add_server_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddMCPServerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/mcp/tools": {
+      "get": {
+        "summary": "List Mcp Tools",
+        "description": "عرض أدوات MCP المتاحة",
+        "operationId": "list_mcp_tools_api_mcp_tools_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/notebook/{date}": {
+      "get": {
+        "summary": "Get Notebook",
+        "description": "قراءة صفحة النوت بوك لتاريخ معين",
+        "operationId": "get_notebook_api_notebook__date__get",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/notebook/profile": {
+      "post": {
+        "summary": "Update Notebook Profile",
+        "description": "تحديث ملف المستخدم في النوت بوك",
+        "operationId": "update_notebook_profile_api_notebook_profile_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateNotebookProfileRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/diagnostics": {
+      "get": {
+        "summary": "Get Diagnostics",
+        "description": "فحص شامل لكل المكونات",
+        "operationId": "get_diagnostics_api_diagnostics_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/security/stats": {
+      "get": {
+        "summary": "Get Security Stats",
+        "description": "إحصائيات الأمان",
+        "operationId": "get_security_stats_api_security_stats_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/security/audit": {
+      "get": {
+        "summary": "Get Audit Log",
+        "description": "سجل التدقيق الأمني",
+        "operationId": "get_audit_log_api_security_audit_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/memory/stats": {
+      "get": {
+        "summary": "Get Memory Stats",
+        "description": "إحصائيات الذاكرة",
+        "operationId": "get_memory_stats_api_memory_stats_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/memory/store": {
+      "post": {
+        "summary": "Store Memory",
+        "description": "تخزين ذكرى جديد",
+        "operationId": "store_memory_api_memory_store_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StoreMemoryRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/memory/search": {
+      "post": {
+        "summary": "Search Memory",
+        "description": "البحث في الذاكرة",
+        "operationId": "search_memory_api_memory_search_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchMemoryRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/memory/reflect": {
+      "post": {
+        "summary": "Reflect Memory",
+        "description": "تأمل في الذكريات",
+        "operationId": "reflect_memory_api_memory_reflect_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReflectMemoryRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/skills": {
+      "get": {
+        "summary": "List Skills",
+        "description": "عرض المهارات المتاحة",
+        "operationId": "list_skills_api_skills_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/scheduler/jobs": {
+      "get": {
+        "summary": "List Scheduled Jobs",
+        "operationId": "list_scheduled_jobs_api_scheduler_jobs_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/scheduler/interval": {
+      "post": {
+        "summary": "Add Interval Job",
+        "operationId": "add_interval_job_api_scheduler_interval_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IntervalJobRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/scheduler/once": {
+      "post": {
+        "summary": "Add Once Job",
+        "operationId": "add_once_job_api_scheduler_once_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OnceJobRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/scheduler/jobs/{job_id}": {
+      "delete": {
+        "summary": "Remove Scheduled Job",
+        "operationId": "remove_scheduled_job_api_scheduler_jobs__job_id__delete",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/plugins": {
+      "get": {
+        "summary": "List Plugins",
+        "operationId": "list_plugins_api_plugins_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/plugins/load": {
+      "post": {
+        "summary": "Load Plugin",
+        "operationId": "load_plugin_api_plugins_load_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoadPluginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/plugins/{plugin_name}": {
+      "delete": {
+        "summary": "Unload Plugin",
+        "operationId": "unload_plugin_api_plugins__plugin_name__delete",
+        "parameters": [
+          {
+            "name": "plugin_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Plugin Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/subagents": {
+      "get": {
+        "summary": "List Subagents",
+        "operationId": "list_subagents_api_subagents_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/subagents/spawn": {
+      "post": {
+        "summary": "Spawn Subagent",
+        "operationId": "spawn_subagent_api_subagents_spawn_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SpawnSubagentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/subagents/{subagent_id}/chat": {
+      "post": {
+        "summary": "Chat Subagent",
+        "operationId": "chat_subagent_api_subagents__subagent_id__chat_post",
+        "parameters": [
+          {
+            "name": "subagent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Subagent Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubagentChatRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/subagents/{subagent_id}": {
+      "delete": {
+        "summary": "Remove Subagent",
+        "operationId": "remove_subagent_api_subagents__subagent_id__delete",
+        "parameters": [
+          {
+            "name": "subagent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Subagent Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/channels": {
+      "get": {
+        "summary": "List Channels",
+        "operationId": "list_channels_api_channels_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/engine/health": {
+      "get": {
+        "summary": "Engine Health",
+        "description": "فحص صحة المحرك — مطلوب من الفرونت اند",
+        "operationId": "engine_health_api_engine_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/engine/stream": {
+      "get": {
+        "summary": "Engine Stream",
+        "description": "SSE stream لأحداث المعالجة — مطلوب من الفرونت اند",
+        "operationId": "engine_stream_api_engine_stream_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/engine/diagnostics": {
+      "get": {
+        "summary": "Engine Diagnostics",
+        "description": "تشخيصات تفصيلية — مطلوب من الفرونت اند",
+        "operationId": "engine_diagnostics_api_engine_diagnostics_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/engine/pipeline-log": {
+      "get": {
+        "summary": "Engine Pipeline Log",
+        "description": "سجل خطوات المعالجة — مطلوب من الفرونت اند",
+        "operationId": "engine_pipeline_log_api_engine_pipeline_log_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/engine/heal": {
+      "post": {
+        "summary": "Engine Heal",
+        "description": "إصلاح تلقائي — مطلوب من الفرونت اند",
+        "operationId": "engine_heal_api_engine_heal_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/voice/chat": {
+      "post": {
+        "summary": "Voice Chat",
+        "description": "محادثة صوتية — مطلوب من الفرونت اند",
+        "operationId": "voice_chat_api_voice_chat_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_voice_chat_api_voice_chat_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/voice/transcribe": {
+      "post": {
+        "summary": "Voice Transcribe",
+        "description": "تفريغ صوتي — مطلوب من الفرونت اند",
+        "operationId": "voice_transcribe_api_voice_transcribe_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_voice_transcribe_api_voice_transcribe_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chat/upload": {
+      "post": {
+        "summary": "Chat Upload",
+        "description": "رفع ملف — مطلوب من الفرونت اند",
+        "operationId": "chat_upload_api_chat_upload_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_chat_upload_api_chat_upload_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ollama/models": {
+      "get": {
+        "summary": "Ollama Models",
+        "description": "قائمة نماذج Ollama — مطلوب من الفرونت اند",
+        "operationId": "ollama_models_api_ollama_models_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ollama/select": {
+      "post": {
+        "summary": "Ollama Select",
+        "description": "اختيار نموذج Ollama — مطلوب من الفرونت اند",
+        "operationId": "ollama_select_api_ollama_select_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OllamaSelectRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/skills/list": {
+      "get": {
+        "summary": "Skills List",
+        "description": "قائمة المهارات التفصيلية — مطلوب من الفرونت اند",
+        "operationId": "skills_list_api_skills_list_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/skills/load": {
+      "post": {
+        "summary": "Skills Load",
+        "description": "تحميل مهارة — مطلوب من الفرونت اند",
+        "operationId": "skills_load_api_skills_load_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkillsLoadRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/notebook/stats": {
+      "get": {
+        "summary": "Notebook Stats",
+        "description": "إحصائيات النوت بوك — مطلوب من الفرونت اند",
+        "operationId": "notebook_stats_api_notebook_stats_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/permissions/respond": {
+      "post": {
+        "summary": "Permissions Respond",
+        "description": "الرد على طلب صلاحية — مطلوب من الفرونت اند",
+        "operationId": "permissions_respond_api_permissions_respond_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PermissionsApproveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/voice/audio/{filename}": {
+      "get": {
+        "summary": "Get Audio",
+        "description": "خدمة ملفات الصوت",
+        "operationId": "get_audio_api_voice_audio__filename__get",
+        "parameters": [
+          {
+            "name": "filename",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Filename"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/voice/synthesize": {
+      "post": {
+        "summary": "Synthesize Voice",
+        "description": "تحويل نص لكلام",
+        "operationId": "synthesize_voice_api_voice_synthesize_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "type": "object",
+                "title": "Req"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "summary": "Register",
+        "description": "[PHASE3] Register a new user account.",
+        "operationId": "register_api_auth_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "summary": "Login",
+        "description": "[PHASE3] Login with username/email + password, returns JWT.",
+        "operationId": "login_api_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/refresh": {
+      "post": {
+        "summary": "Refresh",
+        "description": "[PHASE3] Refresh an access token using a refresh token.",
+        "operationId": "refresh_api_auth_refresh_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "summary": "Me",
+        "description": "[PHASE3] Get current user info from JWT.",
+        "operationId": "me_api_auth_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ActionRequest": {
+        "properties": {
+          "action": {
+            "type": "string",
+            "title": "Action"
+          },
+          "params": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Params",
+            "default": {}
+          }
+        },
+        "type": "object",
+        "required": [
+          "action"
+        ],
+        "title": "ActionRequest"
+      },
+      "AddKnowledgeRequest": {
+        "properties": {
+          "texts": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Texts"
+          },
+          "collection": {
+            "type": "string",
+            "title": "Collection",
+            "default": "knowledge"
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Metadata",
+            "default": {}
+          }
+        },
+        "type": "object",
+        "required": [
+          "texts"
+        ],
+        "title": "AddKnowledgeRequest"
+      },
+      "AddMCPServerRequest": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "command": {
+            "type": "string",
+            "title": "Command"
+          },
+          "args": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Args",
+            "default": []
+          },
+          "env": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Env"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "command"
+        ],
+        "title": "AddMCPServerRequest"
+      },
+      "AddMessageRequest": {
+        "properties": {
+          "role": {
+            "type": "string",
+            "title": "Role"
+          },
+          "content": {
+            "type": "string",
+            "title": "Content"
+          },
+          "mode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mode"
+          },
+          "metadata": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metadata"
+          }
+        },
+        "type": "object",
+        "required": [
+          "role",
+          "content"
+        ],
+        "title": "AddMessageRequest"
+      },
+      "Body_chat_upload_api_chat_upload_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_chat_upload_api_chat_upload_post"
+      },
+      "Body_voice_chat_api_voice_chat_post": {
+        "properties": {
+          "audio": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "Audio"
+          },
+          "session_id": {
+            "type": "string",
+            "title": "Session Id",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "audio"
+        ],
+        "title": "Body_voice_chat_api_voice_chat_post"
+      },
+      "Body_voice_transcribe_api_voice_transcribe_post": {
+        "properties": {
+          "audio": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "Audio"
+          }
+        },
+        "type": "object",
+        "required": [
+          "audio"
+        ],
+        "title": "Body_voice_transcribe_api_voice_transcribe_post"
+      },
+      "ChatRequest": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "context": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Context"
+          },
+          "voice": {
+            "type": "boolean",
+            "title": "Voice",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "ChatRequest"
+      },
+      "ChatResponse": {
+        "properties": {
+          "response": {
+            "type": "string",
+            "title": "Response"
+          },
+          "mode": {
+            "type": "string",
+            "title": "Mode",
+            "default": "communicator"
+          },
+          "intent": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Intent"
+          },
+          "knowledge_used": {
+            "type": "integer",
+            "title": "Knowledge Used",
+            "default": 0
+          },
+          "tool_calls_made": {
+            "type": "integer",
+            "title": "Tool Calls Made",
+            "default": 0
+          },
+          "tools_used": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tools Used",
+            "default": []
+          },
+          "tool_records": {
+            "items": {
+              "$ref": "#/components/schemas/ToolRecord"
+            },
+            "type": "array",
+            "title": "Tool Records",
+            "default": []
+          },
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Errors",
+            "default": []
+          },
+          "cycle": {
+            "type": "integer",
+            "title": "Cycle",
+            "default": 0
+          },
+          "duration_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Ms"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "audio_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audio Url"
+          },
+          "permission_pending": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Permission Pending"
+          }
+        },
+        "type": "object",
+        "required": [
+          "response"
+        ],
+        "title": "ChatResponse"
+      },
+      "ChatSearchRequest": {
+        "properties": {
+          "query": {
+            "type": "string",
+            "title": "Query"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 20
+          }
+        },
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "title": "ChatSearchRequest"
+      },
+      "CreateSessionRequest": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "default": "New Conversation"
+          },
+          "first_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "First Message"
+          }
+        },
+        "type": "object",
+        "title": "CreateSessionRequest"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "IntervalJobRequest": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "seconds": {
+            "type": "integer",
+            "title": "Seconds"
+          },
+          "action": {
+            "type": "string",
+            "title": "Action"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "default": ""
+          },
+          "params": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Params",
+            "default": {}
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "seconds",
+          "action"
+        ],
+        "title": "IntervalJobRequest"
+      },
+      "LoadPluginRequest": {
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "Path"
+          }
+        },
+        "type": "object",
+        "required": [
+          "path"
+        ],
+        "title": "LoadPluginRequest"
+      },
+      "LoginRequest": {
+        "properties": {
+          "username_or_email": {
+            "type": "string",
+            "title": "Username Or Email"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "username_or_email",
+          "password"
+        ],
+        "title": "LoginRequest"
+      },
+      "OllamaSelectRequest": {
+        "properties": {
+          "model": {
+            "type": "string",
+            "title": "Model"
+          }
+        },
+        "type": "object",
+        "required": [
+          "model"
+        ],
+        "title": "OllamaSelectRequest"
+      },
+      "OnceJobRequest": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "run_at": {
+            "type": "string",
+            "title": "Run At"
+          },
+          "action": {
+            "type": "string",
+            "title": "Action"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "default": ""
+          },
+          "params": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Params",
+            "default": {}
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "run_at",
+          "action"
+        ],
+        "title": "OnceJobRequest"
+      },
+      "PermissionsApproveRequest": {
+        "properties": {
+          "approve": {
+            "type": "boolean",
+            "title": "Approve",
+            "default": false
+          },
+          "level": {
+            "type": "string",
+            "title": "Level",
+            "default": "once"
+          }
+        },
+        "type": "object",
+        "title": "PermissionsApproveRequest"
+      },
+      "ReflectMemoryRequest": {
+        "properties": {
+          "days": {
+            "type": "integer",
+            "title": "Days",
+            "default": 1
+          }
+        },
+        "type": "object",
+        "title": "ReflectMemoryRequest"
+      },
+      "RefreshRequest": {
+        "properties": {
+          "refresh_token": {
+            "type": "string",
+            "title": "Refresh Token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "refresh_token"
+        ],
+        "title": "RefreshRequest"
+      },
+      "RegisterRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "username",
+          "password"
+        ],
+        "title": "RegisterRequest"
+      },
+      "SearchMemoryRequest": {
+        "properties": {
+          "query": {
+            "type": "string",
+            "title": "Query"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 10
+          }
+        },
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "title": "SearchMemoryRequest"
+      },
+      "SearchRequest": {
+        "properties": {
+          "query": {
+            "type": "string",
+            "title": "Query"
+          },
+          "collection": {
+            "type": "string",
+            "title": "Collection",
+            "default": "knowledge"
+          },
+          "top_k": {
+            "type": "integer",
+            "title": "Top K",
+            "default": 3
+          }
+        },
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "title": "SearchRequest"
+      },
+      "SkillsLoadRequest": {
+        "properties": {
+          "path": {
+            "type": "string",
+            "title": "Path"
+          }
+        },
+        "type": "object",
+        "required": [
+          "path"
+        ],
+        "title": "SkillsLoadRequest"
+      },
+      "SpawnSubagentRequest": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "default": "subagent"
+          },
+          "config": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Config",
+            "default": {}
+          }
+        },
+        "type": "object",
+        "title": "SpawnSubagentRequest"
+      },
+      "StoreMemoryRequest": {
+        "properties": {
+          "content": {
+            "type": "string",
+            "title": "Content"
+          },
+          "tags": {
+            "type": "string",
+            "title": "Tags",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "content"
+        ],
+        "title": "StoreMemoryRequest"
+      },
+      "SubagentChatRequest": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "SubagentChatRequest"
+      },
+      "SummarizeRequest": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "default": "manual"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "default": "Untitled"
+          },
+          "max_length": {
+            "type": "integer",
+            "title": "Max Length",
+            "default": 500
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "SummarizeRequest"
+      },
+      "SyncMessageItem": {
+        "properties": {
+          "role": {
+            "type": "string",
+            "title": "Role"
+          },
+          "content": {
+            "type": "string",
+            "title": "Content"
+          },
+          "mode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mode"
+          },
+          "metadata": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metadata"
+          }
+        },
+        "type": "object",
+        "required": [
+          "role",
+          "content"
+        ],
+        "title": "SyncMessageItem"
+      },
+      "SyncSessionRequest": {
+        "properties": {
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/SyncMessageItem"
+            },
+            "type": "array",
+            "title": "Messages"
+          }
+        },
+        "type": "object",
+        "required": [
+          "messages"
+        ],
+        "title": "SyncSessionRequest"
+      },
+      "ToolRecord": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "params": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Params",
+            "default": {}
+          },
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": false
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "ToolRecord"
+      },
+      "UpdateNotebookProfileRequest": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "preferences": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preferences"
+          },
+          "background": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Background"
+          },
+          "goals": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goals"
+          }
+        },
+        "type": "object",
+        "title": "UpdateNotebookProfileRequest"
+      },
+      "UpdateSessionRequest": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "title": "UpdateSessionRequest"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000",
+      "description": "Local development"
+    },
+    {
+      "url": "https://api.adam-prism.example.com",
+      "description": "Production"
+    }
+  ],
+  "security": [
+    {
+      "BearerAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "chat",
+      "description": "Chat endpoints — send messages, get responses"
+    },
+    {
+      "name": "knowledge",
+      "description": "Knowledge base — RAG with Qdrant"
+    },
+    {
+      "name": "sessions",
+      "description": "Chat session management"
+    },
+    {
+      "name": "skills",
+      "description": "Skills system"
+    },
+    {
+      "name": "plugins",
+      "description": "Plugin management"
+    },
+    {
+      "name": "channels",
+      "description": "Channel integrations (Telegram, Discord, etc.)"
+    },
+    {
+      "name": "memory",
+      "description": "Memory and notebook"
+    },
+    {
+      "name": "security",
+      "description": "Security and audit logs"
+    },
+    {
+      "name": "scheduler",
+      "description": "Job scheduler"
+    },
+    {
+      "name": "ollama",
+      "description": "Ollama model management"
+    },
+    {
+      "name": "voice",
+      "description": "Voice transcription and synthesis"
+    },
+    {
+      "name": "mcp",
+      "description": "MCP (Model Context Protocol) integration"
+    },
+    {
+      "name": "subagents",
+      "description": "Subagent teams"
+    },
+    {
+      "name": "system",
+      "description": "System status, health, diagnostics"
+    },
+    {
+      "name": "auth",
+      "description": "Authentication endpoints (registration, login, JWT)"
+    }
+  ]
+}

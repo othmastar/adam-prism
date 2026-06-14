@@ -287,6 +287,7 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
 
     # ═══════════════════════════════════════════════════════
     # [FIX] المصادقة — تفعيلها أولاً قبل أي مسارات
+    # [PHASE3] دعم JWT + API key
     # ═══════════════════════════════════════════════════════
     import hmac as _hmac
     import secrets as _secrets
@@ -360,7 +361,11 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
 
     # المسارات العامة — فقط الصفحة الرئيسية والوثائق
     # [PHASE2] /metrics added for Prometheus scraping (no auth required)
-    _public_paths = {"/", "/api/status", "/docs", "/openapi.json", "/redoc", "/metrics"}
+    # [PHASE3] /healthz/* for k8s probes, /health for human overview
+    _public_paths = {
+        "/", "/api/status", "/docs", "/openapi.json", "/redoc", "/metrics",
+        "/healthz/live", "/healthz/ready", "/healthz/startup", "/health",
+    }
 
     # [NEW] الحد الأقصى لحجم طلب API
     _max_request_size = int(os.environ.get("ADAM_MAX_REQUEST_SIZE", str(10 * 1024 * 1024)))  # 10MB default
@@ -380,12 +385,30 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
                 content={"detail": "Too many requests — slow down"}
             )
 
-        # المصادقة
+        # [PHASE3] المصادقة: JWT أولاً، ثم API key تقليدي
+        from adam.auth import verify_token
         auth = request.headers.get("Authorization", "")
+        if not auth.startswith("Bearer "):
+            return JSONResponse(
+                status_code=403,
+                content={"detail": "Unauthorized — provide Bearer token in Authorization header"},
+            )
+        token = auth[7:]
+
+        # Try JWT
+        if _secrets and len(token) > 40:  # JWTs are typically long
+            payload = verify_token(token)
+            if payload:
+                return await call_next(request)
+
+        # Fall back to legacy API key
         expected = f"Bearer {_api_key}"
         if _hmac.compare_digest(auth.encode(), expected.encode()):
             return await call_next(request)
-        return JSONResponse(status_code=403, content={"detail": "Unauthorized — provide Bearer token in Authorization header"})
+        return JSONResponse(
+            status_code=403,
+            content={"detail": "Unauthorized — invalid Bearer token"},
+        )
 
     # [NEW] Middleware لتحديد حجم الطلب
     @app.middleware("http")
@@ -1536,6 +1559,126 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
         await _close_qdrant_clients()
         logger.info("Adam Prism API stopped")
 
+    # [PHASE3] Auth endpoints (register, login, refresh)
+    # Public endpoints for multi-user auth
+    class RegisterRequest(BaseModel):
+        email: str
+        username: str
+        password: str
+
+    class LoginRequest(BaseModel):
+        username_or_email: str
+        password: str
+
+    class RefreshRequest(BaseModel):
+        refresh_token: str
+
+    @app.post("/api/auth/register")
+    async def register(req: RegisterRequest):
+        """[PHASE3] Register a new user account."""
+        from adam.auth import hash_password, create_access_token, create_refresh_token
+        from adam.storage import init_db, get_connection
+        from sqlalchemy import text
+
+        if len(req.password) < 8:
+            raise HTTPException(status_code=400, detail="Password must be at least 8 characters")
+        if len(req.username) < 3:
+            raise HTTPException(status_code=400, detail="Username must be at least 3 characters")
+
+        try:
+            init_db()
+        except Exception:
+            pass
+
+        user_id = _secrets.token_urlsafe(16)
+        password_hash = hash_password(req.password)
+        try:
+            with get_connection() as conn:
+                conn.execute(
+                    text(
+                        "INSERT INTO users (id, email, username, password_hash) "
+                        "VALUES (:id, :email, :username, :pw)"
+                    ),
+                    {"id": user_id, "email": req.email, "username": req.username, "pw": password_hash},
+                )
+        except Exception as e:
+            if "UNIQUE" in str(e).upper() or "duplicate" in str(e).lower():
+                raise HTTPException(status_code=409, detail="Email or username already exists")
+            raise HTTPException(status_code=500, detail=str(e))
+
+        return {
+            "user_id": user_id,
+            "access_token": create_access_token(user_id, req.email),
+            "refresh_token": create_refresh_token(user_id),
+            "token_type": "bearer",
+        }
+
+    @app.post("/api/auth/login")
+    async def login(req: LoginRequest):
+        """[PHASE3] Login with username/email + password, returns JWT."""
+        from adam.auth import verify_password, create_access_token, create_refresh_token
+        from adam.storage import get_connection
+        from sqlalchemy import text
+
+        try:
+            with get_connection() as conn:
+                row = conn.execute(
+                    text(
+                        "SELECT id, email, password_hash, is_active FROM users "
+                        "WHERE username = :u OR email = :u LIMIT 1"
+                    ),
+                    {"u": req.username_or_email},
+                ).first()
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"DB error: {e}")
+
+        if not row or not verify_password(req.password, row.password_hash):
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+        if not row.is_active:
+            raise HTTPException(status_code=403, detail="Account is disabled")
+
+        return {
+            "user_id": row.id,
+            "email": row.email,
+            "access_token": create_access_token(row.id, row.email),
+            "refresh_token": create_refresh_token(row.id),
+            "token_type": "bearer",
+        }
+
+    @app.post("/api/auth/refresh")
+    async def refresh(req: RefreshRequest):
+        """[PHASE3] Refresh an access token using a refresh token."""
+        from adam.auth import verify_token, create_access_token
+        payload = verify_token(req.refresh_token)
+        if not payload or "refresh" not in payload.scopes:
+            raise HTTPException(status_code=401, detail="Invalid refresh token")
+        return {
+            "access_token": create_access_token(payload.sub, payload.email, payload.role, [s for s in payload.scopes if s != "refresh"]),
+            "token_type": "bearer",
+        }
+
+    @app.get("/api/auth/me")
+    async def me(request: Request):
+        """[PHASE3] Get current user info from JWT."""
+        from adam.auth import verify_token
+        auth = request.headers.get("Authorization", "")
+        if not auth.startswith("Bearer "):
+            raise HTTPException(status_code=401, detail="Missing token")
+        token = auth[7:]
+        # Try JWT first
+        payload = verify_token(token)
+        if payload:
+            return {
+                "user_id": payload.sub,
+                "email": payload.email,
+                "role": payload.role,
+                "scopes": payload.scopes,
+            }
+        # Fall back to legacy API key
+        if _hmac.compare_digest(token.encode(), _api_key.encode()):
+            return {"user_id": "default", "role": "admin", "scopes": ["*"]}
+        raise HTTPException(status_code=401, detail="Invalid token")
+
     # [PHASE1-SECURITY] Prometheus /metrics endpoint
     # [FIX H6] Already excluded from auth check via _public_paths
     @app.get("/metrics", include_in_schema=False)
@@ -1586,5 +1729,11 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
 
         from fastapi.responses import PlainTextResponse
         return PlainTextResponse(content="\n".join(lines) + "\n", media_type="text/plain; version=0.0.4")
+
+    # [PHASE3] Health check endpoints (liveness, readiness, startup)
+    from adam.observability.health import HealthRegistry, setup_health_endpoints
+    _health_registry = HealthRegistry()
+    setup_health_endpoints(app, engine, _health_registry)
+    _health_registry.mark_startup_complete()
 
     return app
