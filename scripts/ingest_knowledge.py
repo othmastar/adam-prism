@@ -17,7 +17,8 @@ Adam Knowledge Ingester — يحقن المعرفة في Qdrant
 }
 """
 
-import sys, json, os, time
+import sys
+import time
 
 QDRANT_URL = "http://localhost:6333"
 OLLAMA_URL = "http://localhost:11434"
@@ -394,7 +395,6 @@ KNOWLEDGE = [
 
 import httpx
 
-
 def get_embedding(text: str) -> list:
     r = httpx.post(f"{OLLAMA_URL}/api/embeddings", json={
         "model": "nomic-embed-text",
@@ -403,12 +403,10 @@ def get_embedding(text: str) -> list:
     r.raise_for_status()
     return r.json()["embedding"]
 
-
 def collection_exists(name: str) -> bool:
     r = httpx.get(f"{QDRANT_URL}/collections", timeout=10)
     cols = [c["name"] for c in r.json()["result"]["collections"]]
     return name in cols
-
 
 def store_point(text: str, embedding: list, payload: dict):
     pid = str(hash(text))[:32]
@@ -426,7 +424,6 @@ def store_point(text: str, embedding: list, payload: dict):
     r.raise_for_status()
     return True
 
-
 def main():
     dry_run = "--dry-run" in sys.argv
 
@@ -441,7 +438,7 @@ def main():
         return
 
     ensure_collection()
-    
+
     print(f"Ingesting {len(KNOWLEDGE)} chunks into '{COLLECTION}'...")
     for item in KNOWLEDGE:
         text = item["text"]
@@ -449,7 +446,7 @@ def main():
         source = item.get("source", "Adam Knowledge Base 2026")
 
         embedding = get_embedding(text)
-        
+
         payload = {
             "text": text,
             "category": item.get("category", "ot_attacks"),
@@ -460,8 +457,8 @@ def main():
         }
 
         if dry_run:
-            print(f"\n📄 Chunk (dry run):")
-            print(f"  Category: ot_attacks")
+            print("\n📄 Chunk (dry run):")
+            print("  Category: ot_attacks")
             print(f"  Source: {source}")
             print(f"  Tags: {tags}")
             print(f"  Text preview: {text[:100]}...")
@@ -471,7 +468,6 @@ def main():
             print(f"  ✅ Stored: {text[:60]}...")
 
     print(f"\n{'✅ DRY RUN' if dry_run else '✅ Done'} — {len(KNOWLEDGE)} chunks")
-
 
 def ensure_collection():
     """تأكد إن collection موجودة"""
@@ -495,7 +491,6 @@ def ensure_collection():
     else:
         print(f"  ❌ فشل إنشاء collection: {r.text}")
         sys.exit(1)
-
 
 if __name__ == "__main__":
     if "--list-collections" not in sys.argv:

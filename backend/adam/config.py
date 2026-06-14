@@ -10,7 +10,6 @@ from dataclasses import dataclass, field
 
 logger = logging.getLogger("adam_prism.config")
 
-
 @dataclass
 class AdamConfig:
     """Central configuration — partial coverage, dict fallback for rest."""

@@ -17,17 +17,14 @@ import logging
 import os
 import sqlite3
 import time
-from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 
 logger = logging.getLogger("adam_prism.memory.session_search")
-
 
 class SessionSearch:
     """
     بحث نصي كامل في كل الجلسات السابقة.
-    
+
     مثل Hermes — الذاكرة الحلقية (Episodic Memory):
     "هل تحدثنا عن X الأسبوع الماضي؟" → بحث فوري بدون LLM.
     """
@@ -37,7 +34,7 @@ class SessionSearch:
         os.path.expanduser("~/.adam/sessions/state.db")
     )
 
-    def __init__(self, config: Dict = None):
+    def __init__(self, config: dict = None):
         cfg = config or {}
         self.db_path = Path(cfg.get("db_path", self.DEFAULT_DB_PATH))
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
@@ -119,7 +116,7 @@ class SessionSearch:
         self._conn.commit()
 
     def add_message(self, session_id: str, role: str, content: str,
-                    metadata: Dict = None):
+                    metadata: dict = None):
         """إضافة رسالة لجلسة"""
         now = time.time()
 
@@ -146,7 +143,7 @@ class SessionSearch:
 
     # ─── البحث ────────────────────────────────────────
 
-    def search(self, query: str, limit: int = 10) -> List[Dict]:
+    def search(self, query: str, limit: int = 10) -> list[dict]:
         """
         بحث نصي كامل عبر كل الجلسات (Discovery mode).
         ~20ms مع FTS5.
@@ -157,7 +154,7 @@ class SessionSearch:
         try:
             # FTS5 search مع ترتيب بالصلة
             results = self._conn.execute("""
-                SELECT 
+                SELECT
                     m.session_id,
                     m.role,
                     m.content,
@@ -192,7 +189,7 @@ class SessionSearch:
             # Fallback: بحث LIKE
             return self._fallback_search(query, limit)
 
-    def _fallback_search(self, query: str, limit: int = 10) -> List[Dict]:
+    def _fallback_search(self, query: str, limit: int = 10) -> list[dict]:
         """بحث بديل (LIKE) لو FTS5 فشل"""
         keywords = query.strip().split()[:5]
         if not keywords:
@@ -219,7 +216,7 @@ class SessionSearch:
         ]
 
     def scroll(self, session_id: str, direction: str = "after",
-               reference_timestamp: float = None, limit: int = 20) -> List[Dict]:
+               reference_timestamp: float = None, limit: int = 20) -> list[dict]:
         """
         التنقل داخل جلسة محددة (Scroll mode).
         direction: "after" | "before"
@@ -251,7 +248,7 @@ class SessionSearch:
             for r in rows
         ]
 
-    def browse(self, limit: int = 20, platform: str = None) -> List[Dict]:
+    def browse(self, limit: int = 20, platform: str = None) -> list[dict]:
         """
         استعراض الجلسات السابقة (Browse mode).
         """
@@ -281,7 +278,7 @@ class SessionSearch:
 
     # ─── الإحصائيات ──────────────────────────────────
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         """إحصائيات الجلسات"""
         total_sessions = self._conn.execute("SELECT COUNT(*) FROM sessions").fetchone()[0]
         total_messages = self._conn.execute("SELECT COUNT(*) FROM messages").fetchone()[0]
@@ -296,7 +293,7 @@ class SessionSearch:
             "db_path": str(self.db_path),
         }
 
-    def get_session_summary(self, session_id: str) -> Optional[Dict]:
+    def get_session_summary(self, session_id: str) -> dict | None:
         """ملخص جلسة محددة"""
         row = self._conn.execute(
             "SELECT session_id, platform, model, started_at, ended_at, "

@@ -1,5 +1,4 @@
 
-
 class Skill:
     """قاعدة المهارات — skill = معرفة + optional code"""
 

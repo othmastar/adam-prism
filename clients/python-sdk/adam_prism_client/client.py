@@ -6,11 +6,10 @@ from __future__ import annotations
 
 import asyncio
 import json
-import os
 import time
-from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, AsyncGenerator, Dict, Iterator, List, Optional, Union
+from typing import Any
+from collections.abc import AsyncGenerator, Iterator
 
 import httpx
 
@@ -20,9 +19,7 @@ from .errors import (
     NotFoundError,
     RateLimitError,
     ServiceUnavailableError,
-    TimeoutError,
 )
-
 
 # Default configuration constants
 DEFAULT_TIMEOUT = 30.0
@@ -31,7 +28,6 @@ DEFAULT_RETRY_BACKOFF = 0.5
 DEFAULT_POOL_CONNECTIONS = 10
 DEFAULT_POOL_MAXSIZE = 20
 DEFAULT_RATE_LIMIT_PER_SEC = 50
-
 
 class _TokenBucket:
     """[PHASE3] Simple token bucket for client-side rate limiting"""
@@ -55,7 +51,6 @@ class _TokenBucket:
             else:
                 self.tokens -= tokens
 
-
 class AdamPrismClient:
     """[PHASE3] Production-grade Python client for the Adam Prism API.
     Features: sync+async, retry with backoff, connection pooling, rate limiting,
@@ -67,18 +62,18 @@ class AdamPrismClient:
         base_url: str = "http://localhost:8000",
         timeout: float = DEFAULT_TIMEOUT,
         *,
-        api_key: Optional[str] = None,
+        api_key: str | None = None,
         max_retries: int = DEFAULT_MAX_RETRIES,
         retry_backoff: float = DEFAULT_RETRY_BACKOFF,
         pool_connections: int = DEFAULT_POOL_CONNECTIONS,
         pool_maxsize: int = DEFAULT_POOL_MAXSIZE,
-        rate_limit_per_sec: Optional[float] = DEFAULT_RATE_LIMIT_PER_SEC,
+        rate_limit_per_sec: float | None = DEFAULT_RATE_LIMIT_PER_SEC,
     ):
         self.base_url = base_url.rstrip("/")
         self._timeout = timeout
         self._max_retries = max_retries
         self._retry_backoff = retry_backoff
-        self._headers: Dict[str, str] = {
+        self._headers: dict[str, str] = {
             "Content-Type": "application/json",
             "User-Agent": "adam-prism-client/1.0",
         }
@@ -91,14 +86,14 @@ class AdamPrismClient:
             max_connections=pool_maxsize,
             keepalive_expiry=30.0,
         )
-        self._sync_client: Optional[httpx.Client] = httpx.Client(
+        self._sync_client: httpx.Client | None = httpx.Client(
             base_url=self.base_url,
             headers=self._headers,
             timeout=timeout,
             limits=limits,
             follow_redirects=True,
         )
-        self._async_client: Optional[httpx.AsyncClient] = None
+        self._async_client: httpx.AsyncClient | None = None
         self._async_limits = limits
 
         # [PHASE3] Client-side rate limiting
@@ -174,7 +169,7 @@ class AdamPrismClient:
     def _request_with_retry(
         self, method: str, path: str, **kwargs
     ) -> httpx.Response:
-        last_exc: Optional[Exception] = None
+        last_exc: Exception | None = None
         for attempt in range(self._max_retries + 1):
             try:
                 resp = self._sync_client.request(method, path, **kwargs)
@@ -196,7 +191,7 @@ class AdamPrismClient:
     async def _arequest_with_retry(
         self, method: str, path: str, **kwargs
     ) -> httpx.Response:
-        last_exc: Optional[Exception] = None
+        last_exc: Exception | None = None
         for attempt in range(self._max_retries + 1):
             # [PHASE3] Apply client-side rate limiting
             if self._token_bucket:
@@ -225,10 +220,10 @@ class AdamPrismClient:
     def chat(
         self,
         message: str,
-        context: Optional[Any] = None,
+        context: Any | None = None,
         voice: bool = False,
-    ) -> Dict[str, Any]:
-        body: Dict[str, Any] = {"message": message, "voice": voice}
+    ) -> dict[str, Any]:
+        body: dict[str, Any] = {"message": message, "voice": voice}
         if context is not None:
             body["context"] = context
         resp = self._request_with_retry("POST", "/api/chat", json=body)
@@ -238,10 +233,10 @@ class AdamPrismClient:
     async def chat_async(
         self,
         message: str,
-        context: Optional[Any] = None,
+        context: Any | None = None,
         voice: bool = False,
-    ) -> Dict[str, Any]:
-        body: Dict[str, Any] = {"message": message, "voice": voice}
+    ) -> dict[str, Any]:
+        body: dict[str, Any] = {"message": message, "voice": voice}
         if context is not None:
             body["context"] = context
         resp = await self._arequest_with_retry("POST", "/api/chat", json=body)
@@ -251,14 +246,14 @@ class AdamPrismClient:
     def chat_stream(
         self,
         message: str,
-        context: Optional[Any] = None,
-    ) -> Iterator[Dict[str, Any]]:
+        context: Any | None = None,
+    ) -> Iterator[dict[str, Any]]:
         """[PHASE3] True streaming via SSE /api/engine/stream.
         Falls back to non-streaming chat if stream is unavailable.
         """
         try:
             # Try streaming endpoint first
-            body: Dict[str, Any] = {"message": message, "context": context or {}}
+            body: dict[str, Any] = {"message": message, "context": context or {}}
             with self._sync_client.stream(
                 "POST", "/api/engine/stream", json=body, timeout=self._timeout
             ) as resp:
@@ -279,11 +274,11 @@ class AdamPrismClient:
     async def chat_stream_async(
         self,
         message: str,
-        context: Optional[Any] = None,
-    ) -> AsyncGenerator[Dict[str, Any], None]:
+        context: Any | None = None,
+    ) -> AsyncGenerator[dict[str, Any], None]:
         """[PHASE3] Async streaming via SSE"""
         try:
-            body: Dict[str, Any] = {"message": message, "context": context or {}}
+            body: dict[str, Any] = {"message": message, "context": context or {}}
             client = self._get_async()
             async with client.stream(
                 "POST", "/api/engine/stream", json=body, timeout=self._timeout
@@ -304,32 +299,32 @@ class AdamPrismClient:
     # Status / Health
     # ════════════════════════════════════════════════════════════
 
-    def get_status(self) -> Dict[str, Any]:
+    def get_status(self) -> dict[str, Any]:
         resp = self._request_with_retry("GET", "/api/status")
         self._raise_on_error(resp)
         return resp.json()
 
-    async def get_status_async(self) -> Dict[str, Any]:
+    async def get_status_async(self) -> dict[str, Any]:
         resp = await self._arequest_with_retry("GET", "/api/status")
         self._raise_on_error(resp)
         return resp.json()
 
-    def get_system_health(self) -> Dict[str, Any]:
+    def get_system_health(self) -> dict[str, Any]:
         resp = self._request_with_retry("GET", "/api/engine/health")
         self._raise_on_error(resp)
         return resp.json()
 
-    async def get_system_health_async(self) -> Dict[str, Any]:
+    async def get_system_health_async(self) -> dict[str, Any]:
         resp = await self._arequest_with_retry("GET", "/api/engine/health")
         self._raise_on_error(resp)
         return resp.json()
 
-    def get_diagnostics(self) -> Dict[str, Any]:
+    def get_diagnostics(self) -> dict[str, Any]:
         resp = self._request_with_retry("GET", "/api/engine/diagnostics")
         self._raise_on_error(resp)
         return resp.json()
 
-    async def get_diagnostics_async(self) -> Dict[str, Any]:
+    async def get_diagnostics_async(self) -> dict[str, Any]:
         resp = await self._arequest_with_retry("GET", "/api/engine/diagnostics")
         self._raise_on_error(resp)
         return resp.json()
@@ -349,7 +344,7 @@ class AdamPrismClient:
         query: str,
         collection: str = "knowledge",
         top_k: int = 5,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         resp = self._request_with_retry(
             "POST", "/api/knowledge/search",
             json={"query": query, "collection": collection, "top_k": top_k},
@@ -362,7 +357,7 @@ class AdamPrismClient:
         query: str,
         collection: str = "knowledge",
         top_k: int = 5,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         resp = await self._arequest_with_retry(
             "POST", "/api/knowledge/search",
             json={"query": query, "collection": collection, "top_k": top_k},
@@ -370,7 +365,7 @@ class AdamPrismClient:
         self._raise_on_error(resp)
         return resp.json()
 
-    def add_knowledge(self, text: str, collection: str = "knowledge") -> Dict[str, Any]:
+    def add_knowledge(self, text: str, collection: str = "knowledge") -> dict[str, Any]:
         resp = self._request_with_retry(
             "POST", "/api/knowledge/add",
             json={"texts": [text], "collection": collection},
@@ -380,7 +375,7 @@ class AdamPrismClient:
 
     async def add_knowledge_async(
         self, text: str, collection: str = "knowledge"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         resp = await self._arequest_with_retry(
             "POST", "/api/knowledge/add",
             json={"texts": [text], "collection": collection},
@@ -390,9 +385,9 @@ class AdamPrismClient:
 
     def upload_knowledge_file(
         self,
-        filepath: Union[str, Path],
+        filepath: str | Path,
         collection: str = "knowledge",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         path = Path(filepath)
         if not path.exists():
             raise FileNotFoundError(f"الملف مش موجود: {path}")
@@ -407,9 +402,9 @@ class AdamPrismClient:
 
     async def upload_knowledge_file_async(
         self,
-        filepath: Union[str, Path],
+        filepath: str | Path,
         collection: str = "knowledge",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         path = Path(filepath)
         if not path.exists():
             raise FileNotFoundError(f"الملف مش موجود: {path}")
@@ -422,12 +417,12 @@ class AdamPrismClient:
         self._raise_on_error(resp)
         return resp.json()
 
-    def list_collections(self) -> Dict[str, Any]:
+    def list_collections(self) -> dict[str, Any]:
         resp = self._request_with_retry("GET", "/api/knowledge/collections")
         self._raise_on_error(resp)
         return resp.json()
 
-    async def list_collections_async(self) -> Dict[str, Any]:
+    async def list_collections_async(self) -> dict[str, Any]:
         resp = await self._arequest_with_retry("GET", "/api/knowledge/collections")
         self._raise_on_error(resp)
         return resp.json()
@@ -436,7 +431,7 @@ class AdamPrismClient:
     # Sessions
     # ════════════════════════════════════════════════════════════
 
-    def list_sessions(self, limit: int = 50, offset: int = 0) -> Dict[str, Any]:
+    def list_sessions(self, limit: int = 50, offset: int = 0) -> dict[str, Any]:
         resp = self._request_with_retry(
             "GET", "/api/chat/sessions",
             params={"limit": limit, "offset": offset},
@@ -446,7 +441,7 @@ class AdamPrismClient:
 
     async def list_sessions_async(
         self, limit: int = 50, offset: int = 0
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         resp = await self._arequest_with_retry(
             "GET", "/api/chat/sessions",
             params={"limit": limit, "offset": offset},
@@ -457,9 +452,9 @@ class AdamPrismClient:
     def create_session(
         self,
         title: str = "New Conversation",
-        first_message: Optional[str] = None,
-    ) -> Dict[str, Any]:
-        body: Dict[str, Any] = {"title": title}
+        first_message: str | None = None,
+    ) -> dict[str, Any]:
+        body: dict[str, Any] = {"title": title}
         if first_message is not None:
             body["first_message"] = first_message
         resp = self._request_with_retry("POST", "/api/chat/sessions", json=body)
@@ -469,36 +464,36 @@ class AdamPrismClient:
     async def create_session_async(
         self,
         title: str = "New Conversation",
-        first_message: Optional[str] = None,
-    ) -> Dict[str, Any]:
-        body: Dict[str, Any] = {"title": title}
+        first_message: str | None = None,
+    ) -> dict[str, Any]:
+        body: dict[str, Any] = {"title": title}
         if first_message is not None:
             body["first_message"] = first_message
         resp = await self._arequest_with_retry("POST", "/api/chat/sessions", json=body)
         self._raise_on_error(resp)
         return resp.json()
 
-    def get_session(self, session_id: str) -> Dict[str, Any]:
+    def get_session(self, session_id: str) -> dict[str, Any]:
         resp = self._request_with_retry("GET", f"/api/chat/sessions/{session_id}")
         self._raise_on_error(resp)
         return resp.json()
 
-    async def get_session_async(self, session_id: str) -> Dict[str, Any]:
+    async def get_session_async(self, session_id: str) -> dict[str, Any]:
         resp = await self._arequest_with_retry("GET", f"/api/chat/sessions/{session_id}")
         self._raise_on_error(resp)
         return resp.json()
 
-    def delete_session(self, session_id: str) -> Dict[str, Any]:
+    def delete_session(self, session_id: str) -> dict[str, Any]:
         resp = self._request_with_retry("DELETE", f"/api/chat/sessions/{session_id}")
         self._raise_on_error(resp)
         return resp.json()
 
-    async def delete_session_async(self, session_id: str) -> Dict[str, Any]:
+    async def delete_session_async(self, session_id: str) -> dict[str, Any]:
         resp = await self._arequest_with_retry("DELETE", f"/api/chat/sessions/{session_id}")
         self._raise_on_error(resp)
         return resp.json()
 
-    def search_chat_history(self, query: str, limit: int = 20) -> Dict[str, Any]:
+    def search_chat_history(self, query: str, limit: int = 20) -> dict[str, Any]:
         resp = self._request_with_retry(
             "POST", "/api/chat/search",
             json={"query": query, "limit": limit},
@@ -508,7 +503,7 @@ class AdamPrismClient:
 
     async def search_chat_history_async(
         self, query: str, limit: int = 20
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         resp = await self._arequest_with_retry(
             "POST", "/api/chat/search",
             json={"query": query, "limit": limit},
@@ -520,42 +515,42 @@ class AdamPrismClient:
     # Skills / Plugins
     # ════════════════════════════════════════════════════════════
 
-    def list_skills(self) -> Dict[str, Any]:
+    def list_skills(self) -> dict[str, Any]:
         resp = self._request_with_retry("GET", "/api/skills/list")
         self._raise_on_error(resp)
         return resp.json()
 
-    async def list_skills_async(self) -> Dict[str, Any]:
+    async def list_skills_async(self) -> dict[str, Any]:
         resp = await self._arequest_with_retry("GET", "/api/skills/list")
         self._raise_on_error(resp)
         return resp.json()
 
-    def load_skill(self, path: str) -> Dict[str, Any]:
+    def load_skill(self, path: str) -> dict[str, Any]:
         resp = self._request_with_retry("POST", "/api/skills/load", json={"path": path})
         self._raise_on_error(resp)
         return resp.json()
 
-    async def load_skill_async(self, path: str) -> Dict[str, Any]:
+    async def load_skill_async(self, path: str) -> dict[str, Any]:
         resp = await self._arequest_with_retry("POST", "/api/skills/load", json={"path": path})
         self._raise_on_error(resp)
         return resp.json()
 
-    def list_plugins(self) -> Dict[str, Any]:
+    def list_plugins(self) -> dict[str, Any]:
         resp = self._request_with_retry("GET", "/api/plugins")
         self._raise_on_error(resp)
         return resp.json()
 
-    async def list_plugins_async(self) -> Dict[str, Any]:
+    async def list_plugins_async(self) -> dict[str, Any]:
         resp = await self._arequest_with_retry("GET", "/api/plugins")
         self._raise_on_error(resp)
         return resp.json()
 
-    def load_plugin(self, path: str) -> Dict[str, Any]:
+    def load_plugin(self, path: str) -> dict[str, Any]:
         resp = self._request_with_retry("POST", "/api/plugins/load", json={"path": path})
         self._raise_on_error(resp)
         return resp.json()
 
-    async def load_plugin_async(self, path: str) -> Dict[str, Any]:
+    async def load_plugin_async(self, path: str) -> dict[str, Any]:
         resp = await self._arequest_with_retry("POST", "/api/plugins/load", json={"path": path})
         self._raise_on_error(resp)
         return resp.json()
@@ -564,34 +559,34 @@ class AdamPrismClient:
     # Channels
     # ════════════════════════════════════════════════════════════
 
-    def list_channels(self) -> Dict[str, Any]:
+    def list_channels(self) -> dict[str, Any]:
         resp = self._request_with_retry("GET", "/api/channels")
         self._raise_on_error(resp)
         return resp.json()
 
-    async def list_channels_async(self) -> Dict[str, Any]:
+    async def list_channels_async(self) -> dict[str, Any]:
         resp = await self._arequest_with_retry("GET", "/api/channels")
         self._raise_on_error(resp)
         return resp.json()
 
-    def get_channel(self, name: str) -> Dict[str, Any]:
+    def get_channel(self, name: str) -> dict[str, Any]:
         resp = self._request_with_retry("GET", f"/api/channels/{name}")
         self._raise_on_error(resp)
         return resp.json()
 
-    async def get_channel_async(self, name: str) -> Dict[str, Any]:
+    async def get_channel_async(self, name: str) -> dict[str, Any]:
         resp = await self._arequest_with_retry("GET", f"/api/channels/{name}")
         self._raise_on_error(resp)
         return resp.json()
 
-    def toggle_channel(self, name: str, enabled: bool) -> Dict[str, Any]:
+    def toggle_channel(self, name: str, enabled: bool) -> dict[str, Any]:
         resp = self._request_with_retry(
             "POST", f"/api/channels/{name}", json={"enabled": enabled}
         )
         self._raise_on_error(resp)
         return resp.json()
 
-    async def toggle_channel_async(self, name: str, enabled: bool) -> Dict[str, Any]:
+    async def toggle_channel_async(self, name: str, enabled: bool) -> dict[str, Any]:
         resp = await self._arequest_with_retry(
             "POST", f"/api/channels/{name}", json={"enabled": enabled}
         )
@@ -602,22 +597,22 @@ class AdamPrismClient:
     # Ollama
     # ════════════════════════════════════════════════════════════
 
-    def list_ollama_models(self) -> Dict[str, Any]:
+    def list_ollama_models(self) -> dict[str, Any]:
         resp = self._request_with_retry("GET", "/api/ollama/models")
         self._raise_on_error(resp)
         return resp.json()
 
-    async def list_ollama_models_async(self) -> Dict[str, Any]:
+    async def list_ollama_models_async(self) -> dict[str, Any]:
         resp = await self._arequest_with_retry("GET", "/api/ollama/models")
         self._raise_on_error(resp)
         return resp.json()
 
-    def select_ollama_model(self, model: str) -> Dict[str, Any]:
+    def select_ollama_model(self, model: str) -> dict[str, Any]:
         resp = self._request_with_retry("POST", "/api/ollama/select", json={"model": model})
         self._raise_on_error(resp)
         return resp.json()
 
-    async def select_ollama_model_async(self, model: str) -> Dict[str, Any]:
+    async def select_ollama_model_async(self, model: str) -> dict[str, Any]:
         resp = await self._arequest_with_retry("POST", "/api/ollama/select", json={"model": model})
         self._raise_on_error(resp)
         return resp.json()
@@ -626,32 +621,32 @@ class AdamPrismClient:
     # Memory / Notebook / Security
     # ════════════════════════════════════════════════════════════
 
-    def get_memory_stats(self) -> Dict[str, Any]:
+    def get_memory_stats(self) -> dict[str, Any]:
         resp = self._request_with_retry("GET", "/api/memory/stats")
         self._raise_on_error(resp)
         return resp.json()
 
-    async def get_memory_stats_async(self) -> Dict[str, Any]:
+    async def get_memory_stats_async(self) -> dict[str, Any]:
         resp = await self._arequest_with_retry("GET", "/api/memory/stats")
         self._raise_on_error(resp)
         return resp.json()
 
-    def get_notebook_stats(self) -> Dict[str, Any]:
+    def get_notebook_stats(self) -> dict[str, Any]:
         resp = self._request_with_retry("GET", "/api/notebook/stats")
         self._raise_on_error(resp)
         return resp.json()
 
-    async def get_notebook_stats_async(self) -> Dict[str, Any]:
+    async def get_notebook_stats_async(self) -> dict[str, Any]:
         resp = await self._arequest_with_retry("GET", "/api/notebook/stats")
         self._raise_on_error(resp)
         return resp.json()
 
-    def get_security_stats(self) -> Dict[str, Any]:
+    def get_security_stats(self) -> dict[str, Any]:
         resp = self._request_with_retry("GET", "/api/security/stats")
         self._raise_on_error(resp)
         return resp.json()
 
-    async def get_security_stats_async(self) -> Dict[str, Any]:
+    async def get_security_stats_async(self) -> dict[str, Any]:
         resp = await self._arequest_with_retry("GET", "/api/security/stats")
         self._raise_on_error(resp)
         return resp.json()
@@ -660,12 +655,12 @@ class AdamPrismClient:
     # Scheduler
     # ════════════════════════════════════════════════════════════
 
-    def list_scheduled_jobs(self) -> Dict[str, Any]:
+    def list_scheduled_jobs(self) -> dict[str, Any]:
         resp = self._request_with_retry("GET", "/api/scheduler/jobs")
         self._raise_on_error(resp)
         return resp.json()
 
-    async def list_scheduled_jobs_async(self) -> Dict[str, Any]:
+    async def list_scheduled_jobs_async(self) -> dict[str, Any]:
         resp = await self._arequest_with_retry("GET", "/api/scheduler/jobs")
         self._raise_on_error(resp)
         return resp.json()
@@ -674,7 +669,7 @@ class AdamPrismClient:
     # Voice
     # ════════════════════════════════════════════════════════════
 
-    def transcribe_audio(self, filepath: Union[str, Path]) -> Dict[str, Any]:
+    def transcribe_audio(self, filepath: str | Path) -> dict[str, Any]:
         path = Path(filepath)
         if not path.exists():
             raise FileNotFoundError(f"الملف مش موجود: {path}")
@@ -687,8 +682,8 @@ class AdamPrismClient:
         return resp.json()
 
     async def transcribe_audio_async(
-        self, filepath: Union[str, Path]
-    ) -> Dict[str, Any]:
+        self, filepath: str | Path
+    ) -> dict[str, Any]:
         path = Path(filepath)
         if not path.exists():
             raise FileNotFoundError(f"الملف مش موجود: {path}")

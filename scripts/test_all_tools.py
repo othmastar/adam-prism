@@ -1,5 +1,7 @@
 """اختبار شامل لكل الأدوات — كل أداة 3 مرات"""
-import json, time, sys, os, asyncio
+import time
+import sys
+import asyncio
 sys.path.insert(0, "/mnt/Workspace/Adam_Prism_Complete_v2")
 from core.engine import AdamPrismEngine
 from security.security_guard import TOOL_REGISTRY
@@ -118,7 +120,7 @@ async def test_all():
                 else:
                     results["fail"] += 1
 
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 print(f"  ⏰ {tag} TIMEOUT")
                 results["fail"] += 1
             except Exception as e:
@@ -126,7 +128,7 @@ async def test_all():
                 results["fail"] += 1
 
     print(f"\n{'='*60}")
-    print(f"📊 SUMMARY")
+    print("📊 SUMMARY")
     print(f"{'='*60}")
     print(f"  Total tools   : {len(TOOL_TESTS)}")
     print(f"  Total runs    : {total_runs}")
@@ -137,7 +139,7 @@ async def test_all():
     print(f"{'='*60}")
 
     # Per-tool summary
-    print(f"\n📋 Per-Tool Results:")
+    print("\n📋 Per-Tool Results:")
     for tool_name in TOOL_TESTS:
         n = counts.get(tool_name, 0)
         # Just show name and count

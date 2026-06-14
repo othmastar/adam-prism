@@ -1,15 +1,12 @@
 """Tests for adam/learning/continuous_learner.py"""
 
 import pytest
-from pathlib import Path
 from adam.learning.learner import ContinuousLearner
-
 
 @pytest.fixture
 def learner(tmp_path):
     config = {"learning_path": str(tmp_path / "learning")}
     return ContinuousLearner(config)
-
 
 class TestContinuousLearner:
     """Continuous learner tests"""

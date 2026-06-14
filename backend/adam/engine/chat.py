@@ -24,7 +24,6 @@ from adam.engine.tools import AdamPrismEngineTools
 
 logger = logging.getLogger("adam_prism.core")
 
-
 def _bg_task(coro):
     """جدولة مهمة خلفية مع التقاط وتسجيل الاستثناءات — يمنع task exception was never retrieved"""
     def _handle_done(t: asyncio.Task):
@@ -35,7 +34,6 @@ def _bg_task(coro):
     task = asyncio.create_task(coro)
     task.add_done_callback(_handle_done)
     return task
-
 
 class AdamPrismEngineChat(AdamPrismEngineTools):
     """

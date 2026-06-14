@@ -13,7 +13,6 @@ from typing import Any
 
 logger = logging.getLogger("adam_prism.pipeline.channels")
 
-
 class TelegramChannel:
     """
     قناة Telegram Bot.
@@ -166,7 +165,6 @@ class TelegramChannel:
         """إيقاف الاستماع"""
         self.running = False
 
-
 class TailscaleConfig:
     """
     إعدادات Tailscale VPN.
@@ -234,7 +232,7 @@ tailscale ip -4
             )
             try:
                 stdout, _ = await asyncio.wait_for(proc.communicate(), timeout=5)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 proc.kill()
                 await proc.wait()
                 return {"status": "timeout"}

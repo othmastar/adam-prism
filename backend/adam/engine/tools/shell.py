@@ -31,13 +31,11 @@ SENSITIVE_PATHS = [
     "/var/log", "/boot", "/dev",
 ]
 
-
 def _is_sensitive_path(arg: str) -> bool:
     """فحص هل المسار يبدأ بمسار حساس"""
     # Normalize the path to prevent evasion with trailing slashes or dots
     normalized = arg.rstrip("/")
     return any(normalized == sensitive or normalized.startswith(sensitive + "/") for sensitive in SENSITIVE_PATHS)
-
 
 # دوال آمنة مسموح باستخدامها في الـ sandbox
 _SAFE_BUILTINS = {
@@ -57,7 +55,6 @@ _SAFE_BUILTINS = {
     "hasattr": hasattr, "getattr": getattr,
 }
 
-
 _DANGEROUS_DUNDERS = frozenset({
     "__class__", "__bases__", "__subclasses__",
     "__mro__", "__globals__", "__code__",
@@ -70,7 +67,6 @@ _DANGEROUS_FUNCS = frozenset({
     "breakpoint", "input", "exit", "quit",
     "globals", "locals", "vars", "dir",
 })
-
 
 def _check_ast_safe(tree: ast.AST) -> str | None:
     """فحص AST ورفض العُقد الخطرة. يرجع رسالة الخطأ أو None لو آمن."""
@@ -94,7 +90,6 @@ def _check_ast_safe(tree: ast.AST) -> str | None:
             return f"لا يمكن استخدام سترينج: {node.value}"
     return None
 
-
 def _build_sandbox_code(code: str) -> str:
     """بناء كود sandboxed مع restricted globals."""
     import textwrap
@@ -105,7 +100,6 @@ _sandbox_globals = {{"__builtins__": {safe_repr}}}
 exec({code!r}, _sandbox_globals)
 """).strip()
     return exec_wrapper
-
 
 class ShellToolsMixin:
     """Mixin: shell + python execution tools"""
@@ -154,7 +148,7 @@ class ShellToolsMixin:
                 )
                 try:
                     stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=30)
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     proc.kill()
                     await proc.wait()
                     return {"success": False, "error": "الأمر تجاوز الـ 30 ثانية"}
@@ -198,7 +192,7 @@ class ShellToolsMixin:
                 )
                 try:
                     stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=30)
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     proc.kill()
                     await proc.wait()
                     return {"success": False, "error": "الكود تجاوز الـ 30 ثانية"}

@@ -21,14 +21,12 @@ from typing import Any
 
 logger = logging.getLogger("adam_prism.decision")
 
-
 class RiskLevel(StrEnum):
     """مستوى المخاطرة"""
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
     CRITICAL = "critical"
-
 
 class DecisionDomain(StrEnum):
     """مجالات القرار"""
@@ -39,7 +37,6 @@ class DecisionDomain(StrEnum):
     BUSINESS = "business"
     EDUCATION = "education"
     GENERAL = "general"
-
 
 @dataclass
 class DecisionScenario:
@@ -52,7 +49,6 @@ class DecisionScenario:
     constraints: list[str] = field(default_factory=list)
     deadline: str | None = None
     stakeholder_impact: list[str] = field(default_factory=list)
-
 
 @dataclass
 class SimulationResult:
@@ -67,7 +63,6 @@ class SimulationResult:
     cons: list[str] = field(default_factory=list)
     similar_past_decisions: list[dict[str, Any]] = field(default_factory=list)
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
-
 
 class DecisionSimulator:
     """

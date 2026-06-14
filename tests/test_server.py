@@ -6,13 +6,11 @@ import pytest
 import os
 from fastapi.testclient import TestClient
 
-
 # Set test API key before importing
 os.environ["ADAM_API_KEY"] = "test-api-key-12345"
 os.environ["ADAM_PRODUCTION"] = "0"  # Allow default in tests
 
 from adam.api.server import create_app
-
 
 @pytest.fixture
 def mock_engine():
@@ -74,18 +72,15 @@ def mock_engine():
 
     return MockEngine()
 
-
 @pytest.fixture
 def client(mock_engine):
     """Test client with mock engine"""
     app = create_app(mock_engine)
     return TestClient(app)
 
-
 @pytest.fixture
 def auth_headers():
     return {"Authorization": "Bearer test-api-key-12345"}
-
 
 class TestPublicEndpoints:
     """Test endpoints that don't require auth"""
@@ -102,7 +97,6 @@ class TestPublicEndpoints:
         assert resp.status_code == 200
         data = resp.json()
         assert "status" in data
-
 
 class TestAuthentication:
     """Test API key authentication"""
@@ -121,7 +115,6 @@ class TestAuthentication:
     def test_correct_api_key(self, client, auth_headers):
         resp = client.get("/api/chat/sessions", headers=auth_headers)
         assert resp.status_code == 200
-
 
 class TestChatEndpoint:
     """Test /api/chat endpoint"""
@@ -155,7 +148,6 @@ class TestChatEndpoint:
         )
         assert resp.status_code == 400
 
-
 class TestSessionsEndpoint:
     """Test chat session management"""
 
@@ -188,7 +180,6 @@ class TestSessionsEndpoint:
             headers=auth_headers,
         )
         assert resp.status_code == 404
-
 
 class TestPydanticValidation:
     """Test Pydantic models reject malformed input"""
@@ -238,7 +229,6 @@ class TestPydanticValidation:
         )
         assert resp.status_code == 400
 
-
 class TestMetricsEndpoint:
     """Test Prometheus /metrics endpoint"""
 
@@ -252,7 +242,6 @@ class TestMetricsEndpoint:
         else:
             # If metrics requires auth, that's also acceptable
             assert resp.status_code in (200, 403)
-
 
 class TestRateLimiting:
     """Test rate limiter"""

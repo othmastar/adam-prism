@@ -22,7 +22,6 @@ from adam.infrastructure import TTLCache
 
 logger = logging.getLogger("adam_prism.ethics")
 
-
 class EthicsGate:
     """
     البوابة الأخلاقية لآدم بريزم.

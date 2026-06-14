@@ -25,7 +25,6 @@ import httpx
 
 logger = logging.getLogger("adam_prism.infrastructure")
 
-
 # ═══════════════════════════════════════
 # 1. Connection Pooling — اتصال مهيأ واحد لكل خدمة
 # ═══════════════════════════════════════
@@ -77,7 +76,6 @@ class SharedClients:
     async def health(self) -> dict[str, bool]:
         """حالة كل الاتصالات"""
         return {name: not c.is_closed for name, c in self._clients.items()}
-
 
 # ═══════════════════════════════════════
 # 2. TTL Cache — كاش بزمن انتهاء
@@ -143,7 +141,6 @@ class TTLCache:
             "hit_rate": round(self._hits / max(total, 1) * 100, 1),
         }
 
-
 # ═══════════════════════════════════════
 # 3. Retry Decorator — إعادة المحاولة عند التعذر
 # ═══════════════════════════════════════
@@ -170,7 +167,6 @@ def retry(max_attempts: int = 3, base_delay: float = 0.5, max_delay: float = 10.
             raise last_exc
         return wrapper
     return decorator
-
 
 # ═══════════════════════════════════════
 # 4. Simple Metrics — عدادات وإحصائيات خفيفة
@@ -217,7 +213,6 @@ class MetricsCollector:
         self._timers.clear()
         self._errors.clear()
 
-
 # ═══════════════════════════════════════
 # 5. Input Sanitizer — حماية من المسارات الخبيثة
 # ═══════════════════════════════════════
@@ -250,7 +245,6 @@ BLOCKED_FILENAMES = [
     "password", "credential", "secret", "token",
     ".env", ".htpasswd", ".netrc", ".pgpass",
 ]
-
 
 def sanitize_path(path: str) -> str | None:
     """التحقق من أن المسار مصرح به — يمنع الوصول لملفات النظام"""
@@ -300,7 +294,6 @@ def sanitize_path(path: str) -> str | None:
             return None
 
     return resolved
-
 
 # ═══════════════════════════════════════
 # 6. Circuit Breaker — حماية الخدمات المتعثرة
@@ -363,7 +356,6 @@ class CircuitBreaker:
             "total_failures": self.total_failures,
             "total_successes": self.total_successes,
         }
-
 
 # ═══════════════════════════════════════
 # 7. Model Swapper — إدارة VRAM: موديل واحد في اللحظة

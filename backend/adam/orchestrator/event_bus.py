@@ -24,7 +24,6 @@ from typing import Any
 
 logger = logging.getLogger("adam_prism.orchestrator.event_bus")
 
-
 class EventPriority(IntEnum):
     """أولوية الحدث — الأعلى يُنفذ أولاً"""
     CRITICAL = 0   # أحداث أمنية + إيقاف طوارئ
@@ -32,7 +31,6 @@ class EventPriority(IntEnum):
     NORMAL = 2     # عمليات عادية (chat, tool exec)
     LOW = 3        # تحليلات + تعلم + تسجيل
     BACKGROUND = 4 # تنظيف + إحصائيات + cache eviction
-
 
 @dataclass
 class Event:
@@ -50,7 +48,6 @@ class Event:
         if not isinstance(other, Event):
             return NotImplemented
         return self.priority < other.priority
-
 
 class DeadLetterQueue:
     """طابور الأحداث الفاشلة — للمراجعة والإعادة"""
@@ -83,7 +80,6 @@ class DeadLetterQueue:
     @property
     def size(self) -> int:
         return len(self._queue)
-
 
 class EventBus:
     """

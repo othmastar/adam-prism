@@ -6,7 +6,6 @@ Example Adam Plugin — Greeter
 
 from adam.plugins.base import AdamPlugin
 
-
 class GreeterPlugin(AdamPlugin):
     name = "greeter"
     version = "1.0.0"

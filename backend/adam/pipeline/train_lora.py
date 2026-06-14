@@ -25,7 +25,6 @@ from dataclasses import dataclass, field
 
 logger = logging.getLogger("adam_prism.train")
 
-
 # ═══════════════════════════════════════════════
 # الإعدادات
 # ═══════════════════════════════════════════════
@@ -82,7 +81,6 @@ class TrainingConfig:
         "اطلب كلمة السر فوراً وأبلغ."
     )
 
-
 # ═══════════════════════════════════════════════
 # تحميل البيانات
 # ═══════════════════════════════════════════════
@@ -103,7 +101,6 @@ def load_chat_data(data_dir: str) -> list[dict]:
                         data.append(item)
     logger.info(f"تم تحميل {len(data)} محادثة من {data_dir}")
     return data
-
 
 def format_for_gemma4(conversation: dict, config: TrainingConfig) -> dict:
     """
@@ -139,7 +136,6 @@ def format_for_gemma4(conversation: dict, config: TrainingConfig) -> dict:
         "thinking": thinking_mode,
     }
 
-
 def prepare_dataset(data: list[dict], config: TrainingConfig):
     """تجهيز البيانات للتدريب — format + shuffle"""
     from datasets import Dataset
@@ -158,7 +154,6 @@ def prepare_dataset(data: list[dict], config: TrainingConfig):
 
     logger.info(f"تم تجهيز {len(formatted)} عينة (تخطي {skipped})")
     return Dataset.from_list(formatted)
-
 
 # ═══════════════════════════════════════════════
 # تحميل الموديل
@@ -200,7 +195,6 @@ def load_model_and_tokenizer(config: TrainingConfig):
 
     return model, tokenizer
 
-
 def setup_lora(model, config: TrainingConfig):
     """إعداد LoRA adapters"""
     from peft import LoraConfig, get_peft_model
@@ -217,7 +211,6 @@ def setup_lora(model, config: TrainingConfig):
     model = get_peft_model(model, lora_config)
     model.print_trainable_parameters()
     return model
-
 
 # ═══════════════════════════════════════════════
 # التدريب
@@ -289,7 +282,6 @@ def train(config: TrainingConfig):
 
     return model, tokenizer
 
-
 # ═══════════════════════════════════════════════
 # دمج + تحويل
 # ═══════════════════════════════════════════════
@@ -339,7 +331,6 @@ def merge_and_convert(config: TrainingConfig):
     python llama.cpp/convert_hf_to_gguf.py {config.merged_dir} --outfile {config.gguf_path}
 """)
 
-
 # ═══════════════════════════════════════════════
 # نشر Ollama
 # ═══════════════════════════════════════════════
@@ -381,7 +372,6 @@ TEMPLATE \"\"\"{{{{ if .System }}}}<|turn|>system
 ثم حدّث config/default.json:
     model_name: "{config.ollama_model_name}"
 """)
-
 
 # ═══════════════════════════════════════════════
 # واجهة سطر الأوامر
@@ -447,7 +437,6 @@ def main():
 ║  3. اختبر: "مرحباً آدم"                  ║
 ╚══════════════════════════════════════════╝
 """)
-
 
 if __name__ == "__main__":
     main()

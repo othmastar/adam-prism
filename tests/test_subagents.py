@@ -3,7 +3,6 @@
 import pytest
 from adam.subagents.manager import SubagentManager
 
-
 class FakeProvider:
     async def chat(self, messages):
         last = messages[-1]["content"] if messages else ""
@@ -17,11 +16,9 @@ class FakeProvider:
     def model_name(self):
         return "test-model"
 
-
 class FakeEngine:
     def __init__(self):
         self.provider = FakeProvider()
-
 
 @pytest.mark.asyncio
 async def test_spawn():
@@ -31,7 +28,6 @@ async def test_spawn():
     assert s.id is not None
     assert len(s.conversation_history) == 0
 
-
 @pytest.mark.asyncio
 async def test_list_sessions():
     mgr = SubagentManager(engine=FakeEngine())
@@ -39,7 +35,6 @@ async def test_list_sessions():
     mgr.spawn("a1")
     mgr.spawn("a2")
     assert len(mgr.list_sessions()) == 2
-
 
 @pytest.mark.asyncio
 async def test_get_and_remove():
@@ -50,7 +45,6 @@ async def test_get_and_remove():
     assert mgr.get(s.id) is None
     assert mgr.remove("nope") is False
 
-
 @pytest.mark.asyncio
 async def test_chat():
     mgr = SubagentManager(engine=FakeEngine())
@@ -59,7 +53,6 @@ async def test_chat():
     assert "Echo: hello" in result["response"]
     assert result["subagent_name"] == "echo"
     assert len(s.conversation_history) == 2  # user + assistant
-
 
 @pytest.mark.asyncio
 async def test_history_limit():
@@ -70,7 +63,6 @@ async def test_history_limit():
     # max_history=2 → max 4 messages (2 user + 2 assistant)
     assert len(s.conversation_history) <= 4
 
-
 @pytest.mark.asyncio
 async def test_empty_message():
     mgr = SubagentManager(engine=FakeEngine())
@@ -78,7 +70,6 @@ async def test_empty_message():
     result = await s.chat("")
     assert result["response"] == "..."
     assert len(s.conversation_history) == 0
-
 
 @pytest.mark.asyncio
 async def test_status():
@@ -89,7 +80,6 @@ async def test_status():
     assert status["messages_count"] == 0
     assert "Be concise." in status["system_prompt"]
 
-
 @pytest.mark.asyncio
 async def test_remove_all():
     mgr = SubagentManager(engine=FakeEngine())
@@ -98,7 +88,6 @@ async def test_remove_all():
     assert len(mgr.list_sessions()) == 2
     mgr.remove_all()
     assert len(mgr.list_sessions()) == 0
-
 
 @pytest.mark.asyncio
 async def test_custom_config():

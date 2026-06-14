@@ -26,14 +26,12 @@ from mcp.client.stdio import stdio_client
 
 logger = logging.getLogger("adam_prism.mcp")
 
-
 @dataclass
 class MCPTool:
     name: str
     description: str
     input_schema: dict
     server: str
-
 
 class MCPConnection:
     """اتصال بخادم MCP واحد"""
@@ -111,7 +109,6 @@ class MCPConnection:
     async def _cleanup(self):
         with suppress(Exception):
             await self._exit_stack.aclose()
-
 
 class MCPManager:
     """مدير اتصالات MCP — يدير خوادم متعددة"""

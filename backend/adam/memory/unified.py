@@ -17,27 +17,22 @@ Adam Prism — Unified Memory Manager
 - Smart routing: يوجه الاستعلام للطبقة المناسبة تلقائياً
 """
 
-import asyncio
 import logging
-import time
-from datetime import datetime
-from typing import Dict, List, Optional, Any
 
-from adam.memory.hot_memory import HotMemory, MemorySecurityScanner
+from adam.memory.hot_memory import HotMemory
 from adam.memory.session_search import SessionSearch
 
 logger = logging.getLogger("adam_prism.memory.unified")
 
-
 class UnifiedMemoryManager:
     """
     مدير الذاكرة الموحد — 4 طبقات ذاكرة.
-    
+
     الواجهة الوحيدة التي يجب أن يستخدمها المحرك.
     ينسق بين كل الطبقات ويقدم بحث موحد.
     """
 
-    def __init__(self, config: Dict = None, vector_memory=None, skill_manager=None):
+    def __init__(self, config: dict = None, vector_memory=None, skill_manager=None):
         cfg = config or {}
 
         # الطبقة 1: Hot Memory (MEMORY.md/USER.md)
@@ -61,7 +56,7 @@ class UnifiedMemoryManager:
     # ─── تهيئة الجلسة ────────────────────────────────
 
     async def start_session(self, session_id: str, platform: str = "cli",
-                            model: str = "") -> Dict:
+                            model: str = "") -> dict:
         """
         بدء جلسة جديدة — تحميل snapshot + تسجيل الجلسة.
         يجب استدعاؤها في بداية كل جلسة.
@@ -96,15 +91,15 @@ class UnifiedMemoryManager:
     # ─── البحث الموحد ────────────────────────────────
 
     async def unified_search(self, query: str, top_k: int = 5,
-                             layers: List[str] = None) -> Dict:
+                             layers: list[str] = None) -> dict:
         """
         بحث موحد عبر كل طبقات الذاكرة.
-        
+
         Args:
             query: استعلام البحث
             top_k: عدد النتائج لكل طبقة
             layers: طبقات محددة ["hot", "session", "skills", "vector"]
-        
+
         Returns:
             {
                 "results": [...],  # مرتبة بالصلة
@@ -194,7 +189,7 @@ class UnifiedMemoryManager:
 
     # ─── تخزين موحد ──────────────────────────────────
 
-    async def store_message(self, role: str, content: str, metadata: Dict = None):
+    async def store_message(self, role: str, content: str, metadata: dict = None):
         """تخزين رسالة في كل الطبقات المناسبة"""
         # Session Search — دائماً
         self.session_search.add_message(
@@ -214,7 +209,7 @@ class UnifiedMemoryManager:
                 logger.warning(f"خطأ في تخزين المتجهات: {e}")
 
     async def store_conversation(self, question: str, answer: str,
-                                 metadata: Dict = None):
+                                 metadata: dict = None):
         """تخزين محادثة كاملة في كل الطبقات"""
         # Vector Memory
         if self.vector:
@@ -231,7 +226,7 @@ class UnifiedMemoryManager:
             self.session_id, "assistant", answer, metadata
         )
 
-    async def store_knowledge(self, text: str, source: str, topics: List[str] = None):
+    async def store_knowledge(self, text: str, source: str, topics: list[str] = None):
         """تخزين معرفة جديدة"""
         if self.vector:
             try:
@@ -242,17 +237,17 @@ class UnifiedMemoryManager:
     # ─── إدارة Hot Memory ─────────────────────────────
 
     def add_memory(self, entry: str, target: str = "memory",
-                   origin: str = "agent") -> Dict:
+                   origin: str = "agent") -> dict:
         """إضافة مدخل للذاكرة الساخنة"""
         return self.hot.add(entry, target=target, origin=origin)
 
     def replace_memory(self, old: str, new: str, target: str = "memory",
-                       origin: str = "agent") -> Dict:
+                       origin: str = "agent") -> dict:
         """استبدال مدخل في الذاكرة الساخنة"""
         return self.hot.replace(old, new, target=target, origin=origin)
 
     def remove_memory(self, substring: str, target: str = "memory",
-                      origin: str = "agent") -> Dict:
+                      origin: str = "agent") -> dict:
         """حذف مدخل من الذاكرة الساخنة"""
         return self.hot.remove(substring, target=target, origin=origin)
 
@@ -295,7 +290,7 @@ class UnifiedMemoryManager:
 
     # ─── إحصائيات شاملة ──────────────────────────────
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         """إحصائيات كل طبقات الذاكرة"""
         stats = {
             "hot_memory": self.hot.get_stats(),

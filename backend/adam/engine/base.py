@@ -37,7 +37,6 @@ from adam.security.guard import SecurityOrchestrator
 
 logger = logging.getLogger("adam_prism.core")
 
-
 class AdamPrismEngineBase:
     """
     Base class for Adam Prism Engine mixin chain.

@@ -25,7 +25,6 @@ ALLOWED_PLUGIN_DIR = os.environ.get(
     os.path.join(os.getcwd(), "plugins")
 )
 
-
 def _validate_plugin_path(path: str) -> bool:
     """التحقق من أن المسار داخل المجلد المسموح — منع path traversal"""
     if not path:
@@ -41,7 +40,6 @@ def _validate_plugin_path(path: str) -> bool:
     except Exception:
         logger.exception("⚠️ Plugin path validation error:")
         return False
-
 
 class PluginManager:
     """مدير الإضافات — يكتشف، يحمل، يشغل hooks"""

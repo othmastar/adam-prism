@@ -20,7 +20,6 @@ from adam.subagents.session import SubagentSession
 
 logger = logging.getLogger("adam_prism.subagents")
 
-
 class SubagentManager:
     """مدير الوكلاء الفرعيين — individuals + teams"""
 

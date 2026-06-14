@@ -15,7 +15,6 @@ from .base import BaseChannel
 
 logger = logging.getLogger("adam_prism.channels.telegram")
 
-
 class TelegramChannel(BaseChannel):
     name = "telegram"
     requires = ["bot_token"]

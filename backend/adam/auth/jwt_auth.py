@@ -18,7 +18,6 @@ import os
 import secrets
 import time
 from dataclasses import dataclass
-from typing import Optional
 
 logger = logging.getLogger("adam_prism.auth")
 
@@ -43,7 +42,6 @@ JWT_ALGORITHM = "HS256"
 JWT_TTL_SECONDS = int(os.environ.get("ADAM_JWT_TTL", str(7 * 24 * 3600)))  # 7 days
 JWT_REFRESH_TTL = int(os.environ.get("ADAM_JWT_REFRESH_TTL", str(30 * 24 * 3600)))
 
-
 @dataclass
 class TokenPayload:
     """[PHASE3] JWT token payload."""
@@ -57,20 +55,17 @@ class TokenPayload:
     def has_scope(self, scope: str) -> bool:
         return scope in self.scopes or self.role == "admin"
 
-
 def _fallback_hash_password(password: str) -> str:
     """[PHASE3] PBKDF2 fallback if bcrypt not available."""
     salt = secrets.token_hex(16)
     h = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt.encode("utf-8"), 100_000)
     return f"pbkdf2$100000${salt}${h.hex()}"
 
-
 def hash_password(password: str) -> str:
     """[PHASE3] Hash a password using bcrypt (or PBKDF2 fallback)."""
     if BCRYPT_AVAILABLE:
         return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
     return _fallback_hash_password(password)
-
 
 def verify_password(password: str, hashed: str) -> bool:
     """[PHASE3] Verify a password against its hash."""
@@ -91,7 +86,6 @@ def verify_password(password: str, hashed: str) -> bool:
     except Exception:
         return False
     return False
-
 
 def create_access_token(
     user_id: str,
@@ -125,7 +119,6 @@ def create_access_token(
     signature = hmac.new(secret.encode(), f"{header}.{body}".encode(), hashlib.sha256).hexdigest()
     return f"{header}.{body}.{signature}"
 
-
 def create_refresh_token(user_id: str) -> str:
     """[PHASE3] Create a long-lived refresh token."""
     return create_access_token(
@@ -135,8 +128,7 @@ def create_refresh_token(user_id: str) -> str:
         ttl=JWT_REFRESH_TTL,
     )
 
-
-def verify_token(token: str) -> Optional[TokenPayload]:
+def verify_token(token: str) -> TokenPayload | None:
     """[PHASE3] Verify and decode a JWT token."""
     if not token:
         return None
@@ -175,13 +167,11 @@ def verify_token(token: str) -> Optional[TokenPayload]:
         logger.debug(f"Token verification failed: {e}")
         return None
 
-
 def generate_api_key() -> tuple[str, str]:
     """[PHASE3] Generate a new API key. Returns (plain_key, key_hash)."""
     plain = f"adam-{secrets.token_urlsafe(32)}"
     hashed = hashlib.sha256(plain.encode("utf-8")).hexdigest()
     return plain, hashed
-
 
 def hash_api_key(plain: str) -> str:
     """[PHASE3] Hash an API key for storage/lookup."""

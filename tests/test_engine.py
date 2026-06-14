@@ -1,11 +1,9 @@
 """Basic engine tests - requires Ollama + Qdrant running"""
 import asyncio
 import pytest
-import json
 import time
 from unittest.mock import AsyncMock, MagicMock, patch
 from core.engine import AdamPrismEngine
-
 
 @pytest.fixture
 def config():
@@ -21,12 +19,10 @@ def config():
         "cycle_timeout": 60,
     }
 
-
 @pytest.fixture
 async def engine(config):
     eng = AdamPrismEngine(config)
     yield eng
-
 
 class TestEngineInit:
     def test_defaults(self, engine):
@@ -68,7 +64,6 @@ class TestEngineInit:
         assert result is not None
         assert result["_tool"] == "browser_open"
         assert result["params"]["url"] == "https://x.com"
-
 
 class TestEngineWithMocks:
     """Engine tests with mocked provider — لا تحتاج Ollama"""
@@ -150,7 +145,6 @@ class TestEngineWithMocks:
         await engine._extract_and_save_lessons("أنا أحب البرمجة", "رد", {})
         engine.notebook.update_user_profile.assert_awaited_once()
 
-
 class TestEngineChat:
     @pytest.mark.slow
     @pytest.mark.asyncio
@@ -186,7 +180,6 @@ class TestEngineChat:
         r2 = await engine.chat("كيف حالك؟")
         assert r2["cycle"] == 2
         assert len(engine.conversation_history) == 4
-
 
 class TestTimeouts:
     @pytest.mark.slow

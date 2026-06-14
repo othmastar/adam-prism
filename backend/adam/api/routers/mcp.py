@@ -10,12 +10,10 @@ from fastapi import APIRouter, Request
 
 router = APIRouter(tags=["mcp"])
 
-
 @router.post("/api/mcp/add-server")
 async def add_mcp_server(request: Request):
     """إضافة خادم MCP — يتطلب مفتاح المسؤول"""
     pass
-
 
 @router.get("/api/mcp/tools")
 async def list_mcp_tools():

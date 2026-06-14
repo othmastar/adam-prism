@@ -21,7 +21,6 @@ from transformers import (
 from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
 from datasets import Dataset
 
-
 MODEL_NAME = "google/gemma-4-E4B-it"
 DATASET_PATH = "train.jsonl"
 EVAL_DATASET_PATH = "val.jsonl"
@@ -40,7 +39,6 @@ NUM_EPOCHS = 3
 MAX_LENGTH = 2048
 WARMUP_RATIO = 0.05
 WEIGHT_DECAY = 0.05
-
 
 # === Step 3: Conversation structure validation ===
 def validate_conversation_structure(data):
@@ -76,17 +74,15 @@ def validate_conversation_structure(data):
     print(f"[OK] {len(data)} conversations validated")
     return True
 
-
 def load_dataset(path):
     if not os.path.exists(path):
         print(f"[!] Dataset not found: {path}")
         sys.exit(1)
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         data = [json.loads(line) for line in f if line.strip()]
     print(f"[OK] Loaded {len(data)} examples")
     validate_conversation_structure(data)
     return data
-
 
 def format_chat(examples, tokenizer):
     texts = []
@@ -96,7 +92,6 @@ def format_chat(examples, tokenizer):
         )
         texts.append(text)
     return texts
-
 
 # === Step 1: Label masking (handles multi-turn: only train on ASSISTANT tokens) ===
 def tokenize_with_masking(examples, tokenizer):
@@ -148,7 +143,6 @@ def tokenize_with_masking(examples, tokenizer):
         "attention_mask": all_attention_mask,
     }
 
-
 def verify_masking(tokenized_batch):
     import numpy as np
     labels = np.array(tokenized_batch["labels"])
@@ -161,7 +155,6 @@ def verify_masking(tokenized_batch):
     assert (last_10 != -100).any(), "End of sequence fully masked!"
     assert (labels != -100).any(), "No trainable tokens!"
     return True
-
 
 def main():
     print("=" * 50)
@@ -274,7 +267,6 @@ def main():
     print("       FROM gemma4:e4b")
     print("       ADAPTER ./lora.gguf")
     print("    3. ollama create othmastar -f Modelfile")
-
 
 if __name__ == "__main__":
     main()

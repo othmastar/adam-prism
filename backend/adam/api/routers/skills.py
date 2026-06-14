@@ -10,18 +10,15 @@ from fastapi import APIRouter
 
 router = APIRouter(tags=["skills"])
 
-
 @router.get("/api/skills")
 async def list_skills():
     """عرض المهارات المتاحة"""
     pass
 
-
 @router.get("/api/skills/list")
 async def skills_list():
     """قائمة المهارات التفصيلية"""
     pass
-
 
 @router.post("/api/skills/load")
 async def skills_load(req: dict):

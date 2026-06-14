@@ -19,7 +19,6 @@ logger = logging.getLogger("adam_prism.scheduler")
 
 JobFunc = Callable[..., Awaitable[Any]]
 
-
 class AdamScheduler:
     """جدولة مهام آدم — تعمل في خلفية المحرك"""
 

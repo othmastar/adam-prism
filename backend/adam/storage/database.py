@@ -11,10 +11,10 @@ import logging
 import os
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any
+from collections.abc import Iterator
 
 logger = logging.getLogger("adam_prism.storage")
-
 
 def get_database_url() -> str:
     """Get the database URL from environment, with sensible default."""
@@ -29,13 +29,10 @@ def get_database_url() -> str:
     Path(data_dir).mkdir(parents=True, exist_ok=True)
     return f"sqlite:///{data_dir}/adam.db"
 
-
 def is_postgres(url: str) -> bool:
     return url.startswith(("postgresql://", "postgres://"))
 
-
 _engine = None
-
 
 def get_engine():
     """Lazy-init global SQLAlchemy engine."""
@@ -44,7 +41,6 @@ def get_engine():
         return _engine
 
     from sqlalchemy import create_engine
-    from sqlalchemy.engine import Engine
 
     url = get_database_url()
     kwargs: dict[str, Any] = {"pool_pre_ping": True, "future": True}
@@ -66,7 +62,6 @@ def get_engine():
     _engine = create_engine(url, **kwargs)
     return _engine
 
-
 @contextmanager
 def get_connection() -> Iterator[Any]:
     """[PHASE3] Context manager for database connections."""
@@ -80,7 +75,6 @@ def get_connection() -> Iterator[Any]:
         raise
     finally:
         conn.close()
-
 
 def init_db() -> None:
     """[PHASE3] Initialize database schema. Idempotent (CREATE IF NOT EXISTS)."""

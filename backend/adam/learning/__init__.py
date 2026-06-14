@@ -8,4 +8,4 @@ Adam Prism — Continuous Learning System
 from .learner import ContinuousLearner
 from .closed_loop import ClosedLearningLoop, MemoryNudge, SkillCreator, SkillImprover
 
-__all__ = ["ContinuousLearner", "ClosedLearningLoop", "MemoryNudge", "SkillCreator", "SkillImprover"]
+__all__ = ["ClosedLearningLoop", "ContinuousLearner", "MemoryNudge", "SkillCreator", "SkillImprover"]

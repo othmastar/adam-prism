@@ -4,7 +4,6 @@ import pytest
 from adam.subagents.manager import SubagentManager
 from adam.subagents.teams import SubagentTeam, TeamManager
 
-
 class FakeProvider:
     async def chat(self, messages):
         last = messages[-1]["content"] if messages else ""
@@ -18,11 +17,9 @@ class FakeProvider:
     def model_name(self):
         return "test-model"
 
-
 class FakeEngine:
     def __init__(self):
         self.provider = FakeProvider()
-
 
 class TestSubagentTeam:
     @pytest.mark.asyncio
@@ -112,7 +109,6 @@ class TestSubagentTeam:
         assert status["name"] == "st-team"
         assert status["agents"] == ["a"]
         assert status["results_count"] == 0
-
 
 class TestTeamManager:
     @pytest.mark.asyncio

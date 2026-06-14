@@ -36,7 +36,6 @@ from adam.orchestrator.task_queue import TaskQueue
 
 logger = logging.getLogger("adam_prism.orchestrator")
 
-
 # ═══════════════════════════════════════════════════════
 # 1. Request Types & Routing
 # ═══════════════════════════════════════════════════════
@@ -54,14 +53,12 @@ class RequestType(StrEnum):
     SECURITY_SCAN = "security"       # فحص أمني
     VOICE = "voice"                  # صوت
 
-
 class ModuleHealth(StrEnum):
     """حالة صحة الموديول"""
     HEALTHY = "healthy"
     DEGRADED = "degraded"
     UNHEALTHY = "unhealthy"
     OFFLINE = "offline"
-
 
 @dataclass
 class ModuleStatus:
@@ -76,7 +73,6 @@ class ModuleStatus:
     total_failures: int = 0
     metadata: dict[str, Any] = field(default_factory=dict)
 
-
 @dataclass
 class WorkflowStep:
     """خطوة في سير عمل"""
@@ -89,7 +85,6 @@ class WorkflowStep:
     retry_count: int = 0
     max_retries: int = 2
 
-
 @dataclass
 class Workflow:
     """سير عمل متعدد الخطوات"""
@@ -100,7 +95,6 @@ class Workflow:
     results: dict[str, Any] = field(default_factory=dict)
     errors: list[str] = field(default_factory=list)
     created_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
-
 
 class MasterOrchestrator:
     """

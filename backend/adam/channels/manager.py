@@ -14,7 +14,6 @@ logger = logging.getLogger("adam_prism.channels")
 
 CHANNEL_REGISTRY: dict[str, type] = {}
 
-
 def discover_channels():
     """يجيب كل الـ channels المسجلة"""
     global CHANNEL_REGISTRY
@@ -37,7 +36,6 @@ def discover_channels():
             CHANNEL_REGISTRY[name] = cls
 
     return CHANNEL_REGISTRY
-
 
 class ChannelManager:
     def __init__(self, config: dict[str, Any]):

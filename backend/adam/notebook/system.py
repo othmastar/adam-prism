@@ -13,7 +13,6 @@ from typing import Any
 
 logger = logging.getLogger("adam_prism.notebook")
 
-
 class AdamNotebook:
     """
     دفتر ملاحظات آدم الدائم.

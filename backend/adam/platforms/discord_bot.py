@@ -18,13 +18,12 @@ except ImportError:
     DISCORD_AVAILABLE = False
     logger.info("discord.py مش منصب — Discord bot مش هينفع يشتغل")
     # Mock classes for type hints
-    class discord:  # noqa: N801 — mock mimicking library name
+    class discord:
         class Intents:
             def default(self): return None
         class Message: pass
-    class discord_commands:  # noqa: N801 — mock mimicking library name
+    class discord_commands:
         class Bot: pass
-
 
 class DiscordBot:
     """بوت Discord لآدم — محادثة في كل سيرفر"""

@@ -10,7 +10,6 @@ from fastapi import APIRouter
 
 router = APIRouter(tags=["channels"])
 
-
 @router.get("/api/channels")
 async def list_channels():
     """قائمة القنوات المتاحة"""

@@ -16,7 +16,6 @@ logger = logging.getLogger("adam_prism.chat_store")
 
 DB_PATH = Path(__file__).resolve().parent.parent / "data" / "chat_history.db"
 
-
 class ChatStore:
     """
     تخزين واسترجاع تاريخ المحادثات.

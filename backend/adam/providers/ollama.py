@@ -12,7 +12,6 @@ from adam.providers.base import BaseProvider
 
 logger = logging.getLogger("adam_prism.providers.ollama")
 
-
 class OllamaProvider(BaseProvider):
     name = "ollama"
     supports_vision = False

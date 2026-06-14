@@ -19,15 +19,11 @@ Adam Prism — Closed Learning Loop
 - سير عمل جديد/غير معتاد → novel_workflow
 """
 
-import json
 import logging
-import time
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Any
 
 logger = logging.getLogger("adam_prism.learning.closed_loop")
-
 
 # ═══════════════════════════════════════════════════════
 # Memory Nudge — تنبيه الذاكرة الدوري
@@ -37,7 +33,7 @@ class MemoryNudge:
     """
     تنبيه دوري للوكيل — يطلب منه مراجعة نشاطه الأخير
     وكتابة أي شيء يستحق التذكر للذاكرة.
-    
+
     مثل Hermes — كل ~10 أدوار، الوكيل يستلم nudge.
     """
 
@@ -47,7 +43,7 @@ class MemoryNudge:
         self._turn_count = 0
         self._nudges_given = 0
 
-    def process_turn(self) -> Optional[str]:
+    def process_turn(self) -> str | None:
         """
         معالجة دور — يرجع nudge prompt لو حان الوقت.
         يرجع None لو لسه بدري.
@@ -85,13 +81,12 @@ class MemoryNudge:
         nudge += "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         return nudge.format(turn=self._turn_count)
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         return {
             "turn_count": self._turn_count,
             "nudges_given": self._nudges_given,
             "interval": self.interval,
         }
-
 
 # ═══════════════════════════════════════════════════════
 # Skill Creator — إنشاء مهارات تلقائي
@@ -100,7 +95,7 @@ class MemoryNudge:
 class SkillCreator:
     """
     إنشاء مهارات تلقائي بناءً على محفزات محددة.
-    
+
     مثل Hermes — الوكيل ينشئ skills تلقائياً عندما:
     1. مهمة معقدة (5+ أدوات)
     2. تعافي من خطأ
@@ -127,13 +122,13 @@ class SkillCreator:
         },
     }
 
-    def __init__(self, skill_manager=None, curator=None, config: Dict = None):
+    def __init__(self, skill_manager=None, curator=None, config: dict = None):
         self.skill_manager = skill_manager
         self.curator = curator
         self.config = config or {}
-        self._created_skills: List[Dict] = []
+        self._created_skills: list[dict] = []
 
-    def evaluate_triggers(self, context: Dict) -> List[str]:
+    def evaluate_triggers(self, context: dict) -> list[str]:
         """
         تقييم المحفزات بناءً على سياق التفاعل.
         يرجع قائمة بالمحفزات المنشطة.
@@ -174,7 +169,7 @@ class SkillCreator:
 
         return triggered
 
-    def should_create_skill(self, context: Dict) -> Optional[str]:
+    def should_create_skill(self, context: dict) -> str | None:
         """
         هل يجب إنشاء مهارة؟ يرجع نوع المحفز أو None.
         """
@@ -187,8 +182,8 @@ class SkillCreator:
                     return p
         return None
 
-    async def create_skill_from_context(self, context: Dict,
-                                         trigger: str = None) -> Optional[str]:
+    async def create_skill_from_context(self, context: dict,
+                                         trigger: str = None) -> str | None:
         """
         إنشاء مهارة من سياق التفاعل.
         يرجع اسم المهارة أو None.
@@ -253,12 +248,11 @@ class SkillCreator:
 
         return None
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         return {
             "total_created": len(self._created_skills),
             "recent_creates": self._created_skills[-5:],
         }
-
 
 # ═══════════════════════════════════════════════════════
 # Skill Improver — تحسين المهارات أثناء الاستخدام
@@ -267,7 +261,7 @@ class SkillCreator:
 class SkillImprover:
     """
     تحسين المهارات أثناء الاستخدام.
-    
+
     مثل Hermes:
     - patch: إصلاح موجه (مفضل — لا يكسر ما يعمل)
     - edit: إعادة كتابة كاملة (للتغييرات الكبيرة)
@@ -276,10 +270,10 @@ class SkillImprover:
     def __init__(self, skill_manager=None, curator=None):
         self.skill_manager = skill_manager
         self.curator = curator
-        self._patches: List[Dict] = []
+        self._patches: list[dict] = []
 
     async def patch_skill(self, skill_name: str, old_text: str,
-                          new_text: str) -> Dict:
+                          new_text: str) -> dict:
         """
         إصلاح موجه لمهارة — يغير جزء محدد فقط.
         مفضل على edit لأنه لا يكسر ما يعمل.
@@ -324,7 +318,7 @@ class SkillImprover:
         return {"success": True, "reason": "تم الإصلاح"}
 
     async def edit_skill(self, skill_name: str,
-                         new_content: str) -> Dict:
+                         new_content: str) -> dict:
         """
         إعادة كتابة كاملة لمهارة.
         تستخدم فقط للتغييرات الكبيرة.
@@ -361,12 +355,11 @@ class SkillImprover:
         logger.info(f"✏️ Skill edited: {skill_name}")
         return {"success": True, "reason": "تم التعديل"}
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         return {
             "total_patches": len(self._patches),
             "recent_patches": self._patches[-5:],
         }
-
 
 # ═══════════════════════════════════════════════════════
 # Closed Learning Loop — الحلقة الكاملة
@@ -375,19 +368,19 @@ class SkillImprover:
 class ClosedLearningLoop:
     """
     حلقة التعلم المغلقة — Memory → Skills → Search → Memory
-    
+
     تنسق بين كل مكونات التعلم:
     1. MemoryNudge: تنبيه دوري للذاكرة
     2. SkillCreator: إنشاء مهارات تلقائي
     3. SkillImprover: تحسين المهارات
     4. Curator: إدارة دورة حياة المهارات
     5. UnifiedMemory: البحث والتخزين الموحد
-    
+
     يتم تشغيلها كـ background task بعد كل تفاعل.
     """
 
     def __init__(self, unified_memory=None, skill_manager=None,
-                 curator=None, config: Dict = None):
+                 curator=None, config: dict = None):
         self.config = config or {}
         self.unified_memory = unified_memory
         self.skill_manager = skill_manager
@@ -414,11 +407,11 @@ class ClosedLearningLoop:
         self._nudges_given = 0
 
     async def process_interaction(self, user_message: str, response: str,
-                                   context: Dict) -> Dict:
+                                   context: dict) -> dict:
         """
         معالجة تفاعل في الحلقة المغلقة.
         يُشغَّل كـ background task بعد كل chat cycle.
-        
+
         الحلقة:
         1. فحص nudge → إرسال تنبيه للذاكرة
         2. تقييم triggers → إنشاء مهارة إذا لزم
@@ -471,11 +464,11 @@ class ClosedLearningLoop:
 
         return result
 
-    def get_nudge_if_needed(self) -> Optional[str]:
+    def get_nudge_if_needed(self) -> str | None:
         """الحصول على nudge prompt لو حان الوقت (للدمج في system prompt)"""
         return self.nudge.process_turn()
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         """إحصائيات الحلقة المغلقة"""
         return {
             "loop_count": self._loop_count,

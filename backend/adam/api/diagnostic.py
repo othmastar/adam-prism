@@ -22,7 +22,6 @@ logger = logging.getLogger("adam_prism.api.diagnostic")
 
 router = APIRouter(prefix="/api/orchestrator", tags=["orchestrator"])
 
-
 @router.get("/diagnostic")
 async def run_diagnostic(request: Request):
     """تشخيص كامل للنظام — يفحص كل مكون ويقدم توصيات"""
@@ -109,7 +108,6 @@ async def run_diagnostic(request: Request):
 
     return diagnosis
 
-
 @router.get("/dashboard")
 async def orchestrator_dashboard(request: Request):
     """لوحة تحكم Master Orchestrator"""
@@ -120,7 +118,6 @@ async def orchestrator_dashboard(request: Request):
             "message": "Master Orchestrator is not running. Start it to enable advanced coordination."
         }
     return orchestrator.get_dashboard()
-
 
 @router.get("/health/{module_name}")
 async def module_health(module_name: str, request: Request):
@@ -148,7 +145,6 @@ async def module_health(module_name: str, request: Request):
 
     return health_info
 
-
 @router.get("/events/stats")
 async def event_bus_stats(request: Request):
     """إحصائيات ناقل الأحداث"""
@@ -156,7 +152,6 @@ async def event_bus_stats(request: Request):
     if not orchestrator:
         return {"status": "orchestrator_not_initialized"}
     return orchestrator.event_bus.stats()
-
 
 @router.get("/tasks/stats")
 async def task_queue_stats(request: Request):
@@ -166,7 +161,6 @@ async def task_queue_stats(request: Request):
         return {"status": "orchestrator_not_initialized"}
     return orchestrator.task_queue.stats()
 
-
 @router.get("/tasks/list")
 async def task_list(request: Request, status: str | None = None, limit: int = 50):
     """قائمة المهام"""
@@ -174,7 +168,6 @@ async def task_list(request: Request, status: str | None = None, limit: int = 50
     if not orchestrator:
         return {"status": "orchestrator_not_initialized"}
     return {"tasks": orchestrator.task_queue.list_tasks(status=status, limit=limit)}
-
 
 @router.post("/route")
 async def route_request(request: Request):
@@ -192,7 +185,6 @@ async def route_request(request: Request):
 
     result = await orchestrator.route_request(message, context)
     return result
-
 
 @router.post("/workflow")
 async def execute_workflow(request: Request):
@@ -221,7 +213,6 @@ async def execute_workflow(request: Request):
     workflow = Workflow(name=name, steps=steps)
     result = await orchestrator.execute_workflow(workflow)
     return result
-
 
 def _now():
     from datetime import datetime

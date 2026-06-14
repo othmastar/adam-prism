@@ -33,7 +33,6 @@ from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoin
 
 logger = logging.getLogger("adam_prism.security.rate_limiter")
 
-
 # ═══════════════════════════════════════════════════════════════
 # حدود النقاط / Endpoint Limits
 # ═══════════════════════════════════════════════════════════════
@@ -49,7 +48,6 @@ DEFAULT_ENDPOINT_LIMITS: dict[str, int] = {
     "workflow": 10,
     "default": 60,
 }
-
 
 @dataclass
 class TokenBucket:
@@ -110,7 +108,6 @@ class TokenBucket:
         self.refill()
         deficit = self.capacity - self.tokens
         return time.time() + (deficit / self.refill_rate if self.refill_rate > 0 else 0)
-
 
 # ═══════════════════════════════════════════════════════════════
 # Rate Limiter
@@ -279,7 +276,6 @@ class RateLimiter:
             "category_buckets": category_counts,
             "endpoint_limits": self._limits,
         }
-
 
 # ═══════════════════════════════════════════════════════════════
 # FastAPI Middleware

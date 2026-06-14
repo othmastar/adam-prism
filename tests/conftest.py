@@ -3,14 +3,12 @@
 import pytest
 import httpx
 
-
 def _ollama_available():
     try:
         r = httpx.get("http://localhost:11434/api/tags", timeout=2.0)
         return r.status_code == 200
     except Exception:
         return False
-
 
 def _api_server_available():
     try:
@@ -23,10 +21,8 @@ def _api_server_available():
         except Exception:
             return False
 
-
 ollama_available = _ollama_available()
 api_available = _api_server_available()
-
 
 def pytest_collection_modifyitems(items):
     """Skip tests that need Ollama or API server when not available"""

@@ -11,7 +11,6 @@ from datetime import datetime
 
 logger = logging.getLogger("adam_prism.trace")
 
-
 class ConversationTrace:
     __slots__ = (
         "cycle",
@@ -51,7 +50,6 @@ class ConversationTrace:
 
     def to_dict(self) -> dict:
         return {s: getattr(self, s) for s in self.__slots__}
-
 
 class TraceRecorder:
     def __init__(self, max_traces: int = 200):

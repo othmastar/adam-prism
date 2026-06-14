@@ -16,10 +16,9 @@ import json
 import logging
 import os
 import time
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger("adam_prism.cache")
-
 
 class _InMemoryCache:
     """Fallback in-memory cache (single-process only)"""
@@ -27,7 +26,7 @@ class _InMemoryCache:
     def __init__(self) -> None:
         self._data: dict[str, tuple[Any, float]] = {}
 
-    async def get(self, key: str) -> Optional[Any]:
+    async def get(self, key: str) -> Any | None:
         if key not in self._data:
             return None
         value, expires_at = self._data[key]
@@ -49,14 +48,13 @@ class _InMemoryCache:
     async def stats(self) -> dict[str, int]:
         return {"size": len(self._data), "type": "memory"}
 
-
 class _RedisCache:
     """Redis-backed cache (multi-process)"""
 
     def __init__(self, client) -> None:
         self._client = client
 
-    async def get(self, key: str) -> Optional[Any]:
+    async def get(self, key: str) -> Any | None:
         try:
             raw = await self._client.get(key)
         except Exception as e:
@@ -98,7 +96,6 @@ class _RedisCache:
         except Exception:
             return {"size": 0, "type": "redis"}
 
-
 class CacheClient:
     """[PHASE3] Unified cache client. Uses Redis if available, else in-memory."""
 
@@ -134,7 +131,7 @@ class CacheClient:
             self._impl = _InMemoryCache()
             logger.info("Using in-memory cache (single-process only)")
 
-    async def get(self, key: str) -> Optional[Any]:
+    async def get(self, key: str) -> Any | None:
         await self._ensure_init()
         return await self._impl.get(key)
 

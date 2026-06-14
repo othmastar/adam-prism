@@ -5,7 +5,6 @@ import os
 import uuid
 from datetime import datetime
 
-
 class PlanningMixin:
     """Mixin: planning tool — todo list CRUD"""
 

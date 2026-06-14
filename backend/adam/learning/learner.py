@@ -15,7 +15,6 @@ from typing import Any
 
 logger = logging.getLogger("adam_prism.learning")
 
-
 class ContinuousLearner:
     """التعلم المستمر — يشتغل في الخلفية بعد كل محادثة"""
 

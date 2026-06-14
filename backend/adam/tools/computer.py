@@ -14,7 +14,6 @@ logger = logging.getLogger("adam_prism.tools")
 _WS_BIN = os.environ.get("ADAM_LOCAL_BIN", os.path.expanduser("~/.local/bin"))
 _ENV = {**os.environ, "PATH": f"{_WS_BIN}:{os.environ.get('PATH', '')}"}
 
-
 class ComputerToolManager:
     """إدارة أدوات الحاسوب — تعمل بدون Playwright"""
 

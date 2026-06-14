@@ -14,11 +14,9 @@ logger = logging.getLogger("adam_prism.channels.bulk")
 
 BULK_CHANNELS: dict[str, type] = {}
 
-
 def _register(cls):
     BULK_CHANNELS[cls.name] = cls
     return cls
-
 
 # ─── DISCORD ───────────────────────────────────────────────────────────
 @_register
@@ -128,7 +126,6 @@ class DiscordChannel(BaseChannel):
             await self.send_message(channel_id, result.get("response", ""))
         return {"content": "OK", "status_code": 200}
 
-
 # ─── SLACK ─────────────────────────────────────────────────────────────
 @_register
 class SlackChannel(BaseChannel):
@@ -189,7 +186,6 @@ class SlackChannel(BaseChannel):
                     result = await self.engine.chat(text)
                     await self.send_message(channel, result.get("response", ""))
         return {"content": "OK", "status_code": 200}
-
 
 # ─── EMAIL ─────────────────────────────────────────────────────────────
 @_register
@@ -278,7 +274,6 @@ class EmailChannel(BaseChannel):
                 s.send_message(msg)
         await loop.run_in_executor(None, _send)
 
-
 # ─── SMS / TWILIO ──────────────────────────────────────────────────────
 @_register
 class SMSChannel(BaseChannel):
@@ -320,7 +315,6 @@ class SMSChannel(BaseChannel):
             result = await self.engine.chat(body)
             await self.send_message(sender, result.get("response", ""))
         return {"content": "<Response></Response>", "status_code": 200, "media_type": "application/xml"}
-
 
 # ─── WEBSOCKET SERVER ──────────────────────────────────────────────────
 @_register
@@ -367,7 +361,6 @@ class WebSocketChannel(BaseChannel):
         self.running = False
         if hasattr(self, "_task"):
             self._task.cancel()
-
 
 # ─── WEB CHAT WIDGET ───────────────────────────────────────────────────
 @_register
@@ -422,7 +415,6 @@ const j=await r.json();d.innerHTML+='<div class="bot">🤖 '+esc(j.response||'')
 document.getElementById('msg').addEventListener('keydown',e=>{if(e.key==='Enter')send()});
 </script></body></html>"""
         return {"content": html, "status_code": 200, "media_type": "text/html"}
-
 
 # ─── TWITTER/X DM ──────────────────────────────────────────────────────
 @_register
@@ -481,7 +473,6 @@ class TwitterChannel(BaseChannel):
                           "message": {"data": {"text": text}}})
             except Exception:
                 logger.exception("Twitter DM send failed:")
-
 
 # ─── FACEBOOK MESSENGER ────────────────────────────────────────────────
 @_register
@@ -552,7 +543,6 @@ class FacebookChannel(BaseChannel):
                     await self.send_message(sender, result.get("response", ""))
         return {"content": "OK", "status_code": 200}
 
-
 # ─── MATRIX ────────────────────────────────────────────────────────────
 @_register
 class MatrixChannel(BaseChannel):
@@ -613,7 +603,6 @@ class MatrixChannel(BaseChannel):
         async with httpx.AsyncClient() as client:
             await self._send_room(target, text, client)
 
-
 # ─── SIGNAL ────────────────────────────────────────────────────────────
 @_register
 class SignalChannel(BaseChannel):
@@ -658,7 +647,6 @@ class SignalChannel(BaseChannel):
         except Exception:
             logger.exception("Signal send failed:")
 
-
 # ══════════════════════════════════════════════════════════════════════
 #  LIGHT ADAPTERS (13+) — implementations أبسط لكن same interface
 # ══════════════════════════════════════════════════════════════════════
@@ -684,7 +672,6 @@ class InstagramChannel(BaseChannel):
 
     def stop(self):
         self.running = False
-
 
 @_register
 class LINEChannel(BaseChannel):
@@ -734,7 +721,6 @@ class LINEChannel(BaseChannel):
                         )
         return {"content": "OK", "status_code": 200}
 
-
 @_register
 class ViberChannel(BaseChannel):
     name = "viber"
@@ -776,7 +762,6 @@ class ViberChannel(BaseChannel):
                 await self.send_message(sender, result.get("response", ""))
         return {"content": "OK", "status_code": 200}
 
-
 @_register
 class TeamsChannel(BaseChannel):
     name = "teams"
@@ -813,7 +798,6 @@ class TeamsChannel(BaseChannel):
             return {"content": json.dumps({"type": "message", "text": result.get("response", "")}), "status_code": 200}
         return {"content": "OK", "status_code": 200}
 
-
 @_register
 class GoogleChatChannel(BaseChannel):
     name = "googletalk"
@@ -849,7 +833,6 @@ class GoogleChatChannel(BaseChannel):
             result = await self.engine.chat(text)
             return {"content": json.dumps({"text": result.get("response", "")}), "status_code": 200}
         return {"content": "OK", "status_code": 200}
-
 
 @_register
 class IRCChannel(BaseChannel):
@@ -905,7 +888,6 @@ class IRCChannel(BaseChannel):
     def stop(self):
         self.running = False
 
-
 @_register
 class XMPPChannel(BaseChannel):
     name = "xmpp"
@@ -924,7 +906,6 @@ class XMPPChannel(BaseChannel):
 
     async def send_message(self, target: str, text: str):
         logger.info(f"XMPP message to {target}: {text[:30]}...")
-
 
 @_register
 class TelegramWebhookChannel(BaseChannel):
@@ -965,7 +946,6 @@ class TelegramWebhookChannel(BaseChannel):
             await self.send_message(str(chat_id), result.get("response", ""))
         return {"content": "OK", "status_code": 200}
 
-
 @_register
 class GenericWebhookChannel(BaseChannel):
     name = "webhook_generic"
@@ -996,7 +976,6 @@ class GenericWebhookChannel(BaseChannel):
             result = await self.engine.chat(str(msg))
             return {"content": json.dumps({"response": result.get("response", "")}, ensure_ascii=False), "status_code": 200}
         return {"content": "{}", "status_code": 200}
-
 
 @_register
 class RSSChannel(BaseChannel):
@@ -1036,7 +1015,6 @@ class RSSChannel(BaseChannel):
     async def send_message(self, target: str, text: str):
         pass
 
-
 @_register
 class NotionChannel(BaseChannel):
     name = "notion"
@@ -1070,7 +1048,6 @@ class NotionChannel(BaseChannel):
                 )
             except Exception:
                 logger.exception("Notion send failed:")
-
 
 @_register
 class GitHubChannel(BaseChannel):
@@ -1125,7 +1102,6 @@ class GitHubChannel(BaseChannel):
                 )
             except Exception:
                 logger.exception("GitHub issue creation failed:")
-
 
 @_register
 class WeChatChannel(BaseChannel):

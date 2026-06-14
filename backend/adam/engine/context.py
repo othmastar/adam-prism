@@ -10,7 +10,6 @@ from adam.engine.utils import AdamPrismEngineUtils
 
 logger = logging.getLogger("adam_prism.core")
 
-
 class AdamPrismEngineContext(AdamPrismEngineUtils):
     """
     Mixin: context building with RAG collection routing.

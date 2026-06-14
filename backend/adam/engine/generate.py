@@ -12,7 +12,6 @@ from adam.engine.context import AdamPrismEngineContext
 
 logger = logging.getLogger("adam_prism.core")
 
-
 class AdamPrismEngineGenerate(AdamPrismEngineContext):
     """
     Mixin: generation, prompt building, message construction.

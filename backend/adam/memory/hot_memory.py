@@ -14,17 +14,13 @@ Adam Prism — Hot Memory (MEMORY.md + USER.md)
 - Write Approval Gate: اختياري — يحتاج موافقة المستخدم قبل الكتابة
 """
 
-import json
 import logging
 import os
 import re
-import time
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 
 logger = logging.getLogger("adam_prism.memory.hot")
-
 
 # ═══════════════════════════════════════════════════════
 # Security Scanner — فحص أمني لمدخلات الذاكرة
@@ -65,7 +61,7 @@ class MemorySecurityScanner:
     )
 
     @classmethod
-    def scan(cls, entry: str) -> Dict:
+    def scan(cls, entry: str) -> dict:
         """
         فحص أمني شامل لمدخل الذاكرة.
         يرجع: {"safe": bool, "issues": [...], "sanitized": str}
@@ -98,7 +94,6 @@ class MemorySecurityScanner:
             "sanitized": sanitized,
         }
 
-
 # ═══════════════════════════════════════════════════════
 # Hot Memory — الذاكرة الساخنة
 # ═══════════════════════════════════════════════════════
@@ -106,7 +101,7 @@ class MemorySecurityScanner:
 class HotMemory:
     """
     الذاكرة الساخنة — MEMORY.md + USER.md
-    
+
     دايماً في system prompt. تحميل مرة واحدة بالجلسة (frozen snapshot).
     الكتابة تُحفظ فوراً على القرص لكن لا تظهر في prompt إلا الجلسة القادمة.
     """
@@ -117,7 +112,7 @@ class HotMemory:
         "ADAM_HOME", os.path.expanduser("~/.adam")
     )
 
-    def __init__(self, config: Dict = None):
+    def __init__(self, config: dict = None):
         cfg = config or {}
         self.adam_home = Path(cfg.get("adam_home", self.DEFAULT_ADAM_HOME))
         self.memories_dir = self.adam_home / "memories"
@@ -131,16 +126,16 @@ class HotMemory:
         self.write_approval = cfg.get("write_approval", False)  # يحتاج موافقة المستخدم
 
         # Frozen snapshot — يُحمّل مرة واحدة بالجلسة
-        self._memory_snapshot: Optional[str] = None
-        self._user_snapshot: Optional[str] = None
+        self._memory_snapshot: str | None = None
+        self._user_snapshot: str | None = None
         self._snapshot_loaded = False
 
         # مراجع الانتظار (pending writes — تنتظر موافقة المستخدم)
-        self._pending_writes: List[Dict] = []
+        self._pending_writes: list[dict] = []
 
     # ─── تحميل الـ Snapshot ──────────────────────────
 
-    def load_snapshot(self) -> Tuple[str, str]:
+    def load_snapshot(self) -> tuple[str, str]:
         """
         تحميل snapshot مرة واحدة بالجلسة.
         الـ snapshot لا يتغير أثناء الجلسة — يحافظ على cache.
@@ -195,7 +190,7 @@ class HotMemory:
 
     # ─── إدارة المدخلات ──────────────────────────────
 
-    def _parse_entries(self, text: str) -> List[str]:
+    def _parse_entries(self, text: str) -> list[str]:
         """تحليل النص لمدخلات فردية (كل سطر يبدأ بـ - هو مدخل)"""
         if not text.strip():
             return []
@@ -209,7 +204,7 @@ class HotMemory:
                 entries[-1] += " " + line
         return entries
 
-    def _entries_to_text(self, entries: List[str]) -> str:
+    def _entries_to_text(self, entries: list[str]) -> str:
         """تحويل المدخلات لنص"""
         return "\n".join(entries)
 
@@ -222,16 +217,16 @@ class HotMemory:
     # ─── العمليات العامة ──────────────────────────────
 
     def add(self, entry: str, target: str = "memory",
-            origin: str = "user", require_approval: bool = None) -> Dict:
+            origin: str = "user", require_approval: bool = None) -> dict:
         """
         إضافة مدخل جديد.
-        
+
         Args:
             entry: النص المراد إضافته
             target: "memory" أو "user"
             origin: "user" | "agent" | "background_review" | "nudge"
             require_approval: فرض طلب موافقة المستخدم
-        
+
         Returns:
             {"success": bool, "reason": str, "needs_approval": bool}
         """
@@ -293,7 +288,7 @@ class HotMemory:
         return {"success": success, "reason": "تمت الإضافة", "needs_approval": False}
 
     def replace(self, old_substring: str, new_entry: str, target: str = "memory",
-                origin: str = "user", require_approval: bool = None) -> Dict:
+                origin: str = "user", require_approval: bool = None) -> dict:
         """
         استبدال مدخل بناءً على مطابقة جزئية (substring matching).
         مثل Hermes — لا يحتاج النص الكامل.
@@ -350,7 +345,7 @@ class HotMemory:
         return {"success": success, "reason": "تم الاستبدال", "needs_approval": False}
 
     def remove(self, substring: str, target: str = "memory",
-               origin: str = "user", require_approval: bool = None) -> Dict:
+               origin: str = "user", require_approval: bool = None) -> dict:
         """حذف مدخل بناءً على مطابقة جزئية"""
         path = self.memory_path if target == "memory" else self.user_path
         current = self._read_file(path)
@@ -383,7 +378,7 @@ class HotMemory:
             logger.info(f"🗑️ Hot Memory remove [{target}]: {removed[0][:50]}")
         return {"success": success, "reason": "تم الحذف", "needs_approval": False}
 
-    def consolidate(self, target: str = "memory") -> Dict:
+    def consolidate(self, target: str = "memory") -> dict:
         """
         توحيد المدخلات — يدمج المتشابهات ويحذف المكررات.
         يُستدعى عندما تكون الذاكرة ممتلئة.
@@ -440,11 +435,11 @@ class HotMemory:
 
     # ─── إدارة الموافقات ─────────────────────────────
 
-    def get_pending_writes(self) -> List[Dict]:
+    def get_pending_writes(self) -> list[dict]:
         """استرجاع الكتابات المعلقة"""
         return list(self._pending_writes)
 
-    def approve_write(self, index: int) -> Dict:
+    def approve_write(self, index: int) -> dict:
         """الموافقة على كتابة معلقة"""
         if index < 0 or index >= len(self._pending_writes):
             return {"success": False, "reason": "فهرس غير صالح"}
@@ -461,7 +456,7 @@ class HotMemory:
 
         return {"success": False, "reason": f"إجراء غير معروف: {action}"}
 
-    def reject_write(self, index: int) -> Dict:
+    def reject_write(self, index: int) -> dict:
         """رفض كتابة معلقة"""
         if index < 0 or index >= len(self._pending_writes):
             return {"success": False, "reason": "فهرس غير صالح"}
@@ -470,7 +465,7 @@ class HotMemory:
 
     # ─── إحصائيات ────────────────────────────────────
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         """إحصائيات الذاكرة الساخنة"""
         memory_text = self._read_file(self.memory_path)
         user_text = self._read_file(self.user_path)
