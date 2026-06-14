@@ -1,95 +1,165 @@
----
 # Adam Prism — Showcase Version
 
-This is the **public, reduced version** of Adam Prism.
+This is the **public, minimal version** of Adam Prism.
 
-## What this version is
+## ⚠️ This is NOT the full version
 
-A working, installable, well-documented agent platform that demonstrates:
-- The architecture (FastAPI + Qdrant + Ollama + multi-tenant)
-- The tooling (WAF, observability, webhooks, voice, i18n, backup)
-- The dev experience (one-command install, hot reload, full test suite)
-- The production hardening (Docker, Helm, K8s, ArgoCD, SBOM)
-- The philosophy (Arabic-first, offline-first, ethical)
+This branch contains **only 5 features** (proof of capability).
+The full version with all 93 routes, training data, and model
+weights is **NOT on GitHub** and is distributed privately.
 
-## What this version is NOT
+See `DISTRIBUTION.md` for details on getting full access.
 
-The **full version** (private branch `main`) additionally includes:
+---
 
-| Asset | Size | Why removed |
-|---|---:|---|
-| `data/training/` (2,317 conversations) | 15 MB | Private dataset — the "soul" of Adam |
-| `checkpoints/` (LoRA adapter weights) | 1.1 GB | Proprietary fine-tuning |
-| `data/learning/` (reflection database) | 8 MB | Production learnings |
-| `notebook/` (real user conversations) | 12 MB | Privacy |
-| `data/uploads/` (user files) | varies | Privacy |
-| Internal subagent definitions | 24 KB | Business logic |
-| Real OAuth client credentials | — | Replaced with mocks |
-| Tenant-specific channel configs | — | Customer data |
+## What's here (5 endpoints only)
 
-## How much is "missing"?
+| Method | Path | What it does |
+|---|---|---|
+| POST | `/chat` | Send a message, get a mock response |
+| GET | `/healthz/live` | Liveness probe |
+| GET | `/docs` | OpenAPI documentation |
+| GET | `/metrics` | Prometheus metrics |
+| GET | `/api/skills` | List 3 example skills |
 
-| Metric | Full | Showcase | % Kept |
-|---|---:|---:|---:|
-| **Files tracked in git** | 802 | 710 | 88% |
-| **Python code (backend/adam)** | 23,686 lines | ~14,500 | 61% |
-| **TypeScript/TSX** | 23,839 lines | ~22,000 | 92% |
-| **Tests** | 336 | 224 | 67% |
-| **API routes** | 93 | 91 | 98% |
-| **Total data files** | ~60 MB | 0 KB | 0% |
-| **Documentation** | 14,401 lines | ~9,000 | 62% |
+## How to run
 
-## What you can do with this version
+```bash
+pip install -e .
+uvicorn adam.api.server_minimal:app --port 8000
+# Open http://localhost:8000/  (index.html chat UI)
+# Or http://localhost:8000/docs (OpenAPI)
+```
 
-✅ Install in 30 seconds
-✅ Chat with the base Adam agent (no fine-tuning, but still capable)
-✅ Run the full 336-test suite
-✅ Build Docker images
-✅ Deploy to Kubernetes / Helm
-✅ Set up SSO, webhooks, WAF
-✅ Use voice cloning, hybrid search
-✅ Back up and restore
-✅ Customize system prompts, skills, channels
-✅ **Learn from your own conversations** (the on-the-fly learning still works)
+## What's NOT here (full version only)
 
-## What you CANNOT do with this version
+The full version has:
 
-❌ Use the pre-trained LoRA weights (download separately, commercial license)
-❌ Use the curated 2,317-conversation dataset (commercial license)
-❌ Reproduce exact behavior of the full version (fine-tuning matters)
+- ✅ Real LLM (Ollama, OpenAI, Anthropic)
+- ✅ 19 channels (Telegram, WhatsApp, Discord, Slack, etc.)
+- ✅ 19+ tools (browser, shell, knowledge, etc.)
+- ✅ Multi-tenant + RBAC
+- ✅ 4-layer memory (hot, FTS5, Qdrant, skills)
+- ✅ WAF (Web Application Firewall)
+- ✅ Webhooks (HMAC-SHA256 + retry)
+- ✅ Voice cloning (5 Arabic dialects)
+- ✅ Hybrid search (BM25 + dense)
+- ✅ Predictive monitoring (CruxSight.ai)
+- ✅ SSO (Google, Microsoft, GitHub, Okta, etc.)
+- ✅ AI observability (token tracking, cost)
+- ✅ Mobile app (React Native + Expo)
+- ✅ Desktop app (Electron)
+- ✅ VSCode extension
+- ✅ i18n (Arabic + English)
+- ✅ Helm + Kustomize + ArgoCD
+- ✅ SBOM (CycloneDX)
+- ✅ And more...
+
+Plus proprietary assets:
+- 🔒 2,317 real training conversations
+- 🔒 1.1 GB LoRA adapter weights
+- 🔒 Real tenant configurations
+- 🔒 Real customer subagents
+
+---
+
+## Stats comparison
+
+| Metric | Full (private) | Showcase (public) |
+|---|---:|---:|
+| **Files tracked** | ~802 | ~200 |
+| **API routes** | 93 | 5 |
+| **Tests passing** | 336 | 134 |
+| **Python code (backend/adam)** | 23,686 lines | ~5,000 |
+| **TypeScript/TSX** | 23,839 lines | 0 |
+| **Tracked data** | ~60 MB | 0 KB |
+| **Model weights** | 1.1 GB | 0 KB |
+
+---
 
 ## License
 
-This showcase version is licensed under **AGPL v3** (see `LICENSE`).
-You may use it freely for personal, educational, research, and internal
-commercial use.
+This public version: **AGPL v3** (see `LICENSE`)
 
-If you want to serve Adam Prism as a SaaS to external users without
-publishing your modifications, you need a commercial license. See
-`COMMERCIAL_LICENSE.md` for tiers and pricing.
+The full version: **Custom Proprietary** (see `DISTRIBUTION.md`)
 
-## Getting the full version
+For commercial use (SaaS, embedded, enterprise), see `COMMERCIAL_LICENSE.md`.
 
-The full version is available under a **commercial license**.
-It includes:
+---
 
-- 1.1 GB of LoRA weights (commercial-only, not AGPL)
-- The full conversation dataset (commercial-only, not AGPL)
-- Direct support from Mohamed Othman
-- Custom domain fine-tuning (healthcare, legal, finance, etc.)
-- On-premise deployment + training pipeline
+## How to get the full version
 
-Contact: othman@adam-prism.local
+The full version is available to:
 
-## How to verify this is real
+1. **Selected developers** (3-5 invited)
+   - Sign `templates/NDA.md`
+   - Receive a signed license key
+   - Receive an encrypted package (AES-256-CBC)
+   - See `DISTRIBUTION.md` for the full workflow
 
-1. `git clone https://github.com/othmastar/adam-prism -b showcase`
-2. `bash bin/install.sh`
-3. Open `http://localhost:3000` and chat
-4. Run `pytest tests/ backend/tests/ -q` — see 336 tests pass
-5. Read `docs/adr/` — see real architecture decisions
-6. Check `docs/COMPARISON.md` — see honest comparison with LangGraph, CrewAI, etc.
+2. **Commercial customers** (companies)
+   - See `COMMERCIAL_LICENSE.md` for tiers
+   - Email: othman@adam-prism.local
+   - Includes: training data, weights, support, SLA
 
-**You will get a working, useful agent.** It just won't be **Adam** exactly as
-deployed in production — that requires the 1.1 GB of learned weights and
-2,317 conversations that are not in this public repo.
+3. **Researchers** (academic / non-commercial)
+   - Special terms available
+   - Limited to non-commercial research only
+   - Email: othman@adam-prism.local
+
+---
+
+## What you can do with this showcase
+
+✅ Install in 30 seconds (`pip install -e .`)
+✅ See the chat UI (`frontend/index.html`)
+✅ Explore the 5 endpoints
+✅ Read the code (it's a real, working application)
+✅ Run the tests (134 passing)
+✅ Build the wheel (`python -m build`)
+
+## What you CANNOT do with this showcase
+
+❌ Use a real LLM (mock responses only)
+❌ Use 19 channels (none enabled)
+❌ Use the training data (not in this branch)
+❌ Use the model weights (not in this branch)
+❌ Use WAF, webhooks, voice cloning, etc.
+❌ Use the full multi-tenant system
+❌ Reproduce the production Adam behavior
+
+---
+
+## License breakdown
+
+- **`LICENSE`** — AGPL v3 (full text, this public version)
+- **`COMMERCIAL_LICENSE.md`** — 3 commercial tiers (Startup, Growth, Enterprise)
+- **`RIGHTS.md`** — Plain-language summary of your rights
+- **`TRADEMARKS.md`** — "Adam Prism" mark policy
+- **`DISTRIBUTION.md`** — How the full version is distributed privately
+- **`templates/NDA.md`** — NDA template for full version access
+
+---
+
+## Verification
+
+```bash
+# Run tests
+pytest tests/ -q -k "not slow and not ollama and not integration and not broken"
+
+# Build
+python -m build --wheel
+
+# Run server
+uvicorn adam.api.server_minimal:app --port 8000
+
+# Open browser
+# http://localhost:8000/        → chat UI
+# http://localhost:8000/docs    → API docs
+# http://localhost:8000/metrics → metrics
+```
+
+---
+
+*Last updated: June 15, 2026 — Adam Prism v1.0.0b1 (showcase-minimal)*
+*Maintainer: Mohamed Othman — othman@adam-prism.local*
