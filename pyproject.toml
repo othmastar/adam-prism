@@ -137,6 +137,8 @@ fail_under = 60
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 asyncio_mode = "auto"
+# [PHASE4] Add backend/ to sys.path so `adam.*` imports work
+pythonpath = ["backend"]
 markers = [
     "slow: marks tests as slow (deselect with '-k \"not slow\"')",
     "asyncio: marks tests as async",

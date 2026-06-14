@@ -23,6 +23,7 @@ import { PluginManager } from "@/components/adam/plugin-manager";
 import { SubagentDashboard } from "@/components/adam/subagent-dashboard";
 import { MemoryPanel } from "@/components/adam/memory-panel";
 import { ChannelsPanel } from "@/components/adam/channels-panel";
+import { PredictiveMonitor } from "@/components/predictive/predictive-monitor";
 import { Activity } from "lucide-react";
 
 function AppContent() {
@@ -100,6 +101,10 @@ function AppContent() {
               </h2>
             </div>
             <PipelineMonitor />
+            {/* [PHASE4] Predictive monitoring (CruxSight.ai integration) */}
+            <div className="mt-4">
+              <PredictiveMonitor />
+            </div>
           </div>
         )}
         {activeView === "knowledge" && <KnowledgePanel />}
