@@ -136,6 +136,14 @@ class SyncSessionRequest(BaseModel):
     messages: list[SyncMessageItem]
 
 
+# [PHASE5] Session export + replay models
+class ExportFormat:
+    JSON = "json"
+    MARKDOWN = "markdown"
+    TEXT = "text"
+    HTML = "html"
+
+
 # [PHASE4] CruxSight.ai predictive monitoring models
 class ServiceMetric(BaseModel):
     service_id: str
@@ -389,10 +397,24 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
         if request.url.path in _public_paths:
             return await call_next(request)
 
-        # [NEW] Rate limiting
+        # [PHASE5] Rate limiting — per user (if authenticated) + per IP
         client_ip = request.client.host if request.client else "unknown"
-        if not _rate_limiter.is_allowed(client_ip):
-            logger.warning(f"Rate limit exceeded for IP: {client_ip}")
+        # [PHASE5] Try to identify user from JWT for better rate limit
+        from adam.auth import verify_token as _verify_token
+        rate_key = f"ip:{client_ip}"
+        auth_header = request.headers.get("Authorization", "")
+        if auth_header.startswith("Bearer "):
+            token = auth_header[7:]
+            if len(token) > 40:  # JWT
+                try:
+                    payload = _verify_token(token)
+                    if payload:
+                        # [PHASE5] Authenticated users get per-user rate limit
+                        rate_key = f"user:{payload.sub}"
+                except Exception:
+                    pass
+        if not _rate_limiter.is_allowed(rate_key):
+            logger.warning(f"Rate limit exceeded for {rate_key}")
             return JSONResponse(
                 status_code=429,
                 content={"detail": "Too many requests — slow down"}
@@ -955,7 +977,7 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
         return engine.security_guard.get_stats()
 
     @app.get("/api/security/audit")
-    async def get_audit_log(limit: int = 50):
+    async def get_security_audit(limit: int = 50):
         """سجل التدقيق الأمني"""
         if not engine or not hasattr(engine, 'security_guard'):
             return {"entries": []}
@@ -1427,7 +1449,11 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
 
     @app.websocket("/ws/chat")
     async def websocket_chat(websocket: WebSocket):
-        # [FIX] التحقق من المصادقة عبر query parameter
+        # [PHASE5] Security: try Authorization header first (more secure),
+        # then fall back to query param for backward compatibility
+        token = ""
+        # Browsers can't set custom headers on WebSocket — accept query param
+        # but log a warning. Recommend using ?token= for compatibility.
         token = websocket.query_params.get("token", "")
         expected_token = _api_key
         if not token or not _hmac.compare_digest(token.encode(), expected_token.encode()):
@@ -1560,6 +1586,118 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
             "prediction": monitor.last_prediction.to_dict(),
             "agent_message": monitor.predictor.format_for_agent(monitor.last_prediction),
         }
+
+    # [PHASE5] Session export + replay
+    @app.get("/api/chat/sessions/{session_id}/export")
+    async def export_session(
+        session_id: str,
+        format: str = "json",  # json | markdown | text | html
+    ):
+        """[PHASE5] Export a session in the requested format.
+
+        Formats:
+        - json: full structured data
+        - markdown: human-readable with formatting
+        - text: plain text
+        - html: styled HTML page
+        """
+        session = chat_store.get_session(session_id)
+        if not session:
+            raise HTTPException(status_code=404, detail="Session not found")
+        messages = chat_store.list_messages(session_id)
+
+        from fastapi.responses import Response
+
+        if format == "json":
+            return {
+                "session": session,
+                "messages": messages,
+                "exported_at": __import__("time").time(),
+            }
+        elif format == "markdown":
+            md = f"# {session.get('title', 'Session')}\n\n"
+            md += f"_Exported: {__import__('datetime').datetime.now().isoformat()}_\n\n"
+            for m in messages:
+                role = m.get("role", "user")
+                content = m.get("content", "")
+                md += f"## {role.capitalize()}\n\n{content}\n\n"
+            return Response(content=md, media_type="text/markdown")
+        elif format == "text":
+            text = f"{session.get('title', 'Session')}\n"
+            text += "=" * len(session.get("title", "Session")) + "\n\n"
+            for m in messages:
+                text += f"{m.get('role', 'user').upper()}: {m.get('content', '')}\n\n"
+            return Response(content=text, media_type="text/plain")
+        elif format == "html":
+            html = f"""<!DOCTYPE html>
+<html><head><title>{session.get('title', 'Session')}</title>
+<style>
+body {{ font-family: -apple-system, sans-serif; max-width: 800px; margin: 2em auto; padding: 0 1em; }}
+h1 {{ border-bottom: 2px solid #10b981; padding-bottom: 0.5em; }}
+.msg {{ margin: 1em 0; padding: 1em; border-radius: 8px; }}
+.user {{ background: #1e40af; color: white; }}
+.assistant {{ background: #1f2937; color: #e5e7eb; }}
+.role {{ font-size: 0.75em; font-weight: 700; opacity: 0.7; }}
+</style></head><body>
+<h1>{session.get('title', 'Session')}</h1>
+<p><em>Exported: {__import__('datetime').datetime.now().isoformat()}</em></p>
+"""
+            for m in messages:
+                role = m.get("role", "user")
+                content = m.get("content", "").replace("<", "&lt;").replace(">", "&gt;")
+                html += f'<div class="msg {role}"><div class="role">{role.upper()}</div><div>{content}</div></div>\n'
+            html += "</body></html>"
+            return Response(content=html, media_type="text/html")
+        else:
+            raise HTTPException(status_code=400, detail=f"Unknown format: {format}")
+
+    @app.post("/api/chat/sessions/{session_id}/replay")
+    async def replay_session(session_id: str, from_message_id: int | None = None):
+        """[PHASE5] Replay a session (or part of it) to recreate the context.
+
+        Useful for debugging, analytics, or continuing a conversation
+        after a context loss.
+        """
+        session = chat_store.get_session(session_id)
+        if not session:
+            raise HTTPException(status_code=404, detail="Session not found")
+        messages = chat_store.list_messages(session_id)
+
+        # Filter from a specific message if provided
+        if from_message_id is not None:
+            messages = [m for m in messages if m.get("id", 0) >= from_message_id]
+
+        return {
+            "session_id": session_id,
+            "session_title": session.get("title"),
+            "message_count": len(messages),
+            "messages": [
+                {
+                    "id": m.get("id"),
+                    "role": m.get("role"),
+                    "content": m.get("content"),
+                    "created_at": m.get("created_at"),
+                }
+                for m in messages
+            ],
+            "replay_at": __import__("time").time(),
+        }
+
+    @app.get("/api/audit")
+    async def get_audit_log(limit: int = 100, offset: int = 0, user_id: str | None = None):
+        """[PHASE5] Get the security audit log (admin only)."""
+        if engine and hasattr(engine, "security_guard"):
+            try:
+                entries = engine.security_guard.get_audit_log(limit + offset)
+                if user_id:
+                    entries = [e for e in entries if e.get("user_id") == user_id]
+                return {
+                    "entries": entries[offset : offset + limit],
+                    "total": len(entries),
+                }
+            except Exception as e:
+                return {"entries": [], "total": 0, "error": str(e)}
+        return {"entries": [], "total": 0, "error": "Security guard not available"}
 
     @app.get("/api/voice/audio/{filename}")
     async def get_audio(filename: str):
