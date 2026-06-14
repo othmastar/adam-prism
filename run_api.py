@@ -22,6 +22,13 @@ for _p in (_project_root, _backend_root):
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
+# [PHASE2] Setup structured logging before anything else
+try:
+    from adam.observability import setup_logging
+    setup_logging()
+except ImportError:
+    pass
+
 try:
     from api.server import create_app
     from core.engine import AdamPrismEngine

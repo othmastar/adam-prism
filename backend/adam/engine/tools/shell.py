@@ -4,12 +4,13 @@
 
 [C1] Python sandbox: AST-based safe execution with restricted globals
 [C5] Shell path traversal protection
+[PHASE2] Use asyncio.create_subprocess_exec instead of blocking subprocess.run
 """
 
 import ast
+import asyncio
 import logging
 import shlex
-import subprocess
 
 logger = logging.getLogger("adam_prism.shell")
 
@@ -144,14 +145,24 @@ class ShellToolsMixin:
                 if _is_sensitive_path(arg):
                     return {"success": False, "error": f"وصول مرفوض لمسار حساس: {arg}"}
 
-            # تنفيذ بدون shell=True أبداً
+            # [PHASE2] تنفيذ بدون shell=True أبداً + async subprocess
             try:
-                r = subprocess.run(args, capture_output=True, text=True, timeout=30)
-                output = r.stdout.strip() + ("\n" + r.stderr.strip() if r.stderr.strip() else "")
-                logger.info(f"shell: {command} exit={r.returncode}")
-                return {"success": r.returncode == 0, "output": output, "exit_code": r.returncode}
-            except subprocess.TimeoutExpired:
-                return {"success": False, "error": "الأمر تجاوز الـ 30 ثانية"}
+                proc = await asyncio.create_subprocess_exec(
+                    *args,
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE,
+                )
+                try:
+                    stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=30)
+                except asyncio.TimeoutError:
+                    proc.kill()
+                    await proc.wait()
+                    return {"success": False, "error": "الأمر تجاوز الـ 30 ثانية"}
+                output = stdout.decode("utf-8", errors="replace").strip()
+                err = stderr.decode("utf-8", errors="replace").strip()
+                full_output = output + ("\n" + err if err else "")
+                logger.info(f"shell: {command} exit={proc.returncode}")
+                return {"success": proc.returncode == 0, "output": full_output, "exit_code": proc.returncode}
             except FileNotFoundError:
                 return {"success": False, "error": f"الأمر '{base_cmd}' مش موجود على النظام"}
             except Exception as e:
@@ -176,18 +187,25 @@ class ShellToolsMixin:
             if blocked:
                 return {"success": False, "error": f"نمط غير آمن: {blocked}"}
 
-            # تنفيذ في subprocess مع restricted globals
+            # [PHASE2] تنفيذ في subprocess مع restricted globals + async
             try:
                 sandboxed_code = _build_sandbox_code(code)
-                r = subprocess.run(
-                    ["python3", "-c", sandboxed_code],
-                    capture_output=True, text=True, timeout=30,
+                proc = await asyncio.create_subprocess_exec(
+                    "python3", "-c", sandboxed_code,
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE,
                     env={"PATH": "/usr/bin:/bin"},
                 )
-                output = r.stdout.strip() + ("\n" + r.stderr.strip() if r.stderr.strip() else "")
-                logger.info(f"python_exec (sandboxed): exit={r.returncode}")
-                return {"success": r.returncode == 0, "output": output, "exit_code": r.returncode}
-            except subprocess.TimeoutExpired:
-                return {"success": False, "error": "الكود تجاوز الـ 30 ثانية"}
+                try:
+                    stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=30)
+                except asyncio.TimeoutError:
+                    proc.kill()
+                    await proc.wait()
+                    return {"success": False, "error": "الكود تجاوز الـ 30 ثانية"}
+                output = stdout.decode("utf-8", errors="replace").strip()
+                err = stderr.decode("utf-8", errors="replace").strip()
+                full_output = output + ("\n" + err if err else "")
+                logger.info(f"python_exec (sandboxed): exit={proc.returncode}")
+                return {"success": proc.returncode == 0, "output": full_output, "exit_code": proc.returncode}
             except Exception as e:
                 return {"success": False, "error": str(e)}

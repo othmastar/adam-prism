@@ -14,7 +14,7 @@ Adam Prism — Tool Manager — HARDENED v2
 
 import logging
 import os
-import subprocess
+import asyncio
 from typing import Any
 
 from adam.core.permissions import classify_tool, get_risk_level
@@ -192,9 +192,17 @@ class ToolManager:
                 return {"success": True, "data": entries}
             elif at == "disk_space":
                 _df_path = os.environ.get("ADAM_WORKSPACE", os.path.expanduser("~"))
-                r = subprocess.run(["df", "-h", _df_path],
-                                  capture_output=True, text=True, timeout=5)
-                return {"success": True, "data": r.stdout}
+                # [PHASE2] async subprocess instead of blocking subprocess.run
+                try:
+                    proc = await asyncio.create_subprocess_exec(
+                        "df", "-h", _df_path,
+                        stdout=asyncio.subprocess.PIPE,
+                        stderr=asyncio.subprocess.PIPE,
+                    )
+                    stdout, _ = await asyncio.wait_for(proc.communicate(), timeout=5)
+                    return {"success": True, "data": stdout.decode("utf-8", errors="replace")}
+                except (asyncio.TimeoutError, Exception) as e:
+                    return {"success": False, "error": str(e)}
             return {"success": False, "error": f"File action unknown: {at}"}
         except Exception as e:
             logger.exception("file action error: {at} —")

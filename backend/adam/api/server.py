@@ -126,6 +126,15 @@ class AddMCPServerRequest(BaseModel):
     args: list[str] = []
     env: dict | None = None
 
+class SyncMessageItem(BaseModel):
+    role: str
+    content: str
+    mode: str | None = None
+    metadata: dict | None = None
+
+class SyncSessionRequest(BaseModel):
+    messages: list[SyncMessageItem]
+
 class ChatResponse(BaseModel):
     response: str
     mode: str = "communicator"
@@ -174,11 +183,42 @@ def _lora_url(engine):
         return engine.config.get("lora_server_url", "http://localhost:8080")
     return os.environ.get("LORA_URL", "http://localhost:8080")
 
+# [PHASE2] Qdrant client connection pool
+# QdrantClient is thread-safe and maintains its own HTTP connection pool
+# so a single instance per process is sufficient
+_qdrant_client_singleton: dict[str, "QdrantClient"] = {}
+
 def _qdrant_client(engine):
+    """[PHASE2] Returns a cached QdrantClient (one per Qdrant URL).
+    The Qdrant SDK already maintains an internal HTTP connection pool,
+    so this avoids creating a new client (and new connection pool) per request.
+    """
     from urllib.parse import urlparse
-    pu = urlparse(_qdrant_url(engine))
+    url = _qdrant_url(engine)
+    if url in _qdrant_client_singleton:
+        return _qdrant_client_singleton[url]
+    pu = urlparse(url)
     from qdrant_client import QdrantClient
-    return QdrantClient(host=pu.hostname or "localhost", port=pu.port or 6333)
+    # [PHASE2] Use longer timeouts and HTTP/2 if available
+    client = QdrantClient(
+        host=pu.hostname or "localhost",
+        port=pu.port or 6333,
+        timeout=30.0,
+        # Prefer HTTP/2 for connection multiplexing
+        prefer_grpc=False,
+    )
+    _qdrant_client_singleton[url] = client
+    return client
+
+
+async def _close_qdrant_clients() -> None:
+    """[PHASE2] Cleanup function for graceful shutdown"""
+    for client in _qdrant_client_singleton.values():
+        try:
+            client.close()
+        except Exception:
+            pass
+    _qdrant_client_singleton.clear()
 
 
 # ═══════════════════════════════════════════════════════
@@ -319,7 +359,8 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
         )
 
     # المسارات العامة — فقط الصفحة الرئيسية والوثائق
-    _public_paths = {"/", "/api/status", "/docs", "/openapi.json", "/redoc"}
+    # [PHASE2] /metrics added for Prometheus scraping (no auth required)
+    _public_paths = {"/", "/api/status", "/docs", "/openapi.json", "/redoc", "/metrics"}
 
     # [NEW] الحد الأقصى لحجم طلب API
     _max_request_size = int(os.environ.get("ADAM_MAX_REQUEST_SIZE", str(10 * 1024 * 1024)))  # 10MB default
@@ -612,7 +653,7 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
         return msg
 
     @app.post("/api/chat/sessions/{session_id}/sync")
-    async def sync_session(session_id: str, messages: list[dict]):
+    async def sync_session(session_id: str, req: SyncSessionRequest):
         """مزامنة كل رسائل جلسة دفعة واحدة (يحل محل القديم)"""
         session = chat_store.get_session(session_id)
         if not session:
@@ -620,13 +661,13 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
         # حذف القديم وإعادة الإدراج
         with sqlite3.connect(str(chat_store.db_path)) as conn:
             conn.execute("DELETE FROM messages WHERE session_id = ?", (session_id,))
-        for msg in messages:
+        for msg in req.messages:
             chat_store.add_message(
                 session_id,
-                msg.get("role", "user"),
-                msg.get("content", ""),
-                msg.get("mode"),
-                msg.get("metadata"),
+                msg.role,
+                msg.content,
+                msg.mode,
+                msg.metadata,
             )
         saved = chat_store.list_messages(session_id)
         return {"messages": saved, "count": len(saved)}
@@ -1343,6 +1384,11 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
 
     # ─── WebSocket ──────────────────────────────────────
     # [FIX] WebSocket authentication — التحقق من token
+    # [PHASE2] Added heartbeat to detect dead connections
+    # [PHASE2] Added message size limit at protocol level
+    _ws_max_message_size = int(os.environ.get("ADAM_WS_MAX_MSG_SIZE", str(64 * 1024)))  # 64KB
+    _ws_heartbeat_interval = int(os.environ.get("ADAM_WS_HEARTBEAT_SEC", "30"))
+
     @app.websocket("/ws/chat")
     async def websocket_chat(websocket: WebSocket):
         # [FIX] التحقق من المصادقة عبر query parameter
@@ -1355,13 +1401,35 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
         await websocket.accept()
         logger.info("WebSocket connected (authenticated)")
 
+        # [PHASE2] Heartbeat task to detect dead connections
+        async def heartbeat():
+            try:
+                while True:
+                    await asyncio.sleep(_ws_heartbeat_interval)
+                    await websocket.send_json({"type": "ping"})
+            except (WebSocketDisconnect, Exception):
+                pass
+
+        heartbeat_task = asyncio.create_task(heartbeat())
+
         try:
             while True:
                 data = await websocket.receive_text()
+                # [PHASE2] Check message size at protocol level
+                if len(data.encode("utf-8")) > _ws_max_message_size:
+                    await websocket.send_json({
+                        "error": f"Message too large (max: {_ws_max_message_size // 1024}KB)"
+                    })
+                    continue
+
                 try:
                     msg = json.loads(data)
                 except json.JSONDecodeError:
                     await websocket.send_json({"error": "Invalid JSON"})
+                    continue
+
+                # [PHASE2] Handle pong response
+                if msg.get("type") == "pong":
                     continue
 
                 if not engine:
@@ -1388,6 +1456,11 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
             logger.exception("WebSocket error:")
             with contextlib.suppress(Exception):
                 await websocket.close(code=1011, reason=str(e))
+        finally:
+            # [PHASE2] Cleanup heartbeat task
+            heartbeat_task.cancel()
+            with contextlib.suppress(Exception):
+                await heartbeat_task
 
     # ─── Voice Pipeline ─────────────────────────────────
     _voice_pipeline: VoicePipeline | None = None
@@ -1459,12 +1532,12 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
         if channel_manager:
             with contextlib.suppress(Exception):
                 await channel_manager.shutdown()
+        # [PHASE2] Cleanup Qdrant client pool
+        await _close_qdrant_clients()
         logger.info("Adam Prism API stopped")
 
     # [PHASE1-SECURITY] Prometheus /metrics endpoint
-    # [FIX H6] Excluded from auth check via _public_paths
-    _public_paths.add("/metrics")
-
+    # [FIX H6] Already excluded from auth check via _public_paths
     @app.get("/metrics", include_in_schema=False)
     async def metrics():
         """Prometheus metrics endpoint"""
