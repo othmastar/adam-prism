@@ -1,0 +1,28 @@
+# ═══════════════════════════════════════════
+# Dockerfile - Adam Prism Nginx
+# مع entrypoint ديناميكي لـ HTTPS
+# ═══════════════════════════════════════════
+
+FROM nginx:alpine
+
+LABEL org.opencontainers.image.title="Adam Prism Nginx"
+LABEL org.opencontainers.image.description="Reverse Proxy مع دعم HTTPS ديناميكي"
+LABEL org.opencontainers.image.version="2.0.0"
+
+# Copy nginx config
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Copy entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# Copy SSL generation script (for manual use)
+COPY generate_ssl.sh /generate_ssl.sh
+RUN chmod +x /generate_ssl.sh
+
+# Create SSL directory
+RUN mkdir -p /etc/nginx/ssl
+
+EXPOSE 80 443
+
+ENTRYPOINT ["/entrypoint.sh"]

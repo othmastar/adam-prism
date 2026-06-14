@@ -167,14 +167,15 @@ services:
 
   # ─── 6. Nginx Reverse Proxy ─────────────────────────
   nginx:
-    image: nginx:alpine
+    build:
+      context: ../
+      dockerfile: deploy/Dockerfile.nginx
     container_name: adam-nginx
     restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./ssl:/etc/nginx/ssl:ro  # [M14] TLS certificates
       - nginx_logs:/var/log/nginx
     depends_on:

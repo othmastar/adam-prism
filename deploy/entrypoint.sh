@@ -1,30 +1,38 @@
-# ═══════════════════════════════════════════
-# Nginx Config - Adam Prism
-# Reverse proxy للـ API والـ Web UI
-# [M13-M14] Added rate limiting + TLS configuration
-# ═══════════════════════════════════════════
+#!/bin/bash
+# Nginx entrypoint - dynamically configure HTTPS if SSL certs exist
 
-upstream api_upstream {
-    server api:8000;
-}
+set -e
 
-upstream web_upstream {
-    server web:3000;
-}
+SSL_DIR="/etc/nginx/ssl"
+CERT_FILE="$SSL_DIR/adam-prism.crt"
+KEY_FILE="$SSL_DIR/adam-prism.key"
+NGINX_CONF="/etc/nginx/nginx.conf"
+NGINX_CONF_HTTPS="/etc/nginx/nginx-https.conf"
 
-# [M13] Rate limiting zone — 30 requests per second per IP
-limit_req_zone $binary_remote_addr zone=adam_api:10m rate=30r/s;
-limit_req_zone $binary_remote_addr zone=adam_ws:10m rate=10r/s;
+# If SSL certs exist, generate HTTPS config and include it
+if [ -f "$CERT_FILE" ] && [ -f "$KEY_FILE" ]; then
+    echo "SSL certificates found - enabling HTTPS"
 
-# ─── HTTP server (development) ────────────────
+    cat > "$NGINX_CONF_HTTPS" << 'EOF'
+# ─── HTTPS server (production) ─────────────────────────────
 server {
-    listen 80;
+    listen 443 ssl;
     server_name _;
+
+    # [M14] TLS configuration
+    ssl_certificate     /etc/nginx/ssl/adam-prism.crt;
+    ssl_certificate_key /etc/nginx/ssl/adam-prism.key;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+    ssl_ciphers         ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384;
+    ssl_prefer_server_ciphers on;
+    ssl_session_cache   shared:SSL:10m;
+    ssl_session_timeout 10m;
 
     # Security headers
     add_header X-Frame-Options "SAMEORIGIN" always;
     add_header X-Content-Type-Options "nosniff" always;
     add_header X-XSS-Protection "1; mode=block" always;
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
 
     # Gzip
     gzip on;
@@ -104,7 +112,14 @@ server {
     access_log /var/log/nginx/adam-prism-access.log;
     error_log /var/log/nginx/adam-prism-error.log;
 }
+EOF
 
-# ─── HTTPS server (production - only if SSL certs exist) ─────────────────────────────
-# This server block is included conditionally via entrypoint script
-# See deploy/entrypoint.sh for dynamic inclusion
+    # Include HTTPS config in main nginx.conf
+    echo "include $NGINX_CONF_HTTPS;" >> "$NGINX_CONF"
+else
+    echo "SSL certificates not found - running HTTP only (development mode)"
+    echo "To enable HTTPS, run: ./deploy/generate_ssl.sh"
+fi
+
+# Start nginx
+exec nginx -g "daemon off;"

@@ -25,19 +25,17 @@ RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir psutil
 
 # ── التطبيق ────────────────────────────────
+# نسخ حزمة adam فقط (تحتوي على كل الموديولات المعاد هيكلتها)
 COPY backend/adam/ ./adam/
-COPY core/ ./core/
-COPY api/ ./api/
-COPY memory/ ./memory/
-COPY ethics/ ./ethics/
-COPY security/ ./security/
-COPY notebook/ ./notebook/
-COPY pipeline/ ./pipeline/
-COPY config/ ./config/
-COPY deploy/ ./deploy/
+
+# نسخ ملفات الجذر المطلوبة
 COPY main.py .
 COPY run_api.py .
+COPY config/ ./config/
+COPY data/ ./data/
+COPY deploy/ ./deploy/
 
+# إنشاء المجلدات المطلوبة
 RUN mkdir -p /app/data /app/logs /app/data/notebook/daily \
     /app/data/notebook/connections /app/data/notebook/pending \
     /app/data/notebook/summaries

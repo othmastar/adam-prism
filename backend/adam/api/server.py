@@ -236,11 +236,19 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
     if not _admin_key:
         logger.warning("ADAM_ADMIN_KEY not set — MCP admin operations disabled!")
 
-    # [NEW] Rate limiter
-    _rate_limiter = RateLimiter(
-        max_requests=int(os.environ.get("ADAM_RATE_LIMIT", "60")),
-        window_seconds=60
-    )
+    # [NEW] Rate limiter — supports "max_requests/window_seconds" format (e.g., "60/60")
+    _rate_limit_env = os.environ.get("ADAM_RATE_LIMIT", "60/60")
+    if "/" in _rate_limit_env:
+        _max_req, _window = _rate_limit_env.split("/", 1)
+        _rate_limiter = RateLimiter(
+            max_requests=int(_max_req),
+            window_seconds=int(_window)
+        )
+    else:
+        _rate_limiter = RateLimiter(
+            max_requests=int(_rate_limit_env),
+            window_seconds=60
+        )
 
     # المسارات العامة — فقط الصفحة الرئيسية والوثائق
     _public_paths = {"/", "/api/status", "/docs", "/openapi.json", "/redoc"}
