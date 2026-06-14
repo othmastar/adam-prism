@@ -75,7 +75,7 @@ jobs:
         # --no-header for cleaner output
         run: |
           set -o pipefail
-          python -m pytest tests/ -v \
+          python -m pytest tests/ backend/tests/ -v \
             -k "not slow and not ollama and not integration" \
             --tb=short \
             --no-header \

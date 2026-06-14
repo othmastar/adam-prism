@@ -20,12 +20,13 @@
 
 <p>
   <img src="https://img.shields.io/badge/python-3.10+-3776AB?logo=python&logoColor=white" alt="Python">
-  <img src="https://img.shields.io/badge/tests-321_passed-brightgreen" alt="Tests">
+  <img src="https://img.shields.io/badge/tests-336_passed-brightgreen" alt="Tests">
   <img src="https://img.shields.io/badge/routes-93-blue" alt="Routes">
-  <img src="https://img.shields.io/badge/commits-95-orange" alt="Commits">
-  <img src="https://img.shields.io/badge/code-78k%2B_lines-blueviolet" alt="Code">
+  <img src="https://img.shields.io/badge/commits-97-orange" alt="Commits">
+  <img src="https://img.shields.io/badge/code-72k%2B_lines-blueviolet" alt="Code">
   <img src="https://img.shields.io/badge/docker-ready-2496ED?logo=docker&logoColor=white" alt="Docker">
   <img src="https://img.shields.io/badge/SBOM-CycloneDX-success" alt="SBOM">
+  <img src="https://img.shields.io/badge/i18n-ar%2Ben-blueviolet" alt="i18n">
   <img src="https://img.shields.io/badge/license-Apache_2.0-blue" alt="License">
 </p>
 
@@ -41,7 +42,7 @@
 |---|---|---|
 | **Python modules** | 128 files / 23,112 lines | `adam/` package, 14 subsystems |
 | **TypeScript/TSX** | 166 files / 23,626 lines | Next.js 16 web UI, Expo 52 mobile, Electron desktop |
-| **Tests** | 321 passed / 7 skipped | pytest, Playwright, Locust load tests |
+| **Tests** | 336 passed / 7 skipped | pytest, Playwright, Locust load tests |
 | **API routes** | 93 | REST + WebSocket + SSE |
 | **Tools** | 19 | Browser, shell, search, memory, voice, webhooks, WAF… |
 | **Channels** | 4 | Web, Telegram, WhatsApp, Voice |
@@ -107,12 +108,39 @@
 - **Skills system** — 5 builtin skills, JSON frontmatter
 
 ### 🧪 Testing & Quality
-- **321 pytest tests** — unit, integration, E2E, broken marker
+- **336 pytest tests** — unit, integration, E2E, broken marker
 - **Playwright** — web UI across browsers
 - **Trivy** — security scanner
 - **CycloneDX** — SBOM generation
 - **ruff** — zero errors
 - **GitHub Actions** — matrix (Python 3.10/3.11/3.12) × (Ubuntu/macOS/Windows)
+- **Load tests** — Locust for chat + admin traffic
+
+### 🌍 Operations & Tooling
+- **One-command install** — `bin/install.sh` (Linux/macOS/WSL, Docker auto-install)
+- **30-second quickstart** — `examples/quickstart.sh`
+- **Backup & restore CLI** — `python -m adam.cli.backup {create,restore,list,verify}` with SHA-256 manifests
+- **SSE rate limiter** — per-IP concurrency cap, token/sec budget, idle timeout
+- **Disaster recovery runbook** — `docs/DISASTER_RECOVERY.md` with RTO/RPO targets
+- **Admin dashboard** — `/admin/dashboard` (WAF, webhooks, AI observability, health)
+- **i18n** — Arabic (primary) + English, locale-aware messages (`adam.i18n.t()`)
+- **6 ADRs** — `docs/adr/` (FastAPI, Qdrant, Ollama, multi-tenant, Apache 2.0, HMAC webhooks)
+- **GitHub templates** — bug, feature request, security report, PR template
+- **CODEOWNERS** — auto-assign reviewers per subsystem
+
+### 📊 Repository Stats
+| Metric | Count |
+|---|---:|
+| **Python files** | 181 (32,113 lines) |
+| **TypeScript/TSX** | 167 (23,839 lines) |
+| **YAML configs** | 28 (1,996 lines) |
+| **Documentation** | 111 markdown files (14,401 lines) |
+| **Total lines** | **72,349** |
+| **API routes** | 93 |
+| **Test cases** | 336 passing |
+| **Git commits** | 97 |
+| **Subsystems** | 22 packages |
+| **CLI tools** | backup, install, quickstart, adam-doctor |
 
 ---
 
@@ -139,10 +167,26 @@ LangGraph is great. CrewAI is fast. AutoGen is flexible. **But they all leave yo
 
 ## ⚡ 30 Seconds and It's Running
 
+### Option 1: One-command install (Linux / macOS / WSL)
+```bash
+curl -fsSL https://raw.githubusercontent.com/othmastar/adam-prism/main/bin/install.sh | bash
+```
+This single command installs Docker if missing, clones the repo, generates secrets,
+builds images, starts the stack, and prints connection info. **Zero prompts.**
+
+### Option 2: Quickstart (if you already have the repo)
+```bash
+git clone https://github.com/othmastar/adam-prism.git
+cd adam-prism && bash examples/quickstart.sh
+```
+Starts Ollama + Qdrant + API + Web UI in ~60 seconds.
+
+### Option 3: pip install + run
 ```bash
 pip install adam-prism && adam-prism          # Start immediately
 ```
 
+### Option 4: From source
 ```bash
 git clone https://github.com/othmastar/adam-prism.git
 cd adam-prism && pip install -e .
