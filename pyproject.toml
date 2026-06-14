@@ -7,7 +7,7 @@ name = "adam-prism"
 version = "1.0.0b1"
 description = "Egyptian Arabic conscious AI framework — personal digital twin with ethics, memory, and tools"
 readme = "README.md"
-license = {text = "Apache-2.0"}
+license = {text = "AGPL-3.0-or-later"}
 authors = [
     {name = "Mohamed Othman", email = "othmastar@gmail.com"},
 ]
@@ -17,7 +17,7 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: End Users/Desktop",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: Apache Software License",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
     "Natural Language :: Arabic",
     "Natural Language :: English",
     "Programming Language :: Python :: 3 :: Only",

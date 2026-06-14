@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - 2026-XX-XX
 
+### ⚖️ License Change: AGPL v3 (dual-license model)
+
+Adam Prism is now released under **AGPL v3** (was Apache 2.0) with a
+**dual-license** commercial offering. See `LICENSE`, `COMMERCIAL_LICENSE.md`,
+and `RIGHTS.md` for the full terms.
+
+- **AGPL v3**: Free for personal, educational, research, and internal
+  commercial use. If you serve Adam Prism as a SaaS to external users,
+  you must either publish your source code (Section 13) or purchase a
+  commercial license.
+- **Commercial**: 3 tiers ($2,400 / $12,000 / $60,000 per year) for
+  SaaS, embedded, and enterprise deployments that need source-code
+  privacy and IP indemnification.
+
+Why AGPL v3? To prevent big companies from forking Adam Prism and
+hosting it as a paid SaaS without contributing back. Individual
+developers and internal use are completely unaffected.
+
 ### 🎉 First Public Beta Release
 
 This is the first community-ready release of Adam Prism. Three major hardening phases

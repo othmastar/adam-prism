@@ -1,9 +1,10 @@
 <div align="center">
 
-> **📢 This is the SHOWCASE branch.** It contains ~25-30% of the full Adam Prism
-> deployment (code only, no training data, no model weights, no tenant configs).
+> **📢 SHOWCASE branch + AGPL v3 dual-license.**
+> This branch contains the public, code-only version (~25% of the full deploy).
+> Free for personal / educational / internal use under AGPL v3.
+> Commercial SaaS requires a [commercial license](COMMERCIAL_LICENSE.md).
 > See [`SHOWCASE.md`](SHOWCASE.md) for what was removed and why.
-> For the full version, contact othman@adam-prism.local.
 
 # You're here because you're tired.
 
@@ -19,7 +20,8 @@
 
 <p>
   <img src="https://img.shields.io/badge/Free-Forever-10b981?style=for-the-badge" alt="Free Forever">
-  <img src="https://img.shields.io/badge/Open_Source-Apache_2.0-blue?style=for-the-badge" alt="Apache 2.0">
+  <img src="https://img.shields.io/badge/Open_Source-AGPL_v3-blue?style=for-the-badge" alt="AGPL v3">
+  <img src="https://img.shields.io/badge/Commercial-Dual_License-orange?style=for-the-badge" alt="Commercial">
   <img src="https://img.shields.io/badge/Runs_Locally-100%25-10b981?style=for-the-badge" alt="100% Local">
 </p>
 
@@ -32,7 +34,8 @@
   <img src="https://img.shields.io/badge/docker-ready-2496ED?logo=docker&logoColor=white" alt="Docker">
   <img src="https://img.shields.io/badge/SBOM-CycloneDX-success" alt="SBOM">
   <img src="https://img.shields.io/badge/i18n-ar%2Ben-blueviolet" alt="i18n">
-  <img src="https://img.shields.io/badge/license-Apache_2.0-blue" alt="License">
+  <img src="https://img.shields.io/badge/license-AGPL_v3-blue" alt="License">
+  <img src="https://img.shields.io/badge/Commercial-Dual_License-orange" alt="Commercial">
 </p>
 
 </div>
@@ -129,7 +132,7 @@
 - **Disaster recovery runbook** — `docs/DISASTER_RECOVERY.md` with RTO/RPO targets
 - **Admin dashboard** — `/admin/dashboard` (WAF, webhooks, AI observability, health)
 - **i18n** — Arabic (primary) + English, locale-aware messages (`adam.i18n.t()`)
-- **6 ADRs** — `docs/adr/` (FastAPI, Qdrant, Ollama, multi-tenant, Apache 2.0, HMAC webhooks)
+- **6 ADRs** — `docs/adr/` (FastAPI, Qdrant, Ollama, multi-tenant, AGPL v3, HMAC webhooks)
 - **GitHub templates** — bug, feature request, security report, PR template
 - **CODEOWNERS** — auto-assign reviewers per subsystem
 
@@ -327,7 +330,7 @@ WhatsApp, Telegram, Discord, Slack, Email, SMS, Signal, Matrix, Mattermost, Team
 | **Customizability** | 12 independent layers | Rigid graph | Limited roles | Black box |
 | **Voice** | ASR + TTS built-in | ❌ | ❌ | ❌ |
 | **100% Local** | ✅ | Partial | Partial | ❌ |
-| **Open Source** | Apache 2.0 | MIT | MIT | Closed |
+| **Open Source** | AGPL v3 (dual-license) | MIT | MIT | Closed |
 | **Apps** | Flutter + Electron + Web UI + VS Code | ❌ | ❌ | ❌ |
 
 ### vs Modern Open-Source Agents
@@ -341,7 +344,7 @@ WhatsApp, Telegram, Discord, Slack, Email, SMS, Signal, Matrix, Mattermost, Team
 | **Learning Loop** | Closed Loop: nudge + skill create + improve | Closed Loop: nudge + skill create + improve | Dreaming (background consolidation) |
 | **Voice** | ASR + TTS built-in | CLI + TG + Discord VC | macOS/iOS wake + TTS |
 | **100% Local** | ✅ | ✅ | ✅ |
-| **Open Source** | Apache 2.0 | MIT | MIT |
+| **Open Source** | AGPL v3 (dual-license) | MIT | MIT |
 | **Apps** | Flutter + Electron + Web UI + VS Code | TUI only | macOS/Windows Hub + iOS/Android nodes |
 
 > 📊 **Detailed comparison** (capability matrix, benchmarks, code size, migration guides):
@@ -414,6 +417,65 @@ I executed 6 projects before Adam:
 **Every project I designed and executed taught me something Adam needed. Not separate projects. Siblings.**
 
 If I could go back 7 months? **I wouldn't change a thing.** Because the journey was the lesson.
+
+---
+
+## 📜 Licensing — Free for You, Powerful for Business
+
+Adam Prism is **dual-licensed** to give you maximum freedom while protecting
+your rights as a developer:
+
+### 🆓 Free — AGPL v3 (for individuals, open-source, internal use)
+
+✅ **You may:**
+- Use it for any purpose (personal, education, research, internal)
+- Modify the source code
+- Distribute your modifications
+- Use it internally at a Fortune 500 company
+- Fork it, study it, learn from it
+
+❌ **You must** (only if you serve it as a SaaS to external users):
+- Publish the source code to your users
+- OR purchase a commercial license
+
+**Cost: $0**
+
+### 💼 Commercial — Dual license (for SaaS, products, enterprise)
+
+If you want to serve Adam Prism as a SaaS or embed it in a commercial
+product **without** publishing your modifications, you need a commercial
+license. Three tiers:
+
+| Tier | MAU | Annual Revenue | Price | Includes |
+|---|---:|---:|---:|---|
+| **Startup** | ≤ 100 | ≤ $5M | **$2,400/yr** | Source privacy + email support |
+| **Growth** | ≤ 10k | ≤ $50M | **$12,000/yr** | + Phone/Slack + 4hr SLA |
+| **Enterprise** | unlimited | unlimited | **$60,000/yr** | + 24/7 + 1hr SLA + training data + LoRA weights |
+
+📄 **Full terms:** [`COMMERCIAL_LICENSE.md`](COMMERCIAL_LICENSE.md)
+📋 **Your rights:** [`RIGHTS.md`](RIGHTS.md)
+™️ **Trademarks:** [`TRADEMARKS.md`](TRADEMARKS.md)
+⚖️ **License text:** [`LICENSE`](LICENSE) (AGPL v3 official)
+
+### Why dual-license?
+
+You get a **truly free** open-source product for personal/internal use,
+but companies that monetize Adam Prism as a service **pay for the privilege**
+— and that revenue funds continued development.
+
+### Why AGPL v3 (and not MIT/Apache)?
+
+Because the maintainer wants to prevent big companies from forking
+Adam Prism, hosting it as a SaaS, and contributing nothing back.
+AGPL v3's "network use is distribution" clause forces them to either
+publish their code or pay for a commercial license. **You** (the
+individual developer) get the same freedoms either way.
+
+### What about trademarks?
+
+"Adam Prism" and the logo are trademarks. You can refer to Adam Prism
+in docs, blog posts, and news, but you can't call your fork "Adam
+Prism Pro" without permission. See [`TRADEMARKS.md`](TRADEMARKS.md).
 
 ---
 

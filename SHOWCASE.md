@@ -31,11 +31,11 @@ The **full version** (private branch `main`) additionally includes:
 
 | Metric | Full | Showcase | % Kept |
 |---|---:|---:|---:|
-| **Files tracked in git** | 802 | ~290 | 36% |
+| **Files tracked in git** | 802 | 710 | 88% |
 | **Python code (backend/adam)** | 23,686 lines | ~14,500 | 61% |
 | **TypeScript/TSX** | 23,839 lines | ~22,000 | 92% |
-| **Tests** | 336 | 336 | **100%** |
-| **API routes** | 93 | 78 | 84% |
+| **Tests** | 336 | 224 | 67% |
+| **API routes** | 93 | 91 | 98% |
 | **Total data files** | ~60 MB | 0 KB | 0% |
 | **Documentation** | 14,401 lines | ~9,000 | 62% |
 
@@ -54,17 +54,27 @@ The **full version** (private branch `main`) additionally includes:
 
 ## What you CANNOT do with this version
 
-❌ Use the pre-trained LoRA weights (download separately)
-❌ Use the curated 2,317-conversation dataset (license-restricted)
+❌ Use the pre-trained LoRA weights (download separately, commercial license)
+❌ Use the curated 2,317-conversation dataset (commercial license)
 ❌ Reproduce exact behavior of the full version (fine-tuning matters)
+
+## License
+
+This showcase version is licensed under **AGPL v3** (see `LICENSE`).
+You may use it freely for personal, educational, research, and internal
+commercial use.
+
+If you want to serve Adam Prism as a SaaS to external users without
+publishing your modifications, you need a commercial license. See
+`COMMERCIAL_LICENSE.md` for tiers and pricing.
 
 ## Getting the full version
 
-The full version is available under a separate commercial agreement.
+The full version is available under a **commercial license**.
 It includes:
 
-- 1.1 GB of LoRA weights (Apache 2.0 with commercial restrictions)
-- The full conversation dataset (research license)
+- 1.1 GB of LoRA weights (commercial-only, not AGPL)
+- The full conversation dataset (commercial-only, not AGPL)
 - Direct support from Mohamed Othman
 - Custom domain fine-tuning (healthcare, legal, finance, etc.)
 - On-premise deployment + training pipeline
