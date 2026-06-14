@@ -1,0 +1,30 @@
+# [PHASE7] CODEOWNERS — auto-assign reviewers
+# Each line is a file pattern followed by one or more owners.
+
+# Default owners for everything
+*                               @othmastar
+
+# Core engine & security
+/backend/adam/engine.py         @othmastar
+/backend/adam/security/         @othmastar
+/backend/adam/ethics/           @othmastar
+/backend/adam/api/              @othmastar
+
+# ML / AI
+/backend/adam/predictive/       @othmastar
+/backend/adam/learning/         @othmastar
+/backend/adam/observability/    @othmastar
+
+# Channels (potentially sensitive)
+/backend/adam/channels/         @othmastar
+/backend/adam/auth/             @othmastar
+
+# Frontend
+/frontend/                      @othmastar
+
+# Infrastructure
+/deploy/                        @othmastar
+/.github/                       @othmastar
+
+# CI/CD
+/.github/workflows/             @othmastar
