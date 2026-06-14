@@ -77,24 +77,71 @@ export function TerminalPanel() {
     }
   }, [output])
 
-  // Simple ANSI to HTML
-  const renderLine = (line: string) => {
-    return line
-      .replace(/\x1b\[32m/g, '<span class="text-accent">')
-      .replace(/\x1b\[36m/g, '<span class="text-info">')
-      .replace(/\x1b\[33m/g, '<span class="text-warning">')
-      .replace(/\x1b\[31m/g, '<span class="text-danger">')
-      .replace(/\x1b\[90m/g, '<span class="text-dark-400">')
-      .replace(/\x1b\[0m/g, '</span>')
+  // [PHASE1-SECURITY] XSS-safe ANSI to React rendering
+  // Parse ANSI codes into segments with class names instead of raw HTML
+  // This prevents XSS attacks from malicious terminal output
+  type AnsiSegment = { text: string; className: string }
+
+  const ansiToClass = (code: string): string => {
+    const map: Record<string, string> = {
+      '32': 'text-accent',
+      '36': 'text-info',
+      '33': 'text-warning',
+      '31': 'text-danger',
+      '90': 'text-dark-400'
+    }
+    return map[code] || ''
+  }
+
+  const renderLine = (line: string): AnsiSegment[] => {
+    const segments: AnsiSegment[] = []
+    // Match ANSI escape sequences: \x1b[<code>m
+    const ansiRegex = /\x1b\[(\d+)m/g
+    let lastIndex = 0
+    let currentClass = ''
+    let match: RegExpExecArray | null
+
+    while ((match = ansiRegex.exec(line)) !== null) {
+      // Add text before this escape sequence
+      if (match.index > lastIndex) {
+        segments.push({
+          text: line.slice(lastIndex, match.index),
+          className: currentClass
+        })
+      }
+      // 0 = reset, otherwise look up class
+      const code = match[1]
+      currentClass = code === '0' ? '' : ansiToClass(code)
+      lastIndex = ansiRegex.lastIndex
+    }
+    // Add remaining text
+    if (lastIndex < line.length) {
+      segments.push({
+        text: line.slice(lastIndex),
+        className: currentClass
+      })
+    }
+    // If no segments were created, return a single segment
+    if (segments.length === 0) {
+      segments.push({ text: line, className: '' })
+    }
+    return segments
   }
 
   return (
     <div className="flex flex-col h-full bg-[#0d0d14]">
-      {/* Terminal output */}
+      {/* Terminal output - XSS-safe React rendering */}
       <div ref={terminalRef} className="flex-1 overflow-y-auto p-3 font-mono text-xs leading-relaxed">
-        {output.map((line, i) => (
-          <div key={i} dangerouslySetInnerHTML={{ __html: renderLine(line) }} />
-        ))}
+        {output.map((line, i) => {
+          const segments = renderLine(line)
+          return (
+            <div key={i}>
+              {segments.map((seg, j) => (
+                <span key={j} className={seg.className}>{seg.text}</span>
+              ))}
+            </div>
+          )
+        })}
       </div>
 
       {/* Input */}

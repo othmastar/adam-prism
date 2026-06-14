@@ -58,6 +58,74 @@ class ToolRecord(BaseModel):
     success: bool = False
     error: str | None = None
 
+# [PHASE1-SECURITY] Pydantic models for routes that previously accepted raw dict
+class AddKnowledgeRequest(BaseModel):
+    texts: list[str]
+    collection: str = "knowledge"
+    metadata: dict = {}
+
+class UpdateNotebookProfileRequest(BaseModel):
+    name: str | None = None
+    preferences: dict | None = None
+    background: str | None = None
+    goals: list[str] | None = None
+
+class StoreMemoryRequest(BaseModel):
+    content: str
+    tags: str = ""
+
+class SearchMemoryRequest(BaseModel):
+    query: str
+    limit: int = 10
+
+class ReflectMemoryRequest(BaseModel):
+    days: int = 1
+
+class IntervalJobRequest(BaseModel):
+    id: str
+    seconds: int
+    action: str
+    name: str = ""
+    params: dict = {}
+
+class OnceJobRequest(BaseModel):
+    id: str
+    run_at: str
+    action: str
+    name: str = ""
+    params: dict = {}
+
+class LoadPluginRequest(BaseModel):
+    path: str
+
+class SpawnSubagentRequest(BaseModel):
+    name: str = "subagent"
+    config: dict = {}
+
+class SubagentChatRequest(BaseModel):
+    message: str
+
+class OllamaSelectRequest(BaseModel):
+    model: str
+
+class SkillsLoadRequest(BaseModel):
+    path: str
+
+class PermissionsRespondRequest(BaseModel):
+    request_id: str
+    approved: bool
+    reason: str = ""
+
+class PermissionsApproveRequest(BaseModel):
+    approve: bool = False
+    level: str = "once"
+
+class AddMCPServerRequest(BaseModel):
+    name: str
+    command: str
+    args: list[str] = []
+    env: dict | None = None
+
 class ChatResponse(BaseModel):
     response: str
     mode: str = "communicator"
@@ -607,11 +675,10 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
     # ═══════════════════════════════════════
 
     @app.post("/api/knowledge/add")
-    async def add_knowledge(request: Request):
+    async def add_knowledge(req: AddKnowledgeRequest):
         """إضافة معرفة جديدة لـ Qdrant"""
         try:
-            body = await request.json()
-            texts = body.get("texts", [])
+            texts = req.texts
             if not texts:
                 raise HTTPException(status_code=400, detail="texts array مطلوب")
             # [FIX v2] تحديد عدد النصوص المضافة
@@ -621,9 +688,9 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
             for text in texts:
                 if engine and engine.knowledge:
                     ok = await engine.knowledge.store(
-                        collection=body.get("collection", "knowledge"),
+                        collection=req.collection,
                         text=text,
-                        metadata=body.get("metadata", {}),
+                        metadata=req.metadata,
                     )
                     results.append(ok)
             return {"added": sum(1 for r in results if r), "total": len(results)}
@@ -701,7 +768,7 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
     # ═══════════════════════════════════════
 
     @app.post("/api/mcp/add-server")
-    async def add_mcp_server(request: Request):
+    async def add_mcp_server(req: AddMCPServerRequest, request: Request):
         """إضافة خادم MCP — يتطلب مفتاح المسؤول"""
         if not _admin_key:
             raise HTTPException(status_code=403, detail="ADAM_ADMIN_KEY not configured — MCP additions disabled")
@@ -716,17 +783,8 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
             raise HTTPException(status_code=503, detail="مدير الأدوات غير متصل")
 
         try:
-            body = await request.json()
-            name = body.get("name", "")
-            command = body.get("command", "")
-            args = body.get("args", [])
-            env = body.get("env")
-
-            if not name or not command:
-                raise HTTPException(status_code=400, detail="name و command مطلوبين")
-
-            await engine.tools.add_mcp_server(name, command, args, env)
-            return {"status": "ok", "message": f"خادم MCP '{name}' تمت إضافته"}
+            await engine.tools.add_mcp_server(req.name, req.command, req.args, req.env)
+            return {"status": "ok", "message": f"خادم MCP '{req.name}' تمت إضافته"}
         except ValueError as e:
             raise HTTPException(status_code=400, detail=str(e))
         except HTTPException:
@@ -757,13 +815,13 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
             raise HTTPException(status_code=500, detail=str(e))
 
     @app.post("/api/notebook/profile")
-    async def update_notebook_profile(request: Request):
+    async def update_notebook_profile(req: UpdateNotebookProfileRequest):
         """تحديث ملف المستخدم في النوت بوك"""
         if not engine or not engine.notebook:
             raise HTTPException(status_code=503, detail="النوت بوك غير متاح")
         try:
-            body = await request.json()
-            engine.notebook.update_user_profile(body)
+            profile_data = {k: v for k, v in req.model_dump().items() if v is not None}
+            engine.notebook.update_user_profile(profile_data)
             return {"status": "ok"}
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
@@ -842,14 +900,13 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
         return {"status": "unavailable"}
 
     @app.post("/api/memory/store")
-    async def store_memory(request: Request):
+    async def store_memory(req: StoreMemoryRequest):
         """تخزين ذكرى جديد"""
         if not engine:
             raise HTTPException(status_code=503, detail="المحرك غير متصل")
         try:
-            body = await request.json()
-            content = body.get("content", "")
-            tags = body.get("tags", "")
+            content = req.content
+            tags = req.tags
             if not content:
                 raise HTTPException(status_code=400, detail="content مطلوب")
             # [FIX v2] تحديد طول المحتوى
@@ -864,14 +921,13 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
             raise HTTPException(status_code=500, detail=str(e))
 
     @app.post("/api/memory/search")
-    async def search_memory(request: Request):
+    async def search_memory(req: SearchMemoryRequest):
         """البحث في الذاكرة"""
         if not engine:
             raise HTTPException(status_code=503, detail="المحرك غير متصل")
         try:
-            body = await request.json()
-            query = body.get("query", "")
-            limit = body.get("limit", 10)
+            query = req.query
+            limit = req.limit
             if not query:
                 raise HTTPException(status_code=400, detail="query مطلوب")
             from adam.memory import store as memory_store
@@ -883,15 +939,13 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
             raise HTTPException(status_code=500, detail=str(e))
 
     @app.post("/api/memory/reflect")
-    async def reflect_memory(request: Request):
+    async def reflect_memory(req: ReflectMemoryRequest):
         """تأمل في الذكريات"""
         if not engine:
             raise HTTPException(status_code=503, detail="المحرك غير متصل")
         try:
-            body = await request.json()
-            days = body.get("days", 1)
             from adam.memory import store as memory_store
-            return memory_store.reflect(days)
+            return memory_store.reflect(req.days)
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
 
@@ -920,36 +974,28 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
         return {"jobs": engine.scheduler.list_jobs()}
 
     @app.post("/api/scheduler/interval")
-    async def add_interval_job(req: dict):
+    async def add_interval_job(req: IntervalJobRequest):
         if not engine or not engine.scheduler:
             raise HTTPException(status_code=503, detail="Scheduler غير متاح")
-        job_id = req.get("id", "")
-        seconds = req.get("seconds", 0)
-        action = req.get("action", "")
-        name = req.get("name", "")
-        if not job_id or not seconds or not action:
+        if not req.id or not req.seconds or not req.action:
             raise HTTPException(status_code=400, detail="id, seconds, action مطلوبين")
         async def _run():
-            await engine.execute_action({"type": action, **req.get("params", {})})
-        engine.scheduler.add_interval(job_id, seconds, _run, name=name or job_id)
-        return {"status": "ok", "job_id": job_id}
+            await engine.execute_action({"type": req.action, **req.params})
+        engine.scheduler.add_interval(req.id, req.seconds, _run, name=req.name or req.id)
+        return {"status": "ok", "job_id": req.id}
 
     @app.post("/api/scheduler/once")
-    async def add_once_job(req: dict):
+    async def add_once_job(req: OnceJobRequest):
         if not engine or not engine.scheduler:
             raise HTTPException(status_code=503, detail="Scheduler غير متاح")
-        job_id = req.get("id", "")
-        run_at = req.get("run_at", "")
-        action = req.get("action", "")
-        name = req.get("name", "")
-        if not job_id or not run_at or not action:
+        if not req.id or not req.run_at or not req.action:
             raise HTTPException(status_code=400, detail="id, run_at, action مطلوبين")
         from datetime import datetime
-        run_dt = datetime.fromisoformat(run_at)
+        run_dt = datetime.fromisoformat(req.run_at)
         async def _run():
-            await engine.execute_action({"type": action, **req.get("params", {})})
-        engine.scheduler.add_once(job_id, run_dt, _run, name=name or job_id)
-        return {"status": "ok", "job_id": job_id}
+            await engine.execute_action({"type": req.action, **req.params})
+        engine.scheduler.add_once(req.id, run_dt, _run, name=req.name or req.id)
+        return {"status": "ok", "job_id": req.id}
 
     @app.delete("/api/scheduler/jobs/{job_id}")
     async def remove_scheduled_job(job_id: str):
@@ -968,17 +1014,16 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
         return {"plugins": engine.plugins.list_plugins()}
 
     @app.post("/api/plugins/load")
-    async def load_plugin(req: dict):
+    async def load_plugin(req: LoadPluginRequest):
         if not engine or not engine.plugins:
             raise HTTPException(status_code=503, detail="Plugin system غير متاح")
-        path = req.get("path", "")
-        if not path:
+        if not req.path:
             raise HTTPException(status_code=400, detail="path مطلوب")
         # [C4] Validate plugin path before loading
         from adam.plugins.manager import _validate_plugin_path
-        if not _validate_plugin_path(path):
+        if not _validate_plugin_path(req.path):
             raise HTTPException(status_code=403, detail="مسار الإضافة غير مصرح به — يجب أن يكون داخل المجلد المسموح")
-        engine.plugins.load_from_dir(path)
+        engine.plugins.load_from_dir(req.path)
         return {"status": "ok", "plugins": engine.plugins.list_plugins()}
 
     @app.delete("/api/plugins/{plugin_name}")
@@ -998,28 +1043,25 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
         return {"subagents": engine.subagents.list_sessions()}
 
     @app.post("/api/subagents/spawn")
-    async def spawn_subagent(req: dict):
+    async def spawn_subagent(req: SpawnSubagentRequest):
         if not engine or not engine.subagents:
             raise HTTPException(status_code=503, detail="Subagent system غير متاح")
-        name = req.get("name", "subagent")
-        config = req.get("config", {})
         try:
-            session = engine.subagents.spawn(name=name, config=config)
+            session = engine.subagents.spawn(name=req.name, config=req.config)
             return {"status": "spawned", "subagent": session.get_status()}
         except ValueError as e:
             raise HTTPException(status_code=400, detail=str(e))
 
     @app.post("/api/subagents/{subagent_id}/chat")
-    async def chat_subagent(subagent_id: str, req: dict):
+    async def chat_subagent(subagent_id: str, req: SubagentChatRequest):
         if not engine or not engine.subagents:
             raise HTTPException(status_code=503, detail="Subagent system غير متاح")
         session = engine.subagents.get(subagent_id)
         if not session:
             raise HTTPException(status_code=404, detail="Subagent مش موجود")
-        message = req.get("message", "")
-        if not message:
+        if not req.message:
             raise HTTPException(status_code=400, detail="message مطلوب")
-        result = await session.chat(message)
+        result = await session.chat(req.message)
         return result
 
     @app.delete("/api/subagents/{subagent_id}")
@@ -1229,9 +1271,9 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
             return {"models": [], "connected": False}
 
     @app.post("/api/ollama/select")
-    async def ollama_select(req: dict):
+    async def ollama_select(req: OllamaSelectRequest):
         """اختيار نموذج Ollama — مطلوب من الفرونت اند"""
-        model_name = req.get("model", "")
+        model_name = req.model
         if not model_name:
             raise HTTPException(status_code=400, detail="اسم النموذج مطلوب")
         if not engine:
@@ -1258,9 +1300,9 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
         return {"skills": []}
 
     @app.post("/api/skills/load")
-    async def skills_load(req: dict):
+    async def skills_load(req: SkillsLoadRequest):
         """تحميل مهارة — مطلوب من الفرونت اند"""
-        path = req.get("path", "")
+        path = req.path
         if not path:
             raise HTTPException(status_code=400, detail="path مطلوب")
         if not engine or not hasattr(engine, 'skills'):
@@ -1286,17 +1328,15 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
         return {"total_entries": 0, "last_updated": None, "user_profile": False}
 
     @app.post("/api/permissions/respond")
-    async def permissions_respond(req: dict):
+    async def permissions_respond(req: PermissionsApproveRequest):
         """الرد على طلب صلاحية — مطلوب من الفرونت اند"""
-        approve = req.get("approve", False)
-        level = req.get("level", "once")
         if engine and hasattr(engine, 'permissions'):
             try:
-                if approve:
-                    engine.permissions.grant(level=level)
+                if req.approve:
+                    engine.permissions.grant(level=req.level)
                 else:
                     engine.permissions.deny()
-                return {"status": "ok", "approved": approve, "level": level}
+                return {"status": "ok", "approved": req.approve, "level": req.level}
             except Exception as e:
                 return {"status": "error", "message": str(e)}
         return {"status": "no_engine"}
@@ -1420,5 +1460,58 @@ def create_app(engine=None, channel_manager=None) -> FastAPI:
             with contextlib.suppress(Exception):
                 await channel_manager.shutdown()
         logger.info("Adam Prism API stopped")
+
+    # [PHASE1-SECURITY] Prometheus /metrics endpoint
+    # [FIX H6] Excluded from auth check via _public_paths
+    _public_paths.add("/metrics")
+
+    @app.get("/metrics", include_in_schema=False)
+    async def metrics():
+        """Prometheus metrics endpoint"""
+        lines = []
+        lines.append("# HELP adam_up Whether the engine is running (1=yes, 0=no)")
+        lines.append("# TYPE adam_up gauge")
+        lines.append(f"adam_up {1 if engine else 0}")
+
+        if engine:
+            try:
+                lines.append("# HELP adam_cycle_count Total number of chat cycles processed")
+                lines.append("# TYPE adam_cycle_count counter")
+                lines.append(f"adam_cycle_count {engine.cycle_count}")
+
+                # Engine subsystems status
+                lines.append("# HELP adam_subsystems Number of initialized subsystems")
+                lines.append("# TYPE adam_subsystems gauge")
+                subsystems = ["memory", "ethics", "security", "notebook", "knowledge",
+                             "eyes", "tools", "pipeline", "scheduler", "plugins",
+                             "subagents", "trace_recorder", "meta_learner",
+                             "continuous_learner"]
+                active = sum(1 for name in subsystems if getattr(engine, name, None) is not None)
+                lines.append(f"adam_subsystems {active}")
+
+                # Cache stats
+                if hasattr(engine, 'cache') and engine.cache:
+                    try:
+                        stats = engine.cache.stats()
+                        lines.append("# HELP adam_cache_size Current cache size")
+                        lines.append("# TYPE adam_cache_size gauge")
+                        lines.append(f"adam_cache_size {stats.get('size', 0)}")
+                    except Exception:
+                        pass
+
+                # Metrics from MetricsCollector
+                if hasattr(engine, 'metrics') and engine.metrics:
+                    try:
+                        raw = engine.metrics.dump() if hasattr(engine.metrics, 'dump') else {}
+                        for k, v in raw.items():
+                            if isinstance(v, (int, float)):
+                                lines.append(f"adam_{k} {v}")
+                    except Exception:
+                        pass
+            except Exception as e:
+                logger.warning(f"Metrics collection failed: {e}")
+
+        from fastapi.responses import PlainTextResponse
+        return PlainTextResponse(content="\n".join(lines) + "\n", media_type="text/plain; version=0.0.4")
 
     return app
