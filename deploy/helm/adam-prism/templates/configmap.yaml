@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "adam-prism.fullname" . }}-config
+  labels:
+    {{- include "adam-prism.labels" . | nindent 4 }}
+data:
+  ADAM_INFERENCE_MODE: {{ .Values.config.inferenceMode | quote }}
+  ADAM_OLLAMA_BASE: {{ .Values.config.ollamaBase | quote }}
+  ADAM_QDRANT_URL: {{ .Values.config.qdrantUrl | quote }}
+  ADAM_RATE_LIMIT: {{ .Values.config.rateLimit | quote }}
+  ADAM_LOG_LEVEL: {{ .Values.config.logLevel | quote }}
+  ADAM_LOG_JSON: {{ .Values.config.logJson | quote }}
+  ADAM_PRODUCTION: {{ .Values.config.production | quote }}
+  {{- if .Values.database.url }}
+  ADAM_DATABASE_URL: {{ .Values.database.url | quote }}
+  {{- end }}
+  {{- if .Values.redis.url }}
+  ADAM_REDIS_URL: {{ .Values.redis.url | quote }}
+  {{- end }}

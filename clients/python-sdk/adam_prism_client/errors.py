@@ -57,3 +57,18 @@ class ServiceUnavailableError(APIError):
 
     def __init__(self, detail: str = "", response_data: dict | None = None):
         super().__init__(503, detail, response_data)
+
+
+class RateLimitError(APIError):
+    """[PHASE3] Raised when rate limited by the server (HTTP 429)."""
+
+    def __init__(self, detail: str = "", response_data: dict | None = None):
+        super().__init__(429, detail, response_data)
+        self.retry_after = (response_data or {}).get("retry_after", None)
+
+
+class AuthenticationError(APIError):
+    """[PHASE3] Raised when authentication fails (HTTP 401/403)."""
+
+    def __init__(self, detail: str = "", response_data: dict | None = None):
+        super().__init__(403, detail, response_data)

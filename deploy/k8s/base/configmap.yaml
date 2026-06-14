@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: adam-config
+data:
+  ADAM_INFERENCE_MODE: "ollama"
+  ADAM_OLLAMA_BASE: "http://ollama:11434"
+  ADAM_QDRANT_URL: "http://qdrant:6333"
+  ADAM_API_PORT: "8000"
+  ADAM_RATE_LIMIT: "60/60"
+  ADAM_LOG_LEVEL: "INFO"
+  ADAM_DATABASE_URL: "postgresql://adam:adam@postgres:5432/adam"
+  ADAM_REDIS_URL: "redis://redis:6379/0"
+  ADAM_PRODUCTION: "1"
+  ADAM_LOG_JSON: "1"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ollama-config
+data:
+  OLLAMA_HOST: "0.0.0.0"
+  OLLAMA_KEEP_ALIVE: "24h"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: qdrant-config
+data:
+  QDRANT__SERVICE__GRPC_PORT: "6334"
+  QDRANT__SERVICE__HTTP_PORT: "6333"
