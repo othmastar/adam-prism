@@ -75,6 +75,11 @@ export class AdamChatPanel {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- [PHASE1-SECURITY] Content Security Policy - prevents XSS in webview -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data: https:; font-src data:;">
+<!-- [PHASE1-SECURITY] Additional security headers via meta -->
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta http-equiv="Referrer-Policy" content="no-referrer">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 :root {

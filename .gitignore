@@ -78,8 +78,8 @@ repomix-output.zip
 # Large log / build artifacts
 adam_prism.json
 
-# Broken web-ui duplicate
-web-ui/
+# Broken web-ui duplicate (in root, not frontend/)
+/web-ui/
 
 # Runtime data (backend)
 backend/data/

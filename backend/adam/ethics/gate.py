@@ -187,8 +187,10 @@ class EthicsGate:
             self._eval_cache.set(cache_key, scores, ttl=300.0)
             return scores
         except Exception:
-            logger.exception("فشل التقييم الأخلاقي:")
-            return {"fairness": 0.5, "learning": 0.5, "survival": 0.5, "creativity": 0.5}
+            # [PHASE1-SECURITY] Fail-CLOSED: عند فشل التقييم، نفترض رفض المحتوى
+            # بأمان بدلاً من الموافقة. القيم المنخفضة ستفشل في عتبة 0.55
+            logger.exception("فشل التقييم الأخلاقي - وضع fail-closed:")
+            return {"fairness": 0.0, "learning": 0.0, "survival": 0.0, "creativity": 0.0}
         finally:
             # [M4] Use client is not None instead of 'client' in locals()
             if not self.shared_clients and client is not None:
