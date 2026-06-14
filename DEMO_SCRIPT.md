@@ -1,104 +1,92 @@
-# Adam Prism — Demo Script (60-90 seconds)
+# Sovereign Neural Fortresses — Demo Script (60-90 seconds)
 
 **For:** Hackathon pitch
 **Duration:** 60-90 seconds
-**Status:** Adam is **production-ready, not a prototype**
-**Setup:** Terminal + Browser side by side, Ollama running
+**Setup:** Terminal + Browser, Ollama running
+**Identity:** "Adam is the receipt. Sovereignty is the business."
 
 ---
 
-## 🎬 SCENE 1: The Hook (0:00-0:15)
+## 🎬 SCENE 1: The Question (0:00-0:15)
 
 **Visual:** Close-up of screen, terminal dark, simple
 
-**Action:**
-- Open terminal
-- Type slowly (every keystroke visible)
+**Action:** Open terminal. Type slowly.
 
 ```bash
 git clone https://github.com/othmastar/adam-prism
-cd adam-prism
-bash bin/install.sh
-```
-
-**Voiceover (Arabic + English):**
-
-> AR: "آدم منتج كامل. في 30 ثانية يشتغل على جهازك."
-> EN: "Adam is a complete product. 30 seconds to run on your machine."
-
----
-
-## 🎬 SCENE 2: The Start (0:15-0:30)
-
-**Visual:** Switch to browser showing the chat UI
-
-**Action:** Click send on the welcome message
-
-**Voiceover:**
-
-> AR: "أول رسالة — آدم يفهمك عربي."
-> EN: "First message — Adam understands you in Arabic."
-
-**Screen shows:**
-- User: "مرحبا آدم"
-- Adam: "أهلاً بيك! أنا آدم المنظار. إزاي أقدر أساعدك؟"
-
----
-
-## 🎬 SCENE 3: The Power (0:30-0:55)
-
-**Visual:** Type a real question (something Adam can actually answer)
-
-**Action:** Type a question that shows the LLM working
-
-```
-"اكتبلي كود Python بيحسب الفيبوناتشي"
-"Write me a Python code that calculates Fibonacci"
+cd adam-prism && bash bin/install.sh
 ```
 
 **Voiceover:**
 
-> AR: "مش بس شات. آدم بيفكر، بيكتب كود، بيحل مشاكل. بـ 38 أداة."
-> EN: "Not just chat. Adam thinks, writes code, solves problems. With 38 tools."
-
-**Screen shows:** Real LLM-generated code (qwen2.5 via Ollama)
+> AR: "هل تدير مؤسستك.. أم تدير ثغرة أمنية؟"
+> EN: "Are you managing your business.. or a security breach?"
 
 ---
 
-## 🎬 SCENE 4: The Scale (0:55-1:10)
+## 🎬 SCENE 2: The Receipt (0:15-0:30)
 
-**Visual:** Cut to a slide showing the architecture
+**Visual:** Show the install output, then browser opens
 
-**Action:** Display the architecture diagram (from README)
+**Voiceover:**
+
+> AR: "آدم — إثبات إننا نقدر نبني. 6 أنظمة قبله. 12 سنة خبرة."
+> EN: "Adam — proof we can build. 6 systems before it. 12 years experience."
+
+**Screen shows:** Install complete, server running
+
+---
+
+## 🎬 SCENE 3: The Power (0:30-0:50)
+
+**Visual:** Type a real industrial question
 
 ```
-38 tools • 70+ MCP tools • 25 channels
-4 apps • 12 layers • 134 tests
+"اقرأ ملف SCADA وحدد أي قراءة شاذة في آخر 24 ساعة"
+"Read the SCADA file and identify any anomalous reading in the last 24 hours"
 ```
 
 **Voiceover:**
 
-> AR: "آدم منتج كامل. مش prototype. 38 أداة، 25 قناة، 4 تطبيقات، 134 اختبار."
-> EN: "Adam is a complete product. Not a prototype. 38 tools, 25 channels, 4 apps, 134 tests."
+> AR: "مش بس شات. آدم بيفهم SCADA. بيدمج مع البنية الصناعية."
+> EN: "Not just chat. Adam understands SCADA. Integrates with industrial infrastructure."
+
+**Screen shows:** Real LLM analyzing structured data (qwen2.5 via Ollama)
 
 ---
 
-## 🎬 SCENE 5: The Close (1:10-1:30)
+## 🎬 SCENE 4: The Track Record (0:50-1:10)
 
-**Visual:** Cut to GitHub repo
-
-**Action:** Show the repo URL
-
-```
-https://github.com/othmastar/adam-prism
-```
+**Visual:** Quick montage of 6 project screenshots
 
 **Voiceover:**
 
-> AR: "آدم — أول Digital Twin واعٍ عربي. ملكك بالكامل."
-> EN: "Adam — the first Arabic-conscious Digital Twin. Yours to own."
+> AR: "6 أنظمة قبل آدم. يوكوجاوا SCADA. صيدلية. رأفت المحامي. أتمتة سير العمل. 400 مليون توكن."
+> EN: "6 systems before Adam. Yokogawa SCADA. Pharmacy. Raafat the Lawyer. Workflows. 400M tokens."
 
-**End card:** Logo + contact info
+**Screen shows:** Logos/cards of each project (0.5 sec each)
+
+---
+
+## 🎬 SCENE 5: The Offer (1:10-1:30)
+
+**Visual:** Cut to engagement model slide
+
+**Action:** Display tier table
+
+**Voiceover:**
+
+> AR: "المحادثة الأولى مجانية. أول خرق ليس مجانياً."
+> EN: "First conversation is free. First breach is not."
+
+**End card:** Logo + contact
+
+```
+othmastar@gmail.com
++20 100 292 6918
+sovereign@adam-prism.local
+```
 
 ---
 
@@ -108,60 +96,62 @@ https://github.com/othmastar/adam-prism
 
 ```
 [Scene 1 — 0:00-0:15]
-"Adam isn't a prototype. It's a complete, production-ready product.
-Three commands. Thirty seconds. Let's see it work."
+"Are you managing your business.. or a security breach?
+Three commands. Thirty seconds. Let me show you the receipt."
 
 [Scene 2 — 0:15-0:30]
 *clones repo, runs install*
-"Adam is now running on my machine. Not in California. Here.
-Welcome message, in Egyptian Arabic, not translation. Understanding."
+"Adam is running on my machine. Not in California. Here.
+In 6 months we built 93 features. 134 tests passing.
+But Adam is not the product. It's the receipt."
 
-[Scene 3 — 0:30-0:55]
-*sends a real question*
-"Ask Adam to write code. Ask Adam to explain a concept.
-Ask Adam anything in Arabic. With 38 built-in tools, it just works."
+[Scene 3 — 0:30-0:50]
+*sends industrial question*
+"Ask Adam about SCADA. Ask about anomaly detection.
+Ask anything about your data — it stays on YOUR machine.
+Air-gapped. On-premise. Sovereign."
 
-[Scene 4 — 0:55-1:10]
-*shows architecture*
-"This isn't a demo. It's a complete product.
-38 tools. 25 channels. 4 apps. 12 consciousness layers. 134 tests.
-And every line of code is on GitHub."
+[Scene 4 — 0:50-1:10]
+*shows track record*
+"Six systems before Adam. Energy, pharma, legal, content.
+12 years of industrial defense. The architecture is proven."
 
 [Scene 5 — 1:10-1:30]
-*shows repo*
-"Adam — the first Arabic-conscious Digital Twin.
-Sovereign. Native. Industrial. Complete.
-github.com/othmastar/adam-prism"
+*shows engagement*
+"First conversation is free. First breach is not.
+Sovereign AI Audit. Two weeks. Fixed price.
+othmastar@gmail.com. sovereign@adam-prism.local."
 ```
 
 ### Arabic version:
 
 ```
 [Scene 1 — 0:00-0:15]
-"آدم مش prototype. آدم منتج كامل، جاهز للإنتاج.
-ثلاث أوامر. ثلاثين ثانية. تعالوا نشوفه شغال."
+"هل تدير مؤسستك.. أم تدير ثغرة أمنية؟
+ثلاث أوامر. ثلاثين ثانية. تعالوا نشوف الإثبات."
 
 [Scene 2 — 0:15-0:30]
 *clones repo, runs install*
 "آدم دلوقتي شغال على جهازي. مش في كاليفورنيا. هنا.
-رسالة ترحيب، بالعربي المصري، مش ترجمة. فهم."
+في 6 شهور بنينا 93 ميزة. 134 اختبار.
+بس آدم مش المنتج. آدم الإثبات."
 
-[Scene 3 — 0:30-0:55]
-*sends a real question*
-"اطلب من آدم يكتب كود. اطلب منه يشرح مفهوم.
-اسأله أي حاجة بالعربي. بـ 38 أداة جاهزة، هيشتغل."
+[Scene 3 — 0:30-0:50]
+*sends industrial question*
+"اسأل آدم عن SCADA. اسأل عن كشف الشذوذ.
+اسأل عن أي حاجة في بياناتك — تفضل عندك.
+Air-gapped. On-premise. سيادي."
 
-[Scene 4 — 0:55-1:10]
-*shows architecture*
-"ده مش demo. ده منتج كامل.
-38 أداة. 25 قناة. 4 تطبيقات. 12 layer. 134 اختبار.
-وكل سطر كود على GitHub."
+[Scene 4 — 0:50-1:10]
+*shows track record*
+"6 أنظمة قبل آدم. طاقة. صيدلية. قانون. محتوى.
+12 سنة دفاع صناعي. البنية مثبتة."
 
 [Scene 5 — 1:10-1:30]
-*shows repo*
-"آدم — أول Digital Twin واعٍ عربي.
-سيادي. أصلي. صناعي. كامل.
-github.com/othmastar/adam-prism"
+*shows engagement*
+"المحادثة الأولى مجانية. أول خرق ليس مجانياً.
+تدقيق سيادي. أسبوعين. سعر ثابت.
+othmastar@gmail.com. sovereign@adam-prism.local."
 ```
 
 ---
@@ -169,57 +159,37 @@ github.com/othmastar/adam-prism"
 ## 🎯 Tips for a Great Demo
 
 ### ✅ Before:
-
-1. **Test Ollama** — make sure it's running and responsive
-2. **Test the URL** — `bash bin/install.sh` should work in <30 sec
-3. **Pre-warm the model** — run a test query before the demo
+1. **Test Ollama** — running and responsive
+2. **Test `bash bin/install.sh`** — works in <30 sec
+3. **Pre-warm the model** — test query before demo
 4. **Have backup video** — in case WiFi dies
-5. **Close everything else** — no notifications, no distractions
+5. **Close everything else** — no notifications
 
 ### ✅ During:
-
 1. **Type slowly** — judges need to see the commands
-2. **Explain what you're doing** — "Now I'm cloning, now I'm installing..."
-3. **Pause after each result** — let the audience absorb
-4. **Show the code/architecture** — not just chat
-5. **End with the URL** — make it memorable
+2. **Frame it as "the receipt"** — not the product
+3. **Reference the 6 systems** — track record matters
+4. **Use industrial terms** — SCADA, anomaly, on-premise
+5. **End with the offer** — "first conversation is free"
 
 ### ✅ After:
-
-1. **Have the repo URL visible** — "github.com/othmastar/adam-prism"
-2. **Be ready for "can I try?"** — yes! `git clone` and `bash bin/install.sh`
-3. **Be ready for "what's the tech stack?"** — Ollama, FastAPI, Qdrant, Python, 38 tools
+1. **Have contact info visible** — all 3 channels
+2. **Be ready for "what's next?"** — Sovereign AI Audit
+3. **Be ready for "cost?"** — $X for audit, $Y for pilot
+4. **Be ready for "timeline?"** — 2 weeks audit, 8 weeks pilot
 
 ---
 
 ## 🎬 B-roll Shots (بين الـ scenes)
 
-لو بتصور فيديو، استخدم:
-
-- **Terminal scrolling** (close-up, slow-motion)
-- **Code editor** (showing the 38 tools, 25 channels)
-- **Architecture diagram** (zooming in on 12 layers)
-- **GitHub repo page** (showing README, 134 tests passing)
-- **Ollama pulling a model** (progress bar)
-- **Adam answering in Arabic** (the chat UI)
-- **Files structure** (`tree` command showing the layout)
-- **Tests passing** (`pytest` output showing 134 passed)
-
----
-
-## 🎙️ Voiceover Notes
-
-### Arabic (Egyptian):
-- **Tone:** Confident, warm, slightly proud
-- **Speed:** Medium-slow (الجمهور محتاج وقت يفهم)
-- **Emotion:** Passionate (ده منتجك، خليك متحمس)
-- **Volume:** Medium (مش همس، مش صراخ)
-
-### English:
-- **Tone:** Professional, friendly, clear
-- **Speed:** Medium (don't rush)
-- **Emotion:** Enthusiastic but not salesy
-- **Accent:** Whatever's natural — Arabic accent is FINE (it's your story)
+- **Terminal scrolling** (close-up, slow)
+- **GitHub stars** (200+)
+- **README** (the new Sovereign identity)
+- **Architecture diagram** (4 pillars: Air-Gap, On-Premise, Domain-Tuned, Native Arabic)
+- **6 project cards** (logos + 1-line descriptions)
+- **Cost of inaction** (the $4.88M stat)
+- **ROI** (the $6.4M savings)
+- **Contact** (3 channels)
 
 ---
 
@@ -227,33 +197,26 @@ github.com/othmastar/adam-prism"
 
 | Scene | Duration | Purpose |
 |---|---|---|
-| 1 — Hook | 0:15 | Grab attention — "complete, not prototype" |
-| 2 — Start | 0:15 | Show it works |
-| 3 — Power | 0:25 | Show it does something real (with 38 tools) |
-| 4 — Scale | 0:15 | Show the size (93 features, 134 tests) |
-| 5 — Close | 0:20 | Memorability |
+| 1 — Question | 0:15 | "Breach or business?" |
+| 2 — Receipt | 0:15 | "Adam is proof" |
+| 3 — Power | 0:20 | "Industrial AI, sovereign" |
+| 4 — Track record | 0:20 | "6 systems, 12 years" |
+| 5 — Offer | 0:20 | "First conversation free" |
 | **TOTAL** | **1:30** | Perfect for 90-sec slot |
 
-For 60-sec slot:
-- Cut Scene 4 (architecture) — go straight from 3 to 5
-- Result: 1:15 → 1:00
-
-For 30-sec slot:
-- Cut Scene 1 (hook is just "Watch this run")
-- Cut Scene 4 (architecture)
-- Just scenes 2, 3, 5
-- Result: 1:00 → 0:30
+For 60-sec slot: Cut Scene 4
+For 30-sec slot: Cut Scenes 1 and 4
 
 ---
 
 ## 📋 Pre-Demo Checklist
 
 - [ ] Ollama is running (`ollama serve`)
-- [ ] qwen2.5:3b model is pulled (`ollama list`)
+- [ ] qwen2.5:3b model is pulled
 - [ ] Adam server is up (`curl http://localhost:8000/healthz/live`)
 - [ ] Browser tab open to `http://localhost:8000/`
 - [ ] GitHub tab open to the repo
-- [ ] Backup video file ready (in case of failure)
+- [ ] Backup video file ready
 - [ ] Laptop plugged in
 - [ ] WiFi tested
 - [ ] Microphone tested
@@ -263,11 +226,10 @@ For 30-sec slot:
 
 ## 🎯 One-Liner Summary
 
-> "Adam Prism — the first Arabic-conscious digital twin.
-> 38 tools. 25 channels. 4 apps. 134 tests. **Complete. Not a prototype.**"
+> "Adam is the receipt. Sovereignty is the business. First conversation is free."
 
 ---
 
 *Last updated: June 15, 2026*
 *Speaker: Mohamed Othman*
-*Project: Adam Prism v1.0.0 — Complete, Production-Ready, Open Source*
+*Identity: Sovereign Neural Fortresses*
