@@ -1,5 +1,10 @@
 <div align="center">
 
+> **📢 This is the SHOWCASE branch.** It contains ~25-30% of the full Adam Prism
+> deployment (code only, no training data, no model weights, no tenant configs).
+> See [`SHOWCASE.md`](SHOWCASE.md) for what was removed and why.
+> For the full version, contact othman@adam-prism.local.
+
 # You're here because you're tired.
 
 ### Tired of frameworks crashing at 3 AM.
@@ -207,7 +212,7 @@ cd deploy && docker compose up -d            # Full stack
 | 3 | `security/guard.py` | InputGuard + OutputGuard — 14 injection patterns + PII | ✅ `guard.enabled = False` |
 | 5 | `memory/{system,hot_memory,session_search,unified}.py` | 4-layer Iron Memory: Hot (MEMORY.md) + FTS5 search + Qdrant vector + Skills index — zero token cost session search (~20ms) | ✅ Disable any layer independently |
 | 7 | `ethics/gate.py` | EthicsGate — 4 laws (Justice/Learning/Survival/Creativity) | ✅ `ethics.weights = {0,0,0,0}` |
-| 9 | `subagents/teams.py` | TeamManager — sequential/parallel execution | ✅ Don't call it |
+| 9 | `subagents/teams.py` (showcase: stub) | TeamManager — sequential/parallel execution | ✅ Don't call it |
 
 **No fluff. Every layer = real code. Every layer is optional.**
 
