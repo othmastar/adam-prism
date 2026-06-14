@@ -1,1 +1,0 @@
-[تعذر إنشاء الملخص الشامل: Request URL is missing an 'http://' or 'https://' protocol.]
