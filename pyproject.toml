@@ -43,6 +43,7 @@ dependencies = [
     "PyMuPDF>=1.23.0",
     "python-docx>=1.1.0",
     "edge-tts>=6.1.0",
+    "headroom-ai>=0.25.0",
 ]
 
 [project.urls]
