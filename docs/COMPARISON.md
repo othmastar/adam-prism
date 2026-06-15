@@ -2,6 +2,9 @@
 
 > **The honest, researched comparison of Adam Prism against every major agent framework,
 > AI assistant, and digital twin platform. Updated June 15, 2026.**
+>
+> **Methodology:** We admire the work of every team in this space. We've solved a different
+> problem. Here's how we see the field — with respect.
 
 ## The Frameworks We Compared
 
@@ -401,3 +404,33 @@ cd adam-prism && bash bin/install.sh
 
 *Last updated: June 15, 2026 — Adam Prism v1.0.0b1*
 *Maintainer: Mohamed Othman — Sovereign AI Architect*
+
+---
+
+## A Note on Positioning (Carnegie-Style)
+
+> We admire the work of every team in this space. We've solved a different problem.
+
+Each of these platforms is excellent at what they were designed to do. Here's how we see the field — with respect:
+
+- **LangGraph, CrewAI, AutoGen** are brilliant **frameworks** for building your own agent. We respect that. But they're not finished products. Adam is a finished product.
+- **Hermes Agent, OpenClaw** are pioneers in consciousness-first design. They've shown the way. Adam builds on their insights and adds 9 more layers, 19 more channels, 4 native apps, and 12 years of industrial expertise.
+- **OpenAI, Anthropic, Google** are incredible at **generic AI**. We use their models. But their business model depends on you giving them your data. Adam's business model depends on you keeping it.
+- **ChatGPT Enterprise, Microsoft Copilot** are great for **convenience**. But convenience has a cost — and that cost is your sovereignty.
+
+> **We're not better at what they do. We're the only ones doing what we do.**
+
+The 5 questions every CEO should answer:
+
+1. Is your AI's data on someone else's server? *(Yes? → Sovereign AI.)*
+2. If a breach happens, do you bear the consequences alone? *(Yes? → Sovereign AI.)*
+3. Do you operate under GDPR, HIPAA, or NERC-CIP? *(Yes? → Sovereign AI.)*
+4. Would you prefer your AI inside your walls? *(Yes? → Sovereign AI.)*
+5. Would you want your AI trained on YOUR data? *(Yes? → Sovereign AI.)*
+
+If you said yes to any of these — Adam Prism was built for you.
+
+---
+
+*Last updated: June 15, 2026*
+*Methodology: Dale Carnegie "How to Win Friends and Influence People"*

@@ -1,92 +1,124 @@
-# Sovereign Neural Fortresses — Demo Script (60-90 seconds)
+# Adam Prism — Demo Script (Carnegie-Style, 60-90 seconds)
 
 **For:** Hackathon pitch
 **Duration:** 60-90 seconds
-**Setup:** Terminal + Browser, Ollama running
-**Identity:** "Adam is the receipt. Sovereignty is the business."
+**Methodology:** Dale Carnegie "yes, yes" momentum
+**Hero:** Adam Prism (the product)
+
+> **Adam is the hero. The 5 questions are the bridge. The demo is the proof.**
 
 ---
 
-## 🎬 SCENE 1: The Question (0:00-0:15)
+## 🎬 SCENE 1: The Friendly Hook (0:00-0:12)
 
 **Visual:** Close-up of screen, terminal dark, simple
 
-**Action:** Open terminal. Type slowly.
+**Action:** Open terminal. Type slowly (every keystroke visible)
 
 ```bash
 git clone https://github.com/othmastar/adam-prism
 cd adam-prism && bash bin/install.sh
 ```
 
-**Voiceover:**
+**Voiceover (Carnegie #13 — friendly):**
 
-> AR: "هل تدير مؤسستك.. أم تدير ثغرة أمنية؟"
-> EN: "Are you managing your business.. or a security breach?"
-
----
-
-## 🎬 SCENE 2: The Receipt (0:15-0:30)
-
-**Visual:** Show the install output, then browser opens
-
-**Voiceover:**
-
-> AR: "آدم — إثبات إننا نقدر نبني. 6 أنظمة قبله. 12 سنة خبرة."
-> EN: "Adam — proof we can build. 6 systems before it. 12 years experience."
-
-**Screen shows:** Install complete, server running
+> AR: "أنا محمد عثمان. عملت آدم. خليني أعرضه عليك."
+> EN: "I'm Mohamed Othman. I built Adam. Let me show you."
 
 ---
 
-## 🎬 SCENE 3: The Power (0:30-0:50)
+## ❓ SCENE 2: The 5 Questions (0:12-0:25)
 
-**Visual:** Type a real industrial question
+**Visual:** Cut to face (or just text on screen)
+
+**Action:** Ask 5 questions rapidly (Carnegie #14)
+
+**Voiceover:**
+
+> EN: "Before I show you the demo, let me ask you 5 questions:
+>
+> 1. Is your AI's data on someone else's server? *(Yes?)*
+> 2. If a breach happens, do you bear the consequences alone? *(Yes?)*
+> 3. Do you operate under GDPR, HIPAA, or NERC-CIP? *(Yes?)*
+> 4. Would you prefer your AI inside your walls? *(Yes?)*
+> 5. Would you want your AI trained on YOUR data? *(Yes?)*
+>
+> If you said yes to any of these — Adam is for you."
+
+---
+
+## 🪞 SCENE 3: Adam in Action (0:25-0:50)
+
+**Visual:** Back to terminal, server running
+
+**Action:** Show the chat UI, then run a real query
 
 ```
-"اقرأ ملف SCADA وحدد أي قراءة شاذة في آخر 24 ساعة"
-"Read the SCADA file and identify any anomalous reading in the last 24 hours"
+Click chat → type: "أدهم، اقرأ ملف SCADA وحدد أي قراءة شاذة"
 ```
 
 **Voiceover:**
 
-> AR: "مش بس شات. آدم بيفهم SCADA. بيدمج مع البنية الصناعية."
-> EN: "Not just chat. Adam understands SCADA. Integrates with industrial infrastructure."
+> AR: "آدم منتج كامل. مش prototype. 93 ميزة، 134 اختبار."
+> EN: "Adam is a complete product. Not a prototype. 93 features, 134 tests."
 
-**Screen shows:** Real LLM analyzing structured data (qwen2.5 via Ollama)
-
----
-
-## 🎬 SCENE 4: The Track Record (0:50-1:10)
-
-**Visual:** Quick montage of 6 project screenshots
-
-**Voiceover:**
-
-> AR: "6 أنظمة قبل آدم. يوكوجاوا SCADA. صيدلية. رأفت المحامي. أتمتة سير العمل. 400 مليون توكن."
-> EN: "6 systems before Adam. Yokogawa SCADA. Pharmacy. Raafat the Lawyer. Workflows. 400M tokens."
-
-**Screen shows:** Logos/cards of each project (0.5 sec each)
+**Screen shows:**
+- Real LLM response (Ollama + qwen2.5)
+- 38 tools available
+- 25 channels
+- 12 consciousness layers
 
 ---
 
-## 🎬 SCENE 5: The Offer (1:10-1:30)
+## 🏆 SCENE 4: The Strength Showcase (0:50-1:10)
 
-**Visual:** Cut to engagement model slide
+**Visual:** Quick montage of capabilities
 
-**Action:** Display tier table
+**Action:** Display key stats
+
+```
+38 tools • 25 channels • 12 layers
+4-layer memory • 3-layer security • 4 ethics laws
+5 Arabic dialects • 4 native apps
+134 tests passing • Production-grade
+```
 
 **Voiceover:**
 
-> AR: "المحادثة الأولى مجانية. أول خرق ليس مجانياً."
-> EN: "First conversation is free. First breach is not."
+> AR: "38 أداة. 25 قناة. 4 تطبيقات. 12 layer. ملكك بالكامل."
+> EN: "38 tools. 25 channels. 4 apps. 12 layers. All yours."
 
-**End card:** Logo + contact
+---
+
+## 🏰 SCENE 5: The Company (1:10-1:25)
+
+**Visual:** Cut to Sovereign Neural Fortresses slide
+
+**Action:** Show track record
+
+**Voiceover:**
+
+> AR: "تحت آدم: Sovereign Neural Fortresses. 6 أنظمة قبله. 12 سنة."
+> EN: "Behind Adam: Sovereign Neural Fortresses. 6 systems before. 12 years."
+
+---
+
+## 📞 SCENE 6: The Close (1:25-1:30)
+
+**Visual:** End card
+
+**Action:** Show contact info
 
 ```
 othmastar@gmail.com
 +20 100 292 6918
 sovereign@adam-prism.local
 ```
+
+**Voiceover:**
+
+> AR: "المحادثة الأولى مجانية. أول خرق ليس مجانياً."
+> EN: "First conversation is free. First breach is not."
 
 ---
 
@@ -95,87 +127,108 @@ sovereign@adam-prism.local
 ### English version:
 
 ```
-[Scene 1 — 0:00-0:15]
-"Are you managing your business.. or a security breach?
-Three commands. Thirty seconds. Let me show you the receipt."
+[Scene 1 — 0:00-0:12]
+"I'm Mohamed Othman. I built Adam. Let me show you."
 
-[Scene 2 — 0:15-0:30]
-*clones repo, runs install*
-"Adam is running on my machine. Not in California. Here.
-In 6 months we built 93 features. 134 tests passing.
-But Adam is not the product. It's the receipt."
+[Scene 2 — 0:12-0:25]
+"Before I do, let me ask you 5 questions.
+Is your AI's data on someone else's server? [Yes?]
+If a breach happens, do you bear the consequences alone? [Yes?]
+Do you operate under GDPR, HIPAA, or NERC-CIP? [Yes?]
+Would you prefer your AI inside your walls? [Yes?]
+Would you want your AI trained on YOUR data? [Yes?]
+If you said yes to any of these — Adam is for you."
 
-[Scene 3 — 0:30-0:50]
-*sends industrial question*
-"Ask Adam about SCADA. Ask about anomaly detection.
-Ask anything about your data — it stays on YOUR machine.
-Air-gapped. On-premise. Sovereign."
+[Scene 3 — 0:25-0:50]
+*shows demo*
+"Adam is a complete product. Not a prototype. 93 features, 134 tests.
+Arabic-native. Air-gapped. Multi-tenant. Production-grade.
+This isn't a roadmap. This is what Adam does today."
 
 [Scene 4 — 0:50-1:10]
-*shows track record*
-"Six systems before Adam. Energy, pharma, legal, content.
-12 years of industrial defense. The architecture is proven."
+*shows stats*
+"38 tools. 25 channels. 4 apps. 12 layers. All yours.
+The only platform with: 4-layer Iron Memory, 3-layer security guard,
+WAF (OWASP Top 10), 4 ethics laws, 5 Arabic dialects with cloning.
+And we use Ollama locally. No cloud. No leakage."
 
-[Scene 5 — 1:10-1:30]
-*shows engagement*
+[Scene 5 — 1:10-1:25]
+*shows company*
+"Behind Adam is Sovereign Neural Fortresses.
+6 production systems before Adam. 12 years of industrial defense.
+Yokogawa SCADA. Pharmacy WhatsApp. Raafat the Lawyer.
+Adam is the seventh. The other six are proof."
+
+[Scene 6 — 1:25-1:30]
+*shows contact*
 "First conversation is free. First breach is not.
-Sovereign AI Audit. Two weeks. Fixed price.
-othmastar@gmail.com. sovereign@adam-prism.local."
+othmastar@gmail.com. +20 100 292 6918."
 ```
 
 ### Arabic version:
 
 ```
-[Scene 1 — 0:00-0:15]
-"هل تدير مؤسستك.. أم تدير ثغرة أمنية؟
-ثلاث أوامر. ثلاثين ثانية. تعالوا نشوف الإثبات."
+[Scene 1 — 0:00-0:12]
+"أنا محمد عثمان. عملت آدم. خليني أعرضه عليك."
 
-[Scene 2 — 0:15-0:30]
-*clones repo, runs install*
-"آدم دلوقتي شغال على جهازي. مش في كاليفورنيا. هنا.
-في 6 شهور بنينا 93 ميزة. 134 اختبار.
-بس آدم مش المنتج. آدم الإثبات."
+[Scene 2 — 0:12-0:25]
+"قبل ما أعرض، عندي 5 أسئلة.
+هل بيانات AI بتاعتك على سيرفر حد تاني؟ [أيوه؟]
+لو حصل خرق، شركتك تتحمل لوحدها؟ [أيوه؟]
+هل بتخضع لـ GDPR أو HIPAA أو NERC-CIP؟ [أيوه؟]
+هل تفضل AI داخل جدرانك؟ [أيوه؟]
+هل تفضل AI يتدرب على بياناتك؟ [أيوه؟]
+لو قلت أيوه لأي سؤال — آدم ليك."
 
-[Scene 3 — 0:30-0:50]
-*sends industrial question*
-"اسأل آدم عن SCADA. اسأل عن كشف الشذوذ.
-اسأل عن أي حاجة في بياناتك — تفضل عندك.
-Air-gapped. On-premise. سيادي."
+[Scene 3 — 0:25-0:50]
+*shows demo*
+"آدم منتج كامل. مش prototype. 93 ميزة. 134 اختبار.
+عربي أصلي. Air-gapped. Multi-tenant. Production-grade.
+دي مش roadmap. ده آدم دلوقتي."
 
 [Scene 4 — 0:50-1:10]
-*shows track record*
-"6 أنظمة قبل آدم. طاقة. صيدلية. قانون. محتوى.
-12 سنة دفاع صناعي. البنية مثبتة."
+*shows stats*
+"38 أداة. 25 قناة. 4 تطبيقات. 12 layer. ملكك بالكامل.
+المنصة الوحيدة بـ: ذاكرة 4 طبقات. حارس أمن 3 طبقات.
+WAF. 4 قوانين أخلاقية. 5 لهجات عربية مع voice cloning.
+وبنستخدم Ollama محلياً. مفيش cloud. مفيش تسريب."
 
-[Scene 5 — 1:10-1:30]
-*shows engagement*
+[Scene 5 — 1:10-1:25]
+*shows company*
+"تحت آدم: Sovereign Neural Fortresses.
+6 أنظمة قبل آدم. 12 سنة دفاع صناعي.
+Yokogawa SCADA. صيدلية واتساب. رأفت المحامي.
+آدم هو السابع. الستة الباقين هم الإثبات."
+
+[Scene 6 — 1:25-1:30]
+*shows contact*
 "المحادثة الأولى مجانية. أول خرق ليس مجانياً.
-تدقيق سيادي. أسبوعين. سعر ثابت.
-othmastar@gmail.com. sovereign@adam-prism.local."
+othmastar@gmail.com. +20 100 292 6918."
 ```
 
 ---
 
-## 🎯 Tips for a Great Demo
+## 🎯 Tips for a Great Demo (Carnegie throughout)
 
 ### ✅ Before:
 1. **Test Ollama** — running and responsive
-2. **Test `bash bin/install.sh`** — works in <30 sec
+2. **Test the 3-command install** — works in <30 sec
 3. **Pre-warm the model** — test query before demo
 4. **Have backup video** — in case WiFi dies
-5. **Close everything else** — no notifications
+5. **Print the 5 questions** on a card
 
 ### ✅ During:
-1. **Type slowly** — judges need to see the commands
-2. **Frame it as "the receipt"** — not the product
-3. **Reference the 6 systems** — track record matters
-4. **Use industrial terms** — SCADA, anomaly, on-premise
-5. **End with the offer** — "first conversation is free"
+1. **Be friendly** (Carnegie #13) — not aggressive
+2. **Ask the 5 questions confidently** (Carnegie #14)
+3. **Pause after each question** — let the audience absorb
+4. **Show Adam in action** — not slides about Adam
+5. **Reference the 6 systems** — track record matters
+6. **End with the offer** — "first conversation is free"
 
 ### ✅ After:
 1. **Have contact info visible** — all 3 channels
-2. **Be ready for "what's next?"** — Sovereign AI Audit
-3. **Be ready for "cost?"** — $X for audit, $Y for pilot
+2. **Be ready for "what's the cost?"** — $6.4M savings, $150-300k pilot
+3. **Be ready for "industry-specific?"** — 6 industries
 4. **Be ready for "timeline?"** — 2 weeks audit, 8 weeks pilot
 
 ---
@@ -183,12 +236,11 @@ othmastar@gmail.com. sovereign@adam-prism.local."
 ## 🎬 B-roll Shots (بين الـ scenes)
 
 - **Terminal scrolling** (close-up, slow)
-- **GitHub stars** (200+)
-- **README** (the new Sovereign identity)
-- **Architecture diagram** (4 pillars: Air-Gap, On-Premise, Domain-Tuned, Native Arabic)
-- **6 project cards** (logos + 1-line descriptions)
-- **Cost of inaction** (the $4.88M stat)
-- **ROI** (the $6.4M savings)
+- **The 5 questions** (text on screen, dramatic)
+- **Adam chat UI** (real LLM responding in Arabic)
+- **Architecture diagram** (12 layers)
+- **Stats grid** (38 tools, 25 channels, etc.)
+- **6 project cards** (Yokogawa, Pharmacy, Raafat, etc.)
 - **Contact** (3 channels)
 
 ---
@@ -197,15 +249,16 @@ othmastar@gmail.com. sovereign@adam-prism.local."
 
 | Scene | Duration | Purpose |
 |---|---|---|
-| 1 — Question | 0:15 | "Breach or business?" |
-| 2 — Receipt | 0:15 | "Adam is proof" |
-| 3 — Power | 0:20 | "Industrial AI, sovereign" |
-| 4 — Track record | 0:20 | "6 systems, 12 years" |
-| 5 — Offer | 0:20 | "First conversation free" |
+| 1 — Friendly hook | 0:12 | "Let me show you Adam" |
+| 2 — 5 Questions | 0:13 | "Yes, yes, yes" momentum |
+| 3 — Adam in action | 0:25 | Receipt in action |
+| 4 — Strength showcase | 0:20 | What Adam does uniquely |
+| 5 — The company | 0:15 | 6 systems, 12 years |
+| 6 — The close | 0:05 | Contact + offer |
 | **TOTAL** | **1:30** | Perfect for 90-sec slot |
 
-For 60-sec slot: Cut Scene 4
-For 30-sec slot: Cut Scenes 1 and 4
+For 60-sec slot: Cut scenes 4 and 5
+For 30-sec slot: Cut scenes 2, 4, 5
 
 ---
 
@@ -217,6 +270,7 @@ For 30-sec slot: Cut Scenes 1 and 4
 - [ ] Browser tab open to `http://localhost:8000/`
 - [ ] GitHub tab open to the repo
 - [ ] Backup video file ready
+- [ ] The 5 questions written on a card
 - [ ] Laptop plugged in
 - [ ] WiFi tested
 - [ ] Microphone tested
@@ -226,10 +280,11 @@ For 30-sec slot: Cut Scenes 1 and 4
 
 ## 🎯 One-Liner Summary
 
-> "Adam is the receipt. Sovereignty is the business. First conversation is free."
+> "Adam Prism — the first Arabic-conscious Digital Twin. 38 tools, 25 channels, 4 apps, 134 tests. Yours to own. Yours to trust."
 
 ---
 
 *Last updated: June 15, 2026*
 *Speaker: Mohamed Othman*
-*Identity: Sovereign Neural Fortresses*
+*Methodology: Dale Carnegie "How to Win Friends and Influence People"*
+*Adam is the hero. The 5 questions are the bridge. The demo is the proof.*
