@@ -2,13 +2,14 @@
 Adam Prism — MINIMAL Showcase Server
 =====================================
 
-5 features only (proof of capability):
+6 features only (proof of capability):
 
-  1. POST /chat          — Real chat with Ollama (with mock fallback)
-  2. GET  /healthz/live  — Liveness probe
-  3. GET  /docs          — OpenAPI documentation
-  4. GET  /metrics       — Prometheus metrics
-  5. GET  /api/skills    — List available skills
+  1. POST /chat              — Real chat with Ollama (with mock fallback)
+  2. GET  /healthz/live      — Liveness probe
+  3. GET  /docs              — OpenAPI documentation
+  4. GET  /metrics           — Prometheus metrics
+  5. GET  /api/skills        — List available skills
+  6. GET  /api/compression   — Headroom context compression stats
 
 This is the PUBLIC showcase version. The full version has 93 routes
 and is distributed privately under a custom proprietary license
@@ -94,16 +95,36 @@ For the full version with training data and custom weights, see the README.
 
 
 async def _try_ollama(message: str) -> str | None:
-    """Try to call Ollama. Returns None if unavailable."""
+    """Try to call Ollama. Returns None if unavailable.
+
+    Model-agnostic: works with any chat model Ollama serves (qwen2.5,
+    llama, mistral, gemma, etc.). The model is selected via
+    ADAM_OLLAMA_MODEL env var. Adam's quality does NOT depend on
+    which model you use — Adam's 12 consciousness layers + Headroom
+    compression level the playing field so even 3B models handle
+    long contexts well.
+    """
     try:
+        # [PHASE8] Apply Headroom compression to long user messages
+        # (so even small models handle them)
+        from adam.observability.headroom_integration import get_headroom
+        headroom = get_headroom()
+        compressed_msg = headroom.compress(
+            message, content_type="text"
+        ).content
+        # Compress system prompt too (if it grows in full version)
+        compressed_system = headroom.compress(
+            ADAM_SYSTEM_PROMPT, content_type="text"
+        ).content
+
         async with httpx.AsyncClient(timeout=10.0) as client:
             resp = await client.post(
                 f"{OLLAMA_URL}/api/chat",
                 json={
                     "model": OLLAMA_MODEL,
                     "messages": [
-                        {"role": "system", "content": ADAM_SYSTEM_PROMPT},
-                        {"role": "user", "content": message},
+                        {"role": "system", "content": compressed_system},
+                        {"role": "user", "content": compressed_msg},
                     ],
                     "stream": False,
                 },
@@ -245,6 +266,68 @@ async def list_skills() -> dict[str, Any]:
         "skills": _SKILLS,
         "total": len(_SKILLS),
         "version": "1.0.0b1-showcase",
+    }
+
+
+# ═══════════════════════════════════════
+# Feature 6: /api/compression (Headroom stats)
+# ═══════════════════════════════════════
+
+@app.get("/api/compression", tags=["ops"])
+async def compression_stats() -> dict[str, Any]:
+    """[PHASE8] Headroom context compression statistics.
+
+    Adam uses the `headroom-ai` library (Apache 2.0) for transparent
+    context compression. This endpoint reports session-level savings.
+
+    Stats reset on server restart. For persistent metrics, see
+    `headroom.db` SQLite file.
+    """
+    from adam.observability.headroom_integration import get_headroom
+    return {
+        "compression": get_headroom().stats(),
+        "description": {
+            "headroom_ai": "Apache 2.0 context compression library",
+            "purpose": "50-90% token reduction for sovereign AI deployments",
+            "modes": ["audit (count savings)", "optimize (compress)", "simulate (dry-run)"],
+            "savings_potential": "For air-gapped sovereign AI: enables 70B models on single GPU",
+        },
+    }
+
+
+# ═══════════════════════════════════════
+# Feature 6b: /api/compression/test (interactive compression)
+# ═══════════════════════════════════════
+
+class CompressRequest(BaseModel):
+    content: str
+    content_type: str = "text"
+    force: bool = False
+
+
+@app.post("/api/compression/test", tags=["ops"])
+async def compression_test(req: CompressRequest) -> dict[str, Any]:
+    """[PHASE8] Test Headroom compression on sample content.
+
+    Useful for demos and debugging. Returns original vs compressed
+    sizes plus token savings estimate.
+    """
+    from adam.observability.headroom_integration import get_headroom
+    result = get_headroom().compress(
+        req.content,
+        content_type=req.content_type,
+        force=req.force,
+    )
+    return {
+        "original_chars": len(req.content),
+        "compressed_chars": len(result.content),
+        "original_tokens": result.original_tokens,
+        "compressed_tokens": result.compressed_tokens,
+        "tokens_saved": result.tokens_saved,
+        "cost_saved_usd_estimate": result.cost_saved_usd,
+        "compression_ratio": result.ratio,
+        "was_compressed": result.was_compressed,
+        "preview": result.content[:200] + ("..." if len(result.content) > 200 else ""),
     }
 
 
