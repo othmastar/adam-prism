@@ -119,7 +119,7 @@ I built Adam Prism in 6 months. It's a **complete, production-grade, sovereign A
 | **AI Observability** | Token usage, USD cost, latency tracking (OpenAI, Anthropic, Ollama) |
 | **Predictive monitoring** | CruxSight.ai integration (7 structural patterns) |
 | **93 API routes** | REST + WebSocket + SSE streaming |
-| **134 tests passing** | Unit + integration + E2E |
+| **270 tests passing** | Unit + integration + E2E |
 | **Multi-LLM** | Ollama (local), OpenAI, Anthropic, OpenRouter |
 | **Production-grade infra** | Docker, Helm, K8s, ArgoCD, GitHub Actions |
 | **SBOM** | CycloneDX software bill of materials |
