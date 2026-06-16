@@ -365,17 +365,31 @@ cd adam-prism && bash bin/install.sh
 
 Building sovereign AI takes 12 years of industrial expertise and a lot of coffee. ☕
 
-If Adam helped you — or if you want to support its open-source development and host the public demo — consider buying me a coffee:
+If Adam helped you — or if you want to support its open-source development and host the public demo — consider sponsoring:
 
 ### 🇪🇬 ادعم تطوير آدم
 > بناء ذكاء اصطناعي سيادي يحتاج 12 سنة خبرة وكوب قهوة كتير ☕
-> لو آدم ساعدك أو عايز تدعم تطويره، اشتريلي قهوة:
+> لو آدم ساعدك أو عايز تدعم تطويره، ادعمني:
 
-<p align="center">
-  <a href="https://buymeacoffee.com/othmastar" target="_blank">
-    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="200">
-  </a>
-</p>
+**Recommended platforms (in order):**
+
+1. **GitHub Sponsors** (best for open source)
+   👉 https://github.com/sponsors/othmastar
+   - Monthly tiers ($5, $25, $100, custom)
+   - 100% to maintainer (no fees)
+   - Direct support from your GitHub audience
+
+2. **Open Collective** (best for transparency)
+   👉 https://opencollective.com/adam-prism
+   - Public expense reports
+   - Suitable for OSS projects
+   - Can claim expenses (e.g., Ollama GPU costs)
+
+3. **Buy Me a Coffee** (simplest)
+   👉 https://buymeacoffee.com/othmastar
+   - One-time tips
+   - Quick setup
+   - _(Set up this username first)_
 
 **What your support covers:**
 
