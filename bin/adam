@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Adam Prism — launcher for Linux / macOS
+# Use this if you can't run `python bin/adam.py` directly.
+#
+# Usage:
+#   ./bin/adam              # Start server
+#   ./bin/adam --port 8080  # Custom port
+#   ./bin/adam --doctor     # Health check
+#   ./bin/adam --install    # Install dependencies
+#   ./bin/adam --help       # All options
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+cd "$REPO_ROOT"
+exec python3 bin/adam.py "$@"

@@ -361,6 +361,52 @@ cd adam-prism && bash bin/install.sh
 
 ---
 
+## ☕ Support Adam's Development
+
+Building sovereign AI takes 12 years of industrial expertise and a lot of coffee. ☕
+
+If Adam helped you — or if you want to support its open-source development and host the public demo — consider buying me a coffee:
+
+### 🇪🇬 ادعم تطوير آدم
+> بناء ذكاء اصطناعي سيادي يحتاج 12 سنة خبرة وكوب قهوة كتير ☕
+> لو آدم ساعدك أو عايز تدعم تطويره، اشتريلي قهوة:
+
+<p align="center">
+  <a href="https://buymeacoffee.com/othmastar" target="_blank">
+    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="200">
+  </a>
+</p>
+
+**What your support covers:**
+
+- ☕ **Demo hosting** — the public Adam demo (free for everyone)
+- 🖥️ **Ollama GPU server** — running Adam's full LLM 24/7
+- 📚 **Documentation** — Arabic-first docs, tutorials, examples
+- 🔓 **Open source** — keeping Adam free under AGPL v3
+- 🏰 **Sovereign AI fortresses** — building deployable systems for critical infrastructure
+
+**No pressure.** If you can't support financially, you can still help by:
+- ⭐ Starring the [GitHub repo](https://github.com/othmastar/adam-prism)
+- 🐛 Reporting bugs or suggesting features
+- 📣 Sharing Adam with someone who needs sovereign AI
+- 🌍 Translating docs to your language
+
+**Every coffee counts. Every star counts. شكراً.** 🙏
+
+---
+
+## 🚀 Quick Start (No Technical Background)
+
+Want to try Adam but don't have technical background? See **[`USER_GUIDE.md`](USER_GUIDE.md)** for step-by-step instructions for Windows, Mac, and Linux — with screenshots descriptions and no jargon.
+
+**TL;DR for everyone:**
+1. Open **https://othmastar.github.io/adam-prism/** in your browser
+2. Type a message in Arabic or English
+3. Press Enter
+4. Done! ✨
+
+---
+
 ## 🛡️ The License
 
 | | |

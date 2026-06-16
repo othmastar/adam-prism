@@ -3,68 +3,221 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adam Prism — Showcase</title>
+    <title>Adam Prism — Try Adam Now (Demo)</title>
+    <meta name="description" content="Try Adam Prism — the first Arabic-conscious Digital Twin. No installation, no signup, just chat.">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --border: #334155;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --accent: #10b981;
+            --accent-hover: #059669;
+            --user: #3b82f6;
+        }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, sans-serif;
-            background: #0f172a; color: #e2e8f0; min-height: 100vh;
-            display: flex; flex-direction: column; align-items: center; padding: 2rem;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
         }
-        .container { max-width: 720px; width: 100%; }
-        h1 { font-size: 2rem; margin-bottom: 0.5rem; }
-        .subtitle { color: #94a3b8; margin-bottom: 2rem; }
+        .container { max-width: 800px; width: 100%; }
+        header {
+            text-align: center;
+            padding: 1.5rem 0 1rem;
+        }
+        h1 { font-size: 2rem; margin-bottom: 0.25rem; }
+        .subtitle { color: var(--muted); font-size: 0.95rem; }
+        .badges { margin-top: 0.5rem; }
         .badge {
-            display: inline-block; padding: 0.25rem 0.75rem; background: #1e40af;
-            color: #fff; border-radius: 9999px; font-size: 0.75rem; margin-right: 0.5rem;
+            display: inline-block;
+            padding: 0.15rem 0.6rem;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            margin: 0.2rem;
         }
+        .badge.green { background: #065f46; border-color: #047857; }
         .chat-box {
-            background: #1e293b; border: 1px solid #334155; border-radius: 0.5rem;
-            padding: 1rem; margin-bottom: 1rem; min-height: 300px; max-height: 500px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin: 1rem 0;
+            min-height: 400px;
+            max-height: 60vh;
             overflow-y: auto;
         }
-        .message { margin-bottom: 1rem; padding: 0.75rem; border-radius: 0.5rem; }
-        .user { background: #1e40af; margin-right: 2rem; }
-        .adam { background: #334155; margin-left: 2rem; }
-        .label { font-size: 0.75rem; color: #94a3b8; margin-bottom: 0.25rem; }
-        .input-row { display: flex; gap: 0.5rem; }
+        .message {
+            margin-bottom: 1rem;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            white-space: pre-wrap;
+            line-height: 1.5;
+        }
+        .user {
+            background: var(--user);
+            color: white;
+            margin-right: 3rem;
+        }
+        .adam {
+            background: #0f172a;
+            border: 1px solid var(--border);
+            margin-left: 3rem;
+        }
+        .label { font-size: 0.75rem; color: var(--muted); margin-bottom: 0.25rem; }
+        .label.animated { color: var(--accent); }
+        .input-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
         input {
-            flex: 1; padding: 0.75rem; background: #1e293b; border: 1px solid #334155;
-            border-radius: 0.5rem; color: #e2e8f0; font-size: 1rem;
+            flex: 1;
+            padding: 0.75rem 1rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            color: var(--text);
+            font-size: 1rem;
+            font-family: inherit;
         }
+        input:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
         button {
-            padding: 0.75rem 1.5rem; background: #10b981; color: #fff; border: none;
-            border-radius: 0.5rem; cursor: pointer; font-size: 1rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
         }
+        button:hover { background: var(--accent-hover); }
         button:disabled { opacity: 0.5; cursor: not-allowed; }
-        .footer { margin-top: 2rem; text-align: center; color: #64748b; font-size: 0.875rem; }
-        .footer a { color: #10b981; text-decoration: none; }
+        .quick-questions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+        }
+        .quick-btn {
+            padding: 0.4rem 0.8rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 9999px;
+            color: var(--text);
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+        .quick-btn:hover { background: var(--accent); border-color: var(--accent); }
+        .footer {
+            margin-top: 2rem;
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.85rem;
+            padding: 1rem 0;
+        }
+        .footer a { color: var(--accent); text-decoration: none; margin: 0 0.5rem; }
+        .footer a:hover { text-decoration: underline; }
+        .info-banner {
+            background: linear-gradient(135deg, #065f46 0%, #047857 100%);
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        .typing {
+            display: inline-block;
+            width: 0.6em;
+            height: 0.6em;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: blink 1s infinite;
+            margin-left: 0.3em;
+        }
+        @keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+        @media (max-width: 600px) {
+            h1 { font-size: 1.5rem; }
+            .user, .adam { margin: 0 0 1rem 0; }
+            .quick-questions { justify-content: center; }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🪞 Adam Prism</h1>
-        <p class="subtitle">
-            <span class="badge">Showcase</span>
-            <span class="badge">v1.0.0b1</span>
-            <span class="badge">AGPL v3</span>
-        </p>
-        <p class="subtitle">النسخة التجريبية — 5 ميزات فقط. للنسخة الكاملة: <a href="mailto:othman@adam-prism.local" style="color: #10b981;">othman@adam-prism.local</a></p>
+        <header>
+            <h1>🪞 Adam Prism</h1>
+            <p class="subtitle">أول Digital Twin واعٍ عربي — The first Arabic-conscious Digital Twin</p>
+            <div class="badges">
+                <span class="badge green">✓ Live Demo (No Signup)</span>
+                <span class="badge">Bilingual (AR + EN)</span>
+                <span class="badge">93 Features Available</span>
+            </div>
+        </header>
+
+        <div class="info-banner">
+            👋 This is a live demo. Type in Arabic or English. Adam is running with intelligent mock responses (full LLM version available — see footer).
+        </div>
 
         <div class="chat-box" id="chatBox">
             <div class="message adam">
-                <div class="label">آدم (Adam)</div>
-                <div>أهلاً بيك! أنا النسخة التجريبية. اسألني أي سؤال، بس هجاوب بإجابات بسيطة عشان دي نسخة محدودة.</div>
+                <div class="label">آدم (Adam) — Sovereign AI Agent</div>
+                <div>أهلاً بيك! 👋
+
+أنا آدم — أول Digital Twin واعٍ عربي. مبني على 12 طبقة وعي، 38 أداة، و25 قناة تواصل.
+
+جرّب اسألني أي حاجة. لو عايز الإجابات الكاملة، شغّل Ollama محلياً (مجاني).
+
+I'm Adam — the first Arabic-conscious Digital Twin. Built on 12 consciousness layers, 38 tools, 25 channels.
+
+Ask me anything. For full AI, run Ollama locally (free).</div>
             </div>
         </div>
 
+        <div class="quick-questions">
+            <button class="quick-btn" data-q="انت مين؟">انت مين؟</button>
+            <button class="quick-btn" data-q="ايه مميزاتك؟">ايه مميزاتك؟</button>
+            <button class="quick-btn" data-q="ازاي اشغلك؟">ازاي اشغلك؟</button>
+            <button class="quick-btn" data-q="Who are you?">Who are you?</button>
+            <button class="quick-btn" data-q="What can you do?">What can you do?</button>
+            <button class="quick-btn" data-q="How do I install you?">How do I install?</button>
+            <button class="quick-btn" data-q="sovereignty">sovereignty</button>
+            <button class="quick-btn" data-q="compression">compression</button>
+        </div>
+
         <div class="input-row">
-            <input id="msgInput" type="text" placeholder="اكتب رسالتك هنا..." />
-            <button id="sendBtn" onclick="send()">إرسال</button>
+            <input id="msgInput" type="text" placeholder="اكتب رسالتك هنا... (Type your message here...)" autocomplete="off" />
+            <button id="sendBtn">إرسال (Send)</button>
         </div>
 
         <div class="footer">
-            <p>5 endpoints only · <a href="/docs">API Docs</a> · <a href="/metrics">Metrics</a> · <a href="/healthz/live">Health</a></p>
+            <p>
+                <a href="/docs" target="_blank">📚 API Docs</a> ·
+                <a href="/healthz/live" target="_blank">💚 Health</a> ·
+                <a href="/api/compression" target="_blank">📊 Compression</a> ·
+                <a href="/metrics" target="_blank">📈 Metrics</a>
+            </p>
+            <p style="margin-top: 0.5rem;">
+                🪞 <strong>Adam Prism</strong> ·
+                Built by <a href="mailto:othmastar@gmail.com">Mohamed Othman</a> ·
+                <a href="https://github.com/othmastar/adam-prism" target="_blank">GitHub</a>
+            </p>
+            <p style="margin-top: 0.5rem; font-size: 0.8rem; color: #64748b;">
+                AGPL v3 + Commercial Dual License · 93 features in full version
+            </p>
         </div>
     </div>
 
@@ -73,17 +226,38 @@
         const msgInput = document.getElementById('msgInput');
         const sendBtn = document.getElementById('sendBtn');
 
-        async function send() {
-            const msg = msgInput.value.trim();
+        function escapeHtml(s) {
+            return s.replace(/[&<>"']/g, c => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[c]));
+        }
+
+        function formatMarkdown(text) {
+            // Simple markdown: **bold**, *italic*, code
+            return escapeHtml(text)
+                .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+                .replace(/`([^`]+)`/g, '<code style="background:#0f172a;padding:0.1em 0.3em;border-radius:0.2em">$1</code>');
+        }
+
+        async function send(text) {
+            const msg = (text || msgInput.value).trim();
             if (!msg) return;
             sendBtn.disabled = true;
+            msgInput.value = '';
 
             // Add user message
             const userDiv = document.createElement('div');
             userDiv.className = 'message user';
-            userDiv.innerHTML = `<div class="label">أنت</div><div>${escapeHtml(msg)}</div>`;
+            userDiv.innerHTML = `<div class="label">You / أنت</div><div>${formatMarkdown(msg)}</div>`;
             chatBox.appendChild(userDiv);
-            msgInput.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // Add Adam placeholder
+            const adamDiv = document.createElement('div');
+            adamDiv.className = 'message adam';
+            adamDiv.innerHTML = `<div class="label animated">آدم (Adam) — typing<span class="typing"></span></div><div>...</div>`;
+            chatBox.appendChild(adamDiv);
             chatBox.scrollTop = chatBox.scrollHeight;
 
             try {
@@ -93,31 +267,22 @@
                     body: JSON.stringify({ message: msg })
                 });
                 const data = await resp.json();
-                const adamDiv = document.createElement('div');
-                adamDiv.className = 'message adam';
-                adamDiv.innerHTML = `<div class="label">آدم (Adam)</div><div>${escapeHtml(data.response)}</div>`;
-                chatBox.appendChild(adamDiv);
-                chatBox.scrollTop = chatBox.scrollHeight;
+                adamDiv.innerHTML = `<div class="label">آدم (Adam)</div><div>${formatMarkdown(data.response)}</div>`;
             } catch (e) {
-                const errDiv = document.createElement('div');
-                errDiv.className = 'message adam';
-                errDiv.innerHTML = `<div class="label">آدم (Adam)</div><div>Error: ${e.message}</div>`;
-                chatBox.appendChild(errDiv);
+                adamDiv.innerHTML = `<div class="label">Error</div><div>${escapeHtml(e.message)}</div>`;
             } finally {
                 sendBtn.disabled = false;
                 msgInput.focus();
+                chatBox.scrollTop = chatBox.scrollHeight;
             }
         }
 
-        function escapeHtml(s) {
-            return s.replace(/[&<>"']/g, c => ({
-                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-            }[c]));
-        }
-
-        msgInput.addEventListener('keypress', e => {
-            if (e.key === 'Enter') send();
+        sendBtn.addEventListener('click', () => send());
+        msgInput.addEventListener('keypress', e => { if (e.key === 'Enter') send(); });
+        document.querySelectorAll('.quick-btn').forEach(btn => {
+            btn.addEventListener('click', () => send(btn.dataset.q));
         });
+        msgInput.focus();
     </script>
 </body>
 </html>
