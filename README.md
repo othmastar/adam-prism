@@ -373,23 +373,6 @@ If Adam helped you — or if you want to support its open-source development and
 
 **Recommended platforms (in order):**
 
-1. **GitHub Sponsors** (best for open source)
-   👉 https://github.com/sponsors/othmastar
-   - Monthly tiers ($5, $25, $100, custom)
-   - 100% to maintainer (no fees)
-   - Direct support from your GitHub audience
-
-2. **Open Collective** (best for transparency)
-   👉 https://opencollective.com/adam-prism
-   - Public expense reports
-   - Suitable for OSS projects
-   - Can claim expenses (e.g., Ollama GPU costs)
-
-3. **Buy Me a Coffee** (simplest)
-   👉 https://buymeacoffee.com/othmastar
-   - One-time tips
-   - Quick setup
-   - _(Set up this username first)_
 
 **What your support covers:**
 
