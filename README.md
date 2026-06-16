@@ -368,25 +368,25 @@ Building sovereign AI takes 12 years of industrial expertise and a lot of coffee
 If Adam helped you — or if you want to support its open-source development and host the public demo — consider sponsoring:
 
 ### 🇪🇬 ادعم تطوير آدم
-> بناء ذكاء اصطناعي سيادي يحتاج 12 سنة خبرة وكوب قهوة كتير ☕
+> بناء ذكاء اصطناعي سيادي يحتاج 12 سنة خبرة وكوب قهوة كبير ☕
 > لو آدم ساعدك أو عايز تدعم تطويره، ادعمني:
 
 **Recommended platforms (in order):**
 
 1. **GitHub Sponsors** (best for open source)
-   👉 https://github.com/sponsors/othmastar
+   👉 email me 
    - Monthly tiers ($5, $25, $100, custom)
    - 100% to maintainer (no fees)
    - Direct support from your GitHub audience
 
 2. **Open Collective** (best for transparency)
-   👉 https://opencollective.com/adam-prism
+   👉 call me 
    - Public expense reports
    - Suitable for OSS projects
    - Can claim expenses (e.g., Ollama GPU costs)
 
 3. **Buy Me a Coffee** (simplest)
-   👉 https://buymeacoffee.com/othmastar
+   👉 https://call me 
    - One-time tips
    - Quick setup
    - _(Set up this username first)_
