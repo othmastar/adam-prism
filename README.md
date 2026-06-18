@@ -414,7 +414,7 @@ If Adam helped you — or if you want to support its open-source development and
 Want to try Adam but don't have technical background? See **[`USER_GUIDE.md`](USER_GUIDE.md)** for step-by-step instructions for Windows, Mac, and Linux — with screenshots descriptions and no jargon.
 
 **TL;DR for everyone:**
-1. Open **https://othmastar.github.io/adam-prism/** in your browser
+1. Open **[adam-prism.online](https://adam-prism.online)** in your browser
 2. Type a message in Arabic or English
 3. Press Enter
 4. Done! ✨
@@ -454,6 +454,6 @@ See:
 
 *صُنع في مصر. للعالم. بواسطة محمد عثمان.*
 
-[⭐ Star this repo](https://github.com/othmastar/adam-prism) • [📦 Releases](https://github.com/othmastar/adam-prism/releases) • [🌐 Live Demo](https://othmastar.github.io/adam-prism/)
+[⭐ Star this repo](https://github.com/othmastar/adam-prism) • [📦 Releases](https://github.com/othmastar/adam-prism/releases) • [🌐 Live Demo](https://adam-prism.online)
 
 </div>

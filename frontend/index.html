@@ -3,286 +3,222 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adam Prism — Try Adam Now (Demo)</title>
-    <meta name="description" content="Try Adam Prism — the first Arabic-conscious Digital Twin. No installation, no signup, just chat.">
+    <title>Adam Prism — أول Digital Twin واعٍ عربي</title>
+    <meta name="description" content="Adam Prism — the first Arabic-conscious Digital Twin. Sovereign AI for critical infrastructure. Try it free.">
+    <meta name="keywords" content="Adam Prism, AI agent, Arabic AI, sovereign AI, chatbot, SCADA, digital twin, LLM, Ollama">
+    <meta property="og:title" content="Adam Prism — Sovereign AI Platform">
+    <meta property="og:description" content="أول Digital Twin واعٍ عربي. ملكك بالكامل.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://adam-prism.online">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         :root {
-            --bg: #0f172a;
-            --card: #1e293b;
-            --border: #334155;
-            --text: #e2e8f0;
-            --muted: #94a3b8;
+            --bg: #0a0e1a;
+            --card: #131829;
+            --border: #1f2547;
+            --text: #e8eaf0;
+            --muted: #8b91a8;
             --accent: #10b981;
-            --accent-hover: #059669;
-            --user: #3b82f6;
+            --accent-2: #06b6d4;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, sans-serif;
             background: var(--bg);
             color: var(--text);
             min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .hero {
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 1rem;
-        }
-        .container { max-width: 800px; width: 100%; }
-        header {
+            justify-content: center;
+            padding: 2rem;
             text-align: center;
-            padding: 1.5rem 0 1rem;
+            position: relative;
+            background: radial-gradient(ellipse at top, rgba(16, 185, 129, 0.15) 0%, transparent 50%),
+                        radial-gradient(ellipse at bottom, rgba(6, 182, 212, 0.1) 0%, transparent 50%);
         }
-        h1 { font-size: 2rem; margin-bottom: 0.25rem; }
-        .subtitle { color: var(--muted); font-size: 0.95rem; }
-        .badges { margin-top: 0.5rem; }
+        .hero::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(16, 185, 129, 0.1) 0%, transparent 30%),
+                radial-gradient(circle at 80% 70%, rgba(6, 182, 212, 0.1) 0%, transparent 30%);
+            pointer-events: none;
+        }
+        .content { position: relative; z-index: 1; max-width: 900px; }
+        .logo { font-size: 5rem; margin-bottom: 0.5rem; }
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .tagline { font-size: 1.5rem; color: var(--muted); margin-bottom: 1rem; }
+        .subtitle { font-size: 1.1rem; color: var(--muted); margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto; }
+        .badges { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; margin: 1.5rem 0; }
         .badge {
             display: inline-block;
-            padding: 0.15rem 0.6rem;
+            padding: 0.4rem 1rem;
             background: var(--card);
             border: 1px solid var(--border);
             border-radius: 9999px;
-            font-size: 0.75rem;
-            margin: 0.2rem;
+            font-size: 0.85rem;
         }
         .badge.green { background: #065f46; border-color: #047857; }
-        .chat-box {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 0.75rem;
-            padding: 1rem;
-            margin: 1rem 0;
-            min-height: 400px;
-            max-height: 60vh;
-            overflow-y: auto;
-        }
-        .message {
-            margin-bottom: 1rem;
-            padding: 0.75rem 1rem;
-            border-radius: 0.75rem;
-            white-space: pre-wrap;
-            line-height: 1.5;
-        }
-        .user {
-            background: var(--user);
-            color: white;
-            margin-right: 3rem;
-        }
-        .adam {
-            background: #0f172a;
-            border: 1px solid var(--border);
-            margin-left: 3rem;
-        }
-        .label { font-size: 0.75rem; color: var(--muted); margin-bottom: 0.25rem; }
-        .label.animated { color: var(--accent); }
-        .input-row {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 1rem;
-        }
-        input {
-            flex: 1;
-            padding: 0.75rem 1rem;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 0.5rem;
-            color: var(--text);
-            font-size: 1rem;
-            font-family: inherit;
-        }
-        input:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
-        button {
-            padding: 0.75rem 1.5rem;
+        .cta-buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; margin: 2rem 0; }
+        .cta {
+            display: inline-block;
+            padding: 1rem 2rem;
             background: var(--accent);
             color: white;
-            border: none;
+            text-decoration: none;
             border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: transform 0.2s, background 0.2s;
+            border: none;
             cursor: pointer;
-            font-size: 1rem;
-            font-weight: 500;
         }
-        button:hover { background: var(--accent-hover); }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
-        .quick-questions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 1rem;
-            padding: 0.75rem;
+        .cta:hover { background: var(--accent-2); transform: translateY(-2px); }
+        .cta.secondary { background: transparent; border: 2px solid var(--accent); color: var(--accent); }
+        .cta.secondary:hover { background: var(--accent); color: white; }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 3rem 0;
+        }
+        .feature {
             background: var(--card);
             border: 1px solid var(--border);
-            border-radius: 0.5rem;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            text-align: left;
         }
-        .quick-btn {
-            padding: 0.4rem 0.8rem;
-            background: var(--bg);
-            border: 1px solid var(--border);
+        .feature h3 { color: var(--accent); font-size: 1.2rem; margin-bottom: 0.5rem; }
+        .feature p { color: var(--muted); font-size: 0.95rem; line-height: 1.5; }
+        .feature .icon { font-size: 2rem; margin-bottom: 0.5rem; }
+        .sponsors {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #065f46 0%, #047857 100%);
+            border-radius: 0.75rem;
+        }
+        .sponsors a {
+            color: white;
+            text-decoration: none;
+            background: rgba(0,0,0,0.2);
+            padding: 0.75rem 1.5rem;
             border-radius: 9999px;
-            color: var(--text);
-            font-size: 0.85rem;
-            cursor: pointer;
+            display: inline-block;
+            margin: 0.5rem;
+            font-weight: 600;
+            transition: background 0.2s;
         }
-        .quick-btn:hover { background: var(--accent); border-color: var(--accent); }
+        .sponsors a:hover { background: rgba(0,0,0,0.3); }
         .footer {
-            margin-top: 2rem;
+            padding: 2rem;
             text-align: center;
             color: var(--muted);
-            font-size: 0.85rem;
-            padding: 1rem 0;
+            border-top: 1px solid var(--border);
         }
-        .footer a { color: var(--accent); text-decoration: none; margin: 0 0.5rem; }
-        .footer a:hover { text-decoration: underline; }
-        .info-banner {
-            background: linear-gradient(135deg, #065f46 0%, #047857 100%);
-            border-radius: 0.5rem;
-            padding: 0.75rem 1rem;
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
-            text-align: center;
-        }
-        .typing {
-            display: inline-block;
-            width: 0.6em;
-            height: 0.6em;
-            background: var(--accent);
-            border-radius: 50%;
-            animation: blink 1s infinite;
-            margin-left: 0.3em;
-        }
-        @keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+        .footer a { color: var(--accent); text-decoration: none; }
+        .contact { margin-top: 1rem; }
+        .contact a { margin: 0 0.5rem; }
         @media (max-width: 600px) {
-            h1 { font-size: 1.5rem; }
-            .user, .adam { margin: 0 0 1rem 0; }
-            .quick-questions { justify-content: center; }
+            h1 { font-size: 2.5rem; }
+            .tagline { font-size: 1.2rem; }
+            .logo { font-size: 3.5rem; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🪞 Adam Prism</h1>
-            <p class="subtitle">أول Digital Twin واعٍ عربي — The first Arabic-conscious Digital Twin</p>
+    <section class="hero">
+        <div class="content">
+            <div class="logo">🪞</div>
+            <h1>Adam Prism</h1>
+            <p class="tagline">أول Digital Twin واعٍ عربي</p>
+            <p class="subtitle">Sovereign AI for critical infrastructure.<br>
+            Runs on YOUR machine. Speaks YOUR language. Respects YOUR data.</p>
+
             <div class="badges">
-                <span class="badge green">✓ Live Demo (No Signup)</span>
+                <span class="badge green">✓ Free to try</span>
                 <span class="badge">Bilingual (AR + EN)</span>
-                <span class="badge">93 Features Available</span>
+                <span class="badge">Open source</span>
+                <span class="badge">5 features (showcase)</span>
             </div>
-        </header>
 
-        <div class="info-banner">
-            👋 This is a live demo. Type in Arabic or English. Adam is running with intelligent mock responses (full LLM version available — see footer).
-        </div>
+            <div class="cta-buttons">
+                <a href="/chat" class="cta">🪞 Try Adam Now</a>
+                <a href="https://github.com/othmastar/adam-prism" class="cta secondary">⭐ Star on GitHub</a>
+            </div>
 
-        <div class="chat-box" id="chatBox">
-            <div class="message adam">
-                <div class="label">آدم (Adam) — Sovereign AI Agent</div>
-                <div>أهلاً بيك! 👋
+            <div class="sponsors">
+                <p style="color: white; margin-bottom: 0.5rem;">☕ <strong>Support Adam's Development</strong></p>
+                <p style="color: rgba(255,255,255,0.9); font-size: 0.9rem; margin-bottom: 1rem;">Help us host the public demo, run the Ollama GPU server, and keep Adam free under AGPL v3.</p>
+                <a href="https://github.com/sponsors/othmastar" target="_blank">💖 Sponsor on GitHub</a>
+                <a href="https://buymeacoffee.com/othmastar" target="_blank">☕ Buy Me a Coffee</a>
+                <a href="https://opencollective.com/adam-prism" target="_blank">🏛️ Open Collective</a>
+            </div>
 
-أنا آدم — أول Digital Twin واعٍ عربي. مبني على 12 طبقة وعي، 38 أداة، و25 قناة تواصل.
+            <h2 style="margin-top: 3rem; margin-bottom: 1.5rem; font-size: 1.5rem;">Why Adam Prism?</h2>
 
-جرّب اسألني أي حاجة. لو عايز الإجابات الكاملة، شغّل Ollama محلياً (مجاني).
+            <div class="features">
+                <div class="feature">
+                    <div class="icon">🏰</div>
+                    <h3>Sovereign</h3>
+                    <p>Runs on YOUR machine. Data never leaves. GDPR, HIPAA, NERC-CIP compliant. Air-gapped deployment supported.</p>
+                </div>
+                <div class="feature">
+                    <div class="icon">🗣️</div>
+                    <h3>Native Arabic</h3>
+                    <p>Built from scratch for Arabic. 5 dialects with voice cloning. Egyptian, MSA, Levantine, Gulf, Maghrebi.</p>
+                </div>
+                <div class="feature">
+                    <div class="icon">🧠</div>
+                    <h3>Conscious</h3>
+                    <p>12 consciousness layers. 4-layer Iron Memory. 4 ethics laws. Closed-loop learning. Multi-tenant + RBAC.</p>
+                </div>
+                <div class="feature">
+                    <div class="icon">🛠️</div>
+                    <h3>Powerful</h3>
+                    <p>38 tools. 25 channels. 4 native apps (Web, Mobile, Desktop, VSCode). 93 API routes. 134 tests.</p>
+                </div>
+                <div class="feature">
+                    <div class="icon">📦</div>
+                    <h3>Context Compression</h3>
+                    <p>50-90% token savings with Headroom. Run bigger models on smaller hardware. Air-gapped compatible.</p>
+                </div>
+                <div class="feature">
+                    <div class="icon">🔓</div>
+                    <h3>Open Source</h3>
+                    <p>AGPL v3 + Commercial dual-license. Full version distributed under NDA. Showcase always free.</p>
+                </div>
+            </div>
 
-I'm Adam — the first Arabic-conscious Digital Twin. Built on 12 consciousness layers, 38 tools, 25 channels.
-
-Ask me anything. For full AI, run Ollama locally (free).</div>
+            <div class="cta-buttons">
+                <a href="/chat" class="cta">Try Adam in your browser →</a>
             </div>
         </div>
+    </section>
 
-        <div class="quick-questions">
-            <button class="quick-btn" data-q="انت مين؟">انت مين؟</button>
-            <button class="quick-btn" data-q="ايه مميزاتك؟">ايه مميزاتك؟</button>
-            <button class="quick-btn" data-q="ازاي اشغلك؟">ازاي اشغلك؟</button>
-            <button class="quick-btn" data-q="Who are you?">Who are you?</button>
-            <button class="quick-btn" data-q="What can you do?">What can you do?</button>
-            <button class="quick-btn" data-q="How do I install you?">How do I install?</button>
-            <button class="quick-btn" data-q="sovereignty">sovereignty</button>
-            <button class="quick-btn" data-q="compression">compression</button>
-        </div>
-
-        <div class="input-row">
-            <input id="msgInput" type="text" placeholder="اكتب رسالتك هنا... (Type your message here...)" autocomplete="off" />
-            <button id="sendBtn">إرسال (Send)</button>
-        </div>
-
-        <div class="footer">
-            <p>
-                <a href="/docs" target="_blank">📚 API Docs</a> ·
-                <a href="/healthz/live" target="_blank">💚 Health</a> ·
-                <a href="/api/compression" target="_blank">📊 Compression</a> ·
-                <a href="/metrics" target="_blank">📈 Metrics</a>
-            </p>
-            <p style="margin-top: 0.5rem;">
-                🪞 <strong>Adam Prism</strong> ·
-                Built by <a href="mailto:othmastar@gmail.com">Mohamed Othman</a> ·
-                <a href="https://github.com/othmastar/adam-prism" target="_blank">GitHub</a>
-            </p>
-            <p style="margin-top: 0.5rem; font-size: 0.8rem; color: #64748b;">
-                AGPL v3 + Commercial Dual License · 93 features in full version
-            </p>
-        </div>
-    </div>
-
-    <script>
-        const chatBox = document.getElementById('chatBox');
-        const msgInput = document.getElementById('msgInput');
-        const sendBtn = document.getElementById('sendBtn');
-
-        function escapeHtml(s) {
-            return s.replace(/[&<>"']/g, c => ({
-                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-            }[c]));
-        }
-
-        function formatMarkdown(text) {
-            // Simple markdown: **bold**, *italic*, code
-            return escapeHtml(text)
-                .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-                .replace(/\*([^*]+)\*/g, '<em>$1</em>')
-                .replace(/`([^`]+)`/g, '<code style="background:#0f172a;padding:0.1em 0.3em;border-radius:0.2em">$1</code>');
-        }
-
-        async function send(text) {
-            const msg = (text || msgInput.value).trim();
-            if (!msg) return;
-            sendBtn.disabled = true;
-            msgInput.value = '';
-
-            // Add user message
-            const userDiv = document.createElement('div');
-            userDiv.className = 'message user';
-            userDiv.innerHTML = `<div class="label">You / أنت</div><div>${formatMarkdown(msg)}</div>`;
-            chatBox.appendChild(userDiv);
-            chatBox.scrollTop = chatBox.scrollHeight;
-
-            // Add Adam placeholder
-            const adamDiv = document.createElement('div');
-            adamDiv.className = 'message adam';
-            adamDiv.innerHTML = `<div class="label animated">آدم (Adam) — typing<span class="typing"></span></div><div>...</div>`;
-            chatBox.appendChild(adamDiv);
-            chatBox.scrollTop = chatBox.scrollHeight;
-
-            try {
-                const resp = await fetch('/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: msg })
-                });
-                const data = await resp.json();
-                adamDiv.innerHTML = `<div class="label">آدم (Adam)</div><div>${formatMarkdown(data.response)}</div>`;
-            } catch (e) {
-                adamDiv.innerHTML = `<div class="label">Error</div><div>${escapeHtml(e.message)}</div>`;
-            } finally {
-                sendBtn.disabled = false;
-                msgInput.focus();
-                chatBox.scrollTop = chatBox.scrollHeight;
-            }
-        }
-
-        sendBtn.addEventListener('click', () => send());
-        msgInput.addEventListener('keypress', e => { if (e.key === 'Enter') send(); });
-        document.querySelectorAll('.quick-btn').forEach(btn => {
-            btn.addEventListener('click', () => send(btn.dataset.q));
-        });
-        msgInput.focus();
-    </script>
+    <footer class="footer">
+        <p>Built in Egypt. For the world.</p>
+        <p class="contact">
+            📧 <a href="mailto:othmastar@gmail.com">othmastar@gmail.com</a> ·
+            💼 <a href="https://www.linkedin.com/in/othmastar" target="_blank">LinkedIn</a> ·
+            📱 <a href="https://wa.me/201002926918" target="_blank">+20 100 292 6918</a>
+        </p>
+        <p style="margin-top: 1rem; font-size: 0.85rem;">
+            🪞 Adam Prism v1.0.0b1 · AGPL v3 + Commercial dual-license
+        </p>
+    </footer>
 </body>
 </html>
