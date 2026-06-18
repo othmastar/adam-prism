@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adam Prism — Chat | أول Digital Twin واعٍ عربي</title>
-    <meta name="description" content="Try Adam Prism in your browser. Bilingual AI (Arabic + English). Demo mode (mock responses).">
+    <title>Adam Prism — Try Adam Now (Demo)</title>
+    <meta name="description" content="Try Adam Prism — the first Arabic-conscious Digital Twin. No installation, no signup, just chat.">
     <meta property="og:title" content="Adam Prism — Chat">
     <meta property="og:description" content="أول Digital Twin واعٍ عربي. جربه في متصفحك.">
     <meta property="og:type" content="website">
@@ -12,15 +12,15 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         :root {
-            --bg: #0a0e1a;
-            --card: #131829;
-            --border: #1f2547;
-            --text: #e8eaf0;
-            --muted: #8b91a8;
+            --bg: #0f172a;
+            --card: #1e293b;
+            --border: #334155;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
             --accent: #10b981;
-            --accent-2: #06b6d4;
-            --user-bubble: #065f46;
-            --adam-bubble: #1f2547;
+            --accent-hover: #059669;
+            --user: #3b82f6;
+            --warn: #f59e0b;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, sans-serif;
@@ -29,136 +29,70 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-        }
-        .header {
-            padding: 1rem 2rem;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
             align-items: center;
-            background: var(--card);
-        }
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-        .logo { font-size: 1.5rem; }
-        .header h1 {
-            font-size: 1.25rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .header-right {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-        }
-        .demo-badge {
-            background: #f59e0b;
-            color: #000;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 700;
-        }
-        .back-link {
-            color: var(--accent);
-            text-decoration: none;
-            font-size: 0.9rem;
-            padding: 0.5rem 1rem;
-            border: 1px solid var(--border);
-            border-radius: 0.5rem;
-            transition: background 0.2s;
-        }
-        .back-link:hover { background: var(--card); }
-        .chat-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            max-width: 900px;
-            width: 100%;
-            margin: 0 auto;
             padding: 1rem;
         }
-        .messages {
-            flex: 1;
+        .container { max-width: 800px; width: 100%; }
+        header {
+            text-align: center;
+            padding: 1.5rem 0 1rem;
+        }
+        h1 { font-size: 2rem; margin-bottom: 0.25rem; }
+        .subtitle { color: var(--muted); font-size: 0.95rem; }
+        .badges { margin-top: 0.5rem; }
+        .badge {
+            display: inline-block;
+            padding: 0.15rem 0.6rem;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            margin: 0.2rem;
+        }
+        .badge.green { background: #065f46; border-color: #047857; }
+        .badge.warn { background: #92400e; border-color: #b45309; color: white; }
+        .badge.live { background: #1e3a8a; border-color: #2563eb; color: white; }
+        .chat-box {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin: 1rem 0;
+            min-height: 400px;
+            max-height: 60vh;
             overflow-y: auto;
-            padding: 1rem 0;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
         }
         .message {
-            display: flex;
-            gap: 0.75rem;
-            max-width: 80%;
-            animation: slideIn 0.3s ease;
-        }
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .message.user {
-            align-self: flex-end;
-            flex-direction: row-reverse;
-        }
-        .message-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-            flex-shrink: 0;
-        }
-        .message.user .message-avatar {
-            background: var(--user-bubble);
-        }
-        .message.adam .message-avatar {
-            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
-        }
-        .message-bubble {
+            margin-bottom: 1rem;
             padding: 0.75rem 1rem;
-            border-radius: 1rem;
-            line-height: 1.5;
+            border-radius: 0.75rem;
             white-space: pre-wrap;
-            word-wrap: break-word;
+            line-height: 1.5;
         }
-        .message.user .message-bubble {
-            background: var(--user-bubble);
-            border-bottom-right-radius: 0.25rem;
+        .user {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 3px solid var(--user);
+            margin-left: 1rem;
         }
-        .message.adam .message-bubble {
-            background: var(--adam-bubble);
-            border: 1px solid var(--border);
-            border-bottom-left-radius: 0.25rem;
+        .adam {
+            background: rgba(16, 185, 129, 0.08);
+            border-left: 3px solid var(--accent);
+            margin-right: 1rem;
         }
-        .message-bubble code {
-            background: rgba(0,0,0,0.3);
-            padding: 0.1rem 0.4rem;
-            border-radius: 0.25rem;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9em;
+        .label {
+            font-size: 0.75rem;
+            color: var(--muted);
+            margin-bottom: 0.25rem;
+            font-weight: 600;
         }
-        .message-bubble pre {
-            background: rgba(0,0,0,0.3);
-            padding: 0.75rem;
-            border-radius: 0.5rem;
-            overflow-x: auto;
-            margin: 0.5rem 0;
-        }
-        .input-area {
-            padding: 1rem 0;
-            border-top: 1px solid var(--border);
+        .user .label { color: var(--user); }
+        .adam .label { color: var(--accent); }
+        .input-row {
             display: flex;
             gap: 0.5rem;
+            margin-top: 1rem;
         }
-        .input-area input {
+        input {
             flex: 1;
             padding: 0.75rem 1rem;
             background: var(--card);
@@ -168,162 +102,169 @@
             font-size: 1rem;
             font-family: inherit;
         }
-        .input-area input:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-        .input-area button {
+        input:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
+        button {
             padding: 0.75rem 1.5rem;
             background: var(--accent);
             color: white;
             border: none;
             border-radius: 0.5rem;
-            font-weight: 600;
             cursor: pointer;
             font-size: 1rem;
-            transition: background 0.2s;
+            font-weight: 500;
         }
-        .input-area button:hover { background: var(--accent-2); }
-        .input-area button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        .quick-prompts {
+        button:hover { background: var(--accent-hover); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .quick-questions {
             display: flex;
             flex-wrap: wrap;
             gap: 0.5rem;
-            padding: 0.5rem 0;
-        }
-        .quick-prompt {
-            padding: 0.5rem 1rem;
+            margin-top: 1rem;
+            padding: 0.75rem;
             background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+        }
+        .quick-btn {
+            padding: 0.4rem 0.8rem;
+            background: var(--bg);
             border: 1px solid var(--border);
             border-radius: 9999px;
             color: var(--text);
-            cursor: pointer;
             font-size: 0.85rem;
-            transition: background 0.2s;
+            cursor: pointer;
         }
-        .quick-prompt:hover {
-            background: var(--adam-bubble);
-            border-color: var(--accent);
-        }
-        .notice {
-            background: rgba(245, 158, 11, 0.1);
-            border: 1px solid #f59e0b;
-            padding: 0.75rem 1rem;
-            border-radius: 0.5rem;
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
-            color: #f59e0b;
-        }
-        .notice strong { color: #fbbf24; }
+        .quick-btn:hover { background: var(--accent); border-color: var(--accent); }
         .footer {
-            padding: 1rem 2rem;
+            margin-top: 2rem;
             text-align: center;
             color: var(--muted);
             font-size: 0.85rem;
-            border-top: 1px solid var(--border);
+            padding: 1rem 0;
         }
-        .footer a {
-            color: var(--accent);
-            text-decoration: none;
-        }
+        .footer a { color: var(--accent); text-decoration: none; margin: 0 0.5rem; }
         .footer a:hover { text-decoration: underline; }
+        .info-banner {
+            background: linear-gradient(135deg, #065f46 0%, #047857 100%);
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        .typing {
+            display: inline-block;
+            width: 0.6em;
+            height: 0.6em;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: blink 1s infinite;
+            margin-left: 0.3em;
+        }
+        @keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
         @media (max-width: 600px) {
-            .header { padding: 0.75rem 1rem; }
-            .header h1 { font-size: 1rem; }
-            .message { max-width: 90%; }
+            h1 { font-size: 1.5rem; }
+            .user, .adam { margin: 0 0 1rem 0; }
+            .quick-questions { justify-content: center; }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="header-left">
-            <span class="logo">🪞</span>
-            <h1>Adam Prism Chat</h1>
-        </div>
-        <div class="header-right">
-            <span class="demo-badge">⚡ DEMO MODE</span>
-            <a href="./" class="back-link">← Home</a>
-        </div>
-    </div>
+    <div class="container">
+        <header>
+            <h1>🪞 Adam Prism</h1>
+            <p class="subtitle">أول Digital Twin واعٍ عربي — The first Arabic-conscious Digital Twin</p>
+            <div class="badges" id="badges">
+                <span class="badge green">✓ Live Demo (No Signup)</span>
+                <span class="badge">Bilingual (AR + EN)</span>
+                <span class="badge warn" id="modeBadge">⚡ Checking backend...</span>
+            </div>
+        </header>
 
-    <div class="chat-container">
-        <div class="notice">
-            <strong>⚠️ Demo Mode:</strong> This is a static demo with pattern-matched responses (bilingual).
-            For real AI responses, <a href="https://github.com/othmastar/adam-prism#-30-seconds-and-its-running" style="color:#fbbf24;">run Adam locally</a> with Ollama.
+        <div class="info-banner" id="infoBanner">
+            👋 This is a live demo. Type in Arabic or English. Adam is running with intelligent mock responses (full LLM version available — see footer).
         </div>
 
-        <div class="messages" id="messages">
+        <div class="chat-box" id="chatBox">
             <div class="message adam">
-                <div class="message-avatar">🪞</div>
-                <div class="message-bubble">أهلاً بيك! أنا آدم (Adam Prism) — أول Digital Twin واعٍ عربي.
+                <div class="label">آدم (Adam) — Sovereign AI Agent</div>
+                <div>أهلاً بيك! 👋
 
-أقدر أساعدك بالعربي أو الإنجليزي. اسألني عن المميزات، الأسعار، التثبيت، أو أي حاجة تانية!
+أنا آدم — أول Digital Twin واعٍ عربي. مبني على 12 طبقة وعي، 38 أداة، و25 قناة تواصل.
 
----
+جرّب اسألني أي حاجة. لو عايز الإجابات الكاملة، شغّل Ollama محلياً (مجاني).
 
-Hello! I'm Adam (Adam Prism) — the first Arabic-conscious Digital Twin.
+I'm Adam — the first Arabic-conscious Digital Twin. Built on 12 consciousness layers, 38 tools, 25 channels.
 
-Ask me about features, pricing, installation, or anything else!</div>
+Ask me anything. For full AI, run Ollama locally (free).</div>
             </div>
         </div>
 
-        <div class="quick-prompts" id="quickPrompts">
-            <button class="quick-prompt" data-prompt="انت مين؟">🤔 انت مين؟</button>
-            <button class="quick-prompt" data-prompt="ايه مميزاتك؟">✨ ايه مميزاتك؟</button>
-            <button class="quick-prompt" data-prompt="ازاي اشغلك؟">⚙️ ازاي اشغلك؟</button>
-            <button class="quick-prompt" data-prompt="ايه الأسعار؟">💰 ايه الأسعار؟</button>
-            <button class="quick-prompt" data-prompt="Who are you?">🤔 Who are you?</button>
-            <button class="quick-prompt" data-prompt="What can you do?">✨ What can you do?</button>
-            <button class="quick-prompt" data-prompt="How to install?">⚙️ How to install?</button>
-            <button class="quick-prompt" data-prompt="What about sovereignty?">🏰 Sovereignty?</button>
+        <div class="quick-questions">
+            <button class="quick-btn" data-q="انت مين؟">انت مين؟</button>
+            <button class="quick-btn" data-q="ايه مميزاتك؟">ايه مميزاتك؟</button>
+            <button class="quick-btn" data-q="ازاي اشغلك؟">ازاي اشغلك؟</button>
+            <button class="quick-btn" data-q="Who are you?">Who are you?</button>
+            <button class="quick-btn" data-q="What can you do?">What can you do?</button>
+            <button class="quick-btn" data-q="How do I install you?">How do I install?</button>
+            <button class="quick-btn" data-q="sovereignty">sovereignty</button>
+            <button class="quick-btn" data-q="compression">compression</button>
         </div>
 
-        <div class="input-area">
-            <input type="text" id="messageInput" placeholder="اكتب رسالتك هنا... | Type your message..." autocomplete="off" autofocus>
-            <button id="sendButton">Send / إرسال</button>
+        <div class="input-row">
+            <input id="msgInput" type="text" placeholder="اكتب رسالتك هنا... (Type your message here...)" autocomplete="off" />
+            <button id="sendBtn">إرسال (Send)</button>
         </div>
-    </div>
 
-    <div class="footer">
-        🪞 Adam Prism v1.0.0b1 · <a href="https://github.com/othmastar/adam-prism">GitHub</a> · <a href="./sponsors.html">Sponsor</a>
+        <div class="footer">
+            <p>
+                <a href="./">🏠 Home</a> ·
+                <a href="./sponsors.html">💖 Sponsor</a> ·
+                <a href="https://github.com/othmastar/adam-prism" target="_blank">📦 GitHub</a>
+            </p>
+            <p style="margin-top: 0.5rem;">
+                🪞 <strong>Adam Prism</strong> ·
+                Built by <a href="mailto:othmastar@gmail.com">Mohamed Othman</a>
+            </p>
+            <p style="margin-top: 0.5rem; font-size: 0.8rem; color: #64748b;">
+                AGPL v3 + Commercial Dual License · 93 features in full version
+            </p>
+        </div>
     </div>
 
     <script>
         // ═══════════════════════════════════════
-        // Mock responses (bilingual, pattern-matched)
-        // Same logic as server_minimal.py
+        // Smart chat client: tries /chat first, falls back to mock
         // ═══════════════════════════════════════
+        const chatBox = document.getElementById('chatBox');
+        const msgInput = document.getElementById('msgInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const modeBadge = document.getElementById('modeBadge');
+        const infoBanner = document.getElementById('infoBanner');
+
+        let backendAvailable = false;
+        let backendCheckDone = false;
+
+        // Embedded mock responses (used when /chat is unavailable)
         const MOCK_RESPONSES = {
             greeting_ar: "أهلاً بيك! أنا آدم (Adam Prism) — أول Digital Twin واعٍ عربي. أقدر أساعدك بالعربي أو الإنجليزي. اسألني أي حاجة!",
             greeting_en: "Hello! I'm Adam (Adam Prism) — the first Arabic-conscious Digital Twin. I can help you in Arabic or English. Ask me anything!",
-
             about_ar: "أنا آدم (Adam Prism):\n• 38 أداة مدمجة (shell, browser, knowledge, voice...)\n• 25 قناة تواصل (Telegram, WhatsApp, web...)\n• 4 تطبيقات (Web, Mobile, Desktop, VSCode)\n• 134 اختبار يجتاز بنجاح\n• AGPL v3 + رخصة تجارية مزدوجة\n\nأنا مبني على 12 طبقة وعي: ذاكرة، أخلاقيات، تعلم، انعكاس، وأكثر!",
             about_en: "I'm Adam (Adam Prism):\n• 38 built-in tools (shell, browser, knowledge, voice...)\n• 25 communication channels (Telegram, WhatsApp, web...)\n• 4 native apps (Web, Mobile, Desktop, VSCode)\n• 134 tests passing\n• AGPL v3 + dual commercial license\n\nI'm built on 12 consciousness layers: memory, ethics, learning, reflection, and more!",
-
             features_ar: "أبرز مميزاتي:\n\n🛠️ **38 أداة**: shell, files, browser, knowledge, planning, vision\n🌍 **25 قناة**: Telegram, WhatsApp, Discord, Slack, Email, Signal\n📱 **4 تطبيقات**: Web, Mobile, Desktop, VSCode\n🧠 **4 طبقات ذاكرة**: Hot file + FTS5 + Qdrant vector + Skills\n🛡️ **3 طبقات أمان**: Input + Output + Tool guards + WAF\n⚖️ **4 قوانين أخلاقية**: Justice, Learning, Survival, Creativity\n\nكل ده مع 134 اختبار يجتاز بنجاح! 🚀",
             features_en: "My key features:\n\n🛠️ **38 tools**: shell, files, browser, knowledge, planning, vision\n🌍 **25 channels**: Telegram, WhatsApp, Discord, Slack, Email, Signal\n📱 **4 apps**: Web, Mobile, Desktop, VSCode\n🧠 **4-layer memory**: Hot file + FTS5 + Qdrant vector + Skills\n🛡️ **3-layer security**: Input + Output + Tool guards + WAF\n⚖️ **4 ethics laws**: Justice, Learning, Survival, Creativity\n\nAll with 134 tests passing! 🚀",
-
             install_ar: "لتشغيني بجودة كاملة، ثبّت Ollama:\n\n**Linux/Mac:**\n```bash\ncurl -fsSL https://ollama.ai/install.sh | sh\nollama serve\nollama pull qwen2.5:3b\n```\n\n**Windows:**\nحمّل من https://ollama.ai\n\nبعدها شغّل الأمر: `./bin/adam`\n\nأو للنسخة الكاملة (93 ميزة): تواصل othmastar@gmail.com",
             install_en: "To run me at full quality, install Ollama:\n\n**Linux/Mac:**\n```bash\ncurl -fsSL https://ollama.ai/install.sh | sh\nollama serve\nollama pull qwen2.5:3b\n```\n\n**Windows:**\nDownload from https://ollama.ai\n\nThen run: `./bin/adam`\n\nFor the full version (93 features): contact othmastar@gmail.com",
-
             sovereignty_ar: "أهم ما يميزني: **السيادة** 🏰\n\n• أشتغل على جهازك (مش في كاليفورنيا)\n• بياناتك ما تخرجش أبداً\n• متوافق مع GDPR, HIPAA, NERC-CIP\n• مفيش telemetry أو tracking\n• 3 طبقات أمان + WAF (OWASP Top 10)\n\nالذكاء الاصطناعي ما يبقاش 'خدمة مستأجرة'. لازم يبقى 'أصل مملوك'.",
             sovereignty_en: "What makes me special: **Sovereignty** 🏰\n\n• I run on YOUR machine (not in California)\n• Your data never leaves\n• GDPR, HIPAA, NERC-CIP compliant\n• No telemetry, no tracking\n• 3-layer security + WAF (OWASP Top 10)\n\nAI shouldn't be a 'rented service'. It should be an owned asset.",
-
             compression_ar: "ميزة فريدة: **ضغط السياق** 📦\n\nأقدر أضغط 50-90% من الـ tokens باستخدام Headroom:\n• 10K tokens → 1-3K tokens\n• جودة الإجابة نفسها\n• تكلفة أقل 90%\n• مع موديلات أصغر\n\nمثالي للـ air-gapped deployments!",
             compression_en: "Unique feature: **Context compression** 📦\n\nI can compress 50-90% of tokens using Headroom:\n• 10K tokens → 1-3K tokens\n• Same response quality\n• 90% lower cost\n• With smaller models\n\nPerfect for air-gapped deployments!",
-
             company_ar: "**Sovereign Neural Fortresses** هي الشركة اللي بنتني:\n\n🏰 تأسست على يد محمد عثمان\n🏭 خبرة 12 سنة في SCADA/DCS الصناعي\n📊 6 أنظمة إنتاج قبل آدم (Yokogawa, Pharmacy, Raafat Lawyer...)\n💼 حلول لكل القطاعات: طاقة، صحة، مالية، دفاع\n\n**معرض Hackathon:** 5 ميزات فقط (proof of capability)\n**النسخة الكاملة:** 93 ميزة + training data + model weights\n\nللتواصل: othmastar@gmail.com",
             company_en: "**Sovereign Neural Fortresses** is the company that built me:\n\n🏰 Founded by Mohamed Othman\n🏭 12 years of industrial SCADA/DCS experience\n📊 6 production systems before Adam (Yokogawa, Pharmacy, Raafat Lawyer...)\n💼 Solutions for every sector: energy, healthcare, finance, defense\n\n**Hackathon showcase:** 5 features only (proof of capability)\n**Full version:** 93 features + training data + model weights\n\nContact: othmastar@gmail.com",
-
             license_ar: "الترخيص:\n\n📜 **AGPL v3**: مجاني للاستخدام الشخصي، التعليمي، والداخلي\n💼 **تجاري**: 3 tiers ($2,400 / $12,000 / $60,000 سنوياً)\n🔒 **النسخة الكاملة**: موزعة تحت NDA\n\n**5 أسئلة كل CEO لازم يجاوبها:**\n1. هل AI بتاعك على server حد تاني؟\n2. لو حصل خرق، شركتك تتحمل لوحدها؟\n3. هل عندك GDPR/HIPAA/NERC-CIP؟\n4. هل تفضل AI داخل جدرانك؟\n5. هل تفضل AI يتدرب على بياناتك؟\n\nلو قلت 'أيوه' لأي سؤال — أنا ليك.",
             license_en: "License:\n\n📜 **AGPL v3**: Free for personal, educational, internal use\n💼 **Commercial**: 3 tiers ($2,400 / $12,000 / $60,000 per year)\n🔒 **Full version**: Distributed under NDA\n\n**5 questions every CEO should answer:**\n1. Is your AI on someone else's server?\n2. If a breach happens, do you bear the consequences alone?\n3. Do you operate under GDPR/HIPAA/NERC-CIP?\n4. Would you prefer AI inside your walls?\n5. Would you want AI trained on YOUR data?\n\nIf you said 'yes' to any — I'm for you.",
-
             pricing_ar: "الأسعار (3 tiers):\n\n🥉 **Startup**: $2,400/سنة (≤ 100 users)\n🥈 **Growth**: $12,000/سنة (≤ 10,000 users)\n🥇 **Enterprise**: $60,000/سنة (unlimited)\n\n🎁 **Sovereign AI Audit** (2 أسابيع): $15-30K — fixed price, no commitment\n\n**ROI**: شركة طاقة متوسطة الحجم توفر **$6.4M سنوياً** مقارنة بـ cloud AI.\n\nللتواصل: othmastar@gmail.com",
             pricing_en: "Pricing (3 tiers):\n\n🥉 **Startup**: $2,400/year (≤ 100 users)\n🥈 **Growth**: $12,000/year (≤ 10,000 users)\n🥇 **Enterprise**: $60,000/year (unlimited)\n\n🎁 **Sovereign AI Audit** (2 weeks): $15-30K — fixed price, no commitment\n\n**ROI**: A mid-size energy company saves **$6.4M annually** vs cloud AI.\n\nContact: othmastar@gmail.com",
-
             help_ar: "أقدر أساعدك في:\n\n🗣️ **محادثة** بالعربي أو الإنجليزي\n🛠️ **38 أداة**: shell, files, browser, knowledge\n🧠 **أسئلة معرفية** (لو Ollama متصل)\n📊 **أسئلة عن آدم** نفسه\n\nجرّب اسألني:\n• \"انت مين؟\"\n• \"ايه مميزاتك؟\"\n• \"ازاي اشغلك؟\"\n• \"ايه الأسعار؟\"\n\nأو اكتب أي سؤال!",
             help_en: "I can help you with:\n\n🗣️ **Conversation** in Arabic or English\n🛠️ **38 tools**: shell, files, browser, knowledge\n🧠 **Knowledge questions** (if Ollama is connected)\n📊 **Questions about Adam** itself\n\nTry asking me:\n• \"Who are you?\"\n• \"What are your features?\"\n• \"How do I install you?\"\n• \"What are the prices?\"\n\nOr write any question!"
         };
@@ -363,11 +304,9 @@ Ask me about features, pricing, installation, or anything else!</div>
             if (/(مساعدة|ساعدني|ايه اللي تقدر|help|what can you)/.test(msg)) {
                 return MOCK_RESPONSES[isArabic ? 'help_ar' : 'help_en'];
             }
-
             if (/[?؟]/.test(msg)) {
                 return MOCK_RESPONSES[isArabic ? 'help_ar' : 'help_en'];
             }
-
             return (
                 `استلمت رسالتك: «${message}»\n\n` +
                 "أنا حالياً في وضع تجريبي (mock). للحصول على إجابات ذكية، " +
@@ -377,84 +316,112 @@ Ask me about features, pricing, installation, or anything else!</div>
             );
         }
 
-        function formatResponse(text) {
-            return text
-                .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
-                .replace(/`([^`]+)`/g, '<code>$1</code>')
-                .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-                .replace(/\n/g, '<br>');
+        function escapeHtml(s) {
+            return String(s).replace(/[&<>"']/g, c => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[c]));
         }
 
-        function addMessage(text, isUser) {
-            const messagesDiv = document.getElementById('messages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${isUser ? 'user' : 'adam'}`;
-
-            const avatar = document.createElement('div');
-            avatar.className = 'message-avatar';
-            avatar.textContent = isUser ? '👤' : '🪞';
-
-            const bubble = document.createElement('div');
-            bubble.className = 'message-bubble';
-            bubble.innerHTML = isUser ? text.replace(/\n/g, '<br>') : formatResponse(text);
-
-            messageDiv.appendChild(avatar);
-            messageDiv.appendChild(bubble);
-            messagesDiv.appendChild(messageDiv);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        function formatMarkdown(text) {
+            // Code blocks first (```...```)
+            text = text.replace(/```(\w*)\n?([\s\S]*?)```/g, '<pre style="background:#0f172a;padding:0.75rem;border-radius:0.4rem;overflow-x:auto;margin:0.5rem 0"><code>$2</code></pre>');
+            // Inline code
+            text = text.replace(/`([^`]+)`/g, '<code style="background:#0f172a;padding:0.1em 0.3em;border-radius:0.2em">$1</code>');
+            // Bold then italic
+            text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+            text = escapeHtml(text);
+            // Re-apply formatting that escapeHtml might have over-escaped (already in <pre>/<code> tags)
+            return text;
         }
 
-        function showTyping() {
-            const messagesDiv = document.getElementById('messages');
-            const typingDiv = document.createElement('div');
-            typingDiv.className = 'message adam';
-            typingDiv.id = 'typingIndicator';
-            typingDiv.innerHTML = `
-                <div class="message-avatar">🪞</div>
-                <div class="message-bubble">يكتب... <span class="dots"></span></div>
-            `;
-            messagesDiv.appendChild(typingDiv);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        // Check backend availability on page load
+        async function checkBackend() {
+            try {
+                const resp = await fetch('/healthz/live', { method: 'GET', signal: AbortSignal.timeout(2000) });
+                if (resp.ok) {
+                    backendAvailable = true;
+                    modeBadge.textContent = '🌐 Backend Connected';
+                    modeBadge.className = 'badge live';
+                    infoBanner.innerHTML = '🌐 <strong>Connected to Adam backend</strong>. Type in Arabic or English. Full AI responses (with Ollama if available).';
+                    infoBanner.style.background = 'linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)';
+                } else {
+                    throw new Error('not ok');
+                }
+            } catch (e) {
+                backendAvailable = false;
+                modeBadge.textContent = '⚡ Demo Mode (mock)';
+                modeBadge.className = 'badge warn';
+            }
+            backendCheckDone = true;
         }
 
-        function hideTyping() {
-            const typing = document.getElementById('typingIndicator');
-            if (typing) typing.remove();
+        async function send(text) {
+            const msg = (text || msgInput.value).trim();
+            if (!msg) return;
+            sendBtn.disabled = true;
+            msgInput.value = '';
+
+            // Add user message
+            const userDiv = document.createElement('div');
+            userDiv.className = 'message user';
+            userDiv.innerHTML = `<div class="label">You / أنت</div><div>${escapeHtml(msg)}</div>`;
+            chatBox.appendChild(userDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // Add Adam placeholder (typing)
+            const adamDiv = document.createElement('div');
+            adamDiv.className = 'message adam';
+            adamDiv.innerHTML = `<div class="label">آدم (Adam) — typing<span class="typing"></span></div><div>...</div>`;
+            chatBox.appendChild(adamDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            let responseText = null;
+
+            // Try backend first if available
+            if (backendAvailable) {
+                try {
+                    const resp = await fetch('/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: msg })
+                    });
+                    if (resp.ok) {
+                        const data = await resp.json();
+                        responseText = data.response;
+                    } else {
+                        throw new Error(`HTTP ${resp.status}`);
+                    }
+                } catch (e) {
+                    // Backend died after initial check - fall back to mock
+                    backendAvailable = false;
+                    modeBadge.textContent = '⚡ Demo Mode (backend offline)';
+                    modeBadge.className = 'badge warn';
+                }
+            }
+
+            // Use mock if backend not available
+            if (!responseText) {
+                // Small delay to feel more natural
+                await new Promise(r => setTimeout(r, 400 + Math.random() * 600));
+                responseText = getMockResponse(msg);
+            }
+
+            adamDiv.innerHTML = `<div class="label">آدم (Adam)</div><div>${formatMarkdown(responseText)}</div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            sendBtn.disabled = false;
+            msgInput.focus();
         }
 
-        function sendMessage() {
-            const input = document.getElementById('messageInput');
-            const message = input.value.trim();
-            if (!message) return;
-
-            addMessage(message, true);
-            input.value = '';
-            input.disabled = true;
-            document.getElementById('sendButton').disabled = true;
-
-            showTyping();
-
-            setTimeout(() => {
-                hideTyping();
-                const response = getMockResponse(message);
-                addMessage(response, false);
-                input.disabled = false;
-                document.getElementById('sendButton').disabled = false;
-                input.focus();
-            }, 600 + Math.random() * 800);
-        }
-
-        document.getElementById('sendButton').addEventListener('click', sendMessage);
-        document.getElementById('messageInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
+        sendBtn.addEventListener('click', () => send());
+        msgInput.addEventListener('keypress', e => { if (e.key === 'Enter') send(); });
+        document.querySelectorAll('.quick-btn').forEach(btn => {
+            btn.addEventListener('click', () => send(btn.dataset.q));
         });
 
-        document.querySelectorAll('.quick-prompt').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.getElementById('messageInput').value = btn.dataset.prompt;
-                sendMessage();
-            });
-        });
+        // Check backend on load (after a small delay to not block UI)
+        setTimeout(checkBackend, 100);
+        msgInput.focus();
     </script>
 </body>
 </html>
