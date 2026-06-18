@@ -233,7 +233,7 @@ def _mock_response(message: str) -> str:
         return _MOCK_RESPONSES["install_ar" if is_arabic else "install_en"]
 
     if any(w in msg for w in ["سيادة", "حماية", "بيانات", "sovereignty", "sovereign", "security", "private"]):
-        return _MOCK_RESPONSES["sovereignty_ar" if is_arabic else "sovereign_en"]
+        return _MOCK_RESPONSES["sovereignty_ar" if is_arabic else "sovereignty_en"]
 
     if any(w in msg for w in ["ضغط", "تكلفة", "tokens", "compression", "cost", "expensive"]):
         return _MOCK_RESPONSES["compression_ar" if is_arabic else "compression_en"]
@@ -242,7 +242,7 @@ def _mock_response(message: str) -> str:
         return _MOCK_RESPONSES["company_ar" if is_arabic else "company_en"]
 
     if any(w in msg for w in ["ترخيص", "رخصة", "اسعار", "سعر", "license", "pricing", "commercial", "agpl"]):
-        return _MOCK_RESPONSES["license_ar" if is_arabic else "pricing_en"]
+        return _MOCK_RESPONSES["license_ar" if is_arabic else "license_en"]
 
     if any(w in msg for w in ["مساعدة", "ساعدني", "ايه اللي تقدر", "help", "what can you"]):
         return _MOCK_RESPONSES["help_ar" if is_arabic else "help_en"]

@@ -373,23 +373,30 @@ If Adam helped you — or if you want to support its open-source development and
 
 **Recommended platforms (in order):**
 
-1. **GitHub Sponsors** (best for open source)
-   👉 email me 
-   - Monthly tiers ($5, $25, $100, custom)
-   - 100% to maintainer (no fees)
-   - Direct support from your GitHub audience
+1. **PayPal** (most flexible — recommended for now)
+   👉 https://paypal.me/othmastar
+   - One-time or recurring
+   - 3-5% fees (PayPal standard)
+   - Works with most payment methods
 
-2. **Open Collective** (best for transparency)
-   👉 call me 
+2. **Buy Me a Coffee** (one-time)
+   👉 https://buymeacoffee.com/othmastar
+   - One-time tips
+   - Quick setup
+   - _(Set up this username first)_
+
+3. **Open Collective** (for transparency)
+   👉 https://opencollective.com/adam-prism
    - Public expense reports
    - Suitable for OSS projects
    - Can claim expenses (e.g., Ollama GPU costs)
 
-3. **Buy Me a Coffee** (simplest)
-   👉 https://call me 
-   - One-time tips
-   - Quick setup
-   - _(Set up this username first)_
+4. **GitHub Sponsors** (coming soon — best for developers)
+   - Monthly tiers ($5, $25, $100, custom)
+   - 100% to maintainer (no fees)
+   - Direct support from your GitHub audience
+
+See [`SPONSORS.md`](SPONSORS.md) for the full details.
 
 **What your support covers:**
 
