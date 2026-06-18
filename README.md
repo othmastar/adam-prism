@@ -380,22 +380,11 @@ If Adam helped you — or if you want to support its open-source development and
    - Works with most payment methods
    - Official PayPal hosted checkout
 
-2. **Buy Me a Coffee** (one-time)
-   👉 https://buymeacoffee.com/othmastar
-   - One-time tips
-   - Quick setup
-   - _(Set up this username first)_
-
-3. **Open Collective** (for transparency)
+2. **Open Collective** (for transparency — optional future option)
    👉 https://opencollective.com/adam-prism
    - Public expense reports
    - Suitable for OSS projects
-   - Can claim expenses (e.g., Ollama GPU costs)
-
-4. **GitHub Sponsors** (coming soon — best for developers)
-   - Monthly tiers ($5, $25, $100, custom)
-   - 100% to maintainer (no fees)
-   - Direct support from your GitHub audience
+   - _(Currently using PayPal as primary; Open Collective planned)_
 
 See [`SPONSORS.md`](SPONSORS.md) for the full details.
 
