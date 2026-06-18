@@ -34,8 +34,13 @@ from pydantic import BaseModel
 logger = logging.getLogger("adam_prism.api")
 
 # Path to the chat UI
-UI_DIR = Path(__file__).resolve().parent.parent.parent.parent / "frontend"
-INDEX_HTML = UI_DIR / "index.html"
+# Path to the chat UI
+# Try multiple locations: repo_root/index.html (GitHub Pages) or repo_root/frontend/index.html (local dev)
+_REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent
+UI_DIR = _REPO_ROOT / "frontend"
+INDEX_HTML = _REPO_ROOT / "index.html"  # GitHub Pages standard location
+if not INDEX_HTML.exists():
+    INDEX_HTML = UI_DIR / "index.html"  # local dev fallback
 
 # ═══════════════════════════════════════
 # Models
