@@ -374,10 +374,11 @@ If Adam helped you — or if you want to support its open-source development and
 **Recommended platforms (in order):**
 
 1. **PayPal** (most flexible — recommended for now)
-   👉 https://paypal.me/othmastar
-   - One-time or recurring
+   👉 https://www.paypal.com/ncp/payment/J9E7EYRKSYJ68
+   - One-time (donor sets amount)
    - 3-5% fees (PayPal standard)
    - Works with most payment methods
+   - Official PayPal hosted checkout
 
 2. **Buy Me a Coffee** (one-time)
    👉 https://buymeacoffee.com/othmastar
