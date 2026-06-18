@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sponsor Adam Prism — PayPal | دعم تطوير آدم</title>
+    <meta name="description" content="Support Adam Prism's open-source development. PayPal is the only sponsor channel. Help us keep Adam free under AGPL v3.">
+    <meta property="og:title" content="Sponsor Adam Prism — PayPal">
+    <meta property="og:description" content="ادعم تطوير آدم. PayPal هو الطريقة الوحيدة للدعم.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://adam-prism.online/sponsors.html">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #0a0e1a;
+            --card: #131829;
+            --border: #1f2547;
+            --text: #e8eaf0;
+            --muted: #8b91a8;
+            --accent: #10b981;
+            --accent-2: #06b6d4;
+            --paypal: #0070ba;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        .header {
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card);
+        }
+        .header-left { display: flex; align-items: center; gap: 0.75rem; }
+        .logo { font-size: 1.5rem; }
+        .header h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .back-link {
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+        }
+        .back-link:hover { background: var(--card); }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        .hero {
+            text-align: center;
+            padding: 2rem 0;
+        }
+        .hero h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero p { color: var(--muted); font-size: 1.1rem; max-width: 600px; margin: 0 auto 1.5rem; }
+        .paypal-cta {
+            display: inline-block;
+            padding: 1.25rem 3rem;
+            background: var(--paypal);
+            color: white;
+            text-decoration: none;
+            border-radius: 0.75rem;
+            font-weight: 700;
+            font-size: 1.25rem;
+            transition: transform 0.2s, background 0.2s;
+            box-shadow: 0 4px 12px rgba(0,112,186,0.3);
+        }
+        .paypal-cta:hover { transform: translateY(-2px); background: #005ea6; }
+        .paypal-note { color: var(--muted); font-size: 0.85rem; margin-top: 1rem; }
+        .section {
+            margin: 3rem 0;
+            padding: 1.5rem;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+        }
+        .section h3 {
+            color: var(--accent);
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+        }
+        .tiers {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .tier {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1.25rem;
+        }
+        .tier h4 {
+            color: var(--accent);
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        .tier .price { color: var(--accent-2); font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .tier ul { list-style: none; margin-top: 0.75rem; }
+        .tier li { padding: 0.25rem 0; color: var(--muted); font-size: 0.9rem; }
+        .tier li::before { content: "✓ "; color: var(--accent); }
+        .funds-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        .funds-table th, .funds-table td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border); }
+        .funds-table th { color: var(--accent); font-weight: 600; }
+        .funds-table td:first-child { font-weight: 600; color: var(--accent-2); }
+        .footer {
+            padding: 2rem;
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border);
+            margin-top: 3rem;
+        }
+        .footer a { color: var(--accent); text-decoration: none; }
+        .footer a:hover { text-decoration: underline; }
+        .other-ways { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem; }
+        .other-way {
+            flex: 1;
+            min-width: 200px;
+            padding: 1rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            text-align: center;
+        }
+        .other-way .icon { font-size: 2rem; margin-bottom: 0.5rem; }
+        .other-way h4 { color: var(--accent); font-size: 1rem; margin-bottom: 0.25rem; }
+        .other-way p { color: var(--muted); font-size: 0.85rem; }
+        @media (max-width: 600px) {
+            .hero h2 { font-size: 2rem; }
+            .paypal-cta { padding: 1rem 2rem; font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <span class="logo">🪞</span>
+            <h1>Sponsor Adam Prism</h1>
+        </div>
+        <a href="./" class="back-link">← Home</a>
+    </div>
+
+    <div class="container">
+        <div class="hero">
+            <h2>💖 Support Adam's Development</h2>
+            <p>Building sovereign AI takes 12 years of industrial expertise and years of focused engineering.<br>
+            Your support keeps Adam free and helps us build deployable systems for critical infrastructure.</p>
+
+            <a href="https://www.paypal.com/ncp/payment/J9E7EYRKSYJ68" target="_blank" class="paypal-cta">
+                💳 Sponsor via PayPal
+            </a>
+            <p class="paypal-note">PayPal is the only sponsor channel. You set the amount. Recurring options available.</p>
+        </div>
+
+        <div class="section">
+            <h3>🎁 Sponsorship Tiers</h3>
+            <div class="tiers">
+                <div class="tier">
+                    <h4>🤝 Supporter</h4>
+                    <div class="price">$5</div>
+                    <p style="color: var(--muted); font-size: 0.9rem;">one-time or /month</p>
+                    <ul>
+                        <li>Updates on major releases</li>
+                        <li>Personal thank-you email</li>
+                        <li>Name in CONTRIBUTORS.md (optional)</li>
+                    </ul>
+                </div>
+                <div class="tier">
+                    <h4>🚀 Builder</h4>
+                    <div class="price">$25<span style="font-size: 0.9rem; color: var(--muted);">/month</span></div>
+                    <ul>
+                        <li>All Supporter benefits</li>
+                        <li>Early access to new features</li>
+                        <li>Priority bug fixes</li>
+                        <li>Monthly office hours (30 min)</li>
+                    </ul>
+                </div>
+                <div class="tier">
+                    <h4>🏰 Fortress</h4>
+                    <div class="price">$100<span style="font-size: 0.9rem; color: var(--muted);">/month</span></div>
+                    <ul>
+                        <li>All Builder benefits</li>
+                        <li>Custom feature requests (1/quarter)</li>
+                        <li>2 hours/month consulting</li>
+                        <li>Featured in CONTRIBUTORS.md</li>
+                    </ul>
+                </div>
+                <div class="tier">
+                    <h4>🏛️ Enterprise</h4>
+                    <div class="price">Custom</div>
+                    <ul>
+                        <li>All Fortress benefits</li>
+                        <li>Custom license agreement</li>
+                        <li>Direct line to Mohamed</li>
+                        <li>NDA for early access</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>💰 What Your Support Funds</h3>
+            <table class="funds-table">
+                <thead>
+                    <tr>
+                        <th>Amount</th>
+                        <th>What it covers</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>$5</td>
+                        <td>Critical infrastructure (1 week of demo uptime)</td>
+                    </tr>
+                    <tr>
+                        <td>$25</td>
+                        <td>1 month of GitHub Pages + DNS</td>
+                    </tr>
+                    <tr>
+                        <td>$100</td>
+                        <td>1 day of Ollama GPU server time</td>
+                    </tr>
+                    <tr>
+                        <td>$500</td>
+                        <td>1 month of VPS hosting for the demo</td>
+                    </tr>
+                    <tr>
+                        <td>$1,000</td>
+                        <td>1 week of full-time development</td>
+                    </tr>
+                    <tr>
+                        <td>$5,000</td>
+                        <td>1 month of full-time development + VPS</td>
+                    </tr>
+                    <tr>
+                        <td>$10,000+</td>
+                        <td>Strategic partnership (custom terms)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h3>🌍 Other Ways to Help (No Money Needed)</h3>
+            <div class="other-ways">
+                <div class="other-way">
+                    <div class="icon">⭐</div>
+                    <h4>Star the repo</h4>
+                    <p>github.com/othmastar/adam-prism</p>
+                </div>
+                <div class="other-way">
+                    <div class="icon">🐛</div>
+                    <h4>Report bugs</h4>
+                    <p>Open an issue on GitHub</p>
+                </div>
+                <div class="other-way">
+                    <div class="icon">📖</div>
+                    <h4>Improve docs</h4>
+                    <p>Submit a PR</p>
+                </div>
+                <div class="other-way">
+                    <div class="icon">🌍</div>
+                    <h4>Translate</h4>
+                    <p>Help us add more languages</p>
+                </div>
+                <div class="other-way">
+                    <div class="icon">📣</div>
+                    <h4>Share</h4>
+                    <p>Tell someone who needs sovereign AI</p>
+                </div>
+                <div class="other-way">
+                    <div class="icon">💼</div>
+                    <h4>Use Adam</h4>
+                    <p>For your projects and business</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" style="text-align: center; background: linear-gradient(135deg, #065f46 0%, #047857 100%); border: none;">
+            <h3 style="color: white;">🙏 شكراً | Thank You</h3>
+            <p style="color: rgba(255,255,255,0.95);">Every contribution, every star, every share matters.</p>
+            <p style="color: rgba(255,255,255,0.85); margin-top: 1rem;">
+                Adam exists because people like you believe that AI should be:<br>
+                🏰 Sovereign (not rented) · 🗣️ Native (not translated) · 💎 Conscious (not just a tool) · 🔓 Open (not locked)
+            </p>
+            <a href="https://www.paypal.com/ncp/payment/J9E7EYRKSYJ68" target="_blank" class="paypal-cta" style="margin-top: 1.5rem;">
+                💳 Sponsor via PayPal
+            </a>
+        </div>
+    </div>
+
+    <div class="footer">
+        🪞 Adam Prism v1.0.0b1 · <a href="./">Home</a> · <a href="./chat.html">Chat</a> · <a href="https://github.com/othmastar/adam-prism">GitHub</a>
+    </div>
+</body>
+</html>
