@@ -361,36 +361,31 @@ cd adam-prism && bash bin/install.sh
 
 ---
 
-## ☕ Support Adam's Development
+## 💖 Support Adam's Development
 
-Building sovereign AI takes 12 years of industrial expertise and a lot of coffee. ☕
+Building sovereign AI takes 12 years of industrial expertise and years of focused engineering.
 
 If Adam helped you — or if you want to support its open-source development and host the public demo — consider sponsoring:
 
 ### 🇪🇬 ادعم تطوير آدم
-> بناء ذكاء اصطناعي سيادي يحتاج 12 سنة خبرة وكوب قهوة كبير ☕
+> بناء ذكاء اصطناعي سيادي يحتاج 12 سنة خبرة وسنوات من العمل المركز
 > لو آدم ساعدك أو عايز تدعم تطويره، ادعمني:
 
-**Recommended platforms (in order):**
+### 💳 **PayPal** (the only sponsor channel)
 
-1. **PayPal** (most flexible — recommended for now)
-   👉 https://www.paypal.com/ncp/payment/J9E7EYRKSYJ68
-   - One-time (donor sets amount)
-   - 3-5% fees (PayPal standard)
-   - Works with most payment methods
-   - Official PayPal hosted checkout
+👉 **https://www.paypal.com/ncp/payment/J9E7EYRKSYJ68**
 
-2. **Open Collective** (for transparency — optional future option)
-   👉 https://opencollective.com/adam-prism
-   - Public expense reports
-   - Suitable for OSS projects
-   - _(Currently using PayPal as primary; Open Collective planned)_
+- One-time payment (you set the amount)
+- Recurring: set up a monthly subscription
+- 3-5% fees (PayPal's standard)
+- Works with most payment methods (card, PayPal balance, Apple Pay, Google Pay)
+- Official PayPal hosted checkout
 
 See [`SPONSORS.md`](SPONSORS.md) for the full details.
 
 **What your support covers:**
 
-- ☕ **Demo hosting** — the public Adam demo (free for everyone)
+- 🌐 **Demo hosting** — the public Adam demo (free for everyone)
 - 🖥️ **Ollama GPU server** — running Adam's full LLM 24/7
 - 📚 **Documentation** — Arabic-first docs, tutorials, examples
 - 🔓 **Open source** — keeping Adam free under AGPL v3
@@ -402,7 +397,7 @@ See [`SPONSORS.md`](SPONSORS.md) for the full details.
 - 📣 Sharing Adam with someone who needs sovereign AI
 - 🌍 Translating docs to your language
 
-**Every coffee counts. Every star counts. شكراً.** 🙏
+**Every contribution counts. Every star counts. شكراً.** 🙏
 
 ---
 
