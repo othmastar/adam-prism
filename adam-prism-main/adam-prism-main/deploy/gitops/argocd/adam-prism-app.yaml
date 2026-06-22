@@ -1,0 +1,44 @@
+# [PHASE6] ArgoCD Application definitions for Adam Prism GitOps
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: adam-prism
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: adam-prism
+    app.kubernetes.io/part-of: adam-prism
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/othmastar/adam-prism.git
+    targetRevision: HEAD
+    path: deploy/helm/adam-prism
+    helm:
+      releaseName: adam-prism
+      valueFiles:
+        - values-production.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: adam-prism
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  revisionHistoryLimit: 10
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas

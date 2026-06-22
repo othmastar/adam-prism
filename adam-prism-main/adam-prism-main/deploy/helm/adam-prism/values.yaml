@@ -1,0 +1,151 @@
+# Default values for adam-prism
+# This is a YAML-formatted file.
+# Override values via: helm install adam-prism ./adam-prism --set key=value
+
+replicaCount: 2
+
+image:
+  repository: ghcr.io/othmastar/adam-prism
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+service:
+  type: ClusterIP
+  port: 8000
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: adam.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - hosts:
+        - adam.example.com
+      secretName: adam-prism-tls
+
+resources:
+  limits:
+    cpu: 2
+    memory: 4Gi
+  requests:
+    cpu: 500m
+    memory: 1Gi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+persistence:
+  enabled: true
+  size: 50Gi
+  storageClass: ""
+
+# Configuration
+config:
+  inferenceMode: ollama
+  ollamaBase: http://ollama:11434
+  qdrantUrl: http://qdrant:6333
+  rateLimit: "60/60"
+  logLevel: INFO
+  logJson: "1"
+  production: "1"
+
+# Database
+database:
+  enabled: false  # Set true to deploy PostgreSQL alongside
+  url: ""  # Set to override (e.g., managed Postgres URL)
+  size: 20Gi
+
+# Cache
+redis:
+  enabled: false  # Set true to deploy Redis alongside
+  url: ""  # Set to override
+  size: 5Gi
+
+# Ollama
+ollama:
+  enabled: true
+  image: ollama/ollama
+  model: gemma3:8b
+  modelsPath: /root/.ollama
+  persistence:
+    enabled: true
+    size: 200Gi
+  gpu:
+    enabled: true
+    count: 1
+
+# Qdrant
+qdrant:
+  enabled: true
+  image: qdrant/qdrant
+  persistence:
+    enabled: true
+    size: 50Gi
+
+# Probes
+probes:
+  liveness:
+    enabled: true
+    path: /healthz/live
+    initialDelaySeconds: 30
+    periodSeconds: 30
+  readiness:
+    enabled: true
+    path: /healthz/ready
+    initialDelaySeconds: 10
+    periodSeconds: 10
+  startup:
+    enabled: true
+    path: /healthz/startup
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    failureThreshold: 30
+
+# Secrets (must be set before deploy)
+secrets:
+  apiKey: "CHANGE-ME-32-bytes"
+  adminKey: "CHANGE-ME-admin"
+  jwtSecret: "CHANGE-ME-jwt-min-32-chars"
+  nextauthSecret: "CHANGE-ME-nextauth"
+  grafanaPassword: "CHANGE-ME-grafana"
+
+# Monitoring
+monitoring:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    interval: 30s
+  prometheus:
+    enabled: false  # Deploy Prometheus via kube-prometheus-stack
+
+# Pod-level
+podAnnotations: {}
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  fsGroup: 1001
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL

@@ -1,0 +1,249 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 640" font-family="'Segoe UI', system-ui, sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1000" y2="640">
+      <stop offset="0%" stop-color="#0a0a0f"/>
+      <stop offset="100%" stop-color="#111119"/>
+    </linearGradient>
+    <linearGradient id="prismGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#8b5cf6"/>
+      <stop offset="50%" stop-color="#06b6d4"/>
+      <stop offset="100%" stop-color="#3b82f6"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1000" height="640" fill="url(#bg)"/>
+  <g opacity="0.03">
+    <pattern id="dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+      <circle cx="10" cy="10" r="0.8" fill="#8b5cf6"/>
+    </pattern>
+    <rect width="1000" height="640" fill="url(#dots)"/>
+  </g>
+
+  <text x="500" y="40" text-anchor="middle" fill="url(#prismGrad)" font-size="22" font-weight="700">Adam Prism vs Coding Agents — Feature Comparison</text>
+  <text x="500" y="62" text-anchor="middle" fill="#64748b" font-size="11">June 2026 · Only Adam Prism combines consciousness, ethics, Egyptian Arabic, and digital twin architecture</text>
+
+  <!-- Header row -->
+  <rect x="30" y="80" width="200" height="36" rx="6" fill="#1a1a2e" stroke="#8b5cf6" stroke-width="1" stroke-opacity="0.3"/>
+  <text x="130" y="104" text-anchor="middle" fill="#cbd5e1" font-size="12" font-weight="600">Feature</text>
+
+  <rect x="240" y="80" width="140" height="36" rx="6" fill="url(#prismGrad)" fill-opacity="0.2" stroke="url(#prismGrad)" stroke-width="1.5"/>
+  <text x="310" y="104" text-anchor="middle" fill="#8b5cf6" font-size="12" font-weight="700">✨ Adam Prism</text>
+
+  <rect x="390" y="80" width="120" height="36" rx="6" fill="#1a1a2e" stroke="#64748b" stroke-width="0.5"/>
+  <text x="450" y="104" text-anchor="middle" fill="#94a3b8" font-size="11">Claude Code</text>
+
+  <rect x="520" y="80" width="120" height="36" rx="6" fill="#1a1a2e" stroke="#64748b" stroke-width="0.5"/>
+  <text x="580" y="104" text-anchor="middle" fill="#94a3b8" font-size="11">OpenHands</text>
+
+  <rect x="650" y="80" width="110" height="36" rx="6" fill="#1a1a2e" stroke="#64748b" stroke-width="0.5"/>
+  <text x="705" y="104" text-anchor="middle" fill="#94a3b8" font-size="11">Cline</text>
+
+  <rect x="770" y="80" width="100" height="36" rx="6" fill="#1a1a2e" stroke="#64748b" stroke-width="0.5"/>
+  <text x="820" y="104" text-anchor="middle" fill="#94a3b8" font-size="11">Goose</text>
+
+  <rect x="880" y="80" width="90" height="36" rx="6" fill="#1a1a2e" stroke="#64748b" stroke-width="0.5"/>
+  <text x="925" y="104" text-anchor="middle" fill="#94a3b8" font-size="11">Cursor</text>
+
+  <!-- Row helper -->
+  <g id="r1"><rect x="30" y="124" width="200" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.3"/><text x="42" y="145" fill="#94a3b8" font-size="10">License</text></g>
+  <g id="r2"><rect x="30" y="162" width="200" height="32" rx="4" fill="#111119"/><text x="42" y="183" fill="#94a3b8" font-size="10">Open Source?</text></g>
+  <g id="r3"><rect x="30" y="200" width="200" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.3"/><text x="42" y="221" fill="#94a3b8" font-size="10">Language Support</text></g>
+  <g id="r4"><rect x="30" y="238" width="200" height="32" rx="4" fill="#111119"/><text x="42" y="259" fill="#94a3b8" font-size="10">Egyptian Arabic</text></g>
+  <g id="r5"><rect x="30" y="276" width="200" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.3"/><text x="42" y="297" fill="#94a3b8" font-size="10">Consciousness Layers</text></g>
+  <g id="r6"><rect x="30" y="314" width="200" height="32" rx="4" fill="#111119"/><text x="42" y="335" fill="#94a3b8" font-size="10">Ethics / Morality</text></g>
+  <g id="r7"><rect x="30" y="352" width="200" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.3"/><text x="42" y="373" fill="#94a3b8" font-size="10">Continuous Learning</text></g>
+  <g id="r8"><rect x="30" y="390" width="200" height="32" rx="4" fill="#111119"/><text x="42" y="411" fill="#94a3b8" font-size="10">Long-term Memory</text></g>
+  <g id="r9"><rect x="30" y="428" width="200" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.3"/><text x="42" y="449" fill="#94a3b8" font-size="10">Digital Twin Concept</text></g>
+  <g id="r10"><rect x="30" y="466" width="200" height="32" rx="4" fill="#111119"/><text x="42" y="487" fill="#94a3b8" font-size="10">Multi-Channel</text></g>
+  <g id="r11"><rect x="30" y="504" width="200" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.3"/><text x="42" y="525" fill="#94a3b8" font-size="10">MCP Protocol</text></g>
+  <g id="r12"><rect x="30" y="542" width="200" height="32" rx="4" fill="#111119"/><text x="42" y="563" fill="#94a3b8" font-size="10">Self-Improvement</text></g>
+  <g id="r13"><rect x="30" y="580" width="200" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.3"/><text x="42" y="601" fill="#94a3b8" font-size="10">Price</text></g>
+
+  <!-- Helper: draw cell -->
+  <g id="c1">
+    <rect x="240" y="124" width="140" height="32" rx="4" fill="url(#prismGrad)" fill-opacity="0.08"/>
+    <text x="310" y="145" text-anchor="middle" fill="#06b6d4" font-size="10">Apache 2.0</text>
+    <rect x="390" y="124" width="120" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+    <text x="450" y="145" text-anchor="middle" fill="#cbd5e1" font-size="10">Proprietary</text>
+    <rect x="520" y="124" width="120" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+    <text x="580" y="145" text-anchor="middle" fill="#cbd5e1" font-size="10">MIT</text>
+    <rect x="650" y="124" width="110" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+    <text x="705" y="145" text-anchor="middle" fill="#cbd5e1" font-size="10">Apache 2.0</text>
+    <rect x="770" y="124" width="100" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+    <text x="820" y="145" text-anchor="middle" fill="#cbd5e1" font-size="10">Apache 2.0</text>
+    <rect x="880" y="124" width="90" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+    <text x="925" y="145" text-anchor="middle" fill="#cbd5e1" font-size="10">Proprietary</text>
+  </g>
+
+  <!-- Row 2: Open Source -->
+  <rect x="240" y="162" width="140" height="32" rx="4" fill="url(#prismGrad)" fill-opacity="0.08"/>
+  <text x="310" y="183" text-anchor="middle" fill="#06b6d4" font-size="10">✅ Yes</text>
+  <rect x="390" y="162" width="120" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="450" y="183" text-anchor="middle" fill="#ef4444" font-size="10">❌ No</text>
+  <rect x="520" y="162" width="120" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="580" y="183" text-anchor="middle" fill="#10b981" font-size="10">✅ Yes</text>
+  <rect x="650" y="162" width="110" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="705" y="183" text-anchor="middle" fill="#10b981" font-size="10">✅ Yes</text>
+  <rect x="770" y="162" width="100" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="820" y="183" text-anchor="middle" fill="#10b981" font-size="10">✅ Yes</text>
+  <rect x="880" y="162" width="90" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="925" y="183" text-anchor="middle" fill="#ef4444" font-size="10">❌ No</text>
+
+  <!-- Row 3: Language Support -->
+  <rect x="240" y="200" width="140" height="32" rx="4" fill="url(#prismGrad)" fill-opacity="0.08"/>
+  <text x="310" y="221" text-anchor="middle" fill="#06b6d4" font-size="10">AR/EN native</text>
+  <rect x="390" y="200" width="120" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="450" y="221" text-anchor="middle" fill="#cbd5e1" font-size="10">EN</text>
+  <rect x="520" y="200" width="120" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="580" y="221" text-anchor="middle" fill="#cbd5e1" font-size="10">EN</text>
+  <rect x="650" y="200" width="110" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="705" y="221" text-anchor="middle" fill="#cbd5e1" font-size="10">EN</text>
+  <rect x="770" y="200" width="100" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="820" y="221" text-anchor="middle" fill="#cbd5e1" font-size="10">EN</text>
+  <rect x="880" y="200" width="90" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="925" y="221" text-anchor="middle" fill="#cbd5e1" font-size="10">EN</text>
+
+  <!-- Row 4: Egyptian Arabic -->
+  <rect x="240" y="238" width="140" height="32" rx="4" fill="url(#prismGrad)" fill-opacity="0.15" stroke="#8b5cf6" stroke-width="1"/>
+  <text x="310" y="259" text-anchor="middle" fill="#8b5cf6" font-size="10" font-weight="700">✅ المصري الوحيد</text>
+  <rect x="390" y="238" width="120" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="450" y="259" text-anchor="middle" fill="#64748b" font-size="10">❌</text>
+  <rect x="520" y="238" width="120" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="580" y="259" text-anchor="middle" fill="#64748b" font-size="10">❌</text>
+  <rect x="650" y="238" width="110" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="705" y="259" text-anchor="middle" fill="#64748b" font-size="10">❌</text>
+  <rect x="770" y="238" width="100" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="820" y="259" text-anchor="middle" fill="#64748b" font-size="10">❌</text>
+  <rect x="880" y="238" width="90" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="925" y="259" text-anchor="middle" fill="#64748b" font-size="10">❌</text>
+
+  <!-- Row 5: Consciousness -->
+  <rect x="240" y="276" width="140" height="32" rx="4" fill="url(#prismGrad)" fill-opacity="0.15" stroke="#8b5cf6" stroke-width="1"/>
+  <text x="310" y="297" text-anchor="middle" fill="#8b5cf6" font-size="10" font-weight="700">✅ 12 layers</text>
+  <rect x="390" y="276" width="120" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="450" y="297" text-anchor="middle" fill="#64748b" font-size="10">❌</text>
+  <rect x="520" y="276" width="120" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="580" y="297" text-anchor="middle" fill="#64748b" font-size="10">❌</text>
+  <rect x="650" y="276" width="110" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="705" y="297" text-anchor="middle" fill="#64748b" font-size="10">❌</text>
+  <rect x="770" y="276" width="100" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="820" y="297" text-anchor="middle" fill="#64748b" font-size="10">❌</text>
+  <rect x="880" y="276" width="90" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="925" y="297" text-anchor="middle" fill="#64748b" font-size="10">❌</text>
+
+  <!-- Row 6: Ethics -->
+  <rect x="240" y="314" width="140" height="32" rx="4" fill="url(#prismGrad)" fill-opacity="0.15" stroke="#8b5cf6" stroke-width="1"/>
+  <text x="310" y="335" text-anchor="middle" fill="#8b5cf6" font-size="10" font-weight="700">✅ 4 laws</text>
+  <rect x="390" y="314" width="120" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="450" y="335" text-anchor="middle" fill="#64748b" font-size="10">❌</text>
+  <rect x="520" y="314" width="120" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="580" y="335" text-anchor="middle" fill="#64748b" font-size="10">❌</text>
+  <rect x="650" y="314" width="110" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="705" y="335" text-anchor="middle" fill="#64748b" font-size="10">❌</text>
+  <rect x="770" y="314" width="100" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="820" y="335" text-anchor="middle" fill="#64748b" font-size="10">❌</text>
+  <rect x="880" y="314" width="90" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="925" y="335" text-anchor="middle" fill="#64748b" font-size="10">❌</text>
+
+  <!-- Row 7: Continuous Learning -->
+  <rect x="240" y="352" width="140" height="32" rx="4" fill="url(#prismGrad)" fill-opacity="0.15" stroke="#8b5cf6" stroke-width="1"/>
+  <text x="310" y="373" text-anchor="middle" fill="#8b5cf6" font-size="10" font-weight="700">✅ Full loop</text>
+  <rect x="390" y="352" width="120" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="450" y="373" text-anchor="middle" fill="#64748b" font-size="10">❌</text>
+  <rect x="520" y="352" width="120" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="580" y="373" text-anchor="middle" fill="#64748b" font-size="10">❌</text>
+  <rect x="650" y="352" width="110" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="705" y="373" text-anchor="middle" fill="#64748b" font-size="10">❌</text>
+  <rect x="770" y="352" width="100" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="820" y="373" text-anchor="middle" fill="#cbd5e1" font-size="9">Limited</text>
+  <rect x="880" y="352" width="90" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="925" y="373" text-anchor="middle" fill="#64748b" font-size="10">❌</text>
+
+  <!-- Row 8: Long-term Memory -->
+  <rect x="240" y="390" width="140" height="32" rx="4" fill="url(#prismGrad)" fill-opacity="0.15" stroke="#8b5cf6" stroke-width="1"/>
+  <text x="310" y="411" text-anchor="middle" fill="#8b5cf6" font-size="10" font-weight="700">✅ Qdrant+SQLite</text>
+  <rect x="390" y="390" width="120" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="450" y="411" text-anchor="middle" fill="#cbd5e1" font-size="9">Session only</text>
+  <rect x="520" y="390" width="120" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="580" y="411" text-anchor="middle" fill="#cbd5e1" font-size="9">Session only</text>
+  <rect x="650" y="390" width="110" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="705" y="411" text-anchor="middle" fill="#cbd5e1" font-size="9">Limited</text>
+  <rect x="770" y="390" width="100" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="820" y="411" text-anchor="middle" fill="#cbd5e1" font-size="9">Limited</text>
+  <rect x="880" y="390" width="90" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="925" y="411" text-anchor="middle" fill="#cbd5e1" font-size="9">Session only</text>
+
+  <!-- Row 9: Digital Twin -->
+  <rect x="240" y="428" width="140" height="32" rx="4" fill="url(#prismGrad)" fill-opacity="0.15" stroke="#8b5cf6" stroke-width="1"/>
+  <text x="310" y="449" text-anchor="middle" fill="#8b5cf6" font-size="10" font-weight="700">✅ Core identity</text>
+  <rect x="390" y="428" width="120" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="450" y="449" text-anchor="middle" fill="#64748b" font-size="10">❌</text>
+  <rect x="520" y="428" width="120" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="580" y="449" text-anchor="middle" fill="#64748b" font-size="10">❌</text>
+  <rect x="650" y="428" width="110" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="705" y="449" text-anchor="middle" fill="#64748b" font-size="10">❌</text>
+  <rect x="770" y="428" width="100" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="820" y="449" text-anchor="middle" fill="#64748b" font-size="10">❌</text>
+  <rect x="880" y="428" width="90" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="925" y="449" text-anchor="middle" fill="#64748b" font-size="10">❌</text>
+
+  <!-- Row 10: Multi-Channel -->
+  <rect x="240" y="466" width="140" height="32" rx="4" fill="url(#prismGrad)" fill-opacity="0.15" stroke="#8b5cf6" stroke-width="1"/>
+  <text x="310" y="487" text-anchor="middle" fill="#8b5cf6" font-size="10" font-weight="700">✅ Web/Telegram/WA</text>
+  <rect x="390" y="466" width="120" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="450" y="487" text-anchor="middle" fill="#cbd5e1" font-size="9">Terminal</text>
+  <rect x="520" y="466" width="120" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="580" y="487" text-anchor="middle" fill="#cbd5e1" font-size="9">CLI+Web+SDK</text>
+  <rect x="650" y="466" width="110" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="705" y="487" text-anchor="middle" fill="#cbd5e1" font-size="9">VS Code+CLI</text>
+  <rect x="770" y="466" width="100" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="820" y="487" text-anchor="middle" fill="#cbd5e1" font-size="9">CLI+Web</text>
+  <rect x="880" y="466" width="90" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="925" y="487" text-anchor="middle" fill="#cbd5e1" font-size="9">IDE</text>
+
+  <!-- Row 11: MCP -->
+  <rect x="240" y="504" width="140" height="32" rx="4" fill="url(#prismGrad)" fill-opacity="0.08"/>
+  <text x="310" y="525" text-anchor="middle" fill="#06b6d4" font-size="10">✅ 70+ tools</text>
+  <rect x="390" y="504" width="120" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="450" y="525" text-anchor="middle" fill="#10b981" font-size="10">✅</text>
+  <rect x="520" y="504" width="120" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="580" y="525" text-anchor="middle" fill="#10b981" font-size="10">✅</text>
+  <rect x="650" y="504" width="110" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="705" y="525" text-anchor="middle" fill="#10b981" font-size="10">✅</text>
+  <rect x="770" y="504" width="100" height="32" rx="4" fill="url(#prismGrad)" fill-opacity="0.08"/>
+  <text x="820" y="525" text-anchor="middle" fill="#8b5cf6" font-size="10" font-weight="600">✅ Native</text>
+  <rect x="880" y="504" width="90" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="925" y="525" text-anchor="middle" fill="#10b981" font-size="10">✅</text>
+
+  <!-- Row 12: Self-Improvement -->
+  <rect x="240" y="542" width="140" height="32" rx="4" fill="url(#prismGrad)" fill-opacity="0.15" stroke="#8b5cf6" stroke-width="1"/>
+  <text x="310" y="563" text-anchor="middle" fill="#8b5cf6" font-size="10" font-weight="700">✅ Full loop</text>
+  <rect x="390" y="542" width="120" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="450" y="563" text-anchor="middle" fill="#64748b" font-size="10">❌</text>
+  <rect x="520" y="542" width="120" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="580" y="563" text-anchor="middle" fill="#64748b" font-size="10">❌</text>
+  <rect x="650" y="542" width="110" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="705" y="563" text-anchor="middle" fill="#64748b" font-size="10">❌</text>
+  <rect x="770" y="542" width="100" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="820" y="563" text-anchor="middle" fill="#64748b" font-size="10">❌</text>
+  <rect x="880" y="542" width="90" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="925" y="563" text-anchor="middle" fill="#64748b" font-size="10">❌</text>
+
+  <!-- Row 13: Price -->
+  <rect x="240" y="580" width="140" height="32" rx="4" fill="url(#prismGrad)" fill-opacity="0.08"/>
+  <text x="310" y="601" text-anchor="middle" fill="#06b6d4" font-size="10">🆓 Free</text>
+  <rect x="390" y="580" width="120" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="450" y="601" text-anchor="middle" fill="#cbd5e1" font-size="10">$20-200/mo</text>
+  <rect x="520" y="580" width="120" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="580" y="601" text-anchor="middle" fill="#cbd5e1" font-size="10">🆓 Free</text>
+  <rect x="650" y="580" width="110" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="705" y="601" text-anchor="middle" fill="#cbd5e1" font-size="10">🆓 Free</text>
+  <rect x="770" y="580" width="100" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="820" y="601" text-anchor="middle" fill="#cbd5e1" font-size="10">🆓 Free</text>
+  <rect x="880" y="580" width="90" height="32" rx="4" fill="#1a1a2e" fill-opacity="0.1"/>
+  <text x="925" y="601" text-anchor="middle" fill="#cbd5e1" font-size="10">$20/mo</text>
+
+  <!-- Column highlights -->
+  <rect x="240" y="80" width="140" height="4" rx="2" fill="url(#prismGrad)"/>
+  <rect x="240" y="612" width="140" height="4" rx="2" fill="url(#prismGrad)"/>
+</svg>

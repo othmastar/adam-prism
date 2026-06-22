@@ -1,0 +1,2209 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Adam Prism — دليل التشغيل التفصيلي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════
+   Adam Prism — Operational Guide Styles
+   ═══════════════════════════════════════════════════════════ */
+
+:root {
+  --bg-primary: #0d1117;
+  --bg-secondary: #161b22;
+  --bg-tertiary: #1c2333;
+  --bg-card: #1a2233;
+  --bg-code: #0d1117;
+  --border-primary: #30363d;
+  --border-secondary: #21262d;
+  --text-primary: #e6edf3;
+  --text-secondary: #b1bac4;
+  --text-muted: #8b949e;
+  --accent-blue: #58a6ff;
+  --accent-green: #3fb950;
+  --accent-orange: #d29922;
+  --accent-red: #f85149;
+  --accent-purple: #bc8cff;
+  --accent-cyan: #39d2c0;
+  --accent-pink: #f778ba;
+  --shadow: 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.4);
+  --radius: 8px;
+  --radius-lg: 12px;
+  --font-ar: 'Noto Sans Arabic', sans-serif;
+  --font-code: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px;
+}
+
+body {
+  font-family: var(--font-ar);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.8;
+  font-size: 16px;
+  direction: rtl;
+}
+
+/* ─── HEADER ─────────────────────────────────────── */
+.page-header {
+  background: linear-gradient(135deg, #0d1117 0%, #161b22 50%, #1a1e3a 100%);
+  border-bottom: 2px solid var(--accent-blue);
+  padding: 48px 0;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.page-header::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(ellipse at center, rgba(88,166,255,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+.page-header .logo {
+  font-size: 3em;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+  letter-spacing: -1px;
+}
+.page-header .subtitle {
+  color: var(--text-secondary);
+  font-size: 1.2em;
+  font-weight: 400;
+  margin-bottom: 6px;
+}
+.page-header .version-badge {
+  display: inline-block;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
+  color: var(--accent-green);
+  font-family: var(--font-code);
+  font-size: 0.85em;
+  padding: 4px 16px;
+  border-radius: 20px;
+  margin-top: 12px;
+}
+
+/* ─── LAYOUT ─────────────────────────────────────── */
+.page-layout {
+  display: flex;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: calc(100vh - 200px);
+}
+
+/* ─── SIDEBAR ────────────────────────────────────── */
+.sidebar {
+  width: 320px;
+  min-width: 320px;
+  background: var(--bg-secondary);
+  border-left: 1px solid var(--border-primary);
+  padding: 24px 16px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-primary) transparent;
+}
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border-primary); border-radius: 4px; }
+
+.sidebar-title {
+  color: var(--accent-blue);
+  font-size: 0.85em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-secondary);
+}
+
+.toc-list { list-style: none; }
+.toc-list li { margin-bottom: 2px; }
+.toc-list a {
+  display: block;
+  padding: 8px 12px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-radius: var(--radius);
+  font-size: 0.9em;
+  transition: all 0.2s;
+  border-right: 3px solid transparent;
+}
+.toc-list a:hover {
+  background: var(--bg-tertiary);
+  color: var(--accent-blue);
+  border-right-color: var(--accent-blue);
+}
+.toc-list a.active {
+  background: rgba(88,166,255,0.1);
+  color: var(--accent-blue);
+  border-right-color: var(--accent-blue);
+  font-weight: 600;
+}
+.toc-number {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  text-align: center;
+  background: var(--bg-tertiary);
+  border-radius: 50%;
+  font-size: 0.75em;
+  font-weight: 700;
+  margin-left: 8px;
+  font-family: var(--font-code);
+}
+
+/* ─── MAIN CONTENT ───────────────────────────────── */
+.main-content {
+  flex: 1;
+  padding: 40px 48px;
+  max-width: 900px;
+}
+
+/* ─── SECTIONS ───────────────────────────────────── */
+.section {
+  margin-bottom: 64px;
+  scroll-margin-top: 80px;
+}
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--border-primary);
+}
+.section-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+  border-radius: var(--radius-lg);
+  font-size: 1.3em;
+  font-weight: 800;
+  color: #fff;
+  font-family: var(--font-code);
+  flex-shrink: 0;
+}
+.section-title {
+  font-size: 1.8em;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+/* ─── SUBSECTION ─────────────────────────────────── */
+.subsection {
+  margin-bottom: 40px;
+}
+.subsection-title {
+  font-size: 1.3em;
+  font-weight: 600;
+  color: var(--accent-blue);
+  margin-bottom: 16px;
+  padding-right: 16px;
+  border-right: 4px solid var(--accent-blue);
+}
+.subsection-title-3 {
+  font-size: 1.1em;
+  font-weight: 600;
+  color: var(--accent-cyan);
+  margin-bottom: 12px;
+  margin-top: 24px;
+}
+
+/* ─── PARAGRAPHS ─────────────────────────────────── */
+p {
+  margin-bottom: 16px;
+  color: var(--text-secondary);
+  line-height: 1.9;
+}
+
+/* ─── TABLES ─────────────────────────────────────── */
+.table-wrapper {
+  overflow-x: auto;
+  margin: 20px 0;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-primary);
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92em;
+}
+thead {
+  background: var(--bg-tertiary);
+}
+th {
+  padding: 14px 18px;
+  text-align: right;
+  font-weight: 600;
+  color: var(--accent-blue);
+  border-bottom: 2px solid var(--border-primary);
+  white-space: nowrap;
+}
+td {
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border-secondary);
+  color: var(--text-secondary);
+  vertical-align: top;
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(88,166,255,0.04); }
+td code {
+  font-family: var(--font-code);
+  background: var(--bg-code);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.88em;
+  color: var(--accent-cyan);
+  border: 1px solid var(--border-secondary);
+}
+
+/* ─── CODE BLOCKS ────────────────────────────────── */
+pre {
+  background: var(--bg-code);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin: 16px 0;
+  overflow-x: auto;
+  direction: ltr;
+  text-align: left;
+  font-family: var(--font-code);
+  font-size: 0.88em;
+  line-height: 1.7;
+  color: #c9d1d9;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-primary) transparent;
+}
+pre::-webkit-scrollbar { height: 4px; }
+pre::-webkit-scrollbar-thumb { background: var(--border-primary); border-radius: 4px; }
+
+code {
+  font-family: var(--font-code);
+  font-size: 0.9em;
+}
+.inline-code {
+  background: var(--bg-code);
+  padding: 2px 8px;
+  border-radius: 4px;
+  color: var(--accent-cyan);
+  border: 1px solid var(--border-secondary);
+  font-family: var(--font-code);
+  font-size: 0.88em;
+  direction: ltr;
+  display: inline-block;
+}
+
+/* ─── CALLOUT BOXES ──────────────────────────────── */
+.callout {
+  padding: 16px 20px;
+  border-radius: var(--radius);
+  margin: 20px 0;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.callout-icon {
+  font-size: 1.3em;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.callout-content { flex: 1; }
+.callout-content p { margin-bottom: 8px; }
+.callout-content p:last-child { margin-bottom: 0; }
+
+.callout-warning {
+  background: rgba(210,153,34,0.08);
+  border: 1px solid rgba(210,153,34,0.3);
+  border-right: 4px solid var(--accent-orange);
+}
+.callout-warning .callout-icon { color: var(--accent-orange); }
+
+.callout-note {
+  background: rgba(88,166,255,0.06);
+  border: 1px solid rgba(88,166,255,0.2);
+  border-right: 4px solid var(--accent-blue);
+}
+.callout-note .callout-icon { color: var(--accent-blue); }
+
+.callout-tip {
+  background: rgba(63,185,80,0.06);
+  border: 1px solid rgba(63,185,80,0.2);
+  border-right: 4px solid var(--accent-green);
+}
+.callout-tip .callout-icon { color: var(--accent-green); }
+
+.callout-danger {
+  background: rgba(248,81,73,0.06);
+  border: 1px solid rgba(248,81,73,0.2);
+  border-right: 4px solid var(--accent-red);
+}
+.callout-danger .callout-icon { color: var(--accent-red); }
+
+/* ─── BADGES ─────────────────────────────────────── */
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.78em;
+  font-weight: 600;
+  font-family: var(--font-code);
+}
+.badge-green { background: rgba(63,185,80,0.15); color: var(--accent-green); border: 1px solid rgba(63,185,80,0.3); }
+.badge-blue { background: rgba(88,166,255,0.15); color: var(--accent-blue); border: 1px solid rgba(88,166,255,0.3); }
+.badge-orange { background: rgba(210,153,34,0.15); color: var(--accent-orange); border: 1px solid rgba(210,153,34,0.3); }
+.badge-purple { background: rgba(188,140,255,0.15); color: var(--accent-purple); border: 1px solid rgba(188,140,255,0.3); }
+.badge-red { background: rgba(248,81,73,0.15); color: var(--accent-red); border: 1px solid rgba(248,81,73,0.3); }
+.badge-cyan { background: rgba(57,210,192,0.15); color: var(--accent-cyan); border: 1px solid rgba(57,210,192,0.3); }
+
+/* ─── CARDS ──────────────────────────────────────── */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  margin: 20px 0;
+}
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  transition: border-color 0.2s;
+}
+.card:hover {
+  border-color: var(--accent-blue);
+}
+.card-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  font-size: 1em;
+}
+.card-desc {
+  font-size: 0.88em;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* ─── LISTS ──────────────────────────────────────── */
+ul, ol {
+  margin: 12px 0;
+  padding-right: 24px;
+}
+li {
+  margin-bottom: 8px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+/* ─── DIVIDERS ───────────────────────────────────── */
+.divider {
+  border: none;
+  border-top: 1px solid var(--border-secondary);
+  margin: 32px 0;
+}
+
+/* ─── ARCHITECTURE DIAGRAM ───────────────────────── */
+.arch-diagram {
+  background: var(--bg-code);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  margin: 20px 0;
+  direction: ltr;
+  text-align: center;
+  font-family: var(--font-code);
+  font-size: 0.85em;
+  color: var(--accent-cyan);
+  line-height: 1.5;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+/* ─── STEP LIST ──────────────────────────────────── */
+.step-list {
+  list-style: none;
+  padding: 0;
+  counter-reset: step;
+}
+.step-list li {
+  position: relative;
+  padding: 12px 48px 12px 16px;
+  margin-bottom: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius);
+  counter-increment: step;
+}
+.step-list li::before {
+  content: counter(step);
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  line-height: 28px;
+  text-align: center;
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+  border-radius: 50%;
+  color: #fff;
+  font-size: 0.8em;
+  font-weight: 700;
+  font-family: var(--font-code);
+}
+
+/* ─── STAT GRID ──────────────────────────────────── */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+  margin: 20px 0;
+}
+.stat-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius);
+  padding: 16px;
+  text-align: center;
+}
+.stat-value {
+  font-size: 1.8em;
+  font-weight: 800;
+  font-family: var(--font-code);
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.stat-label {
+  font-size: 0.82em;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* ─── FLOW DIAGRAM ───────────────────────────────── */
+.flow-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 20px 0;
+}
+.flow-step {
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius);
+  padding: 12px 20px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.flow-step:not(:last-child)::after {
+  content: '↓';
+  position: absolute;
+  bottom: -18px;
+  right: 50%;
+  transform: translateX(50%);
+  color: var(--accent-blue);
+  font-size: 1.2em;
+}
+.flow-step-num {
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
+  text-align: center;
+  background: var(--bg-tertiary);
+  border-radius: 50%;
+  font-size: 0.8em;
+  font-weight: 700;
+  font-family: var(--font-code);
+  color: var(--accent-blue);
+  flex-shrink: 0;
+}
+.flow-step-text {
+  color: var(--text-secondary);
+  font-size: 0.95em;
+}
+.flow-step-text strong {
+  color: var(--text-primary);
+}
+
+/* ─── FOOTER ─────────────────────────────────────── */
+.page-footer {
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-primary);
+  padding: 32px 0;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.88em;
+}
+.page-footer a {
+  color: var(--accent-blue);
+  text-decoration: none;
+}
+
+/* ─── RESPONSIVE ─────────────────────────────────── */
+@media (max-width: 1024px) {
+  .sidebar {
+    display: none;
+  }
+  .main-content {
+    padding: 24px 20px;
+  }
+}
+@media (max-width: 640px) {
+  .page-header .logo { font-size: 2em; }
+  .section-title { font-size: 1.4em; }
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .card-grid { grid-template-columns: 1fr; }
+}
+
+/* ─── SYNTAX HIGHLIGHTING (basic) ────────────────── */
+.kw { color: #ff7b72; }
+.str { color: #a5d6ff; }
+.cm { color: #8b949e; }
+.fn { color: #d2a8ff; }
+.num { color: #79c0ff; }
+.var { color: #ffa657; }
+.op { color: #ff7b72; }
+.type { color: #7ee787; }
+
+/* ─── SCROLLBAR ──────────────────────────────────── */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--border-primary); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ─── PRINT ──────────────────────────────────────── */
+@media print {
+  .sidebar { display: none; }
+  body { background: #fff; color: #000; }
+  pre { border: 1px solid #ddd; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     HEADER
+     ═══════════════════════════════════════════════════════════ -->
+<header class="page-header">
+  <div class="logo">Adam Prism</div>
+  <div class="subtitle">دليل التشغيل التفصيلي — Operational Guide</div>
+  <div class="version-badge">v1.0.0 — Apache 2.0</div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════════
+     LAYOUT
+     ═══════════════════════════════════════════════════════════ -->
+<div class="page-layout">
+
+<!-- ─── SIDEBAR / TABLE OF CONTENTS ──────────────── -->
+<nav class="sidebar" id="toc">
+  <div class="sidebar-title">فهرس المحتويات</div>
+  <ul class="toc-list">
+    <li><a href="#sec1"><span class="toc-number">1</span> نظرة عامة على المشروع</a></li>
+    <li><a href="#sec2"><span class="toc-number">2</span> متطلبات النظام</a></li>
+    <li><a href="#sec3"><span class="toc-number">3</span> التثبيت والتهيئة</a></li>
+    <li><a href="#sec4"><span class="toc-number">4</span> تشغيل المشروع</a></li>
+    <li><a href="#sec5"><span class="toc-number">5</span> تهيئة مزودي النماذج</a></li>
+    <li><a href="#sec6"><span class="toc-number">6</span> قنوات الاتصال</a></li>
+    <li><a href="#sec7"><span class="toc-number">7</span> نظام الذاكرة</a></li>
+    <li><a href="#sec8"><span class="toc-number">8</span> الأمان والخصوصية</a></li>
+    <li><a href="#sec9"><span class="toc-number">9</span> الأدوات والمهارات</a></li>
+    <li><a href="#sec10"><span class="toc-number">10</span> الوكلاء الفرعيين</a></li>
+    <li><a href="#sec11"><span class="toc-number">11</span> خط الأنابيب والجدولة</a></li>
+    <li><a href="#sec12"><span class="toc-number">12</span> النسخ الاحتياطي والاستعادة</a></li>
+    <li><a href="#sec13"><span class="toc-number">13</span> حل المشاكل الشائعة</a></li>
+    <li><a href="#sec14"><span class="toc-number">14</span> تطبيقات الديسكتوب والموبايل</a></li>
+  </ul>
+</nav>
+
+<!-- ─── MAIN CONTENT ──────────────────────────────── -->
+<main class="main-content">
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 1: نظرة عامة على المشروع
+     ═══════════════════════════════════════════════════════════ -->
+<section class="section" id="sec1">
+  <div class="section-header">
+    <div class="section-number">1</div>
+    <h2 class="section-title">نظرة عامة على المشروع</h2>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">ما هو Adam Prism؟</h3>
+    <p>
+      <strong>Adam Prism</strong> هو إطار عمل توأم رقمي مفتوح المصدر يعمل محلياً بالكامل على أجهزتك.
+      يجمع بين بنية وعي اصطناعي مكونة من 12 طبقة، و7 أوضاع معرفية، و4 قوانين أخلاقية.
+      يتواصل عبر 25 قناة، ويستخدم 53 أداة مدمجة + 70+ أداة MCP، ويتعلم باستمرار من كل محادثة.
+    </p>
+    <p>
+      اسم "بريزم" (Prism) مستوحى من المنشور الذي يحوّل الضوء الأبيض إلى ألوان الطيف — كذلك آدم يحوّل بياناتك الخام إلى رؤى وأفكار ملونة.
+    </p>
+
+    <div class="stat-grid">
+      <div class="stat-item"><div class="stat-value">12K+</div><div class="stat-label">سطر كود Python</div></div>
+      <div class="stat-item"><div class="stat-value">274</div><div class="stat-label">اختبار ناجح</div></div>
+      <div class="stat-item"><div class="stat-value">65+</div><div class="stat-label">مسار API</div></div>
+      <div class="stat-item"><div class="stat-value">53</div><div class="stat-label">أداة مدمجة</div></div>
+      <div class="stat-item"><div class="stat-value">70+</div><div class="stat-label">أداة MCP</div></div>
+      <div class="stat-item"><div class="stat-value">25</div><div class="stat-label">قناة تواصل</div></div>
+      <div class="stat-item"><div class="stat-value">12</div><div class="stat-label">طبقة وعي</div></div>
+      <div class="stat-item"><div class="stat-value">7</div><div class="stat-label">أوضاع معرفية</div></div>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">المبادئ الأساسية</h3>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-title">السيادة عبر المحلية</div>
+        <div class="card-desc">كل شيء يعمل على أجهزتك. لا بيانات تخرج إلا باختيارك. لا أحد يستطيع تغيير النموذج أو رفع السعر أو إيقاف الخدمة.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">الحرية عبر التفكيكية</div>
+        <div class="card-desc">كل قطعة يمكن إزالتها أو استبدالها أو توسيعها. تريد قناة واحدة بدون ذاكرة؟ تم. تريد 100 أداة مخصصة؟ أضفها.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">التواضع بالتصميم</div>
+        <div class="card-desc">آدم يعترف عندما لا يعرف. يطلب المساعدة منك أو من نماذج أكبر. هذا ليس بديلاً — إنه مبدأ تصميم.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">النمو عبر العلاقة</div>
+        <div class="card-desc">آدم يتأمل ويتعلم ويتغير مع الوقت. لا يولّد ردوداً فحسب — بل ينمو معك.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">هيكل البنية المعمارية</h3>
+    <div class="arch-diagram">
+                      ┌──────────────────────┐
+                      │  Input Channels (25) │
+                      │  Web/Telegram/WA/etc │
+                      └──────────┬───────────┘
+                                 │
+                      ┌──────────▼───────────┐
+                      │   Security Guard     │
+                      │  4-layer detection   │
+                      └──────────┬───────────┘
+                                 │
+                      ┌──────────▼───────────┐
+                      │   Ethics Gate        │
+                      │  4 laws + reverence  │
+                      └──────────┬───────────┘
+                                 │
+               ┌─────────────────┼─────────────────┐
+               │                 │                 │
+      ┌────────▼────────┐  ┌────▼────────┐  ┌─────▼─────────┐
+      │  Memory         │  │ Engine Core │  │  Tools        │
+      │  Qdrant+SQLite  │  │ 12 Layers   │  │  53 built-in  │
+      │  6 collections  │  │ 7 Modes     │  │  +70 MCP      │
+      │  Journal system │  │ Sub-agents  │  │  Sandbox      │
+      └─────────────────┘  └──────┬──────┘  └──────────────┘
+                                  │
+                      ┌───────────▼──────────┐
+                      │  API + Deployment    │
+                      │  FastAPI · Docker    │
+                      │  Modal · CLI · Nginx │
+                      └──────────────────────┘</div>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">حزمة التقنيات (Technology Stack)</h3>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>الطبقة</th><th>التقنية</th><th>الوصف</th></tr></thead>
+        <tbody>
+          <tr><td>Backend</td><td><code>Python 3.12+</code></td><td>لغة البرمجة الأساسية</td></tr>
+          <tr><td>API</td><td><code>FastAPI</code> + <code>Uvicorn</code></td><td>خادم API عالي الأداء مع WebSocket</td></tr>
+          <tr><td>LLM (محلي)</td><td><code>Ollama</code></td><td>مشغّل نماذج GGUF محلي</td></tr>
+          <tr><td>LLM (سحابي)</td><td><code>OpenAI</code> / <code>Anthropic</code></td><td>مزودو نماذج سحابية مع auto-fallback</td></tr>
+          <tr><td>Vector DB</td><td><code>Qdrant</code></td><td>قاعدة بيانات شعاعية للذاكرة الدلالية</td></tr>
+          <tr><td>التخزين المحلي</td><td><code>SQLite</code></td><td>fallback تلقائي عند عدم توفر Qdrant</td></tr>
+          <tr><td>Embedding</td><td><code>nomic-embed-text</code></td><td>نموذج التضمين عبر Ollama</td></tr>
+          <tr><td>Frontend</td><td><code>Next.js 16</code> + <code>Tailwind v4</code></td><td>واجهة الويب مع دعم RTL</td></tr>
+          <tr><td>Desktop</td><td><code>Electron 33</code></td><td>تطبيق سطح المكتب</td></tr>
+          <tr><td>Mobile</td><td><code>Flutter</code></td><td>تطبيقات Android و iOS</td></tr>
+          <tr><td>Browser</td><td><code>Playwright</code></td><td>أتمتة المتصفح</td></tr>
+          <tr><td>النشر</td><td><code>Docker Compose</code></td><td>نشر كامل المكوّنات</td></tr>
+          <tr><td>المراقبة</td><td><code>Prometheus</code> + <code>Grafana</code></td><td>مراقبة الأداء واللوحات</td></tr>
+          <tr><td>MCP</td><td><code>mcp[cli]</code></td><td>بروتوكول سياق النموذج</td></tr>
+          <tr><td>الصوت</td><td><code>edge-tts</code></td><td>تحويل النص إلى كلام بالعربية</td></tr>
+          <tr><td>الترخيص</td><td><code>Apache 2.0</code></td><td>مفتوح المصدر مجاني للأبد</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 2: متطلبات النظام
+     ═══════════════════════════════════════════════════════════ -->
+<section class="section" id="sec2">
+  <div class="section-header">
+    <div class="section-number">2</div>
+    <h2 class="section-title">متطلبات النظام</h2>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">الحد الأدنى من المتطلبات</h3>
+    <div class="callout callout-warning">
+      <span class="callout-icon">⚠️</span>
+      <div class="callout-content">
+        <p>هذه المتطلبات لتشغيل النظام الأساسي فقط (نموذج 4B). للحصول على أداء أفضل مع نماذج أكبر، راجع المتطلبات الموصى بها.</p>
+      </div>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>العنصر</th><th>الحد الأدنى</th><th>الموصى به</th></tr></thead>
+        <tbody>
+          <tr><td>المعالج (CPU)</td><td>Intel Core i5 / AMD Ryzen 5</td><td>Intel Core i7 / AMD Ryzen 7</td></tr>
+          <tr><td>الذاكرة (RAM)</td><td>8 GB</td><td>32 GB</td></tr>
+          <tr><td>كرت الشاشة (GPU)</td><td>— (يعمل على CPU)</td><td>NVIDIA RTX 3060 (12GB VRAM)</td></tr>
+          <tr><td>التخزين</td><td>20 GB حر</td><td>200 GB SSD</td></tr>
+          <tr><td>نظام التشغيل</td><td>Linux / Windows WSL2 / macOS</td><td>Ubuntu 22.04 LTS</td></tr>
+          <tr><td>Python</td><td>3.12+</td><td>3.12+</td></tr>
+          <tr><td>Docker</td><td>اختياري</td><td>موصى به للنشر الكامل</td></tr>
+          <tr><td>الإنترنت</td><td>للتثبيت فقط</td><td>سريع (لتحميل النماذج)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">متطلبات النماذج حسب الحجم</h3>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>النموذج</th><th>الحجم</th><th>VRAM مطلوب</th><th>RAM مطلوب</th><th>سرعة تقريبية</th></tr></thead>
+        <tbody>
+          <tr><td>Gemma 3 4B</td><td>~3 GB</td><td>4 GB</td><td>8 GB</td><td>15-25 tok/s</td></tr>
+          <tr><td>Qwen 3.5 4B</td><td>~2.5 GB</td><td>4 GB</td><td>8 GB</td><td>20-30 tok/s</td></tr>
+          <tr><td>Gemma 4 E4B</td><td>~8 GB</td><td>8 GB</td><td>16 GB</td><td>34 tok/s (RTX 3060)</td></tr>
+          <tr><td>Gemma 3 12B</td><td>~8 GB</td><td>12 GB</td><td>16 GB</td><td>8-15 tok/s</td></tr>
+          <tr><td>Gemma 3 27B</td><td>~16 GB</td><td>24 GB</td><td>32 GB</td><td>3-8 tok/s</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">أنظمة التشغيل المدعومة</h3>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-title">Linux <span class="badge badge-green">موصى به</span></div>
+        <div class="card-desc">Ubuntu 20.04+، يدعم GPU NVIDIA بالكامل عبر CUDA. أفضل أداء وإنتاجية.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Windows (WSL2) <span class="badge badge-blue">مدعوم</span></div>
+        <div class="card-desc">يعمل عبر Windows Subsystem for Linux 2. يدعم GPU عبر CUDA في WSL2.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">macOS <span class="badge badge-orange">مدعوم</span></div>
+        <div class="card-desc">يعمل على Apple Silicon (M1/M2/M3) عبر Metal. أداء جيد مع النماذج الصغيرة.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 3: التثبيت والتهيئة
+     ═══════════════════════════════════════════════════════════ -->
+<section class="section" id="sec3">
+  <div class="section-header">
+    <div class="section-number">3</div>
+    <h2 class="section-title">التثبيت والتهيئة</h2>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">الطريقة الأولى: pip install (الأسرع)</h3>
+    <pre><code># تثبيت الحزمة من PyPI
+pip install adam-prism
+
+# تشغيل آدم فوراً
+adam-prism
+# أو
+adam</code></pre>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">الطريقة الثانية: Git Clone</h3>
+    <pre><code># استنساخ المستودع
+git clone https://github.com/othmastar/adam-prism.git
+cd adam-prism
+
+# إنشاء بيئة افتراضية
+python3 -m venv venv
+source venv/bin/activate   # Linux/macOS
+# venv\Scripts\activate    # Windows
+
+# تثبيت في وضع التطوير
+pip install -e .
+
+# تثبيت المتصفح لأتمتة الويب
+playwright install firefox
+
+# تشغيل
+python main.py --port 8000</code></pre>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">الطريقة الثالثة: Docker Compose (النشر الكامل)</h3>
+    <pre><code># تثبيت Ollama أولاً (محلياً)
+curl -fsSL https://ollama.com/install.sh | sh
+ollama pull gemma3:4b
+ollama pull nomic-embed-text
+
+# النشر عبر Docker Compose
+cd deploy
+docker compose up -d</code></pre>
+    <p>يُطلق Docker Compose الخدمات التالية تلقائياً:</p>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>الخدمة</th><th>المنفذ</th><th>الوصف</th></tr></thead>
+        <tbody>
+          <tr><td>Qdrant</td><td><code>6333</code>, <code>6334</code></td><td>قاعدة البيانات الشعاعية</td></tr>
+          <tr><td>Ollama</td><td><code>11434</code></td><td>مشغّل النماذج المحلي</td></tr>
+          <tr><td>API</td><td><code>8000</code></td><td>خادم FastAPI</td></tr>
+          <tr><td>Web UI</td><td><code>3000</code></td><td>واجهة Next.js</td></tr>
+          <tr><td>Telegram Bot</td><td>—</td><td>بوت تليجرام</td></tr>
+          <tr><td>Nginx</td><td><code>80</code>, <code>443</code></td><td>بروكسي عكسي</td></tr>
+          <tr><td>Prometheus</td><td><code>9090</code></td><td>جمع المقاييس</td></tr>
+          <tr><td>Grafana</td><td><code>3001</code></td><td>لوحات المراقبة</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">الطريقة الرابعة: سكريبت التثبيت التلقائي</h3>
+    <pre><code># تثبيت كل شيء بسطر واحد
+bash scripts/setup.sh</code></pre>
+    <p>يفحص الاعتماديات، ينشئ البيئة الافتراضية، يسحب النماذج، ويشغل Qdrant.</p>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">متغيرات البيئة (.env)</h3>
+    <pre><code># انسخ ملف البيئة
+cp .env.example .env
+
+# ولّد مفاتيح آمنة
+python3 -c "import secrets; print('ADAM_API_KEY=' + secrets.token_urlsafe(32))"
+python3 -c "import secrets; print('ADAM_ADMIN_KEY=' + secrets.token_urlsafe(32))"</code></pre>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>المتغير</th><th>مطلوب</th><th>الافتراضي</th><th>الوصف</th></tr></thead>
+        <tbody>
+          <tr><td><code>ADAM_API_KEY</code></td><td><span class="badge badge-orange">إنتاجي</span></td><td><code>adam-prism-change-me</code></td><td>مفتاح المصادقة على API</td></tr>
+          <tr><td><code>ADAM_ADMIN_KEY</code></td><td><span class="badge badge-orange">إنتاجي</span></td><td>فارغ</td><td>مفتاح المسؤول لعمليات MCP والعمليات المميزة</td></tr>
+          <tr><td><code>ADAM_PRODUCTION</code></td><td><span class="badge badge-blue">اختياري</span></td><td><code>0</code></td><td>تفعيل وضع الأمان الإنتاجي</td></tr>
+          <tr><td><code>ADAM_RATE_LIMIT</code></td><td><span class="badge badge-blue">اختياري</span></td><td><code>60</code></td><td>أقصى عدد طلبات/دقيقة لكل IP</td></tr>
+          <tr><td><code>ADAM_MAX_REQUEST_SIZE</code></td><td><span class="badge badge-blue">اختياري</span></td><td><code>10485760</code></td><td>أقصى حجم للطلب (بايت)</td></tr>
+          <tr><td><code>ADAM_MAX_MCP_SERVERS</code></td><td><span class="badge badge-blue">اختياري</span></td><td><code>10</code></td><td>أقصى عدد اتصالات MCP</td></tr>
+          <tr><td><code>ADAM_SUBAGENT_IDLE_TIMEOUT</code></td><td><span class="badge badge-blue">اختياري</span></td><td><code>3600</code></td><td>مهلة خمول الوكلاء الفرعيين (ثانية)</td></tr>
+          <tr><td><code>INFERENCE_MODE</code></td><td><span class="badge badge-blue">اختياري</span></td><td><code>ollama</code></td><td>مزود النموذج: ollama, openai, anthropic</td></tr>
+          <tr><td><code>OLLAMA_BASE</code></td><td><span class="badge badge-orange">إذا ollama</span></td><td><code>http://localhost:11434</code></td><td>عنوان خادم Ollama</td></tr>
+          <tr><td><code>QDRANT_URL</code></td><td><span class="badge badge-blue">اختياري</span></td><td><code>http://localhost:6333</code></td><td>عنوان Qdrant</td></tr>
+          <tr><td><code>CORS_ORIGINS</code></td><td><span class="badge badge-blue">اختياري</span></td><td><code>*</code></td><td>أصول CORS المسموحة</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">تهيئة مفاتيح API للنماذج السحابية</h3>
+    <pre><code># OpenAI
+export OPENAI_API_KEY="sk-..."
+
+# Anthropic
+export ANTHROPIC_API_KEY="sk-ant-..."
+
+# أو في ملف .env
+OPENAI_API_KEY=sk-...
+ANTHROPIC_API_KEY=sk-ant-...</code></pre>
+    <div class="callout callout-warning">
+      <span class="callout-icon">⚠️</span>
+      <div class="callout-content">
+        <p>لا تضع مفاتيح API في الكود أبداً. استخدم متغيرات البيئة أو ملف <code>.env</code> المضاف لـ <code>.gitignore</code>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 4: تشغيل المشروع
+     ═══════════════════════════════════════════════════════════ -->
+<section class="section" id="sec4">
+  <div class="section-header">
+    <div class="section-number">4</div>
+    <h2 class="section-title">تشغيل المشروع</h2>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">تشغيل خادم API</h3>
+    <pre><code># الطريقة الأساسية
+python main.py --port 8000
+
+# أو عبر CLI
+adam-prism
+adam
+
+# أو عبر runner script
+python run_api.py
+
+# أو كـ Python module
+python -m adam</code></pre>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">تشغيل واجهة الويب (Web UI)</h3>
+    <pre><code># وضع التطوير
+cd frontend/web-ui
+npm install
+npm run dev
+
+# وضع الإنتاج
+npm run build && npm run start</code></pre>
+    <p>الواجهة تعمل على المنفذ <span class="inline-code">3000</span> — افتح <span class="inline-code">http://localhost:3000</span></p>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">تشغيل تطبيق سطح المكتب (Desktop App)</h3>
+    <pre><code>cd frontend/desktop-app
+npm install
+npm start   # تشغيل في وضع التطوير</code></pre>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">Docker Compose (المكدس الكامل)</h3>
+    <pre><code># تشغيل كل الخدمات
+cd deploy && docker compose up -d
+
+# تشغيل API فقط مع الاعتماديات
+docker compose up -d api
+
+# تشغيل بوت تليجرام فقط
+docker compose up -d telegram-bot
+
+# متابعة سجلات API
+docker compose logs -f api
+
+# إيقاف كل شيء
+docker compose down</code></pre>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">خيارات سطر الأوامر (CLI)</h3>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>الأمر</th><th>الوصف</th></tr></thead>
+        <tbody>
+          <tr><td><code>adam chat "رسالة"</code></td><td>إرسال رسالة واحدة والحصول على رد</td></tr>
+          <tr><td><code>adam shell</code></td><td>دخول الوضع التفاعلي</td></tr>
+          <tr><td><code>adam tools</code></td><td>عرض الأدوات المتاحة</td></tr>
+          <tr><td><code>adam mcp</code></td><td>تشغيل MCP server</td></tr>
+          <tr><td><code>adam skill list</code></td><td>عرض المهارات المحملة</td></tr>
+          <tr><td><code>adam skill install NAME</code></td><td>تثبيت مهارة من السوق</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">سكريبتات الإدارة</h3>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>السكريبت</th><th>الوصف</th></tr></thead>
+        <tbody>
+          <tr><td><code>bash scripts/setup.sh</code></td><td>تثبيت تلقائي كامل</td></tr>
+          <tr><td><code>bash start.sh</code></td><td>تشغيل LoRA + API + Frontend بالتتابع</td></tr>
+          <tr><td><code>bash stop.sh</code></td><td>إيقاف كل الخدمات على المنافذ 3000, 8002, 8080</td></tr>
+          <tr><td><code>python scripts/health_monitor.py</code></td><td>مراقب — يفحص Qdrant, Ollama, API ويعيد التشغيل تلقائياً</td></tr>
+          <tr><td><code>python scripts/inference_server.py</code></td><td>تشغيل خادم استدلال LoRA (يحتاج GPU)</td></tr>
+          <tr><td><code>python scripts/train_lora.py</code></td><td>تدريب QLoRA على بياناتك</td></tr>
+          <tr><td><code>python scripts/ingest_knowledge.py</code></td><td>إدخال مستندات لقاعدة معرفة Qdrant</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 5: تهيئة مزودي النماذج
+     ═══════════════════════════════════════════════════════════ -->
+<section class="section" id="sec5">
+  <div class="section-header">
+    <div class="section-number">5</div>
+    <h2 class="section-title">تهيئة مزودي النماذج (LLM Providers)</h2>
+  </div>
+
+  <p>يدعم Adam Prism عدة مزودي نماذج مع نظام <strong>auto-fallback</strong> تلقائي — إذا فشل مزود، يجرب التالي تلقائياً.</p>
+
+  <div class="subsection">
+    <h3 class="subsection-title">Ollama (محلي) <span class="badge badge-green">موصى به</span></h3>
+    <pre><code># تثبيت Ollama
+curl -fsSL https://ollama.com/install.sh | sh
+
+# سحب النموذج
+ollama pull gemma3:4b          # النموذج الأساسي (~3GB)
+ollama pull nomic-embed-text   # نموذج التضمين (~274MB)
+ollama pull qwen3:5b           # بديل ممتاز
+
+# التشغيل
+ollama serve</code></pre>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>الإعداد</th><th>القيمة الافتراضية</th><th>الوصف</th></tr></thead>
+        <tbody>
+          <tr><td><code>inference_mode</code></td><td><code>ollama</code></td><td>وضع الاستدلال</td></tr>
+          <tr><td><code>ollama_base</code></td><td><code>http://localhost:11434</code></td><td>عنوان خادم Ollama</td></tr>
+          <tr><td><code>model_name</code></td><td><code>adam-prism-v13:latest</code></td><td>اسم النموذج</td></tr>
+          <tr><td><code>OLLAMA_HOST</code></td><td><code>0.0.0.0</code></td><td>عنوان الاستماع (لـ Docker)</td></tr>
+          <tr><td><code>OLLAMA_KEEP_ALIVE</code></td><td><code>24h</code></td><td>مدة بقاء النموذج في الذاكرة</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">OpenAI (سحابي)</h3>
+    <pre><code># في .env
+INFERENCE_MODE=openai
+OPENAI_API_KEY=sk-...
+
+# أو في config/default.json
+{
+  "inference_mode": "openai",
+  "openai_api_key": "sk-...",
+  "openai_model": "gpt-4o"
+}</code></pre>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">Anthropic (سحابي)</h3>
+    <pre><code># في .env
+INFERENCE_MODE=anthropic
+ANTHROPIC_API_KEY=sk-ant-...
+
+# أو في config/default.json
+{
+  "inference_mode": "anthropic",
+  "anthropic_api_key": "sk-ant-...",
+  "anthropic_model": "claude-sonnet-4-20250514"
+}</code></pre>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">OpenRouter (متعدد المزودين)</h3>
+    <p>يمكن استخدام OpenRouter للوصول لمئات النماذج عبر API واحد:</p>
+    <pre><code># في .env
+INFERENCE_MODE=openai
+OPENAI_API_KEY=sk-or-...     # OpenRouter key
+OPENAI_BASE_URL=https://openrouter.ai/api/v1</code></pre>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">نظام Auto-Fallback</h3>
+    <div class="callout callout-tip">
+      <span class="callout-icon">💡</span>
+      <div class="callout-content">
+        <p>المدير (ProviderManager) يحاول مع المزود الحالي أولاً، وإذا فشل ينتقل تلقائياً للمزود التالي حسب ترتيب <code>provider_fallback</code>.</p>
+      </div>
+    </div>
+    <pre><code>// في config/default.json
+{
+  "provider_fallback": ["ollama", "openai", "anthropic"]
+}</code></pre>
+    <p>الترتيب الافتراضي: Ollama (محلي) ← OpenAI (سحابي) ← Anthropic (سحابي). يمكنك تغيير الترتيب حسب احتياجك.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 6: قنوات الاتصال
+     ═══════════════════════════════════════════════════════════ -->
+<section class="section" id="sec6">
+  <div class="section-header">
+    <div class="section-number">6</div>
+    <h2 class="section-title">قنوات الاتصال</h2>
+  </div>
+
+  <p>يدعم Adam Prism <strong>25 قناة تواصل</strong> مقسمة إلى ثلاثة أنواع:</p>
+
+  <div class="subsection">
+    <h3 class="subsection-title">WhatsApp</h3>
+    <pre><code># في config/default.json
+{
+  "channels": {
+    "whatsapp": {
+      "enabled": true,
+      "phone_number_id": "YOUR_PHONE_NUMBER_ID",
+      "access_token": "YOUR_ACCESS_TOKEN",
+      "verify_token": "YOUR_VERIFY_TOKEN"
+    }
+  }
+}</code></pre>
+    <p>نقطة نهاية Webhook: <span class="inline-code">POST /webhook/whatsapp</span></p>
+    <p>التحقق: <span class="inline-code">GET /webhook/whatsapp?hub.mode=subscribe&hub.verify_token=...</span></p>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">Telegram</h3>
+    <pre><code># إعداد البوت عبر @BotFather
+# 1. افتح Telegram وابحث عن @BotFather
+# 2. أرسل: /newbot
+# 3. اختر اسم: Adam Prism
+# 4. اختر username: adam_prism_yourname_bot
+# 5. انسخ الـ Token
+
+# في config/default.json
+{
+  "channels": {
+    "telegram": {
+      "enabled": true,
+      "bot_token": "YOUR_BOT_TOKEN",
+      "mode": "polling"   // أو "webhook"
+    }
+  }
+}
+
+# أو تشغيل البوت منفصلاً
+BOT_MODE=telegram python deploy/bot_entrypoint.py --token YOUR_TOKEN</code></pre>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">Discord</h3>
+    <pre><code>{
+  "channels": {
+    "discord": {
+      "enabled": true,
+      "bot_token": "YOUR_DISCORD_TOKEN"
+    }
+  }
+}</code></pre>
+    <p>Discord يستخدم نظام Hybrid (Gateway + Webhook معاً).</p>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">كل القنوات الـ 25</h3>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>القناة</th><th>النوع</th><th>مفتاح الإعداد</th></tr></thead>
+        <tbody>
+          <tr><td>Discord</td><td><span class="badge badge-purple">Hybrid</span></td><td><code>DISCORD_TOKEN</code></td></tr>
+          <tr><td>Slack</td><td><span class="badge badge-blue">Webhook</span></td><td><code>SLACK_BOT_TOKEN</code></td></tr>
+          <tr><td>Email</td><td><span class="badge badge-orange">Polling</span></td><td><code>EMAIL_HOST</code>, <code>EMAIL_USER</code></td></tr>
+          <tr><td>SMS (Twilio)</td><td><span class="badge badge-blue">Webhook</span></td><td><code>TWILIO_ACCOUNT_SID</code></td></tr>
+          <tr><td>Facebook</td><td><span class="badge badge-blue">Webhook</span></td><td><code>FACEBOOK_PAGE_ACCESS_TOKEN</code></td></tr>
+          <tr><td>Twitter</td><td><span class="badge badge-orange">Polling</span></td><td><code>TWITTER_BEARER_TOKEN</code></td></tr>
+          <tr><td>Matrix</td><td><span class="badge badge-orange">Polling</span></td><td><code>MATRIX_HOMESERVER</code></td></tr>
+          <tr><td>Signal</td><td><span class="badge badge-orange">Polling</span></td><td><code>SIGNAL_CLI_PATH</code></td></tr>
+          <tr><td>Instagram</td><td><span class="badge badge-orange">Polling</span></td><td><code>INSTAGRAM_USERNAME</code></td></tr>
+          <tr><td>LINE</td><td><span class="badge badge-blue">Webhook</span></td><td><code>LINE_CHANNEL_ACCESS_TOKEN</code></td></tr>
+          <tr><td>Viber</td><td><span class="badge badge-blue">Webhook</span></td><td><code>VIBER_AUTH_TOKEN</code></td></tr>
+          <tr><td>Teams</td><td><span class="badge badge-blue">Webhook</span></td><td><code>TEAMS_WEBHOOK_URL</code></td></tr>
+          <tr><td>Google Chat</td><td><span class="badge badge-blue">Webhook</span></td><td><code>GOOGLE_CHAT_WEBHOOK_URL</code></td></tr>
+          <tr><td>IRC</td><td><span class="badge badge-orange">Polling</span></td><td><code>IRC_SERVER</code>, <code>IRC_NICK</code></td></tr>
+          <tr><td>XMPP</td><td><span class="badge badge-orange">Polling</span></td><td><code>XMPP_JID</code></td></tr>
+          <tr><td>RSS</td><td><span class="badge badge-orange">Polling</span></td><td><code>RSS_FEEDS</code></td></tr>
+          <tr><td>GitHub</td><td><span class="badge badge-orange">Polling</span></td><td><code>GITHUB_TOKEN</code></td></tr>
+          <tr><td>Notion</td><td><span class="badge badge-orange">Polling</span></td><td><code>NOTION_API_KEY</code></td></tr>
+          <tr><td>WeChat</td><td><span class="badge badge-orange">Polling</span></td><td><code>WECHAT_CORP_ID</code></td></tr>
+          <tr><td>Generic Webhook</td><td><span class="badge badge-blue">Webhook</span></td><td>— (اختياري)</td></tr>
+          <tr><td>WebChat</td><td><span class="badge badge-green">Embedded</span></td><td>مدمج في <code>/chat/widget</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">قالب تهيئة القنوات</h3>
+    <pre><code>{
+  "channels": {
+    "telegram": {
+      "enabled": false,
+      "bot_token": "",
+      "mode": "webhook"
+    },
+    "whatsapp": {
+      "enabled": false,
+      "phone_number_id": "",
+      "access_token": "",
+      "verify_token": ""
+    },
+    "discord": {
+      "enabled": false,
+      "bot_token": ""
+    },
+    "webchat": {
+      "enabled": true
+    },
+    "rss": {
+      "enabled": false,
+      "feeds": [],
+      "interval": 300
+    },
+    "github": {
+      "enabled": false,
+      "token": "",
+      "repos": []
+    }
+  }
+}</code></pre>
+    <div class="callout callout-note">
+      <span class="callout-icon">📝</span>
+      <div class="callout-content">
+        <p>القنوات تبدأ تلقائياً عبر <code>ChannelManager.start_all()</code> عند تهيئتها. ليست بحاجة لتشغيل يدوي.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 7: نظام الذاكرة
+     ═══════════════════════════════════════════════════════════ -->
+<section class="section" id="sec7">
+  <div class="section-header">
+    <div class="section-number">7</div>
+    <h2 class="section-title">نظام الذاكرة</h2>
+  </div>
+
+  <p>نظام الذاكرة في Adam Prism متعدد الطبقات يجمع بين الذاكرة الشعاعية (Qdrant) والذاكرة المحلية (SQLite) مع نظام تخزين مؤقت ذكي.</p>
+
+  <div class="subsection">
+    <h3 class="subsection-title">الذاكرة الشعاعية — Qdrant</h3>
+    <p>تخزين واسترجاع دلالي باستخدام التضمينات (Embeddings). كل نص يُحوّل إلى 768 رقم عبر نموذج <code>nomic-embed-text</code> ويُخزّن في Qdrant للبحث بالمعنى لا بالكلمات.</p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>المجموعة</th><th>المحتوى</th><th>مثال</th></tr></thead>
+        <tbody>
+          <tr><td><code>adam_knowledge</code></td><td>معرفة عامة</td><td>"مبدأ عدم اليقين ينص على..."</td></tr>
+          <tr><td><code>adam_conversations</code></td><td>محادثات</td><td>سؤال: "اشرح ميكانيكا الكم" → جواب: "..."</td></tr>
+          <tr><td><code>adam_patterns</code></td><td>أنماط تفكير</td><td>"المستخدم يفضل الإجابات المنهجية"</td></tr>
+          <tr><td><code>adam_reasoning_patterns</code></td><td>أنماط الاستدلال</td><td>"عند التحليل، ابدأ بالفرضيات"</td></tr>
+          <tr><td><code>adam_summaries</code></td><td>ملخصات</td><td>ملخص كتاب "تفكير سريع وبطيء"</td></tr>
+          <tr><td><code>adam_connections</code></td><td>روابط</td><td>"مبدأ عدم اليقين ↔ اتخاذ القرار"</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <pre><code># تشغيل Qdrant عبر Docker
+docker run -d --name qdrant \
+    -p 6333:6333 \
+    -p 6334:6334 \
+    -v ./qdrant_data:/qdrant/storage \
+    qdrant/qdrant:latest</code></pre>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">ذاكرة SQLite المحلية</h3>
+    <div class="callout callout-tip">
+      <span class="callout-icon">💡</span>
+      <div class="callout-content">
+        <p>عند عدم توفر Qdrant، ينتقل النظام تلقائياً إلى SQLite كـ fallback. لا حاجة لأي إجراء منك.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">عمليات الذاكرة</h3>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>العملية</th><th>الوصف</th><th>API</th></tr></thead>
+        <tbody>
+          <tr><td>تخزين معرفة</td><td>إضافة معرفة جديدة لقاعدة المعرفة</td><td><code>POST /api/knowledge/store</code></td></tr>
+          <tr><td>بحث دلالي</td><td>البحث بالمعنى في كل المجموعات</td><td><code>POST /api/memory/search</code></td></tr>
+          <tr><td>تخزين محادثة</td><td>حفظ سؤال وجواب تلقائياً</td><td>تلقائي بعد كل محادثة</td></tr>
+          <tr><td>تخزين نمط</td><td>حفظ نمط تفكير أو سلوك</td><td><code>POST /api/memory/pattern</code></td></tr>
+          <tr><td>تخزين ملخص</td><td>حفظ ملخص مع المواضيع الرئيسية</td><td><code>POST /api/memory/summary</code></td></tr>
+          <tr><td>ربط أفكار</td><td>ربط فكرتين بنوع العلاقة</td><td><code>POST /api/memory/connection</code></td></tr>
+          <tr><td>استرجاع</td><td>بحث في كل المجموعات بالتوازي</td><td><code>POST /api/memory/retrieve</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">تهيئة الذاكرة</h3>
+    <pre><code>// في config/default.json
+{
+  "memory": {
+    "qdrant_url": "http://localhost:6333",
+    "ollama_base": "http://localhost:11434",
+    "embedding_model": "nomic-embed-text"
+  },
+  "short_term_limit": 50,
+  "context_window": 4096,
+  "token_budget": 4000
+}</code></pre>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 8: الأمان والخصوصية
+     ═══════════════════════════════════════════════════════════ -->
+<section class="section" id="sec8">
+  <div class="section-header">
+    <div class="section-number">8</div>
+    <h2 class="section-title">الأمان والخصوصية</h2>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">إدارة مفاتيح API</h3>
+    <ul>
+      <li>خزّن المفاتيح في متغيرات بيئة أو ملف <code>.env</code> فقط</li>
+      <li>لا تضع المفاتيح في الكود أبداً</li>
+      <li>استخدم <code>ADAM_API_KEY</code> للمصادقة على API</li>
+      <li>استخدم <code>ADAM_ADMIN_KEY</code> للعمليات المميزة (MCP، صلاحيات إدارية)</li>
+      <li>ولّد مفاتيح قوية: <code>python3 -c "import secrets; print(secrets.token_urlsafe(32))"</code></li>
+    </ul>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">نظام الصلاحيات (Permission System)</h3>
+    <p>يحدد صلاحيات كل أداة من الأدوات الـ 53 المدمجة:</p>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>الأداة</th><th>الحد الأقصى/جلسة</th><th>تحتاج تأكيد</th></tr></thead>
+        <tbody>
+          <tr><td><code>shell</code></td><td>20</td><td>لا</td></tr>
+          <tr><td><code>file_write</code></td><td>30</td><td><span class="badge badge-red">نعم</span></td></tr>
+          <tr><td><code>browser_fetch</code></td><td>30</td><td>لا</td></tr>
+          <tr><td><code>screenshot</code></td><td>20</td><td>لا</td></tr>
+          <tr><td><code>memory_store</code></td><td>30</td><td>لا</td></tr>
+          <tr><td><code>memory_recall</code></td><td>50</td><td>لا</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">حارس الأمان (Security Guard)</h3>
+    <p>يتكون من 3 طبقات حماية تعمل بدون استدعاء النموذج (سريعة وخفيفة):</p>
+
+    <div class="flow-steps">
+      <div class="flow-step">
+        <div class="flow-step-num">1</div>
+        <div class="flow-step-text"><strong>InputGuard</strong> — فحص المدخلات قبل وصولها للنموذج. يكشف: حقن الأوامر، تسريب تعليمات النظام، محاولات كسر القيود، حقن الكود.</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-num">2</div>
+        <div class="flow-step-text"><strong>OutputGuard</strong> — فحص المخرجات قبل وصولها للمستخدم. يكشف: تسريب system prompt، بيانات شخصية (PII)، حقن كود.</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-num">3</div>
+        <div class="flow-step-text"><strong>ToolPermissionValidator</strong> — التحقق من صلاحيات استدعاء الأدوات: حد الاستدعاءات، النطاقات المحظورة، التأكيد المطلوب.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">البوابة الأخلاقية (Ethics Gate)</h3>
+    <p>تقييم كل رد حسب 4 قوانين قبل الإرسال:</p>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>القانون</th><th>الوزن</th><th>المعيار</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge badge-blue">العدالة</span></td><td>40%</td><td>هل الرد منصف وصادق وغير متحيز؟</td></tr>
+          <tr><td><span class="badge badge-green">التعلم</span></td><td>30%</td><td>هل يساعد المستخدم على النمو؟</td></tr>
+          <tr><td><span class="badge badge-orange">البقاء</span></td><td>20%</td><td>هل يحافظ على الأمان؟</td></tr>
+          <tr><td><span class="badge badge-purple">الإبداع</span></td><td>10%</td><td>هل مبتكر ويحل المشكلة؟</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout callout-danger">
+      <span class="callout-icon">🚫</span>
+      <div class="callout-content">
+        <p><strong>المحرمات المطلقة</strong> — أي رد ينتهك هذه يُرفض فوراً: إيذاء جسدي/نفسي، انتهاك خصوصية الغير، تزوير معلومات، التلاعب بقرارات المستخدم، إخفاء معلومات مهمة عمداً.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">سجل التدقيق (Audit Logging)</h3>
+    <p>كل استدعاء أداة يُسجّل مع: اسم الأداة، المعاملات، السماح/المنع، السبب، الوقت. يمكنك الوصول عبر:</p>
+    <pre><code># عبر API
+GET /api/security/audit-log?limit=50
+
+# أو من ToolPermissionValidator
+validator.get_audit_log(limit=50)</code></pre>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">حماية SSRF</h3>
+    <ul>
+      <li>فحص عناوين URL قبل طلبها لمنع الوصول للشبكة الداخلية</li>
+      <li>تعقيم محتوى الويب غير الموثوق عبر Base64 encoding</li>
+      <li>تحديد أقصى لحجم المحتوى (<code>max_chars=4000</code>)</li>
+    </ul>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">أمان Shell</h3>
+    <ul>
+      <li>تنفيذ الأوامر في بيئة محدودة (sandbox)</li>
+      <li>حد أقصى 20 استدعاء shell لكل جلسة</li>
+      <li>مراقبة الأوامر الخطيرة (<code>os.system</code>, <code>subprocess.run</code>, <code>exec()</code>)</li>
+      <li>تسجيل كل أمر في سجل التدقيق</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 9: الأدوات والمهارات
+     ═══════════════════════════════════════════════════════════ -->
+<section class="section" id="sec9">
+  <div class="section-header">
+    <div class="section-number">9</div>
+    <h2 class="section-title">الأدوات والمهارات</h2>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">الأدوات المدمجة (53 أداة)</h3>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>الفئة</th><th>الأدوات</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge badge-cyan">ملفات</span></td><td>read, write, list, find, grep, tail, copy, delete, info</td></tr>
+          <tr><td><span class="badge badge-green">نظام</span></td><td>info, processes, memory, network, uptime, disk_space</td></tr>
+          <tr><td><span class="badge badge-orange">Git</span></td><td>status, diff, log, commit, push, pull, clone</td></tr>
+          <tr><td><span class="badge badge-blue">ويب</span></td><td>search, fetch, http_get, ping, dns, whois, screenshot</td></tr>
+          <tr><td><span class="badge badge-purple">أدوات</span></td><td>calc, hash, uuid, date, base64, json, csv</td></tr>
+          <tr><td><span class="badge badge-red">ضغط</span></td><td>compress, decompress, zip</td></tr>
+          <tr><td><span class="badge badge-orange">حزم</span></td><td>pip, npm, apt</td></tr>
+          <tr><td><span class="badge badge-green">ذاكرة</span></td><td>store, recall, list, todo</td></tr>
+          <tr><td><span class="badge badge-blue">متقدمة</span></td><td>subagent, sandbox, mcp_call, mcp_register</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">تكامل MCP (Model Context Protocol)</h3>
+    <p>Adam Prism يعمل كمضيف MCP (يقدم أدواته) وعميل MCP (يتصل بخوادم MCP خارجية) — 70+ أداة إضافية.</p>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>أداة MCP</th><th>الوصف</th></tr></thead>
+        <tbody>
+          <tr><td><code>adam_chat</code></td><td>إرسال رسالة و.receive رد</td></tr>
+          <tr><td><code>adam_memory_store</code></td><td>تخزين ذاكرة مع بيانات وصفية</td></tr>
+          <tr><td><code>adam_memory_search</code></td><td>بحث في الذكريات</td></tr>
+          <tr><td><code>adam_skill_list</code></td><td>عرض المهارات المحملة</td></tr>
+          <tr><td><code>adam_skill_load</code></td><td>تحميل مهارة بالاسم</td></tr>
+          <tr><td><code>adam_browser_fetch</code></td><td>جلب محتوى صفحة ويب</td></tr>
+          <tr><td><code>adam_tools_execute</code></td><td>تنفيذ أداة نظام</td></tr>
+          <tr><td><code>adam_status</code></td><td>حالة المحرك</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>خوادم MCP الخارجية المدعومة: Filesystem, Git, GitHub, Docker, Kubernetes, PostgreSQL, Playwright, Slack, Notion, Jira, Figma, Sentry, Cloudflare, وغيرها.</p>
+
+    <h4 class="subsection-title-3">إعداد MCP مع Claude Desktop</h4>
+    <pre><code>// ~/Library/Application Support/Claude/claude_desktop_config.json
+{
+  "mcpServers": {
+    "adam-prism": {
+      "command": "adam-prism",
+      "args": ["mcp"],
+      "env": {
+        "OLLAMA_BASE": "http://localhost:11434"
+      }
+    }
+  }
+}</code></pre>
+
+    <h4 class="subsection-title-3">إعداد خوادم MCP مخصصة</h4>
+    <pre><code>// config/mcp_servers.json
+{
+  "mcp_servers": [
+    {
+      "name": "weather-api",
+      "transport": "stdio",
+      "command": "python",
+      "args": ["-m", "weather_mcp_server"],
+      "env": { "API_KEY": "your-key" }
+    }
+  ]
+}</code></pre>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">نظام المهارات (Skills)</h3>
+    <p>المهارات حزم معرفية قابلة لإعادة الاستخدام تعلّم آدم كيفية التعامل مع مهمة محددة. ليست إضافات — إنها معرفة مركزة.</p>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-title">git-commit</div>
+        <div class="card-desc">كتابة رسائل commit تقليدية</div>
+      </div>
+      <div class="card">
+        <div class="card-title">code-review</div>
+        <div class="card-desc">مراجعة الكود واكتشاف المشاكل</div>
+      </div>
+      <div class="card">
+        <div class="card-title">explain-code</div>
+        <div class="card-desc">شرح الكود خطوة بخطوة</div>
+      </div>
+      <div class="card">
+        <div class="card-title">debug</div>
+        <div class="card-desc">تشخيص الأخطاء وإصلاحها</div>
+      </div>
+      <div class="card">
+        <div class="card-title">write-test</div>
+        <div class="card-desc">كتابة اختبارات وحدة شاملة</div>
+      </div>
+    </div>
+
+    <pre><code># إدارة المهارات عبر CLI
+adam skill list --installed      # عرض المهارات المثبتة
+adam skill install git-commit    # تثبيت مهارة من السوق
+adam skill search "docker"       # بحث في السوق
+adam skill update --all          # تحديث كل المهارات
+adam skill rate git-commit 5     # تقييم مهارة</code></pre>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">نظام الإضافات (Plugins)</h3>
+    <p>نظام إضافات مبني على الـ hooks يسمح باعتراض وتعديل سلوك المحرك في نقاط محددة:</p>
+
+    <div class="flow-steps">
+      <div class="flow-step">
+        <div class="flow-step-num">1</div>
+        <div class="flow-step-text"><code>before_generate()</code> — تعديل الرسالة/السياق قبل توليد الرد</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-num">2</div>
+        <div class="flow-step-text"><code>after_generate()</code> — تعديل الرد بعد التوليد</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-num">3</div>
+        <div class="flow-step-text"><code>before_tool()</code> — اعتراض تنفيذ الأداة (أو منعها)</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-step-num">4</div>
+        <div class="flow-step-text"><code>after_tool()</code> — تعديل نتيجة الأداة</div>
+      </div>
+    </div>
+
+    <pre><code># مثال: إنشاء إضافة بسيطة
+from adam.plugins import AdamPlugin
+
+class MyPlugin(AdamPlugin):
+    name = "my-plugin"
+    version = "1.0.0"
+    description = "Does something useful"
+
+    async def on_load(self, engine):
+        self.engine = engine
+
+    async def before_generate(self, message, context):
+        context["extra_info"] = "added by plugin"
+        return {"message": message, "context": context}
+
+    async def after_generate(self, message, response):
+        return response + "\n\n— Powered by MyPlugin"</code></pre>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 10: الوكلاء الفرعيين
+     ═══════════════════════════════════════════════════════════ -->
+<section class="section" id="sec10">
+  <div class="section-header">
+    <div class="section-number">10</div>
+    <h2 class="section-title">الوكلاء الفرعيين</h2>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">إنشاء وكيل فرعي (Spawning)</h3>
+    <p>يمكن لآدم إنشاء وكلاء فرعيين متخصصين للعمل على مهام محددة. كل وكيل له جلسة منفصلة وأدواته الخاصة.</p>
+    <pre><code># عبر API
+POST /api/subagents/spawn
+{
+  "name": "research-agent",
+  "config": {
+    "mode": "researcher",
+    "tools_enabled": ["search", "browser_fetch", "memory_store"]
+  }
+}
+
+# القيود الأمنية:
+# - الحد الأقصى: 10 وكلاء فرعيين (ADAM_MAX_SUBAGENTS)
+# - الأسماء المحظورة: admin, root, system, adam, sudo
+# - لا يمكن إنشاء وكيل بنفس الاسم
+# - تنظيف تلقائي للوكلاء الخاملين بعد ساعة</code></pre>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">إدارة الفرق (Team Management)</h3>
+    <p>يمكن تنظيم الوكلاء في فرق تعمل معاً:</p>
+    <pre><code># إنشاء فريق
+POST /api/subagents/teams
+{
+  "name": "analysis-team",
+  "members": ["research-agent", "analyst-agent", "writer-agent"],
+  "mode": "parallel"  // أو "sequential"
+}</code></pre>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">التنفيذ المتوالي vs المتوازي</h3>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>الوضع</th><th>الوصف</th><th>متى تستخدمه</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge badge-blue">Sequential</span></td><td>الوكلاء يعملون واحداً تلو الآخر، كل واحد يبني على نتيجة السابق</td><td>المهام التي تحتاج ترتيب منطقي</td></tr>
+          <tr><td><span class="badge badge-green">Parallel</span></td><td>الوكلاء يعملون في نفس الوقت</td><td>المهام المستقلة التي لا تعتمد على بعضها</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">إدارة الوكلاء</h3>
+    <pre><code># عرض كل الوكلاء
+GET /api/subagents/list
+
+# محادثة وكيل محدد
+POST /api/subagents/{id}/chat
+{ "message": "حلل هذه البيانات" }
+
+# حذف وكيل
+DELETE /api/subagents/{id}
+
+# حذف كل الوكلاء
+DELETE /api/subagents/all</code></pre>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 11: خط الأنابيب والجدولة
+     ═══════════════════════════════════════════════════════════ -->
+<section class="section" id="sec11">
+  <div class="section-header">
+    <div class="section-number">11</div>
+    <h2 class="section-title">خط الأنابيب والجدولة</h2>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">مراقبة خط الأنابيب (Pipeline Monitoring)</h3>
+    <p>يمكن مراقبة أداء النظام عبر Prometheus و Grafana المدمجين:</p>
+    <pre><code># Prometheus
+http://localhost:9090
+
+# Grafana
+http://localhost:3001
+# بيانات الدخول: admin / ${GRAFANA_ADMIN_PASSWORD}</code></pre>
+    <p>لوحة Grafana المضمنة تعرض: معدل الطلبات، وقت الاستجابة، استخدام الأدوات، حالات الأمان.</p>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">نظام الجدولة (Scheduler)</h3>
+    <p>يدعم جدولة المهام بثلاثة أنواع:</p>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-title">Cron <span class="badge badge-blue">دوري</span></div>
+        <div class="card-desc">تنفيذ مهمة بجدول زمني محدد (مثل: كل يوم الساعة 8 صباحاً)</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Interval <span class="badge badge-green">فاصل</span></div>
+        <div class="card-desc">تنفيذ مهمة كل فترة زمنية محددة (مثل: كل 5 دقائق)</div>
+      </div>
+      <div class="card">
+        <div class="card-title">One-time <span class="badge badge-orange">مرة واحدة</span></div>
+        <div class="card-desc">تنفيذ مهمة في وقت محدد مرة واحدة فقط</div>
+      </div>
+    </div>
+
+    <pre><code># عبر API
+POST /api/scheduler/cron
+{
+  "job_id": "daily-summary",
+  "cron_expr": "0 8 * * *",
+  "name": "ملخص يومي"
+}
+
+POST /api/scheduler/interval
+{
+  "job_id": "health-check",
+  "seconds": 300,
+  "name": "فحص صحي"
+}
+
+POST /api/scheduler/once
+{
+  "job_id": "backup-now",
+  "run_at": "2026-03-05T02:00:00",
+  "name": "نسخ احتياطي"
+}
+
+# إدارة المهام
+GET  /api/scheduler/list        # عرض كل المهام
+GET  /api/scheduler/{job_id}    # تفاصيل مهمة
+DELETE /api/scheduler/{job_id}  # حذف مهمة</code></pre>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">أمثلة على Cron</h3>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>التعبير</th><th>الوصف</th></tr></thead>
+        <tbody>
+          <tr><td><code>0 8 * * *</code></td><td>كل يوم الساعة 8:00 صباحاً</td></tr>
+          <tr><td><code>0 */2 * * *</code></td><td>كل ساعتين</td></tr>
+          <tr><td><code>30 0 * * 1</code></td><td>كل اثنين الساعة 12:30 بعد منتصف الليل</td></tr>
+          <tr><td><code>0 0 1 * *</code></td><td>أول يوم من كل شهر</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout callout-note">
+      <span class="callout-icon">📝</span>
+      <div class="callout-content">
+        <p>صيغة Cron: <code>دقيقة ساعة يوم شهر يوم_الأسبوع</code> — 5 أجزاء مفصولة بمسافات.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 12: النسخ الاحتياطي والاستعادة
+     ═══════════════════════════════════════════════════════════ -->
+<section class="section" id="sec12">
+  <div class="section-header">
+    <div class="section-number">12</div>
+    <h2 class="section-title">النسخ الاحتياطي والاستعادة</h2>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">نسخ البيانات احتياطياً</h3>
+    <pre><code># 1. نسخ بيانات Qdrant
+docker exec adam-qdrant curl -X POST http://localhost:6333/snapshots
+# النسخة تُحفظ في /qdrant/snapshots داخل الحاوية
+
+# أو نسخ المجلد مباشرة
+cp -r qdrant_data/ backup/qdrant_$(date +%Y%m%d)/
+
+# 2. نسخ بيانات API (محادثات وسجلات)
+cp -r data/ backup/data_$(date +%Y%m%d)/
+cp -r logs/ backup/logs_$(date +%Y%m%d)/
+
+# 3. نسخ نماذج Ollama
+cp -r ~/.ollama/ backup/ollama_$(date +%Y%m%d)/
+
+# 4. نسخ شامل بسكريبت واحد
+tar -czf adam-backup-$(date +%Y%m%d).tar.gz \
+    qdrant_data/ \
+    data/ \
+    logs/ \
+    config/ \
+    notebook/</code></pre>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">نسخ الإعدادات احتياطياً</h3>
+    <pre><code># نسخ ملفات الإعداد
+cp config/default.json backup/config_$(date +%Y%m%d).json
+cp .env backup/env_$(date +%Y%m%d)
+
+# نسخ مهاراتك المخصصة
+cp -r ~/.adam/skills/ backup/skills_$(date +%Y%m%d)/
+
+# نسخ إضافاتك
+cp -r plugins/ backup/plugins_$(date +%Y%m%d)/</code></pre>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">إجراءات الاستعادة</h3>
+    <pre><code># 1. استعادة Qdrant
+# أوقف الحاوية
+docker stop adam-qdrant
+
+# استعادة البيانات
+cp -r backup/qdrant_YYYYMMDD/ qdrant_data/
+
+# أعد تشغيل الحاوية
+docker start adam-qdrant
+
+# 2. استعادة API
+cp -r backup/data_YYYYMMDD/ data/
+cp -r backup/logs_YYYYMMDD/ logs/
+
+# 3. استعادة الإعدادات
+cp backup/config_YYYYMMDD.json config/default.json
+cp backup/env_YYYYMMDD .env
+
+# 4. استعادة من أرشيف شامل
+tar -xzf adam-backup-YYYYMMDD.tar.gz
+
+# 5. إعادة تشغيل الكل
+cd deploy && docker compose restart</code></pre>
+    <div class="callout callout-warning">
+      <span class="callout-icon">⚠️</span>
+      <div class="callout-content">
+        <p>أوقف كل الخدمات قبل الاستعادة لتجنب تلف البيانات. استخدم <code>bash stop.sh</code> أو <code>docker compose down</code>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 13: حل المشاكل الشائعة
+     ═══════════════════════════════════════════════════════════ -->
+<section class="section" id="sec13">
+  <div class="section-header">
+    <div class="section-number">13</div>
+    <h2 class="section-title">حل المشاكل الشائعة</h2>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">Ollama لا يعمل</h3>
+    <div class="callout callout-danger">
+      <span class="callout-icon">🔴</span>
+      <div class="callout-content"><p><strong>الخطأ:</strong> <code>ConnectionRefusedError: [Errno 111] Connection refused</code> على المنفذ 11434</p></div>
+    </div>
+    <pre><code># فحص حالة Ollama
+ollama list
+
+# إعادة التشغيل
+sudo systemctl restart ollama
+
+# فحص السجلات
+sudo journalctl -u ollama -n 50
+
+# تشغيل يدوي
+ollama serve
+
+# فحص المنفذ
+curl http://localhost:11434/api/tags</code></pre>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">تعارض المنافذ</h3>
+    <div class="callout callout-danger">
+      <span class="callout-icon">🔴</span>
+      <div class="callout-content"><p><strong>الخطأ:</strong> <code>Address already in use</code></p></div>
+    </div>
+    <pre><code># معرفة من يشغل المنفذ
+lsof -i :8000
+# أو
+ss -tlnp | grep 8000
+
+# قتل العملية
+kill -9 $(lsof -ti :8000)
+
+# تغيير المنفذ
+python main.py --port 8001</code></pre>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>المنفذ</th><th>الخدمة</th><th>الحل</th></tr></thead>
+        <tbody>
+          <tr><td>3000</td><td>Web UI</td><td>تغيير عبر <code>npm run dev -- -p 3001</code></td></tr>
+          <tr><td>6333</td><td>Qdrant</td><td>تغيير عبر <code>-p 6334:6333</code></td></tr>
+          <tr><td>8000</td><td>API</td><td>تغيير عبر <code>--port 8001</code></td></tr>
+          <tr><td>11434</td><td>Ollama</td><td>تغيير عبر <code>OLLAMA_HOST</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">مشاكل اتصال Qdrant</h3>
+    <div class="callout callout-danger">
+      <span class="callout-icon">🔴</span>
+      <div class="callout-content"><p><strong>الخطأ:</strong> <code>Qdrant connection refused</code></p></div>
+    </div>
+    <pre><code># فحص Docker
+docker ps | grep qdrant
+
+# إعادة تشغيل الحاوية
+docker restart adam-qdrant
+
+# فحص السجلات
+docker logs adam-qdrant --tail 50
+
+# فحص الاتصال
+curl http://localhost:6333/collections</code></pre>
+    <div class="callout callout-tip">
+      <span class="callout-icon">💡</span>
+      <div class="callout-content">
+        <p>إذا لم يكن Qdrant متاحاً، ينتقل النظام تلقائياً إلى SQLite. لا حاجة لإجراء فوري.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">أخطاء الاستيراد (ImportError)</h3>
+    <pre><code># الخطأ: No module named adam
+pip install -e .
+
+# الخطأ: No module named httpx
+pip install -r requirements.txt
+
+# الخطأ: Playwright not found
+playwright install firefox</code></pre>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">أخطاء الصلاحيات</h3>
+    <pre><code># الخطأ: Permission denied على ملفات
+sudo chown -R $USER:$USER data/ logs/ notebook/
+
+# الخطأ: Docker permission denied
+sudo usermod -aG docker $USER
+# سجّل خروج ودخول مجدداً</code></pre>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">مشاكل الذاكرة</h3>
+    <pre><code># الخطأ: CUDA out of memory
+# 1. استخدم نموذج أصغر
+ollama pull gemma3:4b   # بدلاً من 12B
+
+# 2. قلل السياق
+# في config/default.json:
+{ "context_window": 2048 }
+
+# 3. أوقف العمليات الأخرى
+nvidia-smi  # فحص استخدام GPU</code></pre>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">فحص صحي شامل</h3>
+    <pre><code># فحص كل الخدمات
+curl http://localhost:8000/api/engine/health   # API
+curl http://localhost:11434/api/tags            # Ollama
+curl http://localhost:6333/collections          # Qdrant
+
+# إرسال رسالة تجريبية
+curl -X POST http://localhost:8000/api/chat \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ADAM_API_KEY" \
+  -d '{"message": "مرحباً يا آدم", "session_id": "test"}'
+
+# تشغيل الاختبارات
+pytest tests/ -k "not slow"</code></pre>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 14: تطبيقات الديسكتوب والموبايل
+     ═══════════════════════════════════════════════════════════ -->
+<section class="section" id="sec14">
+  <div class="section-header">
+    <div class="section-number">14</div>
+    <h2 class="section-title">تطبيقات الديسكتوب والموبايل</h2>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">تطبيق سطح المكتب (Electron)</h3>
+    <p>تطبيق مكتبي مبني على Electron 33 مع نموذج أمان preload.js.</p>
+    <pre><code># التثبيت
+cd frontend/desktop-app
+npm install
+
+# التشغيل (وضع التطوير)
+npm start
+
+# بناء للينكس
+npm run build:linux   # → AppImage
+
+# بناء لـ macOS
+npm run build:mac     # → DMG
+
+# بناء لـ Windows
+npm run build:win     # → NSIS installer
+
+# بناء لكل المنصات
+npm run build:all</code></pre>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>الخاصية</th><th>التفاصيل</th></tr></thead>
+        <tbody>
+          <tr><td>المعرف</td><td><code>com.adam-prism.desktop</code></td></tr>
+          <tr><td>الإطار</td><td>Electron 33</td></tr>
+          <tr><td>نموذج الأمان</td><td>preload.js (contextBridge)</td></tr>
+          <tr><td>المنصات</td><td>Linux (AppImage), macOS (DMG), Windows (NSIS)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">إضافة VS Code</h3>
+    <pre><code># التثبيت
+cd frontend/vscode-extension
+npm install
+npm run compile
+
+# الأوامر المتاحة
+# ctrl+alt+a  → فتح المحادثة
+# ctrl+alt+e  → شرح الكود
+# adam-prism.chat         → محادثة
+# adam-prism.explainCode  → شرح كود
+# adam-prism.reviewCode   → مراجعة كود
+# adam-prism.debugCode    → تشخيص خطأ
+# adam-prism.writeTest    → كتابة اختبار</code></pre>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">تطبيق Android</h3>
+    <p>تطبيق مبني على Flutter مع دعم كامل للعربية و RTL:</p>
+    <pre><code># المتطلبات
+# - Flutter SDK 3.x
+# - Android Studio / SDK
+
+# التثبيت
+cd adam-mobile
+flutter pub get
+
+# تشغيل على جهاز متصل
+flutter run
+
+# بناء APK
+flutter build apk --release
+
+# بناء App Bundle (للنشر)
+flutter build appbundle --release</code></pre>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>الخاصية</th><th>التفاصيل</th></tr></thead>
+        <tbody>
+          <tr><td>الإطار</td><td>Flutter</td></tr>
+          <tr><td>اللغات</td><td>العربية + الإنجليزية (l10n)</td></tr>
+          <tr><td>الاتصال</td><td>SSE + REST API + WebSocket</td></tr>
+          <tr><td>الميزات</td><td>محادثة، ذاكرة، مهارات، أدوات، إعدادات، تعلم مبدئي</td></tr>
+          <tr><td>التخزين</td><td>محلي (Hive) مع مزامنة اختيارية</td></tr>
+          <tr><td>الحد الأدنى</td><td>Android 5.0 (API 21)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">تطبيق iOS</h3>
+    <pre><code># المتطلبات
+# - macOS مع Xcode 15+
+# - Flutter SDK 3.x
+# - Apple Developer Account (للنشر)
+
+# التثبيت
+cd adam-mobile
+flutter pub get
+
+# تشغيل على جهاز متصل
+flutter run
+
+# بناء للإصدار
+flutter build ios --release
+
+# فتح في Xcode للنشر
+open ios/Runner.xcworkspace</code></pre>
+    <div class="callout callout-note">
+      <span class="callout-icon">📝</span>
+      <div class="callout-content">
+        <p>تطبيق iOS يحتاج macOS مع Xcode. للتطوير فقط، يمكنك استخدام المحاكي (Simulator).</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <h3 class="subsection-title">الوصول من أجهزة متعددة عبر Tailscale</h3>
+    <pre><code># على خادم آدم (Linux)
+curl -fsSL https://tailscale.com/install.sh | sh
+sudo tailscale up
+
+# احصل على IP
+tailscale ip -4
+# مثال: 100.64.0.1
+
+# على الهاتف/iPad
+# حمّل Tailscale من App Store / Google Play
+# سجّل دخول بنفس الحساب
+
+# افتح المتصفح:
+# http://100.x.x.x:3000  → واجهة الويب
+# http://100.x.x.x:8000  → API مباشرة</code></pre>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ─── CONCLUSION ────────────────────────────────── -->
+<div style="text-align:center; margin: 48px 0;">
+  <p style="color: var(--text-muted); font-size: 1.1em;">
+    آدم بريزم — التوأم الرقمي الذي يفهمك ويتعلم منك وينمو معك
+  </p>
+  <p style="color: var(--text-muted); font-size: 0.9em; margin-top: 8px;">
+    Born in Egypt · Built for the World · Free forever · Apache 2.0
+  </p>
+</div>
+
+</main>
+</div>
+
+<!-- ─── FOOTER ────────────────────────────────────── -->
+<footer class="page-footer">
+  <p>
+    Adam Prism v1.0.0 — دليل التشغيل التفصيلي<br>
+    <a href="https://github.com/othmastar/adam-prism">GitHub</a> ·
+    <a href="https://github.com/othmastar/adam-prism/issues">البلاغات</a> ·
+    Apache 2.0 License
+  </p>
+</footer>
+
+<script>
+// ─── ACTIVE TOC HIGHLIGHTING ──────────────────────
+(function() {
+  const sections = document.querySelectorAll('.section');
+  const tocLinks = document.querySelectorAll('.toc-list a');
+
+  function highlightToc() {
+    let current = '';
+    sections.forEach(section => {
+      const rect = section.getBoundingClientRect();
+      if (rect.top <= 120) {
+        current = section.id;
+      }
+    });
+
+    tocLinks.forEach(link => {
+      link.classList.remove('active');
+      if (link.getAttribute('href') === '#' + current) {
+        link.classList.add('active');
+      }
+    });
+  }
+
+  window.addEventListener('scroll', highlightToc, { passive: true });
+  highlightToc();
+})();
+</script>
+
+</body>
+</html>

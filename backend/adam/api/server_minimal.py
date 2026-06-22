@@ -314,6 +314,68 @@ async def healthz_live() -> dict[str, Any]:
 
 
 # ═══════════════════════════════════════
+# Feature 3a: /api/status — frontend connectivity check
+# ═══════════════════════════════════════
+
+@app.get("/api/status", tags=["ops"])
+async def api_status() -> dict[str, Any]:
+    """Frontend connectivity check."""
+    return {
+        "status": "ok",
+        "version": "1.0.0b1-showcase",
+        "uptime_sec": round(time.time() - _START_TIME, 1),
+        "engine_ready": _ENGINE is not None,
+    }
+
+# ═══════════════════════════════════════
+# Feature 3b: /api/engine/health — engine health
+# ═══════════════════════════════════════
+
+@app.get("/api/engine/health", tags=["ops"])
+async def engine_health() -> dict[str, Any]:
+    """Engine health check for frontend."""
+    uptime = time.time() - _START_TIME
+    services = {"api": True, "ollama": False, "qdrant": False}
+    try:
+        async with httpx.AsyncClient(timeout=2) as c:
+            r = await c.get(f"{OLLAMA_URL}/api/tags")
+            services["ollama"] = r.status_code == 200
+    except Exception:
+        pass
+    try:
+        async with httpx.AsyncClient(timeout=2) as c:
+            r = await c.get("http://localhost:6333/collections")
+            services["qdrant"] = r.status_code == 200
+    except Exception:
+        pass
+    return {
+        "status": "healthy" if services["api"] else "degraded",
+        "uptime_sec": round(uptime, 1),
+        "services": services,
+        "model": OLLAMA_MODEL,
+    }
+
+# ═══════════════════════════════════════
+# Feature 3c: /api/ollama/models — list models
+# ═══════════════════════════════════════
+
+@app.get("/api/ollama/models", tags=["ollama"])
+async def ollama_models() -> dict[str, Any]:
+    """List Ollama models from the connected instance."""
+    try:
+        async with httpx.AsyncClient(timeout=5) as c:
+            r = await c.get(f"{OLLAMA_URL}/api/tags")
+            if r.status_code == 200:
+                models = r.json().get("models", [])
+                return {
+                    "models": [{"name": m["name"], "size": m.get("size", 0)} for m in models],
+                    "total": len(models),
+                }
+    except Exception:
+        pass
+    return {"models": [], "total": 0}
+
+# ═══════════════════════════════════════
 # Feature 3: /docs and /openapi.json
 # ═══════════════════════════════════════
 # (FastAPI auto-provides these via docs_url above)

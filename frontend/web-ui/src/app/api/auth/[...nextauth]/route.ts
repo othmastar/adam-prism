@@ -72,4 +72,6 @@ export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET || "change-me-in-production-use-32-chars-min",
 }
 
-export default NextAuth(authOptions)
+const handler = NextAuth(authOptions)
+export const GET = handler
+export const POST = handler

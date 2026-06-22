@@ -1,0 +1,19 @@
+apiVersion: v2
+name: adam-prism
+description: Adam Prism — AI agent framework for Kubernetes
+type: application
+version: 1.0.0
+appVersion: "2.0.0"
+keywords:
+  - ai
+  - agent
+  - digital-twin
+  - conscious-ai
+home: https://github.com/othmastar/adam-prism
+sources:
+  - https://github.com/othmastar/adam-prism
+maintainers:
+  - name: Mohamed Othman
+    email: othmastar@gmail.com
+
+icon: https://raw.githubusercontent.com/othmastar/adam-prism/main/frontend/web-ui/public/logo.svg

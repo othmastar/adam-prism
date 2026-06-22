@@ -1,0 +1,117 @@
+{
+  "_note": "آدم's 25+ Channel Configuration Template — املأ الـ API keys اللي محتاجها",
+  "_how": "حط الـ config دي في ملف config.json أو env vars وعدل enabled: true للقنوات اللي عايزها",
+
+  "channels": {
+    "telegram": {
+      "enabled": false,
+      "bot_token": "123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11",
+      "authorized_chat_ids": []
+    },
+    "whatsapp": {
+      "enabled": false,
+      "phone_number_id": "123456789",
+      "access_token": "EAAx...",
+      "webhook_verify_token": "adam_prism_verify",
+      "app_secret": "your_app_secret"
+    },
+    "discord": {
+      "enabled": false,
+      "bot_token": "MTIzNDU2Nzg5MDEyMzQ1Njc4OQ.Gabcde.12345"
+    },
+    "slack": {
+      "enabled": false,
+      "bot_token": "xoxb-123456789012-1234567890123-abc123def456",
+      "signing_secret": "1234567890abcdef1234567890abcdef"
+    },
+    "email": {
+      "enabled": false,
+      "smtp_host": "smtp.gmail.com",
+      "smtp_port": 587,
+      "smtp_user": "you@gmail.com",
+      "smtp_pass": "app_password",
+      "imap_host": "imap.gmail.com",
+      "from_addr": "adam@example.com"
+    },
+    "sms": {
+      "enabled": false,
+      "twilio_account_sid": "AC123...",
+      "twilio_auth_token": "abc123...",
+      "from_number": "+15551234567"
+    },
+    "websocket": {
+      "enabled": false,
+      "host": "0.0.0.0",
+      "port": 8765
+    },
+    "webchat": {
+      "enabled": true,
+      "allowed_origins": ["*"]
+    },
+    "twitter": {
+      "enabled": false,
+      "bearer_token": "AAAAAAAAAAAAAAAAAAAA...",
+      "api_key": "abc123...",
+      "api_secret": "abc123..."
+    },
+    "facebook": {
+      "enabled": false,
+      "page_access_token": "EAAx...",
+      "app_secret": "your_app_secret"
+    },
+    "matrix": {
+      "enabled": false,
+      "homeserver": "https://matrix.org",
+      "access_token": "syt_...",
+      "user_id": "@adam:matrix.org"
+    },
+    "signal": {
+      "enabled": false,
+      "cli_path": "signal-cli",
+      "number": "+15551234567"
+    },
+    "instagram": {
+      "enabled": false,
+      "username": "your_instagram",
+      "password": "your_password"
+    },
+    "line": {
+      "enabled": false,
+      "channel_access_token": "abc123..."
+    },
+    "viber": {
+      "enabled": false,
+      "auth_token": "abc123..."
+    },
+    "teams": {
+      "enabled": false,
+      "webhook_url": "https://outlook.office.com/webhook/..."
+    },
+    "googletalk": {
+      "enabled": false,
+      "webhook_url": "https://chat.googleapis.com/v1/spaces/..."
+    },
+    "irc": {
+      "enabled": false,
+      "server": "irc.libera.chat",
+      "port": 6667,
+      "nick": "adam-prism",
+      "channels": ["#adam-prism"]
+    },
+    "xmpp": {
+      "enabled": false,
+      "jid": "adam@example.com",
+      "password": "your_password"
+    },
+    "telegram_webhook": {
+      "enabled": false,
+      "bot_token": "123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
+    },
+    "wechat": {
+      "enabled": false,
+      "corp_id": "ww123...",
+      "corp_secret": "abc123...",
+      "agent_id": "1000001"
+    }
+  }
+}

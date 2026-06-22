@@ -1,0 +1,45 @@
+{
+  "name": "Adam Prism Dev",
+  "image": "mcr.microsoft.com/devcontainers/python:3.12",
+  "postCreateCommand": "pip install -e . && pip install pytest pytest-asyncio",
+  "forwardPorts": [8001, 6333, 11434, 3000],
+  "portsAttributes": {
+    "8001": {
+      "label": "Adam Prism API",
+      "onAutoForward": "notify"
+    },
+    "6333": {
+      "label": "Qdrant",
+      "onAutoForward": "ignore"
+    },
+    "11434": {
+      "label": "Ollama",
+      "onAutoForward": "ignore"
+    },
+    "3000": {
+      "label": "Web UI",
+      "onAutoForward": "notify"
+    }
+  },
+  "features": {
+    "ghcr.io/devcontainers-extra/features/ollama:1": {},
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.black-formatter",
+        "charliermarsh.ruff",
+        "tamasfe.even-better-toml"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.testing.pytestEnabled": true,
+        "python.testing.pytestArgs": ["tests/"]
+      }
+    }
+  },
+  "remoteUser": "root"
+}
