@@ -78,7 +78,18 @@ export function FloatingMonitor() {
   } = useAppStore();
 
   const isArabic = settings.language === "ar";
-  const [position, setPosition] = useState({ x: 16, y: 80 });
+  const [position, setPosition] = useState(() => {
+    if (typeof window === "undefined") return { x: 16, y: 80 };
+    return { x: isArabic ? 16 : window.innerWidth - 216, y: 80 };
+  });
+
+  // Reposition when language changes
+  useEffect(() => {
+    setPosition(prev => ({
+      x: isArabic ? 16 : window.innerWidth - 216,
+      y: prev.y,
+    }));
+  }, [isArabic]);
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const monitorRef = useRef<HTMLDivElement>(null);
@@ -153,7 +164,7 @@ export function FloatingMonitor() {
       <Button
         variant="outline"
         size="sm"
-        className="fixed bottom-4 left-4 z-50 glass cosmic-border h-8 w-8 rounded-full p-0"
+        className={`fixed bottom-4 ${isArabic ? "left-4" : "right-4"} z-50 glass cosmic-border h-8 w-8 rounded-full p-0`}
         onClick={() => setMonitorVisible(true)}
       >
         <Activity className="h-4 w-4 text-primary" />
@@ -168,7 +179,7 @@ export function FloatingMonitor() {
     <div
       ref={monitorRef}
       className="fixed z-50 floating-monitor"
-      style={{ left: position.x, top: position.y, width: 200 }}
+      style={{ [isArabic ? "left" : "right"]: position.x, top: position.y, width: 200 }}
     >
       <div className="glass rounded-xl border border-primary/20 cosmic-border overflow-hidden">
         {/* Header */}
