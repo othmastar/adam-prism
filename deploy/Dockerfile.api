@@ -25,8 +25,12 @@ RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir psutil
 
 # ── التطبيق ────────────────────────────────
-# نسخ حزمة adam فقط (تحتوي على كل الموديولات المعاد هيكلتها)
+# نسخ حزمة adam (المحرك الرئيسي)
 COPY backend/adam/ ./adam/
+
+# نسخ api/ و core/ القديمة للتطابق العكسي
+COPY api/ ./api/
+COPY core/ ./core/
 
 # نسخ ملفات الجذر المطلوبة
 COPY main.py .

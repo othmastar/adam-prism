@@ -40,6 +40,10 @@ python-docx>=1.1.0,<2.0.0
 # File uploads (full server)
 python-multipart>=0.0.12,<1.0.0
 
+# Auth - JWT + password hashing (needed for production with login)
+PyJWT>=2.8.0,<3.0.0
+bcrypt>=4.0.0,<5.0.0
+
 # Voice - TTS
 edge-tts>=6.1.0,<8.0.0
 

@@ -13,15 +13,26 @@ NGINX_CONF_HTTPS="/etc/nginx/nginx-https.conf"
 if [ -f "$CERT_FILE" ] && [ -f "$KEY_FILE" ]; then
     echo "SSL certificates found - enabling HTTPS"
 
-    cat > "$NGINX_CONF_HTTPS" << 'EOF'
+    # Also check for Let's Encrypt certs
+    LETSENCRYPT_CERT="/etc/letsencrypt/live/${DOMAIN:-adam-prism.online}/fullchain.pem"
+    LETSENCRYPT_KEY="/etc/letsencrypt/live/${DOMAIN:-adam-prism.online}/privkey.pem"
+    if [ -f "$LETSENCRYPT_CERT" ] && [ -f "$LETSENCRYPT_KEY" ]; then
+        CERT_FILE="$LETSENCRYPT_CERT"
+        KEY_FILE="$LETSENCRYPT_KEY"
+        echo "Let's Encrypt certificates found - using those"
+    fi
+
+    DOMAIN="${DOMAIN:-adam-prism.online}"
+
+    cat > "$NGINX_CONF_HTTPS" << HTTPSEOF
 # ─── HTTPS server (production) ─────────────────────────────
 server {
-    listen 443 ssl;
-    server_name _;
+    listen 443 ssl http2;
+    server_name ${DOMAIN};
 
-    # [M14] TLS configuration
-    ssl_certificate     /etc/nginx/ssl/adam-prism.crt;
-    ssl_certificate_key /etc/nginx/ssl/adam-prism.key;
+    # SSL
+    ssl_certificate     ${CERT_FILE};
+    ssl_certificate_key ${KEY_FILE};
     ssl_protocols       TLSv1.2 TLSv1.3;
     ssl_ciphers         ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384;
     ssl_prefer_server_ciphers on;
@@ -39,7 +50,7 @@ server {
     gzip_types text/plain text/css application/json application/javascript text/xml application/xml text/javascript image/svg+xml;
     gzip_min_length 1000;
 
-    # Static files للـ Web UI
+    # Static files
     location /_next/static {
         proxy_pass http://web_upstream;
         expires 365d;
@@ -51,27 +62,25 @@ server {
         expires 30d;
     }
 
-    # API reverse proxy — [M13] with rate limiting
+    # API reverse proxy with rate limiting
     location /api/ {
         limit_req zone=adam_api burst=60 nodelay;
         limit_req_status 429;
-
         proxy_pass http://api_upstream;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
     }
 
-    # WebSocket للـ chat — [M13] with rate limiting
+    # WebSocket
     location /ws/ {
         limit_req zone=adam_ws burst=20 nodelay;
-
         proxy_pass http://api_upstream;
         proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection "upgrade";
-        proxy_set_header Host $host;
+        proxy_set_header Host \$host;
         proxy_read_timeout 86400s;
     }
 
@@ -80,45 +89,44 @@ server {
         proxy_pass http://api_upstream;
         proxy_buffering off;
         proxy_cache off;
-        proxy_set_header Connection '';
         chunked_transfer_encoding on;
         proxy_read_timeout 86400s;
     }
 
-    # Health endpoint
-    location /api/engine/health {
+    # Health endpoint (no auth)
+    location /healthz/ {
         proxy_pass http://api_upstream;
     }
 
-    # WhatsApp webhook (POST + GET للتأكيد)
+    # WhatsApp webhook
     location /webhook/whatsapp {
         proxy_pass http://api_upstream;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
         proxy_read_timeout 60s;
     }
 
-    # باقي المسارات → Web UI
+    # All other routes → Web UI (Next.js handles routing including login)
     location / {
         proxy_pass http://web_upstream;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
     }
 
     access_log /var/log/nginx/adam-prism-access.log;
     error_log /var/log/nginx/adam-prism-error.log;
 }
-EOF
+HTTPSEOF
 
     # Include HTTPS config in main nginx.conf
     echo "include $NGINX_CONF_HTTPS;" >> "$NGINX_CONF"
 else
     echo "SSL certificates not found - running HTTP only (development mode)"
-    echo "To enable HTTPS, run: ./deploy/generate_ssl.sh"
+    echo "To enable HTTPS, run: bash deploy/generate_ssl.sh"
 fi
 
 # Start nginx

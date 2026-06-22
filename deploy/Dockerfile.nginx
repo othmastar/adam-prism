@@ -23,6 +23,9 @@ RUN chmod +x /generate_ssl.sh
 # Create SSL directory
 RUN mkdir -p /etc/nginx/ssl
 
+# Allow domain override via env
+ENV DOMAIN=adam-prism.online
+
 EXPOSE 80 443
 
 ENTRYPOINT ["/entrypoint.sh"]

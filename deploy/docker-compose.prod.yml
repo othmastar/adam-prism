@@ -1,0 +1,169 @@
+# ═════════════════════════════════════════════════════════
+# docker-compose.prod.yml - Production deployment
+# للرفع على VM مع Ollama Cloud + LinkedIn Auth
+# ═════════════════════════════════════════════════════════
+#
+# Usage:
+#   docker compose -f deploy/docker-compose.prod.yml up -d
+#
+# Native Ollama (for embeddings) must run on the host:
+#   curl -fsSL https://ollama.ai/install.sh | sh
+#   ollama pull nomic-embed-text
+#
+# ═════════════════════════════════════════════════════════
+
+services:
+  # ─── 1. API (FastAPI - full server, 91 routes) ─────────
+  api:
+    build:
+      context: ../
+      dockerfile: deploy/Dockerfile.api
+    container_name: adam-api
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    environment:
+      - ADAM_PRODUCTION=1
+      - ADAM_ENV=production
+      - OLLAMA_BASE=${OLLAMA_BASE:-https://api.ollama.cloud}
+      - OLLAMA_API_KEY=${OLLAMA_API_KEY:-}
+      - QDRANT_URL=${QDRANT_URL:-http://qdrant:6333}
+      - INFERENCE_MODE=ollama
+      - ADAM_API_KEY=${ADAM_API_KEY:-}
+      - ADAM_ADMIN_KEY=${ADAM_ADMIN_KEY:-}
+      - ADAM_CORS_ORIGINS=${ADAM_CORS_ORIGINS:-https://adam-prism.online}
+      - ADAM_JWT_SECRET=${ADAM_JWT_SECRET:-}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-}
+    volumes:
+      - api_data:/app/data
+      - api_logs:/app/logs
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 15s
+    networks:
+      - adam_net
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '2.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+
+  # ─── 2. Web UI (Next.js) ────────────────────────────
+  web:
+    build:
+      context: ../
+      dockerfile: deploy/Dockerfile.web
+    container_name: adam-web
+    restart: unless-stopped
+    environment:
+      - NEXT_PUBLIC_API_URL=https://adam-prism.online
+      - NEXT_PUBLIC_WS_URL=wss://adam-prism.online
+      - NODE_ENV=production
+      - NEXTAUTH_URL=https://adam-prism.online
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-}
+    ports:
+      - "3000:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - adam_net
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '1.0'
+        reservations:
+          memory: 128M
+          cpus: '0.25'
+
+  # ─── 3. Nginx Reverse Proxy (with SSL) ─────────────
+  nginx:
+    build:
+      context: ../
+      dockerfile: deploy/Dockerfile.nginx
+    container_name: adam-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./ssl:/etc/nginx/ssl:ro
+      - nginx_logs:/var/log/nginx
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api
+      - web
+    networks:
+      - adam_net
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+        reservations:
+          memory: 64M
+          cpus: '0.1'
+
+  # ─── 4. Prometheus (monitoring) ─────────────────────
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: adam-prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    depends_on:
+      - api
+    networks:
+      - adam_net
+    profiles:
+      - monitoring
+
+  # ─── 5. Grafana (monitoring) ────────────────────────
+  grafana:
+    image: grafana/grafana:latest
+    container_name: adam-grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-changeme}
+    volumes:
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources:ro
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - adam_net
+    profiles:
+      - monitoring
+
+# ─── Volumes ────────────────────────────────────────
+volumes:
+  api_data:
+  api_logs:
+  nginx_logs:
+  prometheus_data:
+  grafana_data:
+
+# ─── Networks ───────────────────────────────────────
+networks:
+  adam_net:
+    name: adam_network
+    driver: bridge

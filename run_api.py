@@ -29,13 +29,12 @@ try:
 except ImportError:
     pass
 
-try:
-    from api.server import create_app
-    from core.engine import AdamPrismEngine
-except ImportError:
-    # [M17-M18] Try with package-qualified imports
+import os
+if os.environ.get("ADAM_PRODUCTION", "0") == "1":
     from adam.api.server import create_app
-    from adam.core.engine import AdamPrismEngine
+else:
+    from adam.api.server_minimal import create_app
+from adam.engine import AdamPrismEngine
 
 async def main():
     # Load config
