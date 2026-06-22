@@ -106,8 +106,9 @@ async def chat_ui() -> HTMLResponse:
 # Feature 1: /chat (Ollama with mock fallback)
 # ═══════════════════════════════════════
 
-OLLAMA_URL = os.getenv("ADAM_OLLAMA_URL", "http://localhost:11434")
-OLLAMA_MODEL = os.getenv("ADAM_OLLAMA_MODEL", "qwen2.5:3b")
+OLLAMA_URL = os.getenv("ADAM_OLLAMA_URL", os.getenv("OLLAMA_BASE", "http://localhost:11434"))
+OLLAMA_MODEL = os.getenv("ADAM_OLLAMA_MODEL", os.getenv("MODEL_NAME", "qwen2.5:3b"))
+OLLAMA_API_KEY = os.getenv("OLLAMA_API_KEY", "")
 
 # Adam's base system prompt (showcase version — public-safe)
 # The full version has a richer prompt with personality, ethics, memory
@@ -135,21 +136,23 @@ async def _try_ollama(message: str) -> str | None:
     long contexts well.
     """
     try:
-        # [PHASE8] Apply Headroom compression to long user messages
-        # (so even small models handle them)
         from adam.observability.headroom_integration import get_headroom
         headroom = get_headroom()
         compressed_msg = headroom.compress(
             message, content_type="text"
         ).content
-        # Compress system prompt too (if it grows in full version)
         compressed_system = headroom.compress(
             ADAM_SYSTEM_PROMPT, content_type="text"
         ).content
 
-        async with httpx.AsyncClient(timeout=10.0) as client:
+        headers = {}
+        if OLLAMA_API_KEY:
+            headers["Authorization"] = f"Bearer {OLLAMA_API_KEY}"
+
+        async with httpx.AsyncClient(timeout=30.0) as client:
             resp = await client.post(
                 f"{OLLAMA_URL}/api/chat",
+                headers=headers,
                 json={
                     "model": OLLAMA_MODEL,
                     "messages": [
@@ -162,6 +165,7 @@ async def _try_ollama(message: str) -> str | None:
             if resp.status_code == 200:
                 data = resp.json()
                 return data.get("message", {}).get("content", "").strip()
+            logger.warning(f"Ollama returned {resp.status_code}: {resp.text[:200]}")
             return None
     except (httpx.ConnectError, httpx.TimeoutException, Exception) as e:
         logger.debug(f"Ollama unavailable: {e}")
@@ -294,6 +298,7 @@ async def chat(req: ChatRequest) -> ChatResponse:
 # ═══════════════════════════════════════
 
 _START_TIME = time.time()
+_ENGINE = None
 
 
 @app.get("/healthz/live", tags=["ops"])
@@ -304,6 +309,7 @@ async def healthz_live() -> dict[str, Any]:
         "version": "1.0.0b1-showcase",
         "uptime_sec": round(time.time() - _START_TIME, 1),
         "features": 5,
+        "engine": _ENGINE is not None,
     }
 
 
@@ -455,6 +461,8 @@ async def startup_banner() -> None:
 # Factory (for `create_app()` compatibility)
 # ═══════════════════════════════════════
 
-def create_app() -> FastAPI:
-    """Factory function matching the full server's signature."""
+def create_app(engine=None) -> FastAPI:
+    """Factory function — stores engine and returns the app."""
+    global _ENGINE
+    _ENGINE = engine
     return app
