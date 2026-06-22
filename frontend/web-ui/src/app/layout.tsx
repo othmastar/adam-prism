@@ -26,13 +26,14 @@ export const metadata: Metadata = {
   },
 };
 
-// [PHASE2] Viewport for PWA
+// [PHASE2] Viewport for PWA + mobile safe areas
 export const viewport: Viewport = {
   themeColor: "#10b981",
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
   userScalable: true,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

@@ -2,8 +2,9 @@
 
 import { useEffect } from "react";
 import { ThemeProvider } from "@teispace/next-themes";
-import { useAppStore, useInitializeStore } from "@/lib/store";
+import { useAppStore, useInitializeStore, ViewType } from "@/lib/store";
 import { useApiHealthCheck, useEngineStream } from "@/lib/api";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { ChatSidebar } from "@/components/adam/chat-sidebar";
 import { ChatInterface } from "@/components/adam/chat-interface";
 import { KnowledgePanel } from "@/components/adam/knowledge-panel";
@@ -24,10 +25,74 @@ import { SubagentDashboard } from "@/components/adam/subagent-dashboard";
 import { MemoryPanel } from "@/components/adam/memory-panel";
 import { ChannelsPanel } from "@/components/adam/channels-panel";
 import { PredictiveMonitor } from "@/components/predictive/predictive-monitor";
-import { Activity } from "lucide-react";
+import {
+  Activity, MessageSquare, Database, Wrench, Settings,
+  Cpu, BookOpen, Sparkles, Clock, Package, Bot, Brain, Wifi
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+
+type MobileNavItem = {
+  view: ViewType;
+  icon: React.ElementType;
+  labelAr: string;
+  labelEn: string;
+};
+
+const mobileNavItems: MobileNavItem[] = [
+  { view: "chat", icon: MessageSquare, labelAr: "محادثة", labelEn: "Chat" },
+  { view: "knowledge", icon: Database, labelAr: "المعرفة", labelEn: "Knowledge" },
+  { view: "tools", icon: Wrench, labelAr: "أدوات", labelEn: "Tools" },
+  { view: "monitor", icon: Activity, labelAr: "النظام", labelEn: "System" },
+  { view: "settings", icon: Settings, labelAr: "الإعدادات", labelEn: "Settings" },
+];
+
+function MobileBottomNav() {
+  const { activeView, setActiveView, settings, setSidebarOpen } = useAppStore();
+  const isArabic = settings.language === "ar";
+
+  return (
+    <nav
+      className="bottom-nav fixed bottom-0 left-0 right-0 z-50 glass border-t border-border flex items-center justify-around safe-area-bottom md:hidden"
+      style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+    >
+      {mobileNavItems.map((item) => {
+        const Icon = item.icon;
+        const isActive = activeView === item.view;
+        return (
+          <button
+            key={item.view}
+            onClick={() => setActiveView(item.view)}
+            className={cn(
+              "flex flex-col items-center gap-0.5 py-1.5 px-3 rounded-lg transition-colors min-h-0",
+              isActive
+                ? "text-primary"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Icon className={cn("h-5 w-5", isActive && "bottom-nav-active")} />
+            <span className="text-[10px] font-medium">{isArabic ? item.labelAr : item.labelEn}</span>
+          </button>
+        );
+      })}
+      {/* Menu button to open sidebar */}
+      <button
+        onClick={() => setSidebarOpen(true)}
+        className="flex flex-col items-center gap-0.5 py-1.5 px-3 rounded-lg text-muted-foreground hover:text-foreground min-h-0"
+      >
+        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="3" y1="6" x2="21" y2="6" />
+          <line x1="3" y1="12" x2="21" y2="12" />
+          <line x1="3" y1="18" x2="21" y2="18" />
+        </svg>
+        <span className="text-[10px] font-medium">قائمة</span>
+      </button>
+    </nav>
+  );
+}
 
 function AppContent() {
   const { activeView, settings } = useAppStore();
+  const isMobile = useIsMobile();
 
   // Initialize store from localStorage
   useInitializeStore();
@@ -46,10 +111,12 @@ function AppContent() {
     document.documentElement.lang = lang;
   }, [settings.language]);
 
+  const mainPadding = isMobile ? "pb-[72px]" : "pb-0";
+
   return (
-    <div className="h-screen flex bg-background overflow-hidden relative">
-      {/* Particle background — قيم ثابتة لتجنب hydration error */}
-      <div className="particle-field" aria-hidden="true">
+    <div className="h-dvh flex bg-background overflow-hidden relative">
+      {/* Particle background */}
+      <div className="particle-field hide-on-mobile" aria-hidden="true">
         {Array.from({ length: 30 }).map((_, i) => {
           const seed = (i * 7 + 13) % 100;
           return (
@@ -79,11 +146,11 @@ function AppContent() {
       {/* ActionTrace — terminal line overlay */}
       <ActionTrace />
 
-      {/* Sidebar */}
+      {/* Sidebar (slides in on mobile) */}
       <ChatSidebar />
 
       {/* Main content */}
-      <main className="flex-1 h-full flex flex-col min-w-0 relative z-10">
+      <main className={`flex-1 h-full flex flex-col min-w-0 relative z-10 ${mainPadding}`}>
         {activeView === "chat" && (
           <ChatInterface />
         )}
@@ -93,7 +160,7 @@ function AppContent() {
           </div>
         )}
         {activeView === "pipeline" && (
-          <div className="flex-1 overflow-y-auto p-4">
+          <div className="flex-1 overflow-y-auto p-4 pb-20">
             <div className="flex items-center gap-2 mb-4">
               <Activity className="h-5 w-5 text-primary" />
               <h2 className="text-lg font-semibold">
@@ -101,7 +168,6 @@ function AppContent() {
               </h2>
             </div>
             <PipelineMonitor />
-            {/* [PHASE4] Predictive monitoring (CruxSight.ai integration) */}
             <div className="mt-4">
               <PredictiveMonitor />
             </div>
@@ -118,6 +184,9 @@ function AppContent() {
         {activeView === "channels" && <ChannelsPanel />}
         {activeView === "memory" && <MemoryPanel />}
       </main>
+
+      {/* Mobile bottom navigation */}
+      <MobileBottomNav />
 
       {/* IssueTerminal — modal overlay (renders last for highest z-index) */}
       <IssueTerminal />

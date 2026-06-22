@@ -45,11 +45,11 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="w-full max-w-md space-y-6 bg-card p-8 rounded-lg border shadow-sm">
+    <div className="min-h-dvh flex items-center justify-center bg-background p-4" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
+      <div className="w-full max-w-md space-y-5 sm:space-y-6 bg-card p-6 sm:p-8 rounded-lg border shadow-sm">
         <div className="space-y-2 text-center">
-          <h1 className="text-2xl font-bold">تسجيل الدخول</h1>
-          <p className="text-muted-foreground text-sm">Sign in to Adam Prism</p>
+          <h1 className="text-xl sm:text-2xl font-bold">تسجيل الدخول</h1>
+          <p className="text-muted-foreground text-xs sm:text-sm">Sign in to Adam Prism</p>
         </div>
 
         {error && (
@@ -62,8 +62,8 @@ export default function LoginPage() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <label htmlFor="username" className="text-sm font-medium">
+          <div className="space-y-1.5">
+            <label htmlFor="username" className="text-xs sm:text-sm font-medium">
               اسم المستخدم أو البريد
             </label>
             <input
@@ -73,13 +73,13 @@ export default function LoginPage() {
               autoComplete="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-3 py-2 border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-accent"
+              className="w-full px-3 py-2.5 sm:py-2 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-accent"
               placeholder="username or email"
             />
           </div>
 
-          <div className="space-y-2">
-            <label htmlFor="password" className="text-sm font-medium">
+          <div className="space-y-1.5">
+            <label htmlFor="password" className="text-xs sm:text-sm font-medium">
               كلمة المرور
             </label>
             <input
@@ -90,7 +90,7 @@ export default function LoginPage() {
               minLength={8}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-accent"
+              className="w-full px-3 py-2.5 sm:py-2 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-accent"
               placeholder="••••••••"
             />
           </div>
@@ -98,7 +98,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-accent text-white py-2 rounded-md hover:opacity-90 transition disabled:opacity-50"
+            className="w-full bg-accent text-white py-2.5 sm:py-2 rounded-md hover:opacity-90 transition disabled:opacity-50 text-sm sm:text-base"
           >
             {loading ? "جاري الدخول..." : "دخول / Sign in"}
           </button>
@@ -124,10 +124,10 @@ export default function LoginPage() {
           </Link>
         </p>
 
-        <div className="text-xs text-center text-muted-foreground pt-4 border-t">
-          <p>أول مرة؟ شغّل backend ثم أنشئ أول مستخدم عبر:</p>
-          <code className="block mt-1 bg-muted p-2 rounded text-left">
-            curl -X POST {process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/auth/register \<br />
+        <div className="text-[10px] sm:text-xs text-center text-muted-foreground pt-4 border-t">
+          <p>أول مرة؟ أنشئ أول مستخدم عبر:</p>
+          <code className="block mt-1 bg-muted p-2 rounded text-left text-[10px] sm:text-xs overflow-x-auto">
+            curl -X POST {process.env.NEXT_PUBLIC_API_URL || "https://adam-prism.online"}/api/auth/register \<br />
             {"  "}-H "Content-Type: application/json" \<br />
             {"  "}-d '{{"email":"you@example.com","username":"you","password":"yourpass"}}
           </code>

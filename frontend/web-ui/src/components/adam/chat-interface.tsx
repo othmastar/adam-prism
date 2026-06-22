@@ -212,7 +212,7 @@ function MessageBubble({ message }: { message: Message }) {
       </div>
 
       {/* Bubble */}
-      <div className="max-w-[75%] sm:max-w-[65%] space-y-1.5">
+      <div className="max-w-[85%] sm:max-w-[75%] md:max-w-[65%] space-y-1.5">
         {/* Mode badge for AI messages */}
         {!isUser && message.mode && (
           <CognitiveModeBadge mode={message.mode} isArabic={isArabic} />
@@ -378,6 +378,7 @@ export function ChatInterface() {
   const [showScrollDown, setShowScrollDown] = useState(false);
   const [showConvMenu, setShowConvMenu] = useState(false);
   const [wsConnected, setWsConnected] = useState(false);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
   const wsResponseResolveRef = useRef<((data: Record<string, unknown>) => void) | null>(null);
 
   const ws = useChatWebSocket({
@@ -407,6 +408,22 @@ export function ChatInterface() {
   }, [ws.connected, wsConnected]);
 
   useEffect(() => { setMounted(true); }, []);
+
+  // Detect mobile keyboard visibility via visualViewport API
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.visualViewport) return;
+    const handleResize = () => {
+      const isKeyboard = window.screen.height - window.visualViewport!.height > 150;
+      setKeyboardVisible(isKeyboard);
+      if (isKeyboard) {
+        document.body.classList.add("keyboard-visible");
+      } else {
+        document.body.classList.remove("keyboard-visible");
+      }
+    };
+    window.visualViewport.addEventListener("resize", handleResize);
+    return () => window.visualViewport.removeEventListener("resize", handleResize);
+  }, []);
 
   const activeConversation = conversations.find(
     (c) => c.id === activeConversationId
@@ -1067,7 +1084,7 @@ export function ChatInterface() {
       )}
 
       {/* Input area */}
-      <div className="border-t border-border p-4 glass-subtle shrink-0">
+      <div className="border-t border-border p-3 sm:p-4 glass-subtle shrink-0 chat-input-area" style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 0.75rem)" }}>
         <div className="max-w-3xl mx-auto">
           {error && (
             <div className="flex items-center justify-center gap-2 mb-2">
