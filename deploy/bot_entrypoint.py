@@ -32,6 +32,7 @@ async def main():
     # Environment overrides
     env_map = {
         "OLLAMA_BASE": "ollama_base",
+        "EMBEDDING_BASE_URL": "embedding_base_url",
         "QDRANT_URL": "qdrant_url",
         "TELEGRAM_BOT_TOKEN": "telegram_bot_token",
         "TELEGRAM_ENABLED": "telegram_enabled",

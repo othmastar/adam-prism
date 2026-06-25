@@ -20,7 +20,7 @@ export function ActionTrace() {
   const { isStreaming, processingSteps } = useAppStore();
   const [visible, setVisible] = useState(false);
   const [traceText, setTraceText] = useState("");
-  const hideTimer = useRef<ReturnType<typeof setTimeout>>();
+  const hideTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
     if (!isStreaming) {
@@ -61,7 +61,7 @@ export function ActionTrace() {
 
   return (
     <div
-      className="fixed bottom-16 left-4 z-[70] max-w-[280px] transition-all duration-300"
+      className="fixed bottom-16 end-4 z-[70] max-w-[280px] transition-all duration-300"
       style={{
         opacity: visible || isStreaming ? 1 : 0,
         transform: `translateY(${visible || isStreaming ? 0 : 10}px)`,

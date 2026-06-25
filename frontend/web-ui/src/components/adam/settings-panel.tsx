@@ -81,9 +81,11 @@ export function SettingsPanel() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          inference_mode: localSettings.inferenceMode,
-          lora_server_url: localSettings.loraServerUrl,
-          model_name: localSettings.modelName,
+          settings: {
+            inference_mode: localSettings.inferenceMode,
+            lora_server_url: localSettings.loraServerUrl,
+            model_name: localSettings.modelName,
+          },
         }),
       });
     } catch (e) {
@@ -220,13 +222,13 @@ export function SettingsPanel() {
             </CardHeader>
             <CardContent className="space-y-5">
               <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">{t.modelName}</Label>
+                <Label htmlFor="settings-model-name" className="text-xs text-muted-foreground">{t.modelName}</Label>
                 {ollamaModels.length > 0 ? (
                   <Select
                     value={localSettings.modelName}
                     onValueChange={(val) => handleChange("modelName", val)}
                   >
-                    <SelectTrigger className="bg-muted/50 border-border">
+                    <SelectTrigger id="settings-model-name" className="bg-muted/50 border-border">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -239,6 +241,7 @@ export function SettingsPanel() {
                   </Select>
                 ) : (
                   <Input
+                    id="settings-model-name"
                     value={localSettings.modelName}
                     onChange={(e) => handleChange("modelName", e.target.value)}
                     className="bg-muted/50 border-border"
@@ -248,12 +251,12 @@ export function SettingsPanel() {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">{t.inferenceMode}</Label>
+                <Label htmlFor="settings-inference-mode" className="text-xs text-muted-foreground">{t.inferenceMode}</Label>
                 <Select
                   value={localSettings.inferenceMode}
                   onValueChange={(val) => handleChange("inferenceMode", val)}
                 >
-                  <SelectTrigger className="bg-muted/50 border-border">
+                  <SelectTrigger id="settings-inference-mode" className="bg-muted/50 border-border">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -268,8 +271,9 @@ export function SettingsPanel() {
 
               {localSettings.inferenceMode === "lora" && (
                 <div className="space-y-2">
-                  <Label className="text-xs text-muted-foreground">{t.loraServerUrl}</Label>
+                  <Label htmlFor="settings-lora-url" className="text-xs text-muted-foreground">{t.loraServerUrl}</Label>
                   <Input
+                    id="settings-lora-url"
                     value={localSettings.loraServerUrl}
                     onChange={(e) => handleChange("loraServerUrl", e.target.value)}
                     className="bg-muted/50 border-border"
@@ -377,9 +381,10 @@ export function SettingsPanel() {
             <CardContent className="space-y-5">
               {/* FastAPI URL */}
               <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">{t.fastApiUrl}</Label>
+                <Label htmlFor="settings-fastapi-url" className="text-xs text-muted-foreground">{t.fastApiUrl}</Label>
                 <div className="flex gap-2">
                   <Input
+                    id="settings-fastapi-url"
                     value={localSettings.fastApiUrl}
                     onChange={(e) => handleChange("fastApiUrl", e.target.value)}
                     className="bg-muted/50 border-border"
@@ -424,9 +429,10 @@ export function SettingsPanel() {
 
               {/* Ollama URL */}
               <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">{t.ollamaUrl}</Label>
+                <Label htmlFor="settings-ollama-url" className="text-xs text-muted-foreground">{t.ollamaUrl}</Label>
                 <div className="flex gap-2">
                   <Input
+                    id="settings-ollama-url"
                     value={localSettings.ollamaUrl}
                     onChange={(e) => handleChange("ollamaUrl", e.target.value)}
                     className="bg-muted/50 border-border"
@@ -471,8 +477,9 @@ export function SettingsPanel() {
 
               {/* System Prompt */}
               <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">{t.systemPrompt}</Label>
+                <Label htmlFor="settings-system-prompt" className="text-xs text-muted-foreground">{t.systemPrompt}</Label>
                 <Textarea
+                  id="settings-system-prompt"
                   value={localSettings.systemPrompt}
                   onChange={(e) => handleChange("systemPrompt", e.target.value)}
                   className="min-h-[100px] bg-muted/50 border-border text-sm"
@@ -492,8 +499,9 @@ export function SettingsPanel() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">{t.qdrantUrl}</Label>
+                <Label htmlFor="settings-qdrant-url" className="text-xs text-muted-foreground">{t.qdrantUrl}</Label>
                 <Input
+                  id="settings-qdrant-url"
                   value={localSettings.qdrantUrl}
                   onChange={(e) => handleChange("qdrantUrl", e.target.value)}
                   className="bg-muted/50 border-border"
@@ -502,11 +510,12 @@ export function SettingsPanel() {
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground flex items-center gap-1.5">
+                <Label htmlFor="settings-qdrant-key" className="text-xs text-muted-foreground flex items-center gap-1.5">
                   <Key className="h-3.5 w-3.5" />
                   {t.qdrantApiKey}
                 </Label>
                 <Input
+                  id="settings-qdrant-key"
                   value={localSettings.qdrantApiKey}
                   onChange={(e) => handleChange("qdrantApiKey", e.target.value)}
                   className="bg-muted/50 border-border"
@@ -529,8 +538,9 @@ export function SettingsPanel() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">{t.telegramBotToken}</Label>
+                <Label htmlFor="settings-telegram-token" className="text-xs text-muted-foreground">{t.telegramBotToken}</Label>
                 <Input
+                  id="settings-telegram-token"
                   value={localSettings.telegramBotToken}
                   onChange={(e) => handleChange("telegramBotToken", e.target.value)}
                   className="bg-muted/50 border-border"
@@ -540,8 +550,9 @@ export function SettingsPanel() {
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">{t.telegramChatId}</Label>
+                <Label htmlFor="settings-telegram-chat" className="text-xs text-muted-foreground">{t.telegramChatId}</Label>
                 <Input
+                  id="settings-telegram-chat"
                   value={localSettings.telegramChatId}
                   onChange={(e) => handleChange("telegramChatId", e.target.value)}
                   className="bg-muted/50 border-border"
@@ -562,11 +573,12 @@ export function SettingsPanel() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground flex items-center gap-1.5">
+                <Label htmlFor="settings-auth-users" className="text-xs text-muted-foreground flex items-center gap-1.5">
                   <Users className="h-3.5 w-3.5" />
                   {t.authorizedUsers}
                 </Label>
                 <Input
+                  id="settings-auth-users"
                   value={localSettings.authorizedUsers}
                   onChange={(e) => handleChange("authorizedUsers", e.target.value)}
                   className="bg-muted/50 border-border"
@@ -596,8 +608,9 @@ export function SettingsPanel() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">{t.tailscaleIp}</Label>
+                <Label htmlFor="settings-tailscale-ip" className="text-xs text-muted-foreground">{t.tailscaleIp}</Label>
                 <Input
+                  id="settings-tailscale-ip"
                   value={localSettings.tailscaleIp}
                   onChange={(e) => handleChange("tailscaleIp", e.target.value)}
                   className="bg-muted/50 border-border"

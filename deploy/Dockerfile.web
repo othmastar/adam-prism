@@ -9,6 +9,8 @@ WORKDIR /app
 COPY frontend/web-ui/package.json frontend/web-ui/package-lock.json ./
 RUN npm ci --legacy-peer-deps
 
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 COPY frontend/web-ui/ .
 RUN npm run build
 

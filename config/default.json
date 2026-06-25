@@ -1,6 +1,6 @@
 {
   "ollama_base": "http://localhost:11434",
-  "model_name": "adam-prism-v13:latest",
+  "model_name": "gemma4:12b",
   "inference_mode": "ollama",
   "lora_server_url": "http://localhost:7861",
   "context_window": 4096,

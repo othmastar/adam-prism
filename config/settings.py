@@ -123,6 +123,11 @@ class AdamSettings(BaseSettings):
         description="نموذج التضمين — Embedding model name",
     )
 
+    embedding_base_url: str = Field(
+        default="",
+        description="رابط Ollama للتضمين (منفصل عن ollama_base إن أردت)",
+    )
+
     # ─────────────────────────────────────────────
     # API / واجهة البرمجة
     # ─────────────────────────────────────────────
@@ -477,6 +482,7 @@ class AdamSettings(BaseSettings):
         d["memory"] = {
             "qdrant_url": self.qdrant_url,
             "ollama_base": self.ollama_base,
+            "embedding_base_url": self.embedding_base_url,
             "embedding_model": self.embedding_model,
         }
         d["rate_limits"] = self.get_rate_limits()

@@ -129,7 +129,7 @@ export default function LoginPage() {
           <code className="block mt-1 bg-muted p-2 rounded text-left text-[10px] sm:text-xs overflow-x-auto">
             curl -X POST {process.env.NEXT_PUBLIC_API_URL || "https://adam-prism.online"}/api/auth/register \<br />
             {"  "}-H "Content-Type: application/json" \<br />
-            {"  "}-d '{{"email":"you@example.com","username":"you","password":"yourpass"}}
+            {"  "}-d '{"{"}"email":"you@example.com","username":"you","password":"yourpass"{"}"}'
           </code>
         </div>
       </div>

@@ -264,8 +264,9 @@ export function KnowledgePanel() {
               <div className="flex flex-wrap items-center gap-3">
                 <div className="flex items-center gap-2">
                   <Hash className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">{t.collection}:</span>
+                  <label htmlFor="knowledge-collection-select" className="text-xs text-muted-foreground">{t.collection}:</label>
                   <select
+                    id="knowledge-collection-select"
                     value={collection}
                     onChange={(e) => setCollection(e.target.value)}
                     className="h-7 text-xs bg-muted/50 border border-border rounded-md px-2 text-foreground"
@@ -373,7 +374,9 @@ export function KnowledgePanel() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
+              <label htmlFor="knowledge-add-text" className="sr-only">{t.addKnowledge}</label>
               <textarea
+                id="knowledge-add-text"
                 value={addText}
                 onChange={(e) => setAddText(e.target.value)}
                 placeholder={t.addPlaceholder}
@@ -383,8 +386,9 @@ export function KnowledgePanel() {
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2">
                   <Database className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">{t.collection}:</span>
+                  <label htmlFor="knowledge-add-collection" className="text-xs text-muted-foreground">{t.collection}:</label>
                   <select
+                    id="knowledge-add-collection"
                     value={addCollection}
                     onChange={(e) => setAddCollection(e.target.value)}
                     className="h-7 text-xs bg-muted/50 border border-border rounded-md px-2 text-foreground"
@@ -439,6 +443,7 @@ export function KnowledgePanel() {
                       {uploadFile ? uploadFile.name : (isArabic ? "اختار ملف..." : "Choose a file...")}
                     </span>
                     <input
+                      id="knowledge-upload-file"
                       type="file"
                       accept=".pdf,.docx,.txt,.md"
                       className="hidden"
@@ -448,7 +453,9 @@ export function KnowledgePanel() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Database className="h-3.5 w-3.5 text-muted-foreground" />
+                  <label htmlFor="knowledge-upload-collection" className="sr-only">{t.collection}</label>
                   <select
+                    id="knowledge-upload-collection"
                     value={uploadCollection}
                     onChange={(e) => setUploadCollection(e.target.value)}
                     className="h-7 text-xs bg-muted/50 border border-border rounded-md px-2 text-foreground"

@@ -75,8 +75,8 @@ OLLAMA_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxx
 MODEL_NAME=gemma3:8b
 
 # --- Local Ollama (for embeddings) ---
-# (native on VM, not in Docker)
-OLLAMA_LOCAL_URL=http://localhost:11434
+# داخل Docker: 172.17.0.1 هو gateway bridge يوصل للمضيف
+EMBEDDING_BASE_URL=http://172.17.0.1:11434
 EMBEDDING_MODEL=nomic-embed-text
 
 # --- Domain ---
@@ -133,8 +133,9 @@ fi
 
 # ─── 6. Build & Start ────────────────────────────
 echo "▶ [6/7] Building Docker images..."
-# Copy env to docker-compose context
+# Copy env to compose context (يحتاج docker compose .env بالجذر)
 cp deploy/.env.production deploy/.env
+cp deploy/.env.production .env 2>/dev/null || true
 
 docker compose -f deploy/docker-compose.prod.yml build --parallel
 echo "  ✅ Build complete"

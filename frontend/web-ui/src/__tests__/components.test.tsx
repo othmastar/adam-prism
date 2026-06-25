@@ -24,7 +24,7 @@ describe("AdamLogo", () => {
 describe("VoiceButton", () => {
   it("renders without crashing", async () => {
     const { VoiceButton } = await import("@/components/adam/voice-button");
-    const { container } = render(<VoiceButton />);
+    const { container } = render(<VoiceButton onAudioReady={() => {}} />);
     expect(container).toBeTruthy();
   });
 });

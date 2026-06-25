@@ -56,6 +56,7 @@ async def main():
     # Environment variables override config (useful for Docker)
     env_overrides = {
         "OLLAMA_BASE": "ollama_base",
+        "EMBEDDING_BASE_URL": "embedding_base_url",
         "MODEL_NAME": "model_name",
         "QDRANT_URL": "qdrant_url",
         "API_HOST": "api_host",

@@ -77,6 +77,7 @@ export function AuditLogViewer() {
           </CardTitle>
           <div className="flex items-center gap-2">
             <select
+              id="audit-filter-severity"
               value={filter}
               onChange={(e) => setFilter(e.target.value as any)}
               className="text-xs border rounded px-2 py-1 bg-background"

@@ -60,6 +60,16 @@ export default function RootLayout({
         {children}
         <Toaster />
         <ServiceWorkerRegister />
+        {/* Clean slate — fixes old 8002 URL and clears cache */}
+        <script dangerouslySetInnerHTML={{ __html: '(function(){try{var s=localStorage.getItem("adam-settings");if(s&&s.indexOf("8002")!==-1){localStorage.removeItem("adam-settings");console.log("✅ Fixed old 8002 URL — cleared");}if(!sessionStorage.getItem("sw_cleaned_v4")){["adam-conversations","adam_admin","adam_attempts"].forEach(function(k){localStorage.removeItem(k)});sessionStorage.setItem("sw_cleaned_v4","1");}}catch(e){}})()' }} />
+        <footer className="w-full py-3 px-4 border-t border-border">
+          <div className="max-w-7xl mx-auto flex items-center justify-center gap-2 text-[10px] text-muted-foreground">
+            <span>Powered by</span>
+            <a href="https://sovereignneuralfortresses.com" target="_blank" rel="noopener" className="text-primary hover:underline font-medium">Sovereign Neural Fortresses</a>
+            <span>·</span>
+            <span>Adam v9.5</span>
+          </div>
+        </footer>
       </body>
     </html>
   );

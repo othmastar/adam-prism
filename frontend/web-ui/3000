@@ -7,3 +7,97 @@
 
  GET / 200 in 596ms (next.js: 142ms, proxy.ts: 98ms, application-code: 356ms)
  GET / 200 in 88ms (next.js: 5ms, proxy.ts: 8ms, application-code: 75ms)
+ GET / 200 in 191ms (next.js: 5ms, proxy.ts: 4ms, application-code: 182ms)
+ GET / 200 in 102ms (next.js: 16ms, proxy.ts: 5ms, application-code: 81ms)
+ GET / 200 in 94ms (next.js: 7ms, proxy.ts: 4ms, application-code: 82ms)
+ GET / 200 in 190ms (next.js: 74ms, proxy.ts: 6ms, application-code: 109ms)
+ GET / 200 in 75ms (next.js: 5ms, proxy.ts: 3ms, application-code: 67ms)
+ GET / 200 in 40ms (next.js: 4ms, proxy.ts: 7ms, application-code: 29ms)
+✓ Compiled in 315ms
+ GET / 200 in 304ms (next.js: 97ms, proxy.ts: 82ms, application-code: 125ms)
+ GET / 200 in 103ms (next.js: 5ms, proxy.ts: 6ms, application-code: 91ms)
+ GET / 200 in 57ms (next.js: 8ms, proxy.ts: 6ms, application-code: 44ms)
+ GET / 200 in 142ms (next.js: 50ms, proxy.ts: 5ms, application-code: 87ms)
+ GET / 200 in 115ms (next.js: 5ms, proxy.ts: 4ms, application-code: 106ms)
+ GET / 200 in 88ms (next.js: 5ms, proxy.ts: 3ms, application-code: 81ms)
+ GET / 200 in 65ms (next.js: 6ms, proxy.ts: 4ms, application-code: 55ms)
+ GET / 200 in 109ms (next.js: 41ms, proxy.ts: 5ms, application-code: 63ms)
+ GET / 200 in 41ms (next.js: 10ms, proxy.ts: 5ms, application-code: 26ms)
+✓ Compiled in 73ms
+✓ Compiled in 148ms
+✓ Compiled in 170ms
+✓ Compiled in 135ms
+✓ Compiled in 161ms
+✓ Compiled in 184ms
+✓ Compiled in 150ms
+✓ Compiled in 367ms
+✓ Compiled in 106ms
+ GET / 200 in 433ms (next.js: 10ms, proxy.ts: 5ms, application-code: 418ms)
+ GET / 200 in 88ms (next.js: 3ms, proxy.ts: 4ms, application-code: 81ms)
+✓ Compiled in 262ms
+✓ Compiled in 84ms
+✓ Compiled in 71ms
+✓ Compiled in 98ms
+✓ Compiled in 68ms
+✓ Compiled in 90ms
+✓ Compiled in 161ms
+✓ Compiled in 65ms
+✓ Compiled in 196ms
+✓ Compiled in 94ms
+✓ Compiled in 109ms
+[browser] Route error: ReferenceError: useMemo is not defined
+    at ChatInterface (src/components/adam/chat-interface.tsx:366:19)
+    at Set.forEach (<anonymous>)
+  364 |   
+  365 |   // Admin bypass — ?admin=1 or localStorage flag skips attempt limit
+> 366 |   const isAdmin = useMemo(() => {
+      |                   ^
+  367 |     if (typeof window === "undefined") return false;
+  368 |     const params = new URLSearchParams(window.location.search);
+  369 |     if (params.has("admin")) { (src/app/error.tsx:18:13)
+[browser] Route error: ReferenceError: useMemo is not defined
+    at ChatInterface (src/components/adam/chat-interface.tsx:366:19)
+    at Set.forEach (<anonymous>)
+  364 |   
+  365 |   // Admin bypass — ?admin=1 or localStorage flag skips attempt limit
+> 366 |   const isAdmin = useMemo(() => {
+      |                   ^
+  367 |     if (typeof window === "undefined") return false;
+  368 |     const params = new URLSearchParams(window.location.search);
+  369 |     if (params.has("admin")) { (src/app/error.tsx:18:13)
+[browser] Route error: ReferenceError: useMemo is not defined
+    at ChatInterface (src/components/adam/chat-interface.tsx:366:19)
+    at Set.forEach (<anonymous>)
+  364 |   
+  365 |   // Admin bypass — ?admin=1 or localStorage flag skips attempt limit
+> 366 |   const isAdmin = useMemo(() => {
+      |                   ^
+  367 |     if (typeof window === "undefined") return false;
+  368 |     const params = new URLSearchParams(window.location.search);
+  369 |     if (params.has("admin")) { (src/app/error.tsx:18:13)
+[browser] Route error: ReferenceError: useMemo is not defined
+    at ChatInterface (src/components/adam/chat-interface.tsx:366:19)
+    at Set.forEach (<anonymous>)
+  364 |   
+  365 |   // Admin bypass — ?admin=1 or localStorage flag skips attempt limit
+> 366 |   const isAdmin = useMemo(() => {
+      |                   ^
+  367 |     if (typeof window === "undefined") return false;
+  368 |     const params = new URLSearchParams(window.location.search);
+  369 |     if (params.has("admin")) { (src/app/error.tsx:18:13)
+✓ Compiled in 86ms
+✓ Compiled in 89ms
+✓ Compiled in 139ms
+✓ Compiled in 110ms
+✓ Compiled in 105ms
+✓ Compiled in 84ms
+✓ Compiled in 79ms
+✓ Compiled in 68ms
+✓ Compiled in 70ms
+✓ Compiled in 90ms
+ GET / 200 in 122ms (next.js: 13ms, proxy.ts: 7ms, application-code: 103ms)
+ GET / 200 in 64ms (next.js: 8ms, proxy.ts: 7ms, application-code: 49ms)
+[browser] Encountered a script tag while rendering React component. Scripts inside React components are never executed when rendering on the client. Consider using template tag instead (https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template). 
+[browser] Encountered a script tag while rendering React component. Scripts inside React components are never executed when rendering on the client. Consider using template tag instead (https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template). 
+✓ Compiled in 76ms
+✓ Compiled in 112ms

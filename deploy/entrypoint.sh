@@ -25,6 +25,13 @@ if [ -f "$CERT_FILE" ] && [ -f "$KEY_FILE" ]; then
     DOMAIN="${DOMAIN:-adam-prism.online}"
 
     cat > "$NGINX_CONF_HTTPS" << HTTPSEOF
+# ─── HTTP → HTTPS redirect (production) ────────────────────
+server {
+    listen 80;
+    server_name ${DOMAIN};
+    return 301 https://\$host\$request_uri;
+}
+
 # ─── HTTPS server (production) ─────────────────────────────
 server {
     listen 443 ssl http2;
@@ -122,11 +129,14 @@ server {
 }
 HTTPSEOF
 
-    # Include HTTPS config in main nginx.conf
-    echo "include $NGINX_CONF_HTTPS;" >> "$NGINX_CONF"
+    # Include HTTPS config in main nginx.conf (idempotent)
+    if ! grep -qF "include $NGINX_CONF_HTTPS;" "$NGINX_CONF" 2>/dev/null; then
+        echo "include $NGINX_CONF_HTTPS;" >> "$NGINX_CONF"
+    fi
 else
-    echo "SSL certificates not found - running HTTP only (development mode)"
-    echo "To enable HTTPS, run: bash deploy/generate_ssl.sh"
+    echo "SSL certificates not found - running HTTP only"
+    # Remove any dangling include from previous runs (for idempotent restarts)
+    sed -i "\#include $NGINX_CONF_HTTPS;#d" "$NGINX_CONF" 2>/dev/null || true
 fi
 
 # Start nginx

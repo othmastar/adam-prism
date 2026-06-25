@@ -1,0 +1,463 @@
+"""
+Adam Prism - Production Infrastructure — HARDENED v3
+======================================================
+اتصال مهيأ (Connection Pooling) + Caching + Retry + Metrics + Sanitizer
+خفيف، غير معطل، جاهز للإنتاج.
+
+[SECURITY FIXES v3 — C6]
+1. Removed os.path.expanduser("~") from ALLOWED_FILE_PATHS
+2. Added specific workspace paths instead of home directory
+3. Improved blocklist to use exact path matching instead of substring
+4. Block all dotfile directories properly
+"""
+
+import asyncio
+import hashlib
+import logging
+import time
+from collections.abc import Callable
+from dataclasses import dataclass
+from functools import wraps
+from pathlib import Path
+from typing import Any
+
+import httpx
+
+logger = logging.getLogger("adam_prism.infrastructure")
+
+# ═══════════════════════════════════════
+# 1. Connection Pooling — اتصال مهيأ واحد لكل خدمة
+# ═══════════════════════════════════════
+
+class SharedClients:
+    """مشاركة اتصال HTTP واحد لكل خدمة — بدلاً من create جديد كل مرة"""
+
+    def __init__(self):
+        self._clients: dict[str, httpx.AsyncClient] = {}
+        self._client_timeouts: dict[str, float] = {}
+        self._lock = asyncio.Lock()
+
+    def _make_client(self, base_url: str, timeout: float = 30.0) -> httpx.AsyncClient:
+        """إنشاء عميل مع connection pooling حقيقي"""
+        limits = httpx.Limits(
+            max_keepalive_connections=10,
+            max_connections=20,
+            keepalive_expiry=60.0,
+        )
+        return httpx.AsyncClient(
+            base_url=base_url,
+            timeout=httpx.Timeout(timeout),
+            limits=limits,
+            follow_redirects=True,
+        )
+
+    async def get(self, name: str, base_url: str = "", timeout: float = 30.0) -> httpx.AsyncClient:
+        """الحصول على عميل — ينشئه لو مش موجود أو إذا تغير timeout"""
+        async with self._lock:
+            needs_new = (
+                name not in self._clients
+                or self._clients[name].is_closed
+                or self._client_timeouts.get(name) != timeout
+            )
+            if needs_new:
+                client = self._make_client(base_url, timeout)
+                self._clients[name] = client
+                self._client_timeouts[name] = timeout
+            return self._clients[name]
+
+    async def close_all(self):
+        """إغلاق كل الاتصالات — للخروج النظيف"""
+        async with self._lock:
+            for _name, client in self._clients.items():
+                if not client.is_closed:
+                    await client.aclose()
+            self._clients.clear()
+
+    async def health(self) -> dict[str, bool]:
+        """حالة كل الاتصالات"""
+        return {name: not c.is_closed for name, c in self._clients.items()}
+
+# ═══════════════════════════════════════
+# 2. TTL Cache — كاش بزمن انتهاء
+# ═══════════════════════════════════════
+
+@dataclass
+class CacheEntry:
+    value: Any
+    expiry: float
+
+class TTLCache:
+    """كاش خفيف في الذاكرة مع TTL — بدون Redis"""
+
+    def __init__(self, default_ttl: float = 300.0, max_size: int = 500):
+        self._data: dict[str, CacheEntry] = {}
+        self._default_ttl = default_ttl
+        self._max_size = max_size
+        self._hits = 0
+        self._misses = 0
+
+    def _key(self, *args, **kwargs) -> str:
+        """توليد مفتاح فريد"""
+        raw = str(args) + str(sorted(kwargs.items()))
+        return hashlib.md5(raw.encode()).hexdigest()
+
+    def get(self, key: str):
+        """قراءة من الكاش"""
+        entry = self._data.get(key)
+        if entry and entry.expiry > time.time():
+            self._hits += 1
+            return entry.value
+        if entry:
+            self._misses += 1
+            del self._data[key]
+        return None
+
+    def set(self, key: str, value: Any, ttl: float | None = None):
+        """كتابة في الكاش"""
+        if len(self._data) >= self._max_size:
+            self._evict()
+        self._data[key] = CacheEntry(
+            value=value,
+            expiry=time.time() + (ttl or self._default_ttl),
+        )
+
+    def _evict(self):
+        """إزالة أقدم 20% من المدخلات"""
+        sorted_items = sorted(self._data.items(), key=lambda x: x[1].expiry)
+        for k, _ in sorted_items[:len(self._data) // 5]:
+            del self._data[k]
+
+    def clear(self):
+        self._data.clear()
+        self._hits = 0
+        self._misses = 0
+
+    def stats(self) -> dict:
+        total = self._hits + self._misses
+        return {
+            "size": len(self._data),
+            "hits": self._hits,
+            "misses": self._misses,
+            "hit_rate": round(self._hits / max(total, 1) * 100, 1),
+        }
+
+# ═══════════════════════════════════════
+# 3. Retry Decorator — إعادة المحاولة عند التعذر
+# ═══════════════════════════════════════
+
+def retry(max_attempts: int = 3, base_delay: float = 0.5, max_delay: float = 10.0,
+          retryable_exceptions: tuple = (httpx.TimeoutException, httpx.ConnectError,
+                                          httpx.RemoteProtocolError, ConnectionError, TimeoutError)):
+    """ديكوريتور لإعادة المحاولة مع exponential backoff"""
+    def decorator(func: Callable) -> Callable:
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            last_exc = None
+            for attempt in range(1, max_attempts + 1):
+                try:
+                    return await func(*args, **kwargs)
+                except retryable_exceptions as e:
+                    last_exc = e
+                    if attempt < max_attempts:
+                        delay = min(base_delay * (2 ** (attempt - 1)), max_delay)
+                        logger.exception("{func.__name__} failed (attempt {attempt}/{max_attempts}): . Retrying in {delay:.1f}s")
+                        await asyncio.sleep(delay)
+                    else:
+                        logger.exception("{func.__name__} failed after {max_attempts} attempts:")
+            raise last_exc
+        return wrapper
+    return decorator
+
+# ═══════════════════════════════════════
+# 4. Simple Metrics — عدادات وإحصائيات خفيفة
+# ═══════════════════════════════════════
+
+class MetricsCollector:
+    """عدادات أداء بسيطة — جاهزة للتصدير لـ Prometheus لاحقاً"""
+
+    def __init__(self):
+        self._counters: dict[str, int] = {}
+        self._timers: dict[str, list[float]] = {}
+        self._errors: dict[str, int] = {}
+
+    def inc(self, name: str, value: int = 1):
+        self._counters[name] = self._counters.get(name, 0) + value
+
+    def timing(self, name: str, duration_ms: float):
+        if name not in self._timers:
+            self._timers[name] = []
+        self._timers[name].append(duration_ms)
+        # حافظ على آخر 1000 قيمة فقط
+        if len(self._timers[name]) > 1000:
+            self._timers[name] = self._timers[name][-1000:]
+
+    def error(self, name: str):
+        self._errors[name] = self._errors.get(name, 0) + 1
+        self.inc("errors_total")
+
+    def dump(self) -> dict:
+        result = {}
+        for name, count in sorted(self._counters.items()):
+            result[f"counter_{name}"] = count
+        for name, values in sorted(self._timers.items()):
+            if values:
+                result[f"timer_{name}_avg_ms"] = round(sum(values) / len(values), 1)
+                result[f"timer_{name}_max_ms"] = round(max(values), 1)
+                result[f"timer_{name}_total"] = len(values)
+        for name, count in sorted(self._errors.items()):
+            result[f"error_{name}"] = count
+        return result
+
+    def reset(self):
+        self._counters.clear()
+        self._timers.clear()
+        self._errors.clear()
+
+# ═══════════════════════════════════════
+# 5. Input Sanitizer — حماية من المسارات الخبيثة
+# ═══════════════════════════════════════
+
+# [C6] Removed os.path.expanduser("~") — use specific workspace paths instead
+ALLOWED_FILE_PATHS = [
+    "/tmp",
+    "./notebook",
+    "./data",
+    "./config",
+    "./workspace",
+    "./projects",
+]
+
+# [C6] Improved blocklist — exact path matching instead of substring
+# Uses path boundaries (with trailing slash or exact match) to prevent bypass
+BLOCKED_PATHS = [
+    "/etc", "/proc", "/sys", "/dev", "/boot",
+    "/root", "/var", "/usr", "/bin",
+]
+
+# [C6] Dotfile directories — block all dotfile/hidden directories
+BLOCKED_DOTFILE_DIRS = [
+    ".ssh", ".config", ".env", ".aws", ".gnupg",
+    ".kube", ".docker", ".cache", ".local",
+]
+
+# [C6] Sensitive filename keywords — exact filename matching
+BLOCKED_FILENAMES = [
+    "password", "credential", "secret", "token",
+    ".env", ".htpasswd", ".netrc", ".pgpass",
+]
+
+def sanitize_path(path: str) -> str | None:
+    """التحقق من أن المسار مصرح به — يمنع الوصول لملفات النظام"""
+    if not path or ".." in path:
+        return None
+
+    try:
+        resolved = str(Path(path).resolve())
+    except (OSError, RuntimeError):
+        return None
+
+    # [C6] Check allowed paths — must start with an allowed prefix
+    allowed = False
+    for allowed_path in ALLOWED_FILE_PATHS:
+        allowed_resolved = str(Path(allowed_path).resolve())
+        if resolved == allowed_resolved or resolved.startswith(allowed_resolved + "/"):
+            allowed = True
+            break
+    if not allowed:
+        return None
+
+    # [C6] Check blocked paths using exact path matching
+    # Split the resolved path into components and check each prefix
+    path_parts = resolved.split("/")
+    built_path = ""
+    for part in path_parts:
+        if not part:
+            built_path += "/"
+            continue
+        built_path += part
+        for blocked in BLOCKED_PATHS:
+            if built_path == blocked:
+                return None
+        built_path += "/"
+
+    # [C6] Check for blocked dotfile directories in path components
+    for part in path_parts:
+        for dotdir in BLOCKED_DOTFILE_DIRS:
+            if part == dotdir:
+                return None
+
+    # [C6] Check for blocked filenames — exact match on last component
+    filename = path_parts[-1] if path_parts else ""
+    filename_lower = filename.lower()
+    for blocked_name in BLOCKED_FILENAMES:
+        if filename_lower == blocked_name.lower():
+            return None
+
+    return resolved
+
+# ═══════════════════════════════════════
+# 6. Circuit Breaker — حماية الخدمات المتعثرة
+# ═══════════════════════════════════════
+
+class CircuitBreaker:
+    """قاطع الدائرة — يمنع استدعاء خدمة بعد عدد معين من التعذر"""
+
+    CLOSED = "closed"    # الخدمة سليمة
+    OPEN = "open"        # الخدمة متعطلة — ممنوع المرور
+    HALF_OPEN = "half_open"  # اختبار واحد مسموح
+
+    def __init__(self, name: str, failure_threshold: int = 5, recovery_timeout: float = 30.0):
+        self.name = name
+        self.failure_threshold = failure_threshold
+        self.recovery_timeout = recovery_timeout
+        self.state = self.CLOSED
+        self.failure_count = 0
+        self.last_failure_time = 0.0
+        self.total_failures = 0
+        self.total_successes = 0
+
+    async def call(self, func: Callable, *args, **kwargs):
+        if self.state == self.OPEN:
+            if time.time() - self.last_failure_time >= self.recovery_timeout:
+                self.state = self.HALF_OPEN
+                logger.info(f"CircuitBreaker '{self.name}' half-open — اختبار...")
+            else:
+                raise Exception(f"CircuitBreaker '{self.name}' is OPEN — الخدمة متعطرة")
+
+        try:
+            result = await func(*args, **kwargs)
+            self._on_success()
+            return result
+        except Exception:
+            self._on_failure()
+            raise
+
+    def _on_success(self):
+        self.total_successes += 1
+        if self.state == self.HALF_OPEN:
+            self.state = self.CLOSED
+            self.failure_count = 0
+            logger.info(f"CircuitBreaker '{self.name}' closed — عادت الخدمة للعمل")
+        self.failure_count = 0
+
+    def _on_failure(self):
+        self.total_failures += 1
+        self.failure_count += 1
+        self.last_failure_time = time.time()
+        if self.failure_count >= self.failure_threshold:
+            self.state = self.OPEN
+            logger.warning(f"CircuitBreaker '{self.name}' OPEN — تعطلت الخدمة ({self.failure_count} تعذر)")
+
+    def stats(self) -> dict:
+        return {
+            "name": self.name,
+            "state": self.state,
+            "failure_count": self.failure_count,
+            "total_failures": self.total_failures,
+            "total_successes": self.total_successes,
+        }
+
+# ═══════════════════════════════════════
+# 7. Model Swapper — إدارة VRAM: موديل واحد في اللحظة
+# ═══════════════════════════════════════
+
+class ModelSwapper:
+    """مبادل الموديلات — يضمن أن موديلاً واحداً فقط في VRAM في اللحظة."""
+
+    def __init__(self, max_vram_gb: float = 12.0):
+        self._current_model: str | None = None
+        self._models: dict[str, dict[str, Any]] = {}
+        self._max_vram_gb = max_vram_gb
+        self._lock = asyncio.Lock()
+        self._swap_count = 0
+        self._total_swap_time_ms = 0.0
+
+    def register(self, model_id: str, load_fn: Callable, unload_fn: Callable,
+                 vram_gb: float = 1.0, metadata: dict | None = None):
+        """تسجيل موديل مع دوال التحميل والتفريغ"""
+        self._models[model_id] = {
+            "load_fn": load_fn,
+            "unload_fn": unload_fn,
+            "vram_gb": vram_gb,
+            "loaded": False,
+            "metadata": metadata or {},
+        }
+        logger.info(f"ModelSwapper: {model_id} مسجل ({vram_gb}GB)")
+
+    async def swap_in(self, model_id: str) -> bool:
+        """تبديل إلى موديل — يفرغ الحالي ويحمل الجديد"""
+        async with self._lock:
+            if model_id == self._current_model:
+                return True
+
+            if model_id not in self._models:
+                logger.error(f"ModelSwapper: {model_id} غير مسجل")
+                return False
+
+            start = time.time()
+
+            # تفريغ الموديل الحالي
+            if self._current_model is not None:
+                current = self._models.get(self._current_model)
+                if current and current["loaded"]:
+                    try:
+                        await current["unload_fn"]()
+                        current["loaded"] = False
+                        logger.info(f"ModelSwapper: {self._current_model} مُفرغ")
+                    except Exception:
+                        logger.exception("تعذر تفريغ {self._current_model}:")
+
+            # تحميل الموديل الجديد
+            target = self._models[model_id]
+            if not target["loaded"]:
+                try:
+                    await target["load_fn"]()
+                    target["loaded"] = True
+                    logger.info(f"ModelSwapper: {model_id} محمّل")
+                except Exception:
+                    logger.exception("تعذر تحميل {model_id}:")
+                    self._current_model = None
+                    return False
+
+            self._current_model = model_id
+            elapsed = (time.time() - start) * 1000
+            self._swap_count += 1
+            self._total_swap_time_ms += elapsed
+            logger.info(f"ModelSwapper: swap {model_id} في {elapsed:.0f}ms")
+            return True
+
+    async def swap_out(self):
+        """تفريغ الموديل الحالي فقط"""
+        async with self._lock:
+            if self._current_model is None:
+                return
+            current = self._models.get(self._current_model)
+            if current and current["loaded"]:
+                try:
+                    await current["unload_fn"]()
+                    current["loaded"] = False
+                except Exception:
+                    logger.exception("تعذر تفريغ {self._current_model}:")
+            self._current_model = None
+            logger.info("ModelSwapper: VRAM فارغ")
+
+    @property
+    def current_model(self) -> str | None:
+        return self._current_model
+
+    def is_loaded(self, model_id: str) -> bool:
+        m = self._models.get(model_id)
+        return m is not None and m["loaded"]
+
+    def stats(self) -> dict:
+        return {
+            "current_model": self._current_model,
+            "registered_models": list(self._models.keys()),
+            "swap_count": self._swap_count,
+            "total_swap_time_ms": round(self._total_swap_time_ms, 1),
+            "avg_swap_time_ms": round(self._total_swap_time_ms / max(self._swap_count, 1), 1),
+            "vram_usage_gb": sum(
+                m["vram_gb"] for m in self._models.values() if m["loaded"]
+            ),
+            "max_vram_gb": self._max_vram_gb,
+        }

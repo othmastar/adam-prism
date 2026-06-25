@@ -122,14 +122,10 @@ export function AdamLogo({ size = 48, animate = true }: { size?: number; animate
         <motion.circle
           cx="50"
           cy="55"
-          r="4"
+          initial={{ r: 4 }}
+          animate={animate ? { r: [4, 5, 4], opacity: [0.6, 1, 0.6] } : { r: 4 }}
+          transition={animate ? { duration: 2.5, repeat: Infinity, ease: "easeInOut" } : {}}
           fill="url(#coreGradient)"
-          {...(animate
-            ? {
-                animate: { r: [3, 5, 3], opacity: [0.6, 1, 0.6] },
-                transition: { duration: 2.5, repeat: Infinity, ease: "easeInOut" },
-              }
-            : {})}
         />
 
         <defs>

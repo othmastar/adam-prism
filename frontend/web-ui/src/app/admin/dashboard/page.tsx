@@ -38,7 +38,7 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(false);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-  const token = (session as { apiToken?: string } | null)?.apiToken;
+  const token = (session as { accessToken?: string } | null)?.accessToken;
 
   useEffect(() => {
     if (status !== "authenticated" || !token) return;

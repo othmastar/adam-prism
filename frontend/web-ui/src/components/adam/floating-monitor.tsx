@@ -82,7 +82,12 @@ export function FloatingMonitor() {
     if (typeof window === "undefined") return { x: 16, y: 80 };
     return { x: isArabic ? 16 : window.innerWidth - 216, y: 80 };
   });
-
+  useEffect(() => {
+    setPosition(prev => ({
+      x: isArabic ? 16 : (typeof window !== "undefined" ? window.innerWidth - 216 : 16),
+      y: prev.y,
+    }));
+  }, [isArabic]);
   // Reposition when language changes
   useEffect(() => {
     setPosition(prev => ({
@@ -123,7 +128,7 @@ export function FloatingMonitor() {
   useEffect(() => {
     const check = async () => {
       try {
-        const res = await fetch("https://1.1.1.1", { mode: "no-cors", signal: AbortSignal.timeout(3000) });
+        const res = await fetch("/api/status", { signal: AbortSignal.timeout(3000) });
         setInternetOnline(true);
       } catch {
         setInternetOnline(false);

@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useEffect, useState, useRef, useCallback } from "react";
 import {
   Wrench,
   Menu,
@@ -41,7 +42,6 @@ import {
   ToggleLeft,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useCallback, useRef, useState } from "react";
 
 type TaskItem = {
   id: string;
@@ -63,6 +63,18 @@ export function ToolsPanel() {
   const { settings, setSidebarOpen, apiConnected, summarizeProgress, setSummarizeProgress } = useAppStore();
   const isArabic = settings.language === "ar";
   const t = isArabic ? toolsAr : toolsEn;
+  const [manifestTools, setManifestTools] = useState<Record<string, any>>({});
+  const [toolCount, setToolCount] = useState(0);
+  const [execResult, setExecResult] = useState<string | null>(null);
+
+  // Fetch live tool manifest from backend
+  useEffect(() => {
+    if (!apiConnected) return;
+    fetch("/api/tools/manifest")
+      .then(r => r.json())
+      .then(d => { setManifestTools(d.tools || {}); setToolCount(d.total || 0); })
+      .catch(() => {});
+  }, [apiConnected]);
 
   const [activeTasks, setActiveTasks] = useState<TaskItem[]>([]);
   const [completedCount, setCompletedCount] = useState(0);
@@ -212,12 +224,15 @@ export function ToolsPanel() {
         </Button>
         <Wrench className="h-5 w-5 text-primary" />
         <span className="text-sm font-medium">{t.title}</span>
-        <div className="flex-1" />
-        {activeTasks.length > 0 && (
-          <Badge variant="secondary" className="text-[10px] gap-1 border-primary/20">
-            <Activity className="h-3 w-3 text-primary animate-pulse" />
-            {activeTasks.length} {isArabic ? "مهام" : "tasks"}
+        {toolCount > 0 && (
+          <Badge variant="secondary" className="text-[10px] gap-1 border-primary/20 bg-primary/10 text-primary">
+            <Zap className="h-3 w-3" />
+            {toolCount} {isArabic ? "أداة" : "tools"}
           </Badge>
+        )}
+        <div className="flex-1" />
+        {execResult && (
+          <Badge className="text-[10px] bg-emerald-500/10 text-emerald-400 border-emerald-500/20">{execResult}</Badge>
         )}
         {completedCount > 0 && (
           <span className="text-[9px] text-muted-foreground/50">{completedCount} {isArabic ? "تم" : "done"}</span>
@@ -386,7 +401,7 @@ export function ToolsPanel() {
                 <div className="flex items-center gap-2">
                   <Zap className="h-4 w-4 text-amber-400 shrink-0" />
                   <span className="text-xs flex-1">{t.liveSummarization}</span>
-                  <input ref={fileInputRef} type="file" className="hidden" accept=".txt,.md,.pdf,.doc,.docx" onChange={(e) => {
+                  <input id="tools-file-upload" ref={fileInputRef} type="file" className="hidden" accept=".txt,.md,.pdf,.doc,.docx" onChange={(e) => {
                     const file = e.target.files?.[0]; if (!file) return;
                     const reader = new FileReader();
                     reader.onload = (ev) => { setSummarizeText(ev.target?.result as string); setSummarizeTitle(file.name.replace(/\.[^/.]+$/, "")); };
@@ -438,6 +453,38 @@ export function ToolsPanel() {
                     <AlertCircle className="h-3 w-3 shrink-0" /><span>{summarizeProgress.error}</span>
                   </div>
                 )}
+              </div>
+            </div>
+          )}
+
+          {/* Live Tool Manifest — all 32 tools from backend */}
+          {Object.keys(manifestTools).length > 0 && (
+            <div className="space-y-3 mt-4">
+              <div className="flex items-center gap-2 px-1">
+                <Zap className="h-4 w-4 text-primary" />
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  {isArabic ? "كل الأدوات المتاحة" : "All Available Tools"} ({toolCount})
+                </h3>
+              </div>
+              <div className="grid grid-cols-2 gap-1.5">
+                {Object.entries(manifestTools).map(([name, info]: [string, any]) => {
+                  const cat = name.split("_")[0];
+                  const catColors: Record<string, string> = {
+                    browser: "#06b6d4", mouse: "#ec4899", keyboard: "#f59e0b",
+                    clipboard: "#8b5cf6", screen: "#10b981", window: "#3b82f6",
+                    file: "#ef4444", memory: "#8b5cf6", search: "#06b6d4",
+                    shell: "#f59e0b", disk: "#10b981", python: "#3b82f6",
+                    tool: "#ec4899", request: "#8b5cf6", check: "#06b6d4",
+                  };
+                  const color = catColors[cat] || "#8b5cf6";
+                  return (
+                    <div key={name} className="flex items-center gap-2 px-2.5 py-2 rounded-lg bg-muted/20 hover:bg-muted/40 transition-colors cursor-default group" style={{borderLeft: `2px solid ${color}`}}>
+                      <span className="text-[10px] font-mono text-muted-foreground/50 w-12 shrink-0 truncate">{cat}</span>
+                      <span className="text-[11px] font-medium truncate flex-1">{name}</span>
+                      <div className="h-1.5 w-1.5 rounded-full shrink-0" style={{backgroundColor: color}} />
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}

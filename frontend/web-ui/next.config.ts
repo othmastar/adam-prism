@@ -20,25 +20,36 @@ const nextConfig: NextConfig = {
           { key: "X-XSS-Protection", value: "1; mode=block" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
-          {
-            key: "Content-Security-Policy",
-            value: [
-              "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-              "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: blob: https:",
-              "font-src 'self' data:",
-              "connect-src 'self' http://localhost:8000 http://localhost:8001 ws://localhost:8000 ws://localhost:8001",
-              "frame-src 'none'",
-              "object-src 'none'",
-              "base-uri 'self'",
-              "form-action 'self'"
-            ].join('; ')
-          }
-        ]
-      }
+        ],
+      },
     ];
   },
+  // [DEV] Proxy /api/* to FastAPI backend (port 8000)
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*",
+        destination: "http://localhost:8000/api/:path*",
+      },
+      {
+        source: "/ws/:path*",
+        destination: "http://localhost:8000/ws/:path*",
+      },
+      {
+        source: "/healthz/:path*",
+        destination: "http://localhost:8000/healthz/:path*",
+      },
+      {
+        source: "/metrics",
+        destination: "http://localhost:8000/metrics",
+      },
+      {
+        source: "/docs",
+        destination: "http://localhost:8000/docs",
+      },
+    ];
+  },
+
   allowedDevOrigins: [
     "preview-chat-5cd51445-8812-4a59-a8e3-8bd54cc03b5b.space-z.ai",
     ".space-z.ai",
