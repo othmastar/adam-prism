@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" width="1200" height="1200">
+  <defs>
+    <linearGradient id="triGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F0CB6E"/>
+      <stop offset="100%" stop-color="#B48C3C"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="1200" fill="#0A2540"/>
+
+  <!-- Outer hexagon (fortress walls) -->
+  <g transform="translate(600 420)">
+    <polygon points="0,-336 291,-168 291,168 0,336 -291,168 -291,-168"
+             fill="#103050" fill-opacity="0.78"
+             stroke="#D4A857" stroke-width="6"/>
+    <!-- Inner hexagon -->
+    <polygon points="0,-262 227,-131 227,131 0,262 -227,131 -227,-131"
+             fill="none" stroke="#D4A857" stroke-opacity="0.7" stroke-width="2"/>
+    <!-- Wall notches -->
+    <circle cx="0" cy="-308" r="5" fill="#E5B547"/>
+    <circle cx="267" cy="-154" r="5" fill="#E5B547"/>
+    <circle cx="267" cy="154" r="5" fill="#E5B547"/>
+    <circle cx="0" cy="308" r="5" fill="#E5B547"/>
+    <circle cx="-267" cy="154" r="5" fill="#E5B547"/>
+    <circle cx="-267" cy="-154" r="5" fill="#E5B547"/>
+  </g>
+
+  <!-- Triangle (Adam Prism mark) - with gradient -->
+  <g transform="translate(600 420)">
+    <polygon points="0,-176 144,144 -144,144" fill="url(#triGrad)"/>
+    <polygon points="0,-176 144,144 -144,144" fill="none" stroke="#F0CB6E" stroke-width="3"/>
+  </g>
+
+  <!-- Title: ADAM PRISM -->
+  <g text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-weight="700">
+    <text x="600" y="910" font-size="108" fill="#D4A857">ADAM  PRISM</text>
+  </g>
+
+  <!-- Subtitle -->
+  <g text-anchor="middle" font-family="Arial, sans-serif" font-weight="700">
+    <text x="600" y="975" font-size="30" fill="#D4A857" fill-opacity="0.9" letter-spacing="3">SOVEREIGN  ·  NEURAL  ·  FORTRESSES</text>
+  </g>
+
+  <!-- Decorative lines beside subtitle -->
+  <line x1="395" y1="989" x2="465" y2="989" stroke="#D4A857" stroke-opacity="0.7" stroke-width="2"/>
+  <line x1="735" y1="989" x2="805" y2="989" stroke="#D4A857" stroke-opacity="0.7" stroke-width="2"/>
+  <circle cx="478" cy="989" r="4" fill="#D4A857"/>
+  <circle cx="722" cy="989" r="4" fill="#D4A857"/>
+
+  <!-- Tagline -->
+  <g text-anchor="middle" font-family="Arial, sans-serif" font-weight="700">
+    <text x="600" y="1130" font-size="24" fill="#D4A857" fill-opacity="0.7" letter-spacing="2.5">SOVEREIGN  AI  ·  EST. 2013  ·  CAIRO  ·  EGYPT</text>
+  </g>
+
+  <!-- Bottom ornament -->
+  <line x1="500" y1="1160" x2="580" y2="1160" stroke="#D4A857" stroke-opacity="0.5" stroke-width="1"/>
+  <line x1="620" y1="1160" x2="700" y2="1160" stroke="#D4A857" stroke-opacity="0.5" stroke-width="1"/>
+  <circle cx="600" cy="1160" r="3" fill="#D4A857" fill-opacity="0.8"/>
+</svg>

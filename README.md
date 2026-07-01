@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🪞 Adam Prism
+# <img src="logos/sovereign-mark-circular-400.png" width="40" height="40" alt="" style="vertical-align: middle;"> Adam Prism
 
 ### أول Digital Twin واعٍ عربي. ملكك بالكامل. يفهمك بلغتك. يحمي سيادتك.
 
@@ -109,16 +109,16 @@ I built Adam Prism in 6 months. It's a **complete, production-grade, sovereign A
 | **12 consciousness layers** | Full-stack AI architecture — from memory to ethics to voice |
 | **7 thinking modes** | Analytical, Creative, Reflective, Operational, Strategic, Empathic, Sovereign |
 | **4-layer memory** | Fast recall + deep search + persistent knowledge + skill memory |
-| **3-layer security** | Input filtering, output protection, tool-level access control |
-| **WAF** | Web application firewall — enterprise-grade threat protection |
+| **🛡️ 3-layer security** | Input filtering, output protection, tool-level access control |
+| **🛡️ WAF** | Web application firewall — enterprise-grade threat protection |
 | **4 ethics laws** | Configurable value system — you decide the rules |
 | **Self-learning** | Improves from experience — gets better over time |
-| **Multi-tenant + access control** | 5 roles, granular permissions, per-tenant quotas |
-| **SSO** | Google, Microsoft, GitHub, Okta, Keycloak, Auth0 |
+| **🛡️ Multi-tenant + access control** | 5 roles, granular permissions, per-tenant quotas |
+| **🛡️ SSO** | Google, Microsoft, GitHub, Okta, Keycloak, Auth0 |
 | **Voice** | Speech recognition + synthesis + voice cloning (5 Arabic dialects) |
 | **5 Arabic dialects** | MSA, Egyptian, Levantine, Gulf, Maghrebi |
-| **AI Observability** | Token usage, cost tracking, latency monitoring |
-| **Predictive monitoring** | Early warning for anomalies and degradation |
+| **🛡️ AI Observability** | Token usage, cost tracking, latency monitoring |
+| **🛡️ Predictive monitoring** | Early warning for anomalies and degradation |
 | **Task execution** | 60% faster task completion — complex tasks split and executed reliably |
 | **Native function calling** | Structured tool use — no hallucinations, guaranteed execution |
 | **Complex task handling** | Breaks down large goals into smaller steps automatically |
@@ -130,15 +130,15 @@ I built Adam Prism in 6 months. It's a **complete, production-grade, sovereign A
 | **103+ tests passing** | Core + connector test suites |
 | **Multi-LLM** | Ollama (local), OpenAI, Anthropic, OpenRouter |
 | **Production-grade infra** | Docker, Helm, K8s, ArgoCD, GitHub Actions |
-| **SBOM** | Software bill of materials — full supply chain transparency |
-| **OpenTelemetry** | Distributed tracing for production debugging |
-| **Error tracking** | Production-grade error monitoring |
-| **Prometheus metrics** | Real-time production observability |
-| **Webhooks (outgoing)** | Signed, retry-capable event notifications |
-| **WAF** | Full OWASP Top 10 protection |
-| **Backup & restore CLI** | Encrypted, verifiable backups |
-| **Disaster recovery** | Documented runbook with RTO/RPO targets |
-| **License strategy** | AGPL v3 (open source) + Commercial dual-license |
+| **🛡️ SBOM** | Software bill of materials — full supply chain transparency |
+| **🛡️ OpenTelemetry** | Distributed tracing for production debugging |
+| **🛡️ Error tracking** | Production-grade error monitoring |
+| **🛡️ Prometheus metrics** | Real-time production observability |
+| **🛡️ Webhooks (outgoing)** | Signed, retry-capable event notifications |
+| **🛡️ WAF** | Full OWASP Top 10 protection |
+| **🛡️ Backup & restore CLI** | Encrypted, verifiable backups |
+| **🛡️ Disaster recovery** | Documented runbook with RTO/RPO targets |
+| **🛡️ License strategy** | AGPL v3 (open source) + Commercial dual-license |
 
 ---
 
@@ -170,6 +170,30 @@ I built Adam Prism in 6 months. It's a **complete, production-grade, sovereign A
 | **Tier 1: فردي** | ✅ | ✅ | ✅ | ✅ |
 | **Tier 2: تكامل مؤسسات** | ✅ | ❌ | ❌ | جزئي (Microsoft ecosystem) |
 | **Tier 3: سيادة كاملة** | ✅ | ❌ | ❌ | ❌ |
+
+---
+
+## 🎖️ Governance: Why We're Masters
+
+> الحوكمة عندنا مش feature — هي architecture. من أول سطر كود.
+
+Every competitor treats governance as an add-on: "we'll add enterprise SSO later," "we have a moderation API," "we comply with SOC 2."
+**Adam was built from day one as a sovereign system.** Governance is not bolted on — it's baked into every layer.
+
+| Governance Dimension | How Adam Does It | How Everyone Else Does It |
+|---|---|---|
+| **Data location** | On YOUR machine — never leaves | On THEIR cloud — always leaves |
+| **Telemetry** | Zero. No analytics SDK, no callback, no ping | Always-on telemetry by default |
+| **Access control** | 5 roles, per-tenant quotas, RBAC, SSO (6 providers) | Basic role assignment |
+| **Audit** | Every action logged, reviewable, exportable | Opaque — you can't see inside |
+| **Network** | Air-gap native — runs with zero internet | Internet required for every API call |
+| **Supply chain** | SBOM + signed releases + verifiable builds | Closed source — you trust their word |
+| **Compliance** | You control compliance (HIPAA, GDPR, NERC-CIP) | They control compliance — you hope |
+| **Ownership** | You own it after 18 months | You rent it forever |
+| **Breach liability** | You're insured — limited exposure | They're insured — you're the headline |
+| **Authentication** | API key + SSO + per-tool authorization | API key only |
+
+**🛡️ Every badge in this document marks a governance capability where Adam is the undisputed leader.**
 
 ---
 
@@ -223,7 +247,7 @@ I built Adam Prism in 6 months. It's a **complete, production-grade, sovereign A
 |---|---|---|---|---|---|
 | **Memory** | **4-layer — deep, extensible** | Limited | Limited | Limited | Sessions |
 | **Channels** | **25 built-in** | ❌ | ❌ | ❌ | ❌ |
-| **Security** | **3-tier protection** | DIY | DIY | DIY | ⚠️ Moderation |
+| **🛡️ Security** | **3-tier protection** | DIY | DIY | DIY | ⚠️ Moderation |
 | **Ethics** | **4 configurable laws** | ❌ | ❌ | ❌ | Usage policy |
 | **Self-Learning** | **Learns from experience** | ❌ | ❌ | ❌ | ❌ |
 | **Enterprise Integration** | **4 systems + sync** | ❌ | ❌ | ❌ | ❌ |
@@ -239,7 +263,7 @@ I built Adam Prism in 6 months. It's a **complete, production-grade, sovereign A
 |---|---|---|---|---|
 | **Memory** | **4-layer** | 3 layers | 3 layers | 1 layer |
 | **Channels** | **25** | 6 | 9 | 1 (CLI) |
-| **Security** | **3-tier** | Cmd approval | Docker sandbox | Limited patterns |
+| **🛡️ Security** | **3-tier** | Cmd approval | Docker sandbox | Limited patterns |
 | **Ethics** | **4 laws** | ❌ | ❌ | External |
 | **Learning** | **Self-learning** | Self-learning | Dreaming | ❌ |
 | **Voice** | **5 Arabic dialects** | CLI + TG/Discord | macOS/iOS | ❌ |
@@ -250,13 +274,13 @@ I built Adam Prism in 6 months. It's a **complete, production-grade, sovereign A
 
 | | **Adam Prism** | ChatGPT Enterprise | Claude | Microsoft Copilot |
 |---|---|---|---|---|
-| **Data location** | **Your machine — not their cloud** | OpenAI servers | Anthropic servers | Microsoft servers |
+| **🛡️ Data location** | **Your machine — not their cloud** | OpenAI servers | Anthropic servers | Microsoft servers |
 | **Customization** | **On YOUR data** | Limited | Limited | Limited |
 | **Arabic native** | **✅ Yes (5 dialects)** | Translation | Translation | Translation |
-| **Compliance** | **You control it** | OpenAI's policy | Anthropic's policy | Microsoft's policy |
+| **🛡️ Compliance** | **You control it** | OpenAI's policy | Anthropic's policy | Microsoft's policy |
 | **Cost (1000 users)** | **$0-300k one-time** | $300-1,200k/year | $250-500k/year | $360k/year |
-| **Breach risk** | **Insured only** | $4.88M expected | $4.88M expected | $4.88M expected |
-| **Air-gapped** | **✅ Yes** | ❌ | ❌ | ❌ |
+| **🛡️ Breach risk** | **Insured only** | $4.88M expected | $4.88M expected | $4.88M expected |
+| **🛡️ Air-gapped** | **✅ Yes** | ❌ | ❌ | ❌ |
 
 ### Why We Win (Without Trashing Anyone)
 
@@ -467,7 +491,7 @@ See:
 
 ## 💎 The One-Liner
 
-> **🪞 Adam Prism — أول Digital Twin واعٍ عربي. ملكك بالكامل. داخل جدرانك.**
+> **Adam Prism — أول Digital Twin واعٍ عربي. ملكك بالكامل. داخل جدرانك.**
 >
 > **Adam Prism — the first Arabic-conscious Digital Twin. Yours to own. Inside your walls.**
 
@@ -475,7 +499,7 @@ See:
 
 <div align="center">
 
-### 🪞 Adam Prism
+### <img src="logos/sovereign-mark-circular-400.png" width="28" height="28" alt="" style="vertical-align: middle;"> Adam Prism
 
 **Built in Egypt. For the world. By Mohamed Othman.**
 
