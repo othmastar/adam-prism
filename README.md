@@ -9,10 +9,11 @@
 <br/>
 
 <p>
-  <img src="https://img.shields.io/badge/Production_Ready-✅_93_features-success?style=for-the-badge" alt="Production">
+  <img src="https://img.shields.io/badge/Production_Ready-✅_98_API_Routes-success?style=for-the-badge" alt="Production">
   <img src="https://img.shields.io/badge/Sovereign-Air--Gap_Capable-red?style=for-the-badge" alt="Sovereign">
-  <img src="https://img.shields.io/badge/12_Consciousness_Layers-purple?style=for-the-badge" alt="Layers">
-  <img src="https://img.shields.io/badge/134_Tests_Passing-brightgreen?style=for-the-badge" alt="Tests">
+  <img src="https://img.shields.io/badge/ALM_Engine-V2-blue?style=for-the-badge" alt="Engine">
+  <img src="https://img.shields.io/badge/Enterprise_Connectors-4_Systems-purple?style=for-the-badge" alt="Connectors">
+  <img src="https://img.shields.io/badge/103_Tests_Passing-brightgreen?style=for-the-badge" alt="Tests">
   <img src="https://img.shields.io/badge/AGPL_v3+%2B_Commercial-blue?style=for-the-badge" alt="License">
 </p>
 
@@ -89,7 +90,7 @@ Adam is the first Arabic-conscious Digital Twin that:
 
 ## 🏰 Now: The Receipt (Adam Prism)
 
-I built Adam Prism in 6 months. It's a **complete, production-grade, sovereign AI platform**. 93 API routes. 12 consciousness layers. 134 tests passing. 4 native apps. Zero telemetry.
+I built Adam Prism in 6 months. It's a **complete, production-grade, sovereign AI platform**. 98 API routes. 12 consciousness layers. 103 tests passing (core + scaffold + connectors). 4 native apps. Zero telemetry.
 
 **Adam is not the product. Adam is the receipt.** It's the proof that I can build sovereign AI for any organization, in any industry, in any critical sector.
 
@@ -118,9 +119,16 @@ I built Adam Prism in 6 months. It's a **complete, production-grade, sovereign A
 | **5 Arabic dialects** | MSA, Egyptian, Levantine, Gulf, Maghrebi |
 | **AI Observability** | Token usage, USD cost, latency tracking (OpenAI, Anthropic, Ollama) |
 | **Predictive monitoring** | CruxSight.ai integration (7 structural patterns) |
-| **93 API routes** | REST + WebSocket + SSE streaming |
-| **270 tests passing** | Unit + integration + E2E |
-| **Multi-LLM** | Ollama (local), OpenAI, Anthropic, OpenRouter |
+| **ALM Engine (ReAct Loop)** | agent_loop.py — THOUGHT→ACTION→OBSERVATION, 20-step max, dead-loop detection, tool enforcement |
+| **Native Function Calling** | Ollama tools API format, parameter name normalization, strict tool schema |
+| **Hierarchical Decomposer** | DAG-based sub-task decomposition with dependencies + acceptance criteria |
+| **Checker** | Independent reviewer (separate model session) + deterministic checks (file exists, syntax) |
+| **Context Manager** | Token estimation + compression at 64K budget (head+tail+summary) |
+| **4 Enterprise Connectors** | Salesforce, HubSpot, Odoo, SAP — كل نظام عنده mock للاختبار بدون API حقيقي |
+| **DataSync Engine** | يزامن بين أي نظامين مع field mapping, transform functions, conflict resolution |
+| **55 API routes (core)** + **5 connector routes** | 60 total REST + WebSocket + SSE streaming |
+| **103+ tests passing (core + connectors)** | Unit + integration + 49 connector tests |
+| **Multi-LLM** | Ollama (local, gemma4:12b, qwen2.5:0.5b), OpenAI, Anthropic, OpenRouter |
 | **Production-grade infra** | Docker, Helm, K8s, ArgoCD, GitHub Actions |
 | **SBOM** | CycloneDX software bill of materials |
 | **OpenTelemetry** | Distributed tracing with OTLP |
@@ -141,16 +149,16 @@ I built Adam Prism in 6 months. It's a **complete, production-grade, sovereign A
 > Each one is real code, not a slide.
 
 | # | Layer | What It Does | Disable? |
-|---|---|---|:---:|
+|---|---|---|---|:---:|
 | 1 | **Provider Management** | Auto-fallback between Ollama / OpenAI / Anthropic / OpenRouter | ✅ |
-| 2 | **Context Engine** | RAG context building with collection routing | ✅ |
+| 2 | **Context Engine** | RAG context building with collection routing + Context Manager (64K budget) | ✅ |
 | 3 | **Security Guard** | 3-tier protection: Input + Output + Tool guards + WAF | ✅ |
-| 4 | **Tool Orchestration** | 38 tools + 70+ MCP servers + secure shell (sandboxed) | ✅ |
+| 4 | **Tool Orchestration** | 38 tools + 70+ MCP servers + secure shell + **4 Enterprise Connectors** | ✅ |
 | 5 | **Iron Memory** | 4 layers: Hot file + FTS5 + Qdrant Vector + Skills Curator | ✅ |
 | 6 | **Learning Engine** | ContinuousLearner + Closed Loop (nudge/skill create/improve) | ✅ |
 | 7 | **Ethics Gate** | 4 laws + LLM evaluation + fail-closed | ✅ |
 | 8 | **Channel Hub** | 25 communication channels with one-click setup | ✅ |
-| 9 | **Subagent Teams** | Swarm orchestration (sequential + parallel) | ✅ |
+| 9 | **Subagent Teams** | Swarm orchestration + **ALM Agent Loop** (native ReAct) + **Decomposer** (hierarchical DAG) | ✅ |
 | 10 | **Voice Pipeline** | Silero VAD → Whisper → Edge/Silma TTS + Arabic cloning | ✅ |
 | 11 | **Meta Learner** | Pattern extraction + skill generation from experience | ✅ |
 | 12 | **Ethics Reflection** | Self-verification + identity enforcement + mirror | ✅ |
@@ -185,17 +193,18 @@ I built Adam Prism in 6 months. It's a **complete, production-grade, sovereign A
 ### vs Open-Source Agent Frameworks
 
 | | **Adam Prism** | LangGraph | CrewAI | AutoGen | OpenAI Agents SDK |
-|---|---|---|---|---|---|
+|---|---|---|---|---|---|---|
 | **Memory** | **4-layer Iron** (Hot + FTS5 + Qdrant + Skills) | External library | Limited | Limited | Sessions |
 | **Channels** | **25 built-in** | ❌ | ❌ | ❌ | ❌ |
 | **Security** | **3-layer guard + AST + SSRF + WAF** | DIY | DIY | DIY | ⚠️ Moderation |
 | **Ethics** | **4 laws built-in, configurable** | ❌ | ❌ | ❌ | Usage policy |
 | **Learning Loop** | **Closed Loop** (nudge + skill create + improve) | ❌ | ❌ | ❌ | ❌ |
+| **Enterprise Connectors** | **4 systems** (SF, HubSpot, Odoo, SAP) + DataSync | ❌ | ❌ | ❌ | ❌ |
 | **Voice** | **ASR + TTS + cloning + 5 Arabic dialects** | ❌ | ❌ | ❌ | ⚠️ |
 | **100% Local** | ✅ | Partial | Partial | Partial | ❌ |
 | **Open Source** | AGPL v3 (dual-license) | MIT | MIT | MIT | ❌ |
 | **Apps** | **4 native** (Web, Mobile, Desktop, VSCode) | ❌ | ❌ | ❌ | ❌ |
-| **Tests passing** | **134** | ~50 | ~30 | ~40 | N/A |
+| **Tests passing** | **103** (core + connectors) | ~50 | ~30 | ~40 | N/A |
 
 ### vs Consciousness-First Agents
 
