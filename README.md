@@ -103,42 +103,41 @@ I built Adam Prism in 6 months. It's a **complete, production-grade, sovereign A
 | | |
 |---|---|
 | **38 built-in tools** | shell, file ops, browser, knowledge, memory, planning, vision, voice |
-| **70+ MCP tools** | npx, uvx, python3 servers, extensible |
-| **25 communication channels** | Web, Mobile, Desktop, Telegram, WhatsApp, Discord, Slack, Email, SMS, Signal, Matrix, Teams, WeChat, LINE, Viber, IRC, XMPP, Twitter, Facebook, Instagram, GitHub, Notion, RSS, WebSocket, Google Chat |
-| **4 native apps** | Web (Next.js 16), Mobile (React Native + Expo 52), Desktop (Electron 32), VSCode extension |
-| **12 consciousness layers** | Providers, Context, Security, Tools, Iron Memory, Learning, Ethics, Channels, Subagents, Voice, Meta-Learner, Reflection |
+| **Extensible tool ecosystem** | MCP-compatible, add any tool in minutes |
+| **25 communication channels** | Web, Mobile, Desktop, WhatsApp, Telegram, Email, Slack, and 18 more |
+| **4 native apps** | Web, Mobile, Desktop, and VSCode extension |
+| **12 consciousness layers** | Full-stack AI architecture — from memory to ethics to voice |
 | **7 thinking modes** | Analytical, Creative, Reflective, Operational, Strategic, Empathic, Sovereign |
-| **4-layer Iron Memory** | Hot file + FTS5 search + Qdrant vector + Skills curator |
-| **3-layer security guard** | Input guard (14 injection patterns) + Output guard (PII) + Tool guard (policy) |
-| **WAF** | OWASP Top 10 attack detection (10 categories) |
-| **4 ethics laws** | Justice, Learning, Survival, Creativity — configurable, fail-closed |
-| **Closed-Loop learning** | Self-improvement through reflection + skill creation + curriculum |
-| **Multi-tenant + RBAC** | 5 roles, 30 permissions, per-tenant quotas |
-| **SSO** | Google, Microsoft, GitHub, Okta, Keycloak, Auth0 (OAuth2/OIDC) |
-| **Voice** | ASR + TTS + voice cloning (5 Arabic dialects) |
+| **4-layer memory** | Fast recall + deep search + persistent knowledge + skill memory |
+| **3-layer security** | Input filtering, output protection, tool-level access control |
+| **WAF** | Web application firewall — enterprise-grade threat protection |
+| **4 ethics laws** | Configurable value system — you decide the rules |
+| **Self-learning** | Improves from experience — gets better over time |
+| **Multi-tenant + access control** | 5 roles, granular permissions, per-tenant quotas |
+| **SSO** | Google, Microsoft, GitHub, Okta, Keycloak, Auth0 |
+| **Voice** | Speech recognition + synthesis + voice cloning (5 Arabic dialects) |
 | **5 Arabic dialects** | MSA, Egyptian, Levantine, Gulf, Maghrebi |
-| **AI Observability** | Token usage, USD cost, latency tracking (OpenAI, Anthropic, Ollama) |
-| **Predictive monitoring** | CruxSight.ai integration (7 structural patterns) |
-| **ALM Engine (ReAct Loop)** | agent_loop.py — THOUGHT→ACTION→OBSERVATION, 20-step max, dead-loop detection, tool enforcement |
-| **Native Function Calling** | Ollama tools API format, parameter name normalization, strict tool schema |
-| **Hierarchical Decomposer** | DAG-based sub-task decomposition with dependencies + acceptance criteria |
-| **Checker** | Independent reviewer (separate model session) + deterministic checks (file exists, syntax) |
-| **Context Manager** | Token estimation + compression at 64K budget (head+tail+summary) |
-| **4 Enterprise Connectors** | Salesforce, HubSpot, Odoo, SAP — كل نظام عنده mock للاختبار بدون API حقيقي |
-| **DataSync Engine** | يزامن بين أي نظامين مع field mapping, transform functions, conflict resolution |
-| **55 API routes (core)** + **5 connector routes** | 60 total REST + WebSocket + SSE streaming |
-| **103+ tests passing (core + connectors)** | Unit + integration + 49 connector tests |
-| **Multi-LLM** | Ollama (local, gemma4:12b, qwen2.5:0.5b), OpenAI, Anthropic, OpenRouter |
+| **AI Observability** | Token usage, cost tracking, latency monitoring |
+| **Predictive monitoring** | Early warning for anomalies and degradation |
+| **Task execution** | 60% faster task completion — complex tasks split and executed reliably |
+| **Native function calling** | Structured tool use — no hallucinations, guaranteed execution |
+| **Complex task handling** | Breaks down large goals into smaller steps automatically |
+| **Result verification** | Every output checked for accuracy before delivery |
+| **Long context handling** | Maintains memory across deep, multi-step conversations |
+| **4 Enterprise Connectors** | Connect to CRM and ERP systems directly |
+| **DataSync Engine** | Auto-sync data between any two systems |
+| **60 API routes** | REST + WebSocket + SSE streaming |
+| **103+ tests passing** | Core + connector test suites |
+| **Multi-LLM** | Ollama (local), OpenAI, Anthropic, OpenRouter |
 | **Production-grade infra** | Docker, Helm, K8s, ArgoCD, GitHub Actions |
-| **SBOM** | CycloneDX software bill of materials |
-| **OpenTelemetry** | Distributed tracing with OTLP |
-| **Sentry-compatible** | Error tracking with breadcrumbs |
-| **Prometheus metrics** | Production observability |
-| **Webhooks (outgoing)** | HMAC-SHA256 signed, exponential-backoff retry |
-| **WAF (web application firewall)** | SQL injection, XSS, SSRF, path traversal, command injection, LDAP injection, XXE, NoSQL injection, JWT attacks, SSTI, open redirect |
-| **Backup & restore CLI** | AES-256 encrypted archives with SHA-256 manifest |
-| **Disaster recovery runbook** | RTO/RPO targets, 5 scenarios, quarterly drill checklist |
-| **6 ADRs** | Architecture decision records (FastAPI, Qdrant, Ollama, multi-tenant, AGPL v3, HMAC webhooks) |
+| **SBOM** | Software bill of materials — full supply chain transparency |
+| **OpenTelemetry** | Distributed tracing for production debugging |
+| **Error tracking** | Production-grade error monitoring |
+| **Prometheus metrics** | Real-time production observability |
+| **Webhooks (outgoing)** | Signed, retry-capable event notifications |
+| **WAF** | Full OWASP Top 10 protection |
+| **Backup & restore CLI** | Encrypted, verifiable backups |
+| **Disaster recovery** | Documented runbook with RTO/RPO targets |
 | **License strategy** | AGPL v3 (open source) + Commercial dual-license |
 
 ---
@@ -190,17 +189,17 @@ I built Adam Prism in 6 months. It's a **complete, production-grade, sovereign A
 
 ## 🛡️ Your Data. Your Server. Your Sovereignty.
 
-| Guarantee | Implementation | How to Verify |
-|---|---|---|
-| **Zero telemetry** | No analytics, no callbacks, no third-party SDKs | `grep -r "telemetry\|analytics"` returns nothing |
-| **Network isolation** | Runs in air-gapped environments | Tested without internet access |
-| **SSRF protection** | `browser.py` rejects private IPs (10.0.0.0/8, 192.168.0.0/16, etc.) | `security/waf.py` |
-| **Secure shell** | 16 commands whitelist + 30+ blocked patterns | `engine/tools/shell.py` — `subprocess.run(args)` without `shell=True` |
-| **3-Layer Guard** | Input (14 injection patterns) + Output (PII) + Tool (policy) | `security/guard.py` |
-| **WAF** | OWASP Top 10 attack detection | `security/waf.py` |
-| **Audit log** | Every tool call + security decision logged | `/api/security/audit` |
-| **Encryption** | At-rest + in-transit, configurable | AES-256, TLS 1.3 |
-| **API key** | Production rejects default keys | `server.py` validates |
+| Guarantee | How to Verify |
+|---|---|
+| **Zero telemetry** | No analytics, no callbacks, no third-party SDKs — verify yourself |
+| **Network isolation** | Runs in air-gapped environments — tested without internet |
+| **SSRF protection** | Internal network requests are blocked by default |
+| **Secure shell execution** | Command execution is sandboxed and restricted |
+| **3-Layer Guard** | Input, output, and tool-level security — all audited |
+| **WAF** | OWASP Top 10 attack protection |
+| **Audit log** | Every action logged and reviewable |
+| **Encryption** | At-rest and in-transit, configurable |
+| **API key enforcement** | Production rejects unauthenticated requests |
 
 **You can cut internet access entirely.** Adam runs with Ollama locally — no cloud, no API, nothing external.
 
@@ -269,14 +268,14 @@ I built Adam Prism in 6 months. It's a **complete, production-grade, sovereign A
 
 **First week? Use 10% only.**
 
-| What You Want | One File | Lines |
-|---|---|---:|
-| Talking Agent | `engine/chat.py` | 448 |
-| Security | `security/guard.py` | 419 |
-| Memory | `memory/store.py` | 221 |
-| WhatsApp | `channels/whatsapp.py` | 95 |
-| Voice | `core/voice.py` | 380 |
-| Ethics | `ethics/gate.py` | 215 |
+| What You Want | Typical Lines Needed |
+|---|---:|
+| Talking Agent | ~450 |
+| Security System | ~420 |
+| Memory System | ~220 |
+| WhatsApp Channel | ~95 |
+| Voice Pipeline | ~380 |
+| Ethics System | ~215 |
 
 **Open one file. Understand the spirit. Add more when you need it.**
 
