@@ -145,46 +145,46 @@ I built Adam Prism in 6 months. It's a **complete, production-grade, sovereign A
 
 ## 📊 What Changed: Phase A & B — Performance Results
 
-> آدم بقى أسرع، أعمق، وأقوى — المهام بتنفذ في وقت أقل ونتيجة أدق.
+> Faster execution, deeper context, enterprise-ready.
 
-### Phase A: سرعة وعمق التنفيذ
+### Phase A: Speed & Depth
 
-| قبل | بعد |
+| Before | After |
 |---|---|
-| المهمة البسيطة كانت تاخد 3-5 خطوات | المهمة البسيطة بتنفذ في خطوة — أسرع بنسبة 60% |
-| المهام المعقدة كانت تفشل بعد 6+ خطوات | المهام المعقدة بتنقسم وتتنفذ صح — نسبة نجاح أعلى |
-| الذاكرة بتضيع في المهام الطويلة | الذاكرة بتستمر لمهام أعمق وأطول |
-| مفيش مراجعة للنتيجة قبل التسليم | كل نتيجة بتتأكد من صحتها قبل ما تطلع |
+| Simple tasks took 3-5 steps | Simple tasks execute in one step — up to 60% faster |
+| Complex tasks failed after 6+ steps | Complex tasks complete reliably with higher success rate |
+| Memory lost in long tasks | Memory persists for deeper, longer tasks |
+| No result verification | Every result verified before delivery |
 
-### Phase B: تكامل مع أنظمة المؤسسات
+### Phase B: Enterprise Integration
 
-| النظام | الإمكانية |
+| System | Capability |
 |---|---|
-| أنظمة CRM | قراءة وكتابة البيانات مباشرة |
-| أنظمة ERP | قراءة وكتابة البيانات مباشرة |
-| المزامنة | أي نظامين يقدروا يتبادلوا البيانات تلقائياً |
-| الاختبار | 49 اختبار شغالة بدون أي اتصال خارجي |
+| CRM systems | Read & write data directly |
+| ERP systems | Read & write data directly |
+| Data sync | Any two systems exchange data automatically |
+| Testing | 49 tests run without any external connection |
 
 ---
 
-## 🧠 12 Consciousness Layers (How Adam Thinks)
+## 🧠 12 Consciousness Layers
 
-> كل طبقة **مستقلة، موثقة، ومختبرة** — وكلها شغالة بجد.
+> Each layer is **independent, documented, and tested** — real code, not slides.
 
-| # | الطبقة | الوظيفة |
+| # | Layer | What It Does |
 |---|---|---|
-| 1 | **إدارة النماذج** | Auto-fallback بين Ollama, OpenAI, Anthropic |
-| 2 | **السياق** | بناء السياق — المهام الطويلة مش بتتوه |
-| 3 | **الأمان** | حماية من 3 طبقات: إدخال، إخراج، أدوات |
-| 4 | **الأدوات** | 38 أداة + تكامل مع أنظمة المؤسسات (CRM, ERP) |
-| 5 | **الذاكرة** | 4 طبقات: سريعة + بحث + متجهات + مهارات |
-| 6 | **التعلم** | بيتعلم من التجارب — بيتحسن مع الوقت |
-| 7 | **الأخلاق** | 4 قوانين — أنت تحدد القيم بتاعتك |
-| 8 | **التواصل** | 25 قناة (واتساب، تيليجرام، إيميل، سلاك...) |
-| 9 | **الفرق الذكية** | المهام المعقدة بتتقسم على فرق عمل |
-| 10 | **الصوت** | يتكلم ويفهم العربية بـ 5 لهجات |
-| 11 | **التطور** | يستخرج مهارات جديدة من التجارب |
-| 12 | **المرآة** | يراجع نفسه — القيم والهوية |
+| 1 | **Provider Management** | Auto-fallback between Ollama, OpenAI, Anthropic |
+| 2 | **Context Engine** | Builds context for long tasks — no lost memory |
+| 3 | **Security Guard** | 3-tier protection: input, output, tools |
+| 4 | **Tool Orchestration** | 38 tools + enterprise system integration (CRM, ERP) |
+| 5 | **Iron Memory** | 4 layers: hot file + search + vectors + skills |
+| 6 | **Learning Engine** | Learns from experience — improves over time |
+| 7 | **Ethics Gate** | 4 configurable value laws |
+| 8 | **Channel Hub** | 25 channels (WhatsApp, Telegram, Email, Slack...) |
+| 9 | **Subagent Teams** | Complex tasks split across agent teams |
+| 10 | **Voice Pipeline** | Speaks and understands Arabic (5 dialects) |
+| 11 | **Meta Learner** | Extracts patterns and skills from experience |
+| 12 | **Ethics Reflection** | Self-review — identity and values check |
 
 ---
 
@@ -215,42 +215,42 @@ I built Adam Prism in 6 months. It's a **complete, production-grade, sovereign A
 
 | | **Adam Prism** | LangGraph | CrewAI | AutoGen | OpenAI Agents SDK |
 |---|---|---|---|---|---|
-| **الذاكرة** | **4 طبقات — عميقة وقابلة للتوسع** | محدودة | محدودة | محدودة | جلسات مؤقتة |
-| **قنوات التواصل** | **25 قناة** | ❌ | ❌ | ❌ | ❌ |
-| **الأمان** | **3 طبقات حماية** | يدوي | يدوي | يدوي | ⚠️ إشراف |
-| **القيم الأخلاقية** | **4 قوانين مدمجة قابلة للتعديل** | ❌ | ❌ | ❌ | سياسة استخدام |
-| **التعلم الذاتي** | **يتعلم من التجارب** | ❌ | ❌ | ❌ | ❌ |
-| **تكامل مؤسسات** | **4 أنظمة + مزامنة** | ❌ | ❌ | ❌ | ❌ |
-| **الصوت** | **5 لهجات عربية** | ❌ | ❌ | ❌ | ⚠️ |
-| **100% محلي** | ✅ | جزئي | جزئي | جزئي | ❌ |
-| **مفتوح المصدر** | AGPL v3 | MIT | MIT | MIT | ❌ |
-| **تطبيقات** | **4 تطبيقات** (ويب، موبايل، ديسكتوب، VSCode) | ❌ | ❌ | ❌ | ❌ |
-| **اختبارات** | **103** | ~50 | ~30 | ~40 | — |
+| **Memory** | **4-layer — deep, extensible** | Limited | Limited | Limited | Sessions |
+| **Channels** | **25 built-in** | ❌ | ❌ | ❌ | ❌ |
+| **Security** | **3-tier protection** | DIY | DIY | DIY | ⚠️ Moderation |
+| **Ethics** | **4 configurable laws** | ❌ | ❌ | ❌ | Usage policy |
+| **Self-Learning** | **Learns from experience** | ❌ | ❌ | ❌ | ❌ |
+| **Enterprise Integration** | **4 systems + sync** | ❌ | ❌ | ❌ | ❌ |
+| **Voice** | **5 Arabic dialects** | ❌ | ❌ | ❌ | ⚠️ |
+| **100% Local** | ✅ | Partial | Partial | Partial | ❌ |
+| **Open Source** | AGPL v3 | MIT | MIT | MIT | ❌ |
+| **Native Apps** | **4 apps** (Web, Mobile, Desktop, VSCode) | ❌ | ❌ | ❌ | ❌ |
+| **Tests Passing** | **103** | ~50 | ~30 | ~40 | — |
 
 ### vs Consciousness-First Agents
 
 | | **Adam Prism** | Hermes Agent | OpenClaw | Claude Code |
 |---|---|---|---|---|
-| **الذاكرة** | **4 طبقات** | 3 طبقات | 3 طبقات | طبقة واحدة |
-| **قنوات التواصل** | **25** | 6 | 9 | 1 (CLI) |
-| **الأمان** | **3 طبقات** | موافقة أوامر | Docker sandbox | أنماط محدودة |
-| **القيم** | **4 قوانين** | ❌ | ❌ | تابعة |
-| **التعلم** | **ذاتي مستمر** | ذاتي | Dreaming | ❌ |
-| **الصوت** | **5 لهجات عربية** | CLI + TG/Discord | macOS/iOS | ❌ |
-| **صناعي** | **SCADA/DCS** | ❌ | ❌ | ❌ |
-| **تطبيقات** | **4 تطبيقات** | TUI | macOS/Win + iOS/Android | CLI |
+| **Memory** | **4-layer** | 3 layers | 3 layers | 1 layer |
+| **Channels** | **25** | 6 | 9 | 1 (CLI) |
+| **Security** | **3-tier** | Cmd approval | Docker sandbox | Limited patterns |
+| **Ethics** | **4 laws** | ❌ | ❌ | External |
+| **Learning** | **Self-learning** | Self-learning | Dreaming | ❌ |
+| **Voice** | **5 Arabic dialects** | CLI + TG/Discord | macOS/iOS | ❌ |
+| **Industrial** | **SCADA/DCS native** | ❌ | ❌ | ❌ |
+| **Native Apps** | **4 apps** | TUI | macOS/Win + iOS/Android | CLI |
 
 ### vs Cloud AI Assistants
 
 | | **Adam Prism** | ChatGPT Enterprise | Claude | Microsoft Copilot |
 |---|---|---|---|---|
-| **مكان البيانات** | **جهازك — مش سحابتهم** | سيرفرات OpenAI | سيرفرات Anthropic | سيرفرات Microsoft |
-| **تخصيص** | **على بياناتك أنت** | محدود | محدود | محدود |
-| **عربي أصلي** | **✅ نعم (5 لهجات)** | ترجمة | ترجمة | ترجمة |
-| **الامتثال** | **أنت تتحكم** | سياسة OpenAI | سياسة Anthropic | سياسة Microsoft |
-| **التكلفة (1000 مستخدم)** | **$0-300k مرة واحدة** | $300-1,200k/سنة | $250-500k/سنة | $360k/سنة |
-| **مخاطر الاختراق** | **مؤمن فقط** | $4.88M متوقع | $4.88M متوقع | $4.88M متوقع |
-| **عزل شبكي** | **✅ نعم** | ❌ | ❌ | ❌ |
+| **Data location** | **Your machine — not their cloud** | OpenAI servers | Anthropic servers | Microsoft servers |
+| **Customization** | **On YOUR data** | Limited | Limited | Limited |
+| **Arabic native** | **✅ Yes (5 dialects)** | Translation | Translation | Translation |
+| **Compliance** | **You control it** | OpenAI's policy | Anthropic's policy | Microsoft's policy |
+| **Cost (1000 users)** | **$0-300k one-time** | $300-1,200k/year | $250-500k/year | $360k/year |
+| **Breach risk** | **Insured only** | $4.88M expected | $4.88M expected | $4.88M expected |
+| **Air-gapped** | **✅ Yes** | ❌ | ❌ | ❌ |
 
 ### Why We Win (Without Trashing Anyone)
 
