@@ -214,44 +214,43 @@ I built Adam Prism in 6 months. It's a **complete, production-grade, sovereign A
 ### vs Open-Source Agent Frameworks
 
 | | **Adam Prism** | LangGraph | CrewAI | AutoGen | OpenAI Agents SDK |
-|---|---|---|---|---|---|---|
-| **Memory** | **4-layer Iron** (Hot + FTS5 + Qdrant + Skills) | External library | Limited | Limited | Sessions |
-| **Channels** | **25 built-in** | ❌ | ❌ | ❌ | ❌ |
-| **Security** | **3-layer guard + AST + SSRF + WAF** | DIY | DIY | DIY | ⚠️ Moderation |
-| **Ethics** | **4 laws built-in, configurable** | ❌ | ❌ | ❌ | Usage policy |
-| **Learning Loop** | **Closed Loop** (nudge + skill create + improve) | ❌ | ❌ | ❌ | ❌ |
-| **Enterprise Connectors** | **4 systems** (SF, HubSpot, Odoo, SAP) + DataSync | ❌ | ❌ | ❌ | ❌ |
-| **Voice** | **ASR + TTS + cloning + 5 Arabic dialects** | ❌ | ❌ | ❌ | ⚠️ |
-| **100% Local** | ✅ | Partial | Partial | Partial | ❌ |
-| **Open Source** | AGPL v3 (dual-license) | MIT | MIT | MIT | ❌ |
-| **Apps** | **4 native** (Web, Mobile, Desktop, VSCode) | ❌ | ❌ | ❌ | ❌ |
-| **Tests passing** | **103** (core + connectors) | ~50 | ~30 | ~40 | N/A |
+|---|---|---|---|---|---|
+| **الذاكرة** | **4 طبقات — عميقة وقابلة للتوسع** | محدودة | محدودة | محدودة | جلسات مؤقتة |
+| **قنوات التواصل** | **25 قناة** | ❌ | ❌ | ❌ | ❌ |
+| **الأمان** | **3 طبقات حماية** | يدوي | يدوي | يدوي | ⚠️ إشراف |
+| **القيم الأخلاقية** | **4 قوانين مدمجة قابلة للتعديل** | ❌ | ❌ | ❌ | سياسة استخدام |
+| **التعلم الذاتي** | **يتعلم من التجارب** | ❌ | ❌ | ❌ | ❌ |
+| **تكامل مؤسسات** | **4 أنظمة + مزامنة** | ❌ | ❌ | ❌ | ❌ |
+| **الصوت** | **5 لهجات عربية** | ❌ | ❌ | ❌ | ⚠️ |
+| **100% محلي** | ✅ | جزئي | جزئي | جزئي | ❌ |
+| **مفتوح المصدر** | AGPL v3 | MIT | MIT | MIT | ❌ |
+| **تطبيقات** | **4 تطبيقات** (ويب، موبايل، ديسكتوب، VSCode) | ❌ | ❌ | ❌ | ❌ |
+| **اختبارات** | **103** | ~50 | ~30 | ~40 | — |
 
 ### vs Consciousness-First Agents
 
 | | **Adam Prism** | Hermes Agent | OpenClaw | Claude Code |
 |---|---|---|---|---|
-| **Language** | Python | Python | TypeScript | TypeScript |
-| **Memory** | **4-layer Iron** | 3 layers | 3 layers | 1 layer |
-| **Channels** | **25** | 6 | 9 | 1 (CLI) |
-| **Security** | **3-layer + WAF + AST** | Cmd approval | Docker sandbox | 6 patterns |
-| **Ethics** | **4 laws, configurable** | ❌ | ❌ | Anthropic's |
-| **Learning** | **Closed Loop** | Closed Loop | Dreaming | ❌ |
-| **Voice** | **5 Arabic dialects + cloning** | CLI + TG/Discord | macOS/iOS wake + TTS | ❌ |
-| **Industrial** | **SCADA/DCS native** | ❌ | ❌ | ❌ |
-| **Apps** | **4 native** | TUI only | macOS/Win + iOS/Android | CLI |
+| **الذاكرة** | **4 طبقات** | 3 طبقات | 3 طبقات | طبقة واحدة |
+| **قنوات التواصل** | **25** | 6 | 9 | 1 (CLI) |
+| **الأمان** | **3 طبقات** | موافقة أوامر | Docker sandbox | أنماط محدودة |
+| **القيم** | **4 قوانين** | ❌ | ❌ | تابعة |
+| **التعلم** | **ذاتي مستمر** | ذاتي | Dreaming | ❌ |
+| **الصوت** | **5 لهجات عربية** | CLI + TG/Discord | macOS/iOS | ❌ |
+| **صناعي** | **SCADA/DCS** | ❌ | ❌ | ❌ |
+| **تطبيقات** | **4 تطبيقات** | TUI | macOS/Win + iOS/Android | CLI |
 
 ### vs Cloud AI Assistants
 
-| | **Adam Prism** | ChatGPT Enterprise | Claude (Anthropic) | Microsoft Copilot |
+| | **Adam Prism** | ChatGPT Enterprise | Claude | Microsoft Copilot |
 |---|---|---|---|---|
-| **Data location** | **Your machine** | OpenAI's servers | Anthropic's servers | Microsoft servers |
-| **Customization** | **Fine-tune on YOUR data** | Limited | Limited | Limited |
-| **Arabic native** | **Yes (5 dialects)** | Translation | Translation | Translation |
-| **Compliance** | **You control it** | OpenAI's policy | Anthropic's policy | Microsoft's policy |
-| **Cost (1000 users)** | **$0-300k one-time** | $300-1,200k/year | $250-500k/year | $360k/year |
-| **Breach risk** | **Insured only** | $4.88M expected | $4.88M expected | $4.88M expected |
-| **Air-gapped** | **✅ Yes** | ❌ | ❌ | ❌ |
+| **مكان البيانات** | **جهازك — مش سحابتهم** | سيرفرات OpenAI | سيرفرات Anthropic | سيرفرات Microsoft |
+| **تخصيص** | **على بياناتك أنت** | محدود | محدود | محدود |
+| **عربي أصلي** | **✅ نعم (5 لهجات)** | ترجمة | ترجمة | ترجمة |
+| **الامتثال** | **أنت تتحكم** | سياسة OpenAI | سياسة Anthropic | سياسة Microsoft |
+| **التكلفة (1000 مستخدم)** | **$0-300k مرة واحدة** | $300-1,200k/سنة | $250-500k/سنة | $360k/سنة |
+| **مخاطر الاختراق** | **مؤمن فقط** | $4.88M متوقع | $4.88M متوقع | $4.88M متوقع |
+| **عزل شبكي** | **✅ نعم** | ❌ | ❌ | ❌ |
 
 ### Why We Win (Without Trashing Anyone)
 
