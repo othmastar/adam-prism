@@ -167,27 +167,24 @@ I built Adam Prism in 6 months. It's a **complete, production-grade, sovereign A
 
 ---
 
-## 🧠 The 12 Consciousness Layers (How Adam Thinks)
+## 🧠 12 Consciousness Layers (How Adam Thinks)
 
-> Each layer is **independent, documented, tested, and disableable**.
-> Each one is real code, not a slide.
+> كل طبقة **مستقلة، موثقة، ومختبرة** — وكلها شغالة بجد.
 
-| # | Layer | What It Does | Disable? |
-|---|---|---|---|:---:|
-| 1 | **Provider Management** | Auto-fallback between Ollama / OpenAI / Anthropic / OpenRouter | ✅ |
-| 2 | **Context Engine** | RAG context building with collection routing + Context Manager (64K budget) | ✅ |
-| 3 | **Security Guard** | 3-tier protection: Input + Output + Tool guards + WAF | ✅ |
-| 4 | **Tool Orchestration** | 38 tools + 70+ MCP servers + secure shell + **4 Enterprise Connectors** | ✅ |
-| 5 | **Iron Memory** | 4 layers: Hot file + FTS5 + Qdrant Vector + Skills Curator | ✅ |
-| 6 | **Learning Engine** | ContinuousLearner + Closed Loop (nudge/skill create/improve) | ✅ |
-| 7 | **Ethics Gate** | 4 laws + LLM evaluation + fail-closed | ✅ |
-| 8 | **Channel Hub** | 25 communication channels with one-click setup | ✅ |
-| 9 | **Subagent Teams** | Swarm orchestration + **ALM Agent Loop** (native ReAct) + **Decomposer** (hierarchical DAG) | ✅ |
-| 10 | **Voice Pipeline** | Silero VAD → Whisper → Edge/Silma TTS + Arabic cloning | ✅ |
-| 11 | **Meta Learner** | Pattern extraction + skill generation from experience | ✅ |
-| 12 | **Ethics Reflection** | Self-verification + identity enforcement + mirror | ✅ |
-
-**No fluff. Every layer = real code. Every layer is optional.**
+| # | الطبقة | الوظيفة |
+|---|---|---|
+| 1 | **إدارة النماذج** | Auto-fallback بين Ollama, OpenAI, Anthropic |
+| 2 | **السياق** | بناء السياق — المهام الطويلة مش بتتوه |
+| 3 | **الأمان** | حماية من 3 طبقات: إدخال، إخراج، أدوات |
+| 4 | **الأدوات** | 38 أداة + تكامل مع أنظمة المؤسسات (CRM, ERP) |
+| 5 | **الذاكرة** | 4 طبقات: سريعة + بحث + متجهات + مهارات |
+| 6 | **التعلم** | بيتعلم من التجارب — بيتحسن مع الوقت |
+| 7 | **الأخلاق** | 4 قوانين — أنت تحدد القيم بتاعتك |
+| 8 | **التواصل** | 25 قناة (واتساب، تيليجرام، إيميل، سلاك...) |
+| 9 | **الفرق الذكية** | المهام المعقدة بتتقسم على فرق عمل |
+| 10 | **الصوت** | يتكلم ويفهم العربية بـ 5 لهجات |
+| 11 | **التطور** | يستخرج مهارات جديدة من التجارب |
+| 12 | **المرآة** | يراجع نفسه — القيم والهوية |
 
 ---
 
