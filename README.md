@@ -142,27 +142,34 @@ I built Adam Prism in 6 months. It's a **complete, production-grade, sovereign A
 
 ---
 
-## 📊 What Changed: Phase A & B — Performance Results
+## 🏗️ One Platform. Every Level.
 
-> Faster execution, deeper context, enterprise-ready.
+> من الموظف إلى الرئيس — هرم متكامل من الذكاء السيادي.
 
-### Phase A: Speed & Depth
+### 🧑‍💼 TIER 1: ADAM PERSONAL
+*للمستخدم الفرد — موظف، باحث، محترف.*
 
-| Before | After |
-|---|---|
-| Simple tasks took 3-5 steps | Simple tasks execute in one step — up to 60% faster |
-| Complex tasks failed after 6+ steps | Complex tasks complete reliably with higher success rate |
-| Memory lost in long tasks | Memory persists for deeper, longer tasks |
-| No result verification | Every result verified before delivery |
+100% open source, يجري على أي جهاز. أتمتة مهام، 25 قناة تواصل، ذاكرة متعددة الطبقات، auto-fallback بين نماذج متعددة، 5 لهجات عربية صوت وكتابة، 7 thinking modes، 12 وعي awareness. **يشتغل local بالكامل — بدون إنترنت.**
 
-### Phase B: Enterprise Integration
+### 🔗 TIER 2: ADAM CONNECTED
+*للمؤسسة — فرق، أقسام، أنظمة.*
 
-| System | Capability |
-|---|---|
-| CRM systems | Read & write data directly |
-| ERP systems | Read & write data directly |
-| Data sync | Any two systems exchange data automatically |
-| Testing | 49 tests run without any external connection |
+كل اللي في Tier 1 + **Enterprise Connectors**: يتكامل مع Salesforce, HubSpot, Odoo, SAP مباشرة. **DataSync**: يزامن البيانات بين أي نظامين تلقائياً. RBAC + SSO + Multitenant. 60 API route قابلة للتوسع. **حلقة الوصل بين أنظمتك وبين ذكائك.**
+
+### 🏰 TIER 3: ADAM SOVEREIGN
+*للدولة — بنوك، حكومة، بنية تحتية حرجة.*
+
+كل اللي في Tier 1 + 2 + **سيادة كاملة**: Air-gapped — يشتغل من غير إنترنت خالص. النموذج مدرب على بياناتك — مش generic. Zero telemetry فعلي — مفيش أي اتصال خارجي. 3-layer security guard + WAF + Audit. الملكية كاملة بعد 18 شهر. **أنت بتملكه — مش بتستأجره.**
+
+---
+
+**كل منافس بيخدم طبقة واحدة. احنا بنخدم الهرم كله.**
+
+| الإمكانية | Adam (كل الـ 3) | ChatGPT Enterprise | Claude Enterprise | Microsoft Copilot |
+|---|---|---|---|---|
+| **Tier 1: فردي** | ✅ | ✅ | ✅ | ✅ |
+| **Tier 2: تكامل مؤسسات** | ✅ | ❌ | ❌ | جزئي (Microsoft ecosystem) |
+| **Tier 3: سيادة كاملة** | ✅ | ❌ | ❌ | ❌ |
 
 ---
 
@@ -379,13 +386,13 @@ cd adam-prism && bash bin/install.sh
 
 | | |
 |---|---|
-| 📧 **Email** | othmastar@gmail.com |
+| 🌐 **Website** | [sovereignneuralfortresses.com](https://sovereignneuralfortresses.com) |
 | 💼 **LinkedIn** | [linkedin.com/in/othmastar](https://www.linkedin.com/in/othmastar) |
+| 🐙 **GitHub** | [github.com/othmastar/adam-prism](https://github.com/othmastar/adam-prism) |
+| 📧 **Email** | othmastar@gmail.com |
 | 📱 **WhatsApp / Telegram** | +20 100 292 6918 |
-| 🏢 **For Companies** | othman@adam-prism.local |
-| 🏰 **For Government / Defense** | sovereign@adam-prism.local |
 
-**Response time: 24 hours. Sovereign AI Audit: 2 weeks. Pilot: 8 weeks. Fortress: 16 weeks.**
+**3 channels. 1 founder. Response time: 24 hours.**
 
 ---
 
@@ -474,6 +481,6 @@ See:
 
 *صُنع في مصر. للعالم. بواسطة محمد عثمان.*
 
-[⭐ Star this repo](https://github.com/othmastar/adam-prism) • [📦 Releases](https://github.com/othmastar/adam-prism/releases) • [🌐 Live Demo](https://adam-prism.online)
+[🐙 GitHub — code & architecture](https://github.com/othmastar/adam-prism) • [🌐 Website — enterprise inquiries](https://sovereignneuralfortresses.com) • [💼 LinkedIn — founder](https://www.linkedin.com/in/othmastar)
 
 </div>
