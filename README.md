@@ -103,6 +103,10 @@ I built Adam Prism in 6 months. It's a **complete, production-grade, sovereign A
 | | |
 |---|---|
 | **38 built-in tools** | shell, file ops, browser, knowledge, memory, planning, vision, voice |
+| **9 specialized tool categories** | data, database, file, git, image, network, pdf, utility, web |
+| **Dynamic Tool Registry** | Auto-discover, register, enable/disable tools at runtime |
+| **Advanced T-A-O execution loop** | Multi-iteration tool execution with dead-loop detection |
+| **Performance tool cache** | LRU-cached tool execution for sub-ms response |
 | **Extensible tool ecosystem** | MCP-compatible, add any tool in minutes |
 | **25 communication channels** | Web, Mobile, Desktop, WhatsApp, Telegram, Email, Slack, and 18 more |
 | **4 native apps** | Web, Mobile, Desktop, and VSCode extension |
@@ -112,7 +116,7 @@ I built Adam Prism in 6 months. It's a **complete, production-grade, sovereign A
 | **🛡️ 3-layer security** | Input filtering, output protection, tool-level access control |
 | **🛡️ WAF** | Web application firewall — enterprise-grade threat protection |
 | **4 ethics laws** | Configurable value system — you decide the rules |
-| **Self-learning** | Improves from experience — gets better over time |
+| **Self-learning** | Improves from experience — background reviewer + skill creation + pattern analysis |
 | **🛡️ Multi-tenant + access control** | 5 roles, granular permissions, per-tenant quotas |
 | **🛡️ SSO** | Google, Microsoft, GitHub, Okta, Keycloak, Auth0 |
 | **Voice** | Speech recognition + synthesis + voice cloning (5 Arabic dialects) |
@@ -206,14 +210,14 @@ Every competitor treats governance as an add-on: "we'll add enterprise SSO later
 | 1 | **Provider Management** | Auto-fallback between Ollama, OpenAI, Anthropic |
 | 2 | **Context Engine** | Builds context for long tasks — no lost memory |
 | 3 | **Security Guard** | 3-tier protection: input, output, tools |
-| 4 | **Tool Orchestration** | 38 tools + enterprise system integration (CRM, ERP) |
+| 4 | **Tool Orchestration** | 38 tools + Dynamic Registry + T-A-O iterative loop + 9 categories + enterprise integration (CRM, ERP) |
 | 5 | **Iron Memory** | 4 layers: hot file + search + vectors + skills |
-| 6 | **Learning Engine** | Learns from experience — improves over time |
+| 6 | **Learning Engine** | Background auto-reviewer + skill creation from experience — improves over time |
 | 7 | **Ethics Gate** | 4 configurable value laws |
 | 8 | **Channel Hub** | 25 channels (WhatsApp, Telegram, Email, Slack...) |
 | 9 | **Subagent Teams** | Complex tasks split across agent teams |
 | 10 | **Voice Pipeline** | Speaks and understands Arabic (5 dialects) |
-| 11 | **Meta Learner** | Extracts patterns and skills from experience |
+| 11 | **Meta Learner** | GEPA pattern analysis + automated skill extraction from experience |
 | 12 | **Ethics Reflection** | Self-review — identity and values check |
 
 ---
