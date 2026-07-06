@@ -30,7 +30,7 @@ import psutil
 import httpx
 from fastapi import FastAPI, HTTPException, UploadFile, File, WebSocket, WebSocketDisconnect, Request as FastAPIRequest
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse
+from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse, JSONResponse
 from pydantic import BaseModel
 import asyncio
 
@@ -38,6 +38,10 @@ import asyncio
 from adam.engine import AdamEngine, EngineConfig
 from adam.memory import MemoryStore
 from adam.tools import ToolDispatcher
+
+# Security middleware
+from adam.api.middleware import SecurityHeadersMiddleware
+from adam.security.waf import get_waf
 
 # Lazy engine — initialized on first request for fast startup
 _engine: AdamEngine | None = None
@@ -99,14 +103,54 @@ app = FastAPI(
     openapi_url="/openapi.json",
 )
 
-# CORS — open in showcase, restricted in production
+# CORS — specific origins in production, dev-friendly in showcase
+_cors_origins_str = os.getenv("ADAM_CORS_ORIGINS", "")
+if _cors_origins_str:
+    _cors_origins = [o.strip() for o in _cors_origins_str.split(",") if o.strip()]
+    _cors_creds = True
+elif os.getenv("ADAM_PRODUCTION") == "1":
+    _cors_origins = ["https://adam-prism.online"]
+    _cors_creds = True
+else:
+    _cors_origins = [
+        "http://localhost:3000",
+        "http://localhost:8000",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:8000",
+    ]
+    _cors_creds = True
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"] if os.getenv("ADAM_PRODUCTION") != "1" else [],
-    allow_credentials=True,
+    allow_origins=_cors_origins,
+    allow_credentials=_cors_creds,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Security headers middleware
+app.add_middleware(SecurityHeadersMiddleware)
+
+# WAF (Web Application Firewall) — scan every request
+@app.middleware("http")
+async def waf_middleware(request: FastAPIRequest, call_next):
+    scan_text = str(request.url.path)
+    for key, value in request.query_params.multi_items():
+        scan_text += f" {key}={value}"
+    if request.method in ("POST", "PUT", "PATCH"):
+        body = await request.body()
+        if body:
+            scan_text += " " + body.decode("utf-8", errors="replace")
+    waf = get_waf()
+    is_safe, matches = waf.is_safe(scan_text, source=f"{request.method} {request.url.path}")
+    if not is_safe:
+        logger.warning(f"[WAF] BLOCKED {request.method} {request.url.path}: "
+                       f"{len([m for m in matches if m.severity=='critical'])} critical")
+        return JSONResponse(status_code=403, content={
+            "detail": "Request blocked by WAF",
+            "categories": list({m.category for m in matches}),
+        })
+    return await call_next(request)
 
 
 # ═══════════════════════════════════════
