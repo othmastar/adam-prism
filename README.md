@@ -15,6 +15,10 @@
   <img src="https://img.shields.io/badge/Enterprise_Connectors-4_Systems-purple?style=for-the-badge" alt="Connectors">
   <img src="https://img.shields.io/badge/103_Tests_Passing-brightgreen?style=for-the-badge" alt="Tests">
   <img src="https://img.shields.io/badge/AGPL_v3+%2B_Commercial-blue?style=for-the-badge" alt="License">
+  <img src="https://img.shields.io/badge/Security-CSP_Grade_A-success?style=for-the-badge" alt="CSP Grade A">
+  <img src="https://img.shields.io/badge/WAF-OWASP_Top_10-success?style=for-the-badge" alt="WAF">
+  <img src="https://img.shields.io/badge/CORS-Hardened-success?style=for-the-badge" alt="CORS Hardened">
+  <img src="https://img.shields.io/badge/HSTS-Enabled-success?style=for-the-badge" alt="HSTS">
 </p>
 
 </div>
@@ -114,7 +118,11 @@ I built Adam Prism in 6 months. It's a **complete, production-grade, sovereign A
 | **7 thinking modes** | Analytical, Creative, Reflective, Operational, Strategic, Empathic, Sovereign |
 | **4-layer memory** | Fast recall + deep search + persistent knowledge + skill memory |
 | **🛡️ 3-layer security** | Input filtering, output protection, tool-level access control |
-| **🛡️ WAF** | Web application firewall — enterprise-grade threat protection |
+| **🛡️ WAF** | OWASP Top 10 protection — SQLi, XSS, path traversal, command injection, SSRF, and more |
+| **🛡️ CORS hardened** | Explicit origin allowlist — no wildcard, no credential leaks |
+| **🛡️ CSP Grade A** | Content Security Policy with strict `default-src 'self'` |
+| **🛡️ HSTS** | Strict-Transport-Security with `max-age=31536000; includeSubDomains` |
+| **🛡️ Security headers** | X-Frame-Options, X-Content-Type-Options, X-XSS-Protection, Referrer-Policy, Permissions-Policy |
 | **4 ethics laws** | Configurable value system — you decide the rules |
 | **Self-learning** | Improves from experience — background reviewer + skill creation + pattern analysis |
 | **🛡️ Multi-tenant + access control** | 5 roles, granular permissions, per-tenant quotas |
@@ -139,7 +147,6 @@ I built Adam Prism in 6 months. It's a **complete, production-grade, sovereign A
 | **🛡️ Error tracking** | Production-grade error monitoring |
 | **🛡️ Prometheus metrics** | Real-time production observability |
 | **🛡️ Webhooks (outgoing)** | Signed, retry-capable event notifications |
-| **🛡️ WAF** | Full OWASP Top 10 protection |
 | **🛡️ Backup & restore CLI** | Encrypted, verifiable backups |
 | **🛡️ Disaster recovery** | Documented runbook with RTO/RPO targets |
 | **🛡️ License strategy** | AGPL v3 (open source) + Commercial dual-license |
@@ -231,7 +238,11 @@ Every competitor treats governance as an add-on: "we'll add enterprise SSO later
 | **SSRF protection** | Internal network requests are blocked by default |
 | **Secure shell execution** | Command execution is sandboxed and restricted |
 | **3-Layer Guard** | Input, output, and tool-level security — all audited |
-| **WAF** | OWASP Top 10 attack protection |
+| **WAF** | OWASP Top 10 attack protection — SQLi, XSS, path traversal, command injection, SSRF, and more |
+| **CORS Hardened** | Explicit origin allowlist — no wildcard, no credential leakage |
+| **CSP Grade A** | Content Security Policy with `default-src 'self'` |
+| **HSTS** | Strict-Transport-Security with `max-age=31536000; includeSubDomains` |
+| **Security Headers** | X-Frame-Options (DENY), X-Content-Type-Options (nosniff), X-XSS-Protection, Referrer-Policy, Permissions-Policy |
 | **Audit log** | Every action logged and reviewable |
 | **Encryption** | At-rest and in-transit, configurable |
 | **API key enforcement** | Production rejects unauthenticated requests |
