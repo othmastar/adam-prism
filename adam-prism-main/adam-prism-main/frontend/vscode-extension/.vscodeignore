@@ -1,7 +1,0 @@
-.vscodeignore
-node_modules
-src
-tsconfig.json
-.gitignore
-yarn.lock
-package-lock.json
