@@ -9,11 +9,11 @@
 <br/>
 
 <p>
-  <img src="https://img.shields.io/badge/Production_Ready-✅_98_API_Routes-success?style=for-the-badge" alt="Production">
+  <img src="https://img.shields.io/badge/Production_Ready-✅_128_API_Routes-success?style=for-the-badge" alt="Production">
   <img src="https://img.shields.io/badge/Sovereign-Air--Gap_Capable-red?style=for-the-badge" alt="Sovereign">
   <img src="https://img.shields.io/badge/ALM_Engine-V2-blue?style=for-the-badge" alt="Engine">
-  <img src="https://img.shields.io/badge/Enterprise_Connectors-4_Systems-purple?style=for-the-badge" alt="Connectors">
-  <img src="https://img.shields.io/badge/1118_Tests_Passing-brightgreen?style=for-the-badge" alt="Tests">
+  <img src="https://img.shields.io/badge/26_Scenarios-12_Product_%2B_14_Tree-purple?style=for-the-badge" alt="Scenarios">
+  <img src="https://img.shields.io/badge/1311_Tests_Passing-brightgreen?style=for-the-badge" alt="Tests">
   <img src="https://img.shields.io/badge/AGPL_v3+%2B_Commercial-blue?style=for-the-badge" alt="License">
 </p>
 
@@ -90,7 +90,7 @@ Adam is the first Arabic-conscious Digital Twin that:
 
 ## 🏰 Now: The Receipt (Adam Prism)
 
-I built Adam Prism in 6 months. It's a **complete, production-grade, sovereign AI platform**. 98 API routes. 12 consciousness layers. 103 tests passing (core + scaffold + connectors). 4 native apps. Zero telemetry.
+I built Adam Prism in 6 months. It's a **complete, production-grade, sovereign AI platform**. 128 API routes. 12 consciousness layers. **1,311 tests passing** (core + scaffold + connectors + knowledge graph + audit pipeline + v12/v13 modules). 4 native apps. Zero telemetry.
 
 **Adam is not the product. Adam is the receipt.** It's the proof that I can build sovereign AI for any organization, in any industry, in any critical sector.
 
@@ -126,9 +126,16 @@ I built Adam Prism in 6 months. It's a **complete, production-grade, sovereign A
 | **Long context handling** | Maintains memory across deep, multi-step conversations |
 | **4 Enterprise Connectors** | Connect to CRM and ERP systems directly |
 | **DataSync Engine** | Auto-sync data between any two systems |
-| **60 API routes** | REST + WebSocket + SSE streaming |
-| **1,118+ tests passing** | Core + scaffold + knowledge graph + audit pipeline |
+| **128 API routes** | REST + WebSocket + SSE streaming |
+| **1,311 tests passing** | Core + scaffold + knowledge graph + audit pipeline + v12/v13 modules |
 | **Multi-LLM** | Ollama (local), OpenAI, Anthropic, OpenRouter |
+| **26 ready-made scenarios** | 12 product-building + 14 deep tree workflows — pick a goal, get a plan |
+| **Linux Distribution Designer** | Designs and assembles hardened Linux distributions — kernel, root filesystem, security hardening, bootloader, disk image (`.raw`) and bootable ISO |
+| **Deep autonomous build & repair** | Plans a goal, executes step-by-step, verifies results, repairs issues automatically — until an honest gate passes |
+| **Independent spec-conformance judging** | A separate quality judge checks that delivered products match the requested spec — not just that "it runs" |
+| **Deterministic validation** | Statistical validation for fraud/compliance reviews — profile-shape tests, deviation thresholds, duplicate detection (no extra dependencies) |
+| **PDF-native document intelligence** | Extracts text from PDF documents inside fetch pipelines |
+| **Governance built-in** | Event bus with approval gates for human-in-the-loop steps, scheduled background jobs, durable agent teams, runtime invariants, rotating credential storage |
 | **Production-grade infra** | Docker, Helm, K8s, ArgoCD, GitHub Actions |
 | **🛡️ SBOM** | Software bill of materials — full supply chain transparency |
 | **🛡️ OpenTelemetry** | Distributed tracing for production debugging |
@@ -142,17 +149,17 @@ I built Adam Prism in 6 months. It's a **complete, production-grade, sovereign A
 
 ---
 
-## 📊 22 Ready-Made Scenarios — Complex Tasks Made Simple
+## 📊 26 Ready-Made Scenarios — Complex Tasks Made Simple
 
 > **The secret: Instead of letting the model think (and fail), we give it a ready-made plan.**
 
 | Category | Scenarios | What It Does |
 |---|---|---|
-| 🔍 **Data Review** | 8 scenarios | Detect ghost employees, duplicate payments, compliance violations, anomaly patterns |
+| 🔍 **Data Review & Compliance** | 6 scenarios | Detect ghost employees, duplicate payments, compliance violations, anomaly patterns, enterprise & financial security audits |
+| 🐧 **Linux & Cloud Infrastructure** | 4 scenarios | Design hardened Linux distributions, Kubernetes platforms, smart energy grids |
+| ⚙️ **Software Development** | 8 scenarios | Code review, architecture, testing, documentation, refactoring, full-stack SaaS generation |
+| 🏦 **Secure Systems** | 5 scenarios | Secure banking systems, healthcare systems, government financial audits, smart factories |
 | 💼 **Daily Operations** | 3 scenarios | Data analysis, comprehensive comparison, executive summary |
-| ⚙️ **Software Development** | 5 scenarios | Code review, architecture design, testing, documentation, refactoring |
-| 📊 **Reports** | 3 scenarios | Performance report, technical report, executive report |
-| 🎓 **Research & Analysis** | 3 scenarios | Market research, trend analysis, proposal writing |
 
 ### How It Works (Simple)
 
@@ -218,12 +225,15 @@ Result: Understands the full context, not just words
 > **Same model. Same hardware. Dramatically different results.**
 
 | Metric | Before | After | Improvement |
-|---|---|---|---|
+|---|---|---|---|---|
 | **Task completion time** | 5-10 minutes | 30-60 seconds | **90% faster** |
 | **Success rate** | 40-50% | 95%+ | **2x better** |
-| **Tests passing** | 103 | 1,118 | **10x more** |
-| **Ready-made scenarios** | 0 | 22 | **New capability** |
+| **Tests passing** | 103 | 1,311 | **~13x more** |
+| **Ready-made scenarios** | 0 | 26 (12 product + 14 tree, verified end-to-end) | **New capability** |
+| **Product materialization** | — | **12/12 green** — `status=pass`, real files in `products/`, no missing artifacts, secret scans clean | **New capability** |
 | **Knowledge understanding** | Basic | Relationship-aware | **Smarter** |
+
+> **Latest proof** (2026-08): the full scenario suite runs to green — every product scenario materializes real files that pass its own verification gate (checks + tests + lint) after the automated self-fix loop; tree workflows carry the same guarantee deeper (verified, repaired, and honestly reported). The live engineering runs proved that a plan → build → verify → repair cycle can take a vague goal and ship a working, independently-audited product on a local 12B model — the in-loop verification caught failures that a shallow "it compiled" gate would have missed, and the repair cycle fixed them before the honest gate. Full data lives under `docs/benchmark/`.
 
 ### Real-World Performance
 
@@ -257,9 +267,41 @@ New way: 15 seconds, comprehensive documentation
 
 ---
 
+## 🏆 Achievements — What Adam Prism Reached in 2026
+
+> نتكلم بإنجازات موثقة بالأرقام — مش بوعود.
+
+| Achievement | What It Means |
+|---|---|
+| **1,311 automated tests passing** | From 103 at first public beta to 1,311 green today (+13x) — mounts a regression net across core, scaffold, knowledge graph, audit pipeline, and engineering modules. No LLM required to run them. |
+| **26 ready-made scenarios** | 12 product-building scenarios (each verified end-to-end to real output files) + 14 deep tree workflows (batched/verified execution). Just describe the goal. |
+| **128 API routes** | REST + WebSocket + SSE streaming surface, from core chat to tools, sessions, memory, skills, subagents, MCP, voice, and engineering endpoints. |
+| **Produces real artifacts** | Scenarios don't return prose — they manufacture **real output** (reports, code, or full **hardened Linux distributions**: kernel, root filesystem, bootloader, security hardening, disk image `.raw` and bootable ISO). |
+| **Independent quality judging** | A separate judge checks the delivered product against the requested spec — not just against its own tests. Functionality *and* fidelity are verified. |
+| **Automated self-repair** | Issues found in verification are repaired automatically in escalating steps before the final honest gate. Verified → repaired → honestly reported. |
+| **Deterministic validation** | Fraud/compliance reviews use statistical validation (distribution-shape checks, deviation thresholds, duplicate detection) that needs no extra dependencies — same result every run, anywhere. |
+| **Arabic-native sovereignty, kept** | Still 100% local-first: zero telemetry, air-gap capable, Egyptian Arabic native, AGPL v3 + commercial dual-license. |
+
+---
+
+## 🧗 Challenges We Hit (And What They Taught Us)
+
+> Honesty is a feature. Every capability above was earned against a real wall.
+
+| Challenge | What Happened | What We Learned |
+|---|---|---|
+| **Small local model, big goals** | A 12B local model thinks fast but drifts on long unstructured goals. | Give it structure, not free thinking: ready-made plans + step-by-step execution + observation → quality and speed both jumped. |
+| **"It runs" is not "it's right"** | Products could pass a shallow gate (compiles) while missing the spec the user actually asked for. | Add an independent judge that compares product to the requested spec — functionality *and* fidelity. |
+| **Repair escaping or oscillating** | Fixing defects could get stuck in loops, or break already-working parts. | Introduce honest stops and convergence rules: stop when the evidence says the loop can't converge; report the failure truthfully instead of pretending. |
+| **Self-written tests drifting** | A system can quietly test its own wrong assumptions — green tests on drifted behavior. | Anchor to the requested contract deterministically, so *pytest-green* means *spec-green*, not "self-consistent." |
+| **Storage pressure on big builds** | Producing large artifacts (distribution images, ISO files) fills local disks fast. | Use sparse images and staging flows; keep inspectable configs light; design artifacts to be reproduced deterministically rather than hoarded. |
+| **Scale without a server farm** | No cloud, no GPU cluster — everything on consumer hardware. | Design for efficiency: deterministic checks do the heavy validation, and the LLM only judges what rules can't decide. |
+
+---
+
 ## 📋 What You Can Do Right Now
 
-> **22 ready-made scenarios — just pick your task and go.**
+> **26 ready-made scenarios — just pick your task and go.**
 
 ### For Financial Auditors
 
@@ -418,7 +460,7 @@ Every competitor treats governance as an add-on: "we'll add enterprise SSO later
 | **100% Local** | ✅ | Partial | Partial | Partial | ❌ |
 | **Open Source** | AGPL v3 | MIT | MIT | MIT | ❌ |
 | **Native Apps** | **4 apps** (Web, Mobile, Desktop, VSCode) | ❌ | ❌ | ❌ | ❌ |
-| **Tests Passing** | **103** | ~50 | ~30 | ~40 | — |
+| **Tests Passing** | **1,311** | ~50 | ~30 | ~40 | — |
 
 ### vs Consciousness-First Agents
 
